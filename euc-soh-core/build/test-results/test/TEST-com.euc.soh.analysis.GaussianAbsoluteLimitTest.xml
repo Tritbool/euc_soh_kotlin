@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.euc.soh.analysis.GaussianAbsoluteLimitTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-02-17T16:06:40.291Z" hostname="IlPalazzo" time="0.004">
-  <properties/>
-  <testcase name="detectAlarms should trigger absolute Req alarm when rPackNominal provided" classname="com.euc.soh.analysis.GaussianAbsoluteLimitTest" time="0.002"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
