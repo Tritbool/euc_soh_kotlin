@@ -68,6 +68,30 @@ data class LogData(
 }
 
 /**
+ * Point de métriques calculées pour un fichier (résultat de l'analyse d'un CSV)
+ * Plus léger et découplé de la structure LogData utilisée pour l'UI/export.
+ */
+data class FileStats(
+    val fileName: String,
+    val datetimeFirst: String?,
+    val wheelKm: Double?,
+    val vIdle: Double,
+    val nsSeries: Int?,
+    val nPoints: Int,
+    val reqMean: Double,
+    val reqMedian: Double,
+    val reqMedian25C: Double,
+    val req95p: Double,
+    val sag95p: Double,
+    val sagMax: Double,
+    val vMinStrong: Double,
+    val iMax: Double,
+    val i95p: Double,
+    val tempBoardMax: Double?,
+    val tempMotorMax: Double?
+)
+
+/**
  * Statistiques globales d'une roue
  */
 data class WheelStatistics(

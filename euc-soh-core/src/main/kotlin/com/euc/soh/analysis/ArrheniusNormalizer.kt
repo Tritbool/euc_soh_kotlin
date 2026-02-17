@@ -40,21 +40,22 @@ object ArrheniusNormalizer {
         val tRefK = T_REF_C + 273.15
         val tMeasK = tempMeasuredC + 273.15
         
-        // Garde-fou température
+        // Garde-fou température: warn if outside reliable range but continue calculation
         if (tMeasK < 263.15 || tMeasK > 353.15) {
-            // Hors plage fiable (-10°C à 80°C)
-            return rBattMeasured
+            // Hors plage fiable (-10°C à 80°C) — on continue le calcul (parité avec Python)
+            // Optionnel: log a warning here if desired
+            // println("[WARNING] normalizeRBattTo25C: T=$tempMeasuredC°C outside reliable range")
         }
         
         // Calcul Arrhenius
         val exponent = (eaJPerMol / R_GAS) * (1.0 / tMeasK - 1.0 / tRefK)
         val clippedExponent = exponent.coerceIn(-100.0, 100.0)
         val factor = exp(clippedExponent)
-        
+
         val rBatt25C = rBattMeasured / factor
         return maxOf(0.0, rBatt25C)
     }
-    
+
     /**
      * Calibre automatiquement l'énergie d'activation E_a depuis les données
      * en ajustant une régression linéaire sur ln(R) vs 1/T
@@ -74,7 +75,7 @@ object ArrheniusNormalizer {
         socMax: Double = 90.0
     ): Double {
         // Filtre des logs avec données valides
-        val validLogs = logs.filter { log ->
+        var validLogs = logs.filter { log ->
             val r = log.getMetric(metric)
             val t = when (tempMetric) {
                 "temp_board_max" -> log.tempBoardMax
@@ -84,6 +85,15 @@ object ArrheniusNormalizer {
             r != null && !r.isNaN() && r > 0.0 && t != null && !t.isNaN()
         }
         
+        // Si les logs contiennent une métrique soc_voltage, filtrer par SoC (20..90) comme en Python
+        val hasSocVoltage = validLogs.any { it.getMetric("soc_voltage") != null }
+        if (hasSocVoltage) {
+            validLogs = validLogs.filter { log ->
+                val soc = log.getMetric("soc_voltage")
+                soc != null && !soc.isNaN() && soc >= socMin && soc <= socMax
+            }
+        }
+
         if (validLogs.size < 5) {
             return DEFAULT_EA
         }

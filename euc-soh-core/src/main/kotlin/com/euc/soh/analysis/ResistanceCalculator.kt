@@ -99,14 +99,25 @@ object ResistanceCalculator {
             return iPhaseAbs.sumOf { it * it } * dt
         }
         
-        // Intégration trapézoïdale
+        // Copie et tri des timestamps pour garantir l'ordre
+        val t = timestamps.copyOf()
+        val idx = t.indices.sortedBy { t[it] }
+        val sortedT = DoubleArray(t.size) { t[idx[it]] }
+        val sortedI = DoubleArray(iPhaseAbs.size) { iPhaseAbs[idx[it]] }
+
+        // Intégration trapézoïdale avec clipping dt inférieur (>= 0.01) et supérieur (<= 1.0)
         var integral = 0.0
-        for (i in 0 until iPhaseAbs.size - 1) {
-            val dt = timestamps[i + 1] - timestamps[i]
-            if (dt > 0 && dt < 1.0) { // Garde-fou dt aberrant
-                val i2_avg = (iPhaseAbs[i] * iPhaseAbs[i] + iPhaseAbs[i + 1] * iPhaseAbs[i + 1]) / 2.0
-                integral += i2_avg * dt
+        for (i in 0 until sortedI.size - 1) {
+            var dt = sortedT[i + 1] - sortedT[i]
+            // Garde-fous similaires à Python: clip entre 0.01 et 1.0
+            if (dt.isNaN()) continue
+            dt = when {
+                dt < 0.01 -> 0.01
+                dt > 1.0 -> 1.0
+                else -> dt
             }
+            val i2_avg = (sortedI[i] * sortedI[i] + sortedI[i + 1] * sortedI[i + 1]) / 2.0
+            integral += i2_avg * dt
         }
         
         return integral

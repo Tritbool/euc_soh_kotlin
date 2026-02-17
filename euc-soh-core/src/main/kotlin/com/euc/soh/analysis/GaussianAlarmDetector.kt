@@ -100,6 +100,7 @@ object GaussianAlarmDetector {
      * @param checkAbsoluteLimit Vérifier limite absolue Req
      * @param absReqLimit Limite absolue Req (Ω)
      * @param absKmLimit Kilométrage minimum pour alarme absolue
+     * @param rPackNominal Résistance pack nominale (optionnelle) pour calculer abs limit
      * @return Liste des alarmes
      */
     fun detectAlarms(
@@ -107,7 +108,8 @@ object GaussianAlarmDetector {
         thresholds: Map<String, Threshold>,
         checkAbsoluteLimit: Boolean = true,
         absReqLimit: Double = Constants.ABS_REQ_LIMIT,
-        absKmLimit: Double = Constants.ABS_KM_LIMIT
+        absKmLimit: Double = Constants.ABS_KM_LIMIT,
+        rPackNominal: Double? = null
     ): List<Alarm> {
         val alarms = mutableListOf<Alarm>()
         
@@ -149,18 +151,21 @@ object GaussianAlarmDetector {
         
         // Alarme absolue Req
         if (checkAbsoluteLimit) {
+            // if rPackNominal is provided, compute abs limit from it (like Python)
+            val computedAbsLimit = rPackNominal?.let { it * Constants.ABS_REQ_FACTOR } ?: absReqLimit
+
             for (log in logs) {
                 val req = log.reqMedian
                 val km = log.wheelKm ?: continue
                 
-                if (req > absReqLimit && km >= absKmLimit) {
+                if (req > computedAbsLimit && km >= absKmLimit) {
                     alarms.add(
                         Alarm(
                             fileName = log.fileName,
                             wheelKm = km,
                             datetimeFirst = log.datetimeFirst,
                             reasons = "Req_median absolu élevé: ${String.format("%.3f", req)} Ω " +
-                                     "(> ${String.format("%.3f", absReqLimit)} Ω) à ${km.toInt()} km"
+                                     "(> ${String.format("%.3f", computedAbsLimit)} Ω) à ${km.toInt()} km"
                         )
                     )
                 }
