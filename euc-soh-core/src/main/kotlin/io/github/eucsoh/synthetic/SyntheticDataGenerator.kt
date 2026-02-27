@@ -1,6 +1,11 @@
 package io.github.eucsoh.synthetic
 
+import io.github.eucsoh.SohAnalyzer
+import io.github.eucsoh.analysis.GaussianAlarmDetector
 import io.github.eucsoh.model.ThresholdInfo
+import kotlinx.coroutines.runBlocking
+import org.jetbrains.kotlinx.dataframe.DataFrame
+import org.jetbrains.kotlinx.dataframe.api.maxBy
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -16,6 +21,10 @@ import kotlin.random.Random
  * - Slow initial drift
  * - Accelerated degradation after "knee" point
  * - Multiple failure modes (battery, MOSFET, global)
+ * 
+ * Supports two modes:
+ * 1. Pure synthetic: provide thresholds manually (default, for unit tests)
+ * 2. From real logs: analyze real data folder and extrapolate degradation
  */
 object SyntheticDataGenerator {
 
@@ -50,6 +59,151 @@ object SyntheticDataGenerator {
         val vIdle: Double = 134.0,
         val startKm: Double = 0.0
     )
+
+    /**
+     * Real SoH data loaded from actual logs.
+     * Equivalent to Python's load_real_soh() return value.
+     */
+    data class RealSoh(
+        val stats: DataFrame<*>,
+        val thresholds: Map<String, ThresholdInfo>,
+        val maxKm: Double
+    )
+
+    /**
+     * Loads and analyzes real logs to extract stats and thresholds.
+     * Equivalent to Python's load_real_soh(folder).
+     * 
+     * @param folder Directory containing real CSV logs
+     * @param optimalFrac Fraction of best logs to use for threshold computation
+     * @return RealSoh with stats, thresholds, and max km
+     */
+    suspend fun loadRealSoh(
+        folder: File,
+        optimalFrac: Double = 0.3
+    ): RealSoh {
+        val csvFiles = folder.listFiles()?.filter { it.extension == "csv" } ?: emptyList()
+        require(csvFiles.isNotEmpty()) { "No CSV files found in ${folder.absolutePath}" }
+
+        val csvPaths = csvFiles.map { it.absolutePath }.sorted()
+
+        val analyzer = SohAnalyzer()
+        val result = analyzer.analyzeFolderForReq(
+            csvPaths = csvPaths,
+            optimalFrac = optimalFrac,
+            parallel = false
+        )
+
+        val stats = result.stats
+        val thresholds = GaussianAlarmDetector.computeThresholds(
+            df = stats,
+            optimalFrac = optimalFrac,
+            nSigma = 2.0
+        )
+
+        // Extract max km from stats
+        val maxKmRow = stats.maxBy { (it["wheel_km"] as? Number)?.toDouble() ?: 0.0 }
+        val maxKm = (maxKmRow?.get("wheel_km") as? Number)?.toDouble() ?: 0.0
+
+        return RealSoh(
+            stats = stats,
+            thresholds = thresholds,
+            maxKm = maxKm
+        )
+    }
+
+    /**
+     * Generates synthetic SoH time series from real data.
+     * Equivalent to Python's generate_soh_timeseries(df_stats, thresholds, ...).
+     * 
+     * @param real Real SoH data from loadRealSoh()
+     * @param years Number of years to simulate
+     * @param wheelName Name prefix for generated files
+     * @param mode Degradation mode
+     * @param kmPerWeek Average km per week
+     * @param kneeFrac Fraction of lifespan before accelerated degradation
+     * @return List of synthetic log metadata
+     */
+    fun generateSohTimeseriesFromReal(
+        real: RealSoh,
+        years: Int = 3,
+        wheelName: String = "synthetic_wheel",
+        mode: DegradationMode = DegradationMode.GLOBAL,
+        kmPerWeek: Double = 100.0,
+        kneeFrac: Double = 0.90
+    ): List<Map<String, Any?>> {
+        val config = SyntheticConfig(
+            years = years,
+            kmPerWeek = kmPerWeek,
+            kneeFrac = kneeFrac,
+            mode = mode,
+            wheelName = wheelName,
+            vIdle = 134.0,  // Will be overridden if needed
+            startKm = real.maxKm
+        )
+
+        return generateSohTimeseries(
+            thresholds = real.thresholds,
+            config = config
+        )
+    }
+
+    /**
+     * Generates complete synthetic folder from real logs.
+     * Equivalent to Python's generate_synthetic_folder(input_folder, output_folder, ...).
+     * 
+     * @param inputFolder Directory with real CSV logs
+     * @param outputFolder Directory where synthetic logs will be written
+     * @param vIdle Idle voltage for synthetic logs
+     * @param years Number of years to simulate
+     * @param wheelName Name prefix for generated files
+     * @param mode Degradation mode
+     * @param kmPerWeek Average km per week
+     * @param kneeFrac Fraction of lifespan before accelerated degradation
+     * @return List of synthetic log metadata
+     */
+    suspend fun generateSyntheticFolderFromReal(
+        inputFolder: File,
+        outputFolder: File,
+        vIdle: Double,
+        years: Int = 3,
+        wheelName: String = "synthetic",
+        mode: DegradationMode = DegradationMode.GLOBAL,
+        kmPerWeek: Double = 100.0,
+        kneeFrac: Double = 0.90
+    ): List<Map<String, Any?>> {
+        outputFolder.mkdirs()
+
+        val real = loadRealSoh(inputFolder)
+
+        val timeseries = generateSohTimeseriesFromReal(
+            real = real,
+            years = years,
+            wheelName = wheelName,
+            mode = mode,
+            kmPerWeek = kmPerWeek,
+            kneeFrac = kneeFrac
+        )
+
+        // Generate WheelLog CSVs
+        timeseries.forEach { row ->
+            val fileName = row["file"] as String
+            val kmEnd = row["wheel_km"] as Double
+            val csvFile = File(outputFolder, fileName)
+
+            synthesizeWheellogCsv(
+                outputFile = csvFile,
+                vIdle = vIdle,
+                kmEnd = kmEnd,
+                metrics = row
+            )
+        }
+
+        // Write summary CSV
+        writeSummaryCsv(outputFolder, wheelName, timeseries)
+
+        return timeseries
+    }
 
     /**
      * Generates synthetic SoH time series from thresholds.
@@ -321,7 +475,7 @@ object SyntheticDataGenerator {
     }
 
     /**
-     * Generates a complete folder of synthetic logs.
+     * Generates a complete folder of synthetic logs (pure synthetic mode).
      * 
      * @param outputDir Output directory
      * @param thresholds Thresholds from real analysis
@@ -350,8 +504,20 @@ object SyntheticDataGenerator {
             )
         }
 
-        // Write summary CSV
-        val summaryFile = File(outputDir, "${config.wheelName}_summary.csv")
+        writeSummaryCsv(outputDir, config.wheelName, timeseries)
+
+        return timeseries
+    }
+
+    /**
+     * Writes summary CSV file.
+     */
+    private fun writeSummaryCsv(
+        outputDir: File,
+        wheelName: String,
+        timeseries: List<Map<String, Any?>>
+    ) {
+        val summaryFile = File(outputDir, "${wheelName}_summary.csv")
         summaryFile.bufferedWriter().use { writer ->
             val headers = listOf("file", "datetime_first", "wheel_km") + METRICS
             writer.write(headers.joinToString(","))
@@ -365,7 +531,5 @@ object SyntheticDataGenerator {
                 writer.newLine()
             }
         }
-
-        return timeseries
     }
 }
