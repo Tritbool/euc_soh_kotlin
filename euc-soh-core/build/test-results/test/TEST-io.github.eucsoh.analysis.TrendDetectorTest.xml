@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="io.github.eucsoh.analysis.TrendDetectorTest" tests="11" skipped="0" failures="6" errors="0" timestamp="2026-02-27T16:22:56.545Z" hostname="IlPalazzo" time="0.086">
+  <properties/>
+  <testcase name="detectTrendLinear identifies no trend in flat data()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.009">
+    <failure message="java.lang.NullPointerException" type="java.lang.NullPointerException">java.lang.NullPointerException
+	at io.github.eucsoh.analysis.TrendDetectorTest.detectTrendLinear identifies no trend in flat data(TrendDetectorTest.kt:52)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+</failure>
+  </testcase>
+  <testcase name="detectTrendLinear identifies clear upward trend()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.002"/>
+  <testcase name="detectTrendLinear realistic EUC degradation()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.006"/>
+  <testcase name="detectTrendLinear with noisy data()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.004">
+    <failure message="org.opentest4j.AssertionFailedError: Should detect trend through noise" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: Should detect trend through noise
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:138)
+	at kotlin.test.junit5.JUnit5Asserter.fail(JUnitSupport.kt:56)
+	at kotlin.test.Asserter$DefaultImpls.assertTrue(Assertions.kt:694)
+	at kotlin.test.junit5.JUnit5Asserter.assertTrue(JUnitSupport.kt:30)
+	at kotlin.test.Asserter$DefaultImpls.assertTrue(Assertions.kt:704)
+	at kotlin.test.junit5.JUnit5Asserter.assertTrue(JUnitSupport.kt:30)
+	at kotlin.test.AssertionsKt__AssertionsKt.assertTrue(Assertions.kt:44)
+	at kotlin.test.AssertionsKt.assertTrue(Unknown Source)
+	at io.github.eucsoh.analysis.TrendDetectorTest.detectTrendLinear with noisy data(TrendDetectorTest.kt:109)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+</failure>
+  </testcase>
+  <testcase name="detectTrendLinear handles missing metric gracefully()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.001"/>
+  <testcase name="detectTrendLinear with constant values returns zero slope()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.004">
+    <failure message="java.lang.NullPointerException" type="java.lang.NullPointerException">java.lang.NullPointerException
+	at io.github.eucsoh.analysis.TrendDetectorTest.detectTrendLinear with constant values returns zero slope(TrendDetectorTest.kt:269)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+</failure>
+  </testcase>
+  <testcase name="detectTrendLinear with very weak trend()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.003"/>
+  <testcase name="detectTrendLinear filters null values()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.004">
+    <failure message="org.opentest4j.AssertionFailedError: Should compute slope from valid points" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: Should compute slope from valid points
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:138)
+	at kotlin.test.junit5.JUnit5Asserter.fail(JUnitSupport.kt:56)
+	at kotlin.test.Asserter$DefaultImpls.assertTrue(Assertions.kt:694)
+	at kotlin.test.junit5.JUnit5Asserter.assertTrue(JUnitSupport.kt:30)
+	at kotlin.test.Asserter$DefaultImpls.assertTrue(Assertions.kt:704)
+	at kotlin.test.junit5.JUnit5Asserter.assertTrue(JUnitSupport.kt:30)
+	at kotlin.test.AssertionsKt__AssertionsKt.assertTrue(Assertions.kt:44)
+	at kotlin.test.AssertionsKt.assertTrue(Unknown Source)
+	at io.github.eucsoh.analysis.TrendDetectorTest.detectTrendLinear filters null values(TrendDetectorTest.kt:161)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+</failure>
+  </testcase>
+  <testcase name="detectTrendLinear requires minimum points()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.003"/>
+  <testcase name="detectTrendLinear slope units are correct()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.032">
+    <failure message="java.lang.NullPointerException" type="java.lang.NullPointerException">java.lang.NullPointerException
+	at io.github.eucsoh.analysis.TrendDetectorTest.detectTrendLinear slope units are correct(TrendDetectorTest.kt:207)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+</failure>
+  </testcase>
+  <testcase name="detectTrendLinear handles downward trend()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.004">
+    <failure message="org.opentest4j.AssertionFailedError: Clear downward trend should be significant" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: Clear downward trend should be significant
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:138)
+	at kotlin.test.junit5.JUnit5Asserter.fail(JUnitSupport.kt:56)
+	at kotlin.test.Asserter$DefaultImpls.assertTrue(Assertions.kt:694)
+	at kotlin.test.junit5.JUnit5Asserter.assertTrue(JUnitSupport.kt:30)
+	at kotlin.test.Asserter$DefaultImpls.assertTrue(Assertions.kt:704)
+	at kotlin.test.junit5.JUnit5Asserter.assertTrue(JUnitSupport.kt:30)
+	at kotlin.test.AssertionsKt__AssertionsKt.assertTrue(Assertions.kt:44)
+	at kotlin.test.AssertionsKt.assertTrue(Unknown Source)
+	at io.github.eucsoh.analysis.TrendDetectorTest.detectTrendLinear handles downward trend(TrendDetectorTest.kt:71)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+</failure>
+  </testcase>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

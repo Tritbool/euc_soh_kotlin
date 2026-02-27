@@ -346,7 +346,7 @@ class EndToEndSyntheticTest {
 
         // Should infer 24S configuration
         assertEquals(24, result.nsGlobal, "Should detect 24S pack from V_idle=100.8V")
-        assertEquals(88.8, result.vNominal, 0.1, "V_nominal should be 24*3.7=88.8V")
+        assertEquals(88.8, result.vNominal?: Double.MAX_VALUE, 0.1, "V_nominal should be 24*3.7=88.8V")
 
         println("✓ Inferred pack: ${result.nsGlobal}S, ${result.vNominal}V nominal")
     }

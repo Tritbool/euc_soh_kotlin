@@ -35,7 +35,7 @@ class PackInferenceTest {
         val (ns, vNom) = PackInference.inferPackConfig(df)
 
         assertEquals(24, ns, "Should detect 24S configuration")
-        assertEquals(88.8, vNom, 0.01, "V_nominal should be 24 * 3.7V")
+        assertEquals(88.8, vNom?: Double.MAX_VALUE, 0.01, "V_nominal should be 24 * 3.7V")
     }
 
     @Test
@@ -86,7 +86,7 @@ class PackInferenceTest {
         val (ns, vNom) = PackInference.inferPackConfig(df)
 
         assertEquals(16, ns, "Should detect 16S configuration")
-        assertEquals(59.2, vNom, 0.01, "V_nominal should be 16 * 3.7V")
+        assertEquals(59.2, vNom?: Double.MAX_VALUE, 0.01, "V_nominal should be 16 * 3.7V")
     }
 
     @Test
@@ -99,7 +99,7 @@ class PackInferenceTest {
         val (ns, vNom) = PackInference.inferPackConfig(df)
 
         assertEquals(30, ns, "Should detect 30S configuration")
-        assertEquals(111.0, vNom, 0.01, "V_nominal should be 30 * 3.7V")
+        assertEquals(111.0, vNom?: Double.MAX_VALUE, 0.01, "V_nominal should be 30 * 3.7V")
     }
 
     @Test

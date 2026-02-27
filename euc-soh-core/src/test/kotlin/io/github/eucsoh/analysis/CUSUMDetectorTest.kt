@@ -27,7 +27,7 @@ class CUSUMDetectorTest {
         )
 
         assertTrue(result.alarmIndices.isEmpty(), "Stable data should trigger no alarms")
-        assertEquals(0.050, result.muRef, 0.005, "Reference mean should be ~50 mΩ")
+        assertEquals(0.050, result.muRef?: Double.MAX_VALUE, 0.005, "Reference mean should be ~50 mΩ")
     }
 
     @Test
@@ -50,7 +50,7 @@ class CUSUMDetectorTest {
         )
 
         assertTrue(result.alarmIndices.isNotEmpty(), "Should detect regime change")
-        assertEquals(0.050, result.muRef, 0.005, "Reference should be stable baseline")
+        assertEquals(0.050, result.muRef?: Double.MAX_VALUE, 0.005, "Reference should be stable baseline")
     }
 
     @Test
@@ -132,7 +132,7 @@ class CUSUMDetectorTest {
             testKmMin = 400.0
         )
 
-        assertEquals(0.050, result.muRef, 0.005, "Reference should only use early stable data")
+        assertEquals(0.050, result.muRef?: Double.MAX_VALUE, 0.005, "Reference should only use early stable data")
         assertTrue(result.alarmIndices.isNotEmpty(), "Should detect late degradation")
     }
 
@@ -186,8 +186,8 @@ class CUSUMDetectorTest {
         )
 
         // Should handle gracefully (sigma=0 case)
-        assertEquals(0.050, result.muRef, 0.001, "Reference mean should be exact")
-        assertEquals(0.0, result.sigmaRef, 0.001, "Sigma should be zero for identical values")
+        assertEquals(0.050, result.muRef?: Double.MAX_VALUE, 0.001, "Reference mean should be exact")
+        assertEquals(0.0, result.sigmaRef?: Double.MAX_VALUE, 0.001, "Sigma should be zero for identical values")
     }
 
     @Test

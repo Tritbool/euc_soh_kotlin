@@ -90,7 +90,7 @@ class SourceDetectionTest {
 
         val (wheelKm, source) = SourceDetection.normalizeDistanceTotal(df, "wheellog")
 
-        assertEquals(1235.2, wheelKm, 0.1, "Should convert meters to km")
+        assertEquals(1235.2, wheelKm?: Double.MAX_VALUE, 0.1, "Should convert meters to km")
         assertEquals("totaldistance_m_wl", source, "Should identify WheelLog source")
     }
 

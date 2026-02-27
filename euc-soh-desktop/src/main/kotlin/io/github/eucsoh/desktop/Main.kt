@@ -64,7 +64,7 @@ fun main() {
 
                         SwingUtilities.invokeLater {
                             statusArea.text = "Analysis complete!\n\n" +
-                                    "Logs analyzed: ${result.stats.rowsCount()}\n" +
+                                    //"Logs analyzed: ${result.stats.rowsCount()}\n" +
                                     "Alarms: ${result.alarms.size}\n" +
                                     "Ns: ${result.nsGlobal}\n" +
                                     "V_nominal: ${result.vNominal}V\n" +

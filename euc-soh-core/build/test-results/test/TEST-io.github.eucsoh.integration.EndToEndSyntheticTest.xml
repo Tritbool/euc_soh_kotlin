@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="io.github.eucsoh.integration.EndToEndSyntheticTest" tests="7" skipped="0" failures="5" errors="0" timestamp="2026-02-27T16:22:56.635Z" hostname="IlPalazzo" time="18.861">
+  <properties/>
+  <testcase name="synthetic data respects pack configuration inference()" classname="io.github.eucsoh.integration.EndToEndSyntheticTest" time="4.097">
+    <failure message="org.opentest4j.AssertionFailedError: Should detect 24S pack from V_idle=100.8V ==&gt; expected: &lt;24&gt; but was: &lt;null&gt;" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: Should detect 24S pack from V_idle=100.8V ==&gt; expected: &lt;24&gt; but was: &lt;null&gt;
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at kotlin.test.junit5.JUnit5Asserter.assertEquals(JUnitSupport.kt:32)
+	at kotlin.test.AssertionsKt__AssertionsKt.assertEquals(Assertions.kt:63)
+	at kotlin.test.AssertionsKt.assertEquals(Unknown Source)
+	at io.github.eucsoh.integration.EndToEndSyntheticTest$synthetic data respects pack configuration inference$1.invokeSuspend(EndToEndSyntheticTest.kt:348)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:104)
+	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:277)
+	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:95)
+	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:69)
+	at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)
+	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:48)
+	at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)
+	at io.github.eucsoh.integration.EndToEndSyntheticTest.synthetic data respects pack configuration inference(EndToEndSyntheticTest.kt:318)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+</failure>
+  </testcase>
+  <testcase name="CUSUM detects regime change in synthetic data()" classname="io.github.eucsoh.integration.EndToEndSyntheticTest" time="3.564"/>
+  <testcase name="detect MOSFET degradation in synthetic data()" classname="io.github.eucsoh.integration.EndToEndSyntheticTest" time="3.812"/>
+  <testcase name="buildSummary generates complete export structure()" classname="io.github.eucsoh.integration.EndToEndSyntheticTest" time="0.443">
+    <failure message="java.lang.RuntimeException: No exploitable logs for calibration" type="java.lang.RuntimeException">java.lang.RuntimeException: No exploitable logs for calibration
+	at io.github.eucsoh.SohAnalyzer$analyzeFolderForReq$2.invokeSuspend(SohAnalyzer.kt:104)
+	at io.github.eucsoh.SohAnalyzer$analyzeFolderForReq$2.invoke(SohAnalyzer.kt)
+	at io.github.eucsoh.SohAnalyzer$analyzeFolderForReq$2.invoke(SohAnalyzer.kt)
+	at kotlinx.coroutines.intrinsics.UndispatchedKt.startUndispatchedOrReturn(Undispatched.kt:61)
+	at kotlinx.coroutines.CoroutineScopeKt.coroutineScope(CoroutineScope.kt:261)
+	at io.github.eucsoh.SohAnalyzer.analyzeFolderForReq(SohAnalyzer.kt:76)
+	at io.github.eucsoh.SohAnalyzer.analyzeFolderForReq$default(SohAnalyzer.kt:71)
+	at io.github.eucsoh.integration.EndToEndSyntheticTest$buildSummary generates complete export structure$1.invokeSuspend(EndToEndSyntheticTest.kt:380)
+	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
+	at io.github.eucsoh.integration.EndToEndSyntheticTest$buildSummary generates complete export structure$1.invokeSuspend(EndToEndSyntheticTest.kt:380)
+Caused by: java.lang.RuntimeException: No exploitable logs for calibration
+	at io.github.eucsoh.SohAnalyzer$analyzeFolderForReq$2.invokeSuspend(SohAnalyzer.kt:104)
+	at io.github.eucsoh.SohAnalyzer$analyzeFolderForReq$2.invoke(SohAnalyzer.kt)
+	at io.github.eucsoh.SohAnalyzer$analyzeFolderForReq$2.invoke(SohAnalyzer.kt)
+	at kotlinx.coroutines.intrinsics.UndispatchedKt.startUndispatchedOrReturn(Undispatched.kt:61)
+	at kotlinx.coroutines.CoroutineScopeKt.coroutineScope(CoroutineScope.kt:261)
+	at io.github.eucsoh.SohAnalyzer.analyzeFolderForReq(SohAnalyzer.kt:76)
+	at io.github.eucsoh.SohAnalyzer.analyzeFolderForReq$default(SohAnalyzer.kt:71)
+	at io.github.eucsoh.integration.EndToEndSyntheticTest$buildSummary generates complete export structure$1.invokeSuspend(EndToEndSyntheticTest.kt:380)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:104)
+	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:277)
+	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:95)
+	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:69)
+	at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)
+	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:48)
+	at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)
+	at io.github.eucsoh.integration.EndToEndSyntheticTest.buildSummary generates complete export structure(EndToEndSyntheticTest.kt:355)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+</failure>
+  </testcase>
+  <testcase name="detect battery degradation in synthetic data()" classname="io.github.eucsoh.integration.EndToEndSyntheticTest" time="1.757">
+    <failure message="org.opentest4j.AssertionFailedError: Req_median should increase over time (battery degradation). First: 0.12423409977461874, Last: 0.12420253947657318" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: Req_median should increase over time (battery degradation). First: 0.12423409977461874, Last: 0.12420253947657318
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:138)
+	at kotlin.test.junit5.JUnit5Asserter.fail(JUnitSupport.kt:56)
+	at kotlin.test.Asserter$DefaultImpls.assertTrue(Assertions.kt:694)
+	at kotlin.test.junit5.JUnit5Asserter.assertTrue(JUnitSupport.kt:30)
+	at kotlin.test.Asserter$DefaultImpls.assertTrue(Assertions.kt:704)
+	at kotlin.test.junit5.JUnit5Asserter.assertTrue(JUnitSupport.kt:30)
+	at kotlin.test.AssertionsKt__AssertionsKt.assertTrue(Assertions.kt:44)
+	at kotlin.test.AssertionsKt.assertTrue(Unknown Source)
+	at io.github.eucsoh.integration.EndToEndSyntheticTest$detect battery degradation in synthetic data$1.invokeSuspend(EndToEndSyntheticTest.kt:114)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:104)
+	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:277)
+	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:95)
+	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:69)
+	at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)
+	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:48)
+	at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)
+	at io.github.eucsoh.integration.EndToEndSyntheticTest.detect battery degradation in synthetic data(EndToEndSyntheticTest.kt:28)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+</failure>
+  </testcase>
+  <testcase name="stable synthetic data produces no alarms()" classname="io.github.eucsoh.integration.EndToEndSyntheticTest" time="1.236">
+    <failure message="org.opentest4j.AssertionFailedError: Stable data should produce &lt;10% false alarms, got 73,1%" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: Stable data should produce &lt;10% false alarms, got 73,1%
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:138)
+	at kotlin.test.junit5.JUnit5Asserter.fail(JUnitSupport.kt:56)
+	at kotlin.test.Asserter$DefaultImpls.assertTrue(Assertions.kt:694)
+	at kotlin.test.junit5.JUnit5Asserter.assertTrue(JUnitSupport.kt:30)
+	at kotlin.test.Asserter$DefaultImpls.assertTrue(Assertions.kt:704)
+	at kotlin.test.junit5.JUnit5Asserter.assertTrue(JUnitSupport.kt:30)
+	at kotlin.test.AssertionsKt__AssertionsKt.assertTrue(Assertions.kt:44)
+	at kotlin.test.AssertionsKt.assertTrue(Unknown Source)
+	at io.github.eucsoh.integration.EndToEndSyntheticTest$stable synthetic data produces no alarms$1.invokeSuspend(EndToEndSyntheticTest.kt:309)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:104)
+	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:277)
+	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:95)
+	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:69)
+	at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)
+	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:48)
+	at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)
+	at io.github.eucsoh.integration.EndToEndSyntheticTest.stable synthetic data produces no alarms(EndToEndSyntheticTest.kt:268)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+</failure>
+  </testcase>
+  <testcase name="linear trend detection on gradual degradation()" classname="io.github.eucsoh.integration.EndToEndSyntheticTest" time="3.938">
+    <failure message="org.opentest4j.AssertionFailedError: Should detect upward trends" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: Should detect upward trends
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:138)
+	at kotlin.test.junit5.JUnit5Asserter.fail(JUnitSupport.kt:56)
+	at kotlin.test.Asserter$DefaultImpls.assertTrue(Assertions.kt:694)
+	at kotlin.test.junit5.JUnit5Asserter.assertTrue(JUnitSupport.kt:30)
+	at kotlin.test.Asserter$DefaultImpls.assertTrue(Assertions.kt:704)
+	at kotlin.test.junit5.JUnit5Asserter.assertTrue(JUnitSupport.kt:30)
+	at kotlin.test.AssertionsKt__AssertionsKt.assertTrue(Assertions.kt:44)
+	at kotlin.test.AssertionsKt.assertTrue(Unknown Source)
+	at io.github.eucsoh.integration.EndToEndSyntheticTest$linear trend detection on gradual degradation$1.invokeSuspend(EndToEndSyntheticTest.kt:259)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:104)
+	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:277)
+	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:95)
+	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:69)
+	at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)
+	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:48)
+	at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)
+	at io.github.eucsoh.integration.EndToEndSyntheticTest.linear trend detection on gradual degradation(EndToEndSyntheticTest.kt:222)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+</failure>
+  </testcase>
+  <system-out><![CDATA[✓ CUSUM detected 3 regime changes
+  - Alarm at 400 km (knee at 6240 km)
+  - Alarm at 2700 km (knee at 6240 km)
+  - Alarm at 200 km (knee at 6240 km)
+✓ Detected 17 MOSFET/thermal alarms
+✓ Detected 68 battery alarms
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

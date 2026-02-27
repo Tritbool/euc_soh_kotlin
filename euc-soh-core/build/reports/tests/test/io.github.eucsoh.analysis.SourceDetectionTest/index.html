@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=edge"/>
+<title>Test results - io.github.eucsoh.analysis.SourceDetectionTest</title>
+<link href="../css/base-style.css" rel="stylesheet" type="text/css"/>
+<link href="../css/style.css" rel="stylesheet" type="text/css"/>
+<script src="../js/report.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="content">
+<div class="breadcrumbs">
+<a class="breadcrumb" href="../index.html">all</a> &gt; 
+<span class="breadcrumb">io.github.eucsoh.analysis.SourceDetectionTest</span>
+</div>
+<div class="tab-container">
+<ul class="tabLinks">
+<li>
+<a class="successGroup" href="#">Gradle Test Run :euc-soh-core:test</a>
+</li>
+</ul>
+<div class="tab">
+<h2>Gradle Test Run :euc-soh-core:test</h2>
+<h1>SourceDetectionTest</h1>
+<div class="tab-container">
+<ul class="tabLinks">
+<li>
+<a class="" href="#">summary</a>
+</li>
+</ul>
+<div class="tab">
+<h2>summary</h2>
+<div>
+<div class="summary">
+<table>
+<tr>
+<td>
+<div class="summaryGroup">
+<table>
+<tr>
+<td>
+<div class="infoBox">
+<div class="counter">16</div>
+<p>tests</p>
+</div>
+</td>
+<td>
+<div class="infoBox">
+<div class="counter">0</div>
+<p>failures</p>
+</div>
+</td>
+<td>
+<div class="infoBox">
+<div class="counter">0</div>
+<p>skipped</p>
+</div>
+</td>
+<td>
+<div class="infoBox duration">
+<div class="counter">0.088s</div>
+<p>duration</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</td>
+<td>
+<div class="infoBox success successRate">
+<div class="percent">100%</div>
+<p>successful</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<table class="test-results">
+<thead>
+<tr>
+<th>Child</th>
+<th hidden="">Name</th>
+<th>Tests</th>
+<th>Failures</th>
+<th>Skipped</th>
+<th>Duration</th>
+<th>Success rate</th>
+</tr>
+</thead>
+<tr>
+<td class="success">detectSource defaults to euc_world if datetime present()</td>
+<td class="path" hidden="">detectSource defaults to euc_world if datetime present()</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.002s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">detectSource defaults to wheellog if date and time present()</td>
+<td class="path" hidden="">detectSource defaults to wheellog if date and time present()</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.006s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">detectSource identifies EUC World format()</td>
+<td class="path" hidden="">detectSource identifies EUC World format()</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.002s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">detectSource identifies WheelLog format()</td>
+<td class="path" hidden="">detectSource identifies WheelLog format()</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.010s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">detectSource mixed format prefers EUC World indicators()</td>
+<td class="path" hidden="">detectSource mixed format prefers EUC World indicators()</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.002s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">getFirstDatetime for EUC World()</td>
+<td class="path" hidden="">getFirstDatetime for EUC World()</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.003s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">getFirstDatetime for WheelLog combines date and time()</td>
+<td class="path" hidden="">getFirstDatetime for WheelLog combines date and time()</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.003s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">getFirstDatetime for WheelLog with only date()</td>
+<td class="path" hidden="">getFirstDatetime for WheelLog with only date()</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.001s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">getFirstDatetime prefers datetime over gps_datetime()</td>
+<td class="path" hidden="">getFirstDatetime prefers datetime over gps_datetime()</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.002s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">getFirstDatetime returns null when no datetime columns()</td>
+<td class="path" hidden="">getFirstDatetime returns null when no datetime columns()</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.003s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">getFirstDatetime uses gps_datetime as fallback()</td>
+<td class="path" hidden="">getFirstDatetime uses gps_datetime as fallback()</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.003s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">normalizeDistanceTotal fallback to distance column for EUC World()</td>
+<td class="path" hidden="">normalizeDistanceTotal fallback to distance column for EUC World()</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.001s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">normalizeDistanceTotal fallback to distance column for WheelLog()</td>
+<td class="path" hidden="">normalizeDistanceTotal fallback to distance column for WheelLog()</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.001s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">normalizeDistanceTotal for EUC World distance_total in km()</td>
+<td class="path" hidden="">normalizeDistanceTotal for EUC World distance_total in km()</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.001s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">normalizeDistanceTotal for WheelLog totaldistance in meters()</td>
+<td class="path" hidden="">normalizeDistanceTotal for WheelLog totaldistance in meters()</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.001s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">normalizeDistanceTotal returns null when no distance columns()</td>
+<td class="path" hidden="">normalizeDistanceTotal returns null when no distance columns()</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0s</td>
+<td class="success">100%</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<p>
+<div>
+<label class="hidden" id="label-for-line-wrapping-toggle" for="line-wrapping-toggle">Wrap lines
+<input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
+</label>
+</div>Generated by 
+<a href="https://www.gradle.org">Gradle 9.3.0</a> at 27 févr. 2026, 17:23:15</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="io.github.eucsoh.analysis.PackInferenceTest" tests="18" skipped="0" failures="2" errors="0" timestamp="2026-02-27T16:22:56.316Z" hostname="IlPalazzo" time="0.139">
+  <properties/>
+  <testcase name="inferPackConfig detects 20S pack from typical voltages()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.012"/>
+  <testcase name="chooseBatteryCurrentWindow for 30S pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.001"/>
+  <testcase name="computePackNominalResistance with null Ns returns null()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.001"/>
+  <testcase name="chooseBatteryCurrentWindow for null Ns uses default()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.001"/>
+  <testcase name="inferPackConfig detects 16S small pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.001"/>
+  <testcase name="computePackNominalResistance for 20S pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.002">
+    <failure message="org.opentest4j.AssertionFailedError: 20S pack should have ~360 mΩ nominal resistance. Expected &lt;0.36&gt; with absolute tolerance &lt;0.01&gt;, actual &lt;0.44&gt;." type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: 20S pack should have ~360 mΩ nominal resistance. Expected &lt;0.36&gt; with absolute tolerance &lt;0.01&gt;, actual &lt;0.44&gt;.
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:138)
+	at kotlin.test.junit5.JUnit5Asserter.fail(JUnitSupport.kt:56)
+	at kotlin.test.Asserter$DefaultImpls.assertTrue(Assertions.kt:694)
+	at kotlin.test.junit5.JUnit5Asserter.assertTrue(JUnitSupport.kt:30)
+	at kotlin.test.UtilsKt.checkDoublesAreEqual(Utils.kt:32)
+	at kotlin.test.UtilsKt.checkDoublesAreEqual$default(Utils.kt:22)
+	at kotlin.test.AssertionsKt__AssertionsKt.assertEquals(Assertions.kt:69)
+	at kotlin.test.AssertionsKt.assertEquals(Unknown Source)
+	at io.github.eucsoh.analysis.PackInferenceTest.computePackNominalResistance for 20S pack(PackInferenceTest.kt:113)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+</failure>
+  </testcase>
+  <testcase name="inferPackConfig detects 24S pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.003"/>
+  <testcase name="inferPackConfig rounds to nearest known series()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.001"/>
+  <testcase name="inferPackConfig with empty valid data returns null()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.075"/>
+  <testcase name="estimateCellResistanceMOhm for different voltages()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.003">
+    <failure message="org.opentest4j.AssertionFailedError: 20S should have medium resistance" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: 20S should have medium resistance
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:138)
+	at kotlin.test.junit5.JUnit5Asserter.fail(JUnitSupport.kt:56)
+	at kotlin.test.Asserter$DefaultImpls.assertTrue(Assertions.kt:694)
+	at kotlin.test.junit5.JUnit5Asserter.assertTrue(JUnitSupport.kt:30)
+	at kotlin.test.Asserter$DefaultImpls.assertTrue(Assertions.kt:704)
+	at kotlin.test.junit5.JUnit5Asserter.assertTrue(JUnitSupport.kt:30)
+	at kotlin.test.AssertionsKt__AssertionsKt.assertTrue(Assertions.kt:44)
+	at kotlin.test.AssertionsKt.assertTrue(Unknown Source)
+	at io.github.eucsoh.analysis.PackInferenceTest.estimateCellResistanceMOhm for different voltages(PackInferenceTest.kt:202)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+</failure>
+  </testcase>
+  <testcase name="chooseBatteryCurrentWindow for 24S pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.0"/>
+  <testcase name="chooseBatteryCurrentWindow for 16S pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.002"/>
+  <testcase name="computePackNominalResistance for 30S high-voltage pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.005"/>
+  <testcase name="computePackNominalResistance for 16S small pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.001"/>
+  <testcase name="inferPackConfig ignores invalid SoC references()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.002"/>
+  <testcase name="chooseBatteryCurrentWindow for 40S+ high-power pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.001"/>
+  <testcase name="chooseBatteryCurrentWindow for 20S pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.0"/>
+  <testcase name="inferPackConfig detects 30S high-voltage pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
