@@ -4,12 +4,12 @@ import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
 
 /**
- * CSV source detection and normalization (EUC World vs WheelLog).
+ * CSV source type detection (EUC World vs WheelLog).
  */
 object SourceDetection {
 
     /**
-     * Detects CSV source type from column names.
+     * Detects source format from DataFrame columns.
      * @return "euc_world" or "wheellog"
      */
     fun detectSource(df: DataFrame<*>): String {
@@ -18,16 +18,14 @@ object SourceDetection {
         if ("datetime" in cols && "distance_total" in cols) {
             return "euc_world"
         }
-
         if ("date" in cols && "time" in cols && "totaldistance" in cols) {
             return "wheellog"
         }
-
         return if ("datetime" in cols) "euc_world" else "wheellog"
     }
 
     /**
-     * Extracts total distance in km from DataFrame.
+     * Extracts total wheel distance in km from DataFrame.
      * @return Pair(wheel_km, source_description)
      */
     fun normalizeDistanceTotal(df: DataFrame<*>, source: String): Pair<Double?, String?> {
@@ -47,7 +45,7 @@ object SourceDetection {
                 return maxDist to "distance_log_km_euc"
             }
         } else {
-            // wheellog: totaldistance in meters
+            // WheelLog: totaldistance in meters
             if ("totaldistance" in cols) {
                 val maxDist = df["totaldistance"].values()
                     .filterIsInstance<Number>()
@@ -66,7 +64,7 @@ object SourceDetection {
     }
 
     /**
-     * Extracts first datetime string for log sorting.
+     * Gets first datetime string for log sorting.
      */
     fun getFirstDatetime(df: DataFrame<*>, source: String): String? {
         if (df.rowsCount() == 0) return null
@@ -79,7 +77,7 @@ object SourceDetection {
             }
             return null
         } else {
-            // wheellog
+            // WheelLog
             val date = if ("date" in df.columnNames()) df["date"][0]?.toString() else null
             val time = if ("time" in df.columnNames()) df["time"][0]?.toString() else null
 
