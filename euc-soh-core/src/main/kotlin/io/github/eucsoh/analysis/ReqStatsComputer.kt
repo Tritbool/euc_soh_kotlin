@@ -1,0 +1,316 @@
+package io.github.eucsoh.analysis
+
+import io.github.eucsoh.Constants
+import io.github.eucsoh.CsvSource
+import io.github.eucsoh.model.MOSFETParams
+import org.jetbrains.kotlinx.dataframe.DataFrame
+import org.jetbrains.kotlinx.dataframe.api.*
+import org.jetbrains.kotlinx.dataframe.io.readCSV
+import kotlin.math.abs
+import kotlin.math.round
+
+/**
+ * Main CSV analysis: computes R_eq and SoH metrics for a single file.
+ * Port of compute_req_stats_for_file() from soh_core_en.py.
+ */
+object ReqStatsComputer {
+
+    data class FileStats(
+        val file: String,
+        val source: String,
+        val datetimeFirst: String?,
+        val wheelKm: Double?,
+        val wheelKmSource: String?,
+        val vIdle: Double,
+        val ns: Int?,
+        val socRefOk: Boolean,
+        val socRefVFull: Double?,
+        val nPoints: Int,
+        val reqMean: Double,
+        val reqMedian: Double,
+        val reqMedian25C: Double,
+        val req95p: Double,
+        val sag95p: Double,
+        val sagMax: Double,
+        val vMinStrong: Double,
+        val iMax: Double,
+        val i95p: Double,
+        val tempBoardMax: Double?,
+        val tempMotorMax: Double?,
+        val iPhase2Int: Double?,
+        val iPhaseMax: Double?,
+        val iPhase95p: Double?,
+        val rMosfetHot: Double?,
+        val rBattMedian: Double?,
+        val rBattMedian25C: Double?
+    )
+
+    /**
+     * Analyzes one CSV file and returns stats.
+     */
+    fun computeReqStatsForFile(
+        csvPath: String,
+        csvSource: CsvSource? = null,
+        speedThr: Double = 20.0,
+        curThr: Double = 5.0,
+        mosfetParams: MOSFETParams? = null,
+        eaJPerMol: Double? = null
+    ): FileStats? {
+        val df = try {
+            if (csvSource != null) {
+                val stream = csvSource.openCsvStream(csvPath)
+                DataFrame.readCSV(stream)
+            } else {
+                DataFrame.readCSV(csvPath)
+            }
+        } catch (e: Exception) {
+            if (Constants.DEBUG) println("[ERROR] Failed to read $csvPath: ${e.message}")
+            return null
+        }
+
+        if (df.rowsCount() == 0) return null
+
+        val source = SourceDetection.detectSource(df)
+
+        val vCol = "voltage"
+        val iCol = "current"
+        val sCol = "speed"
+
+        // Check required columns
+        if (vCol !in df.columnNames() || iCol !in df.columnNames() || sCol !in df.columnNames()) {
+            if (Constants.DEBUG) println("[ERROR] Missing required columns in $csvPath")
+            return null
+        }
+
+        val tempBoardCol = when {
+            "system_temp" in df.columnNames() -> "system_temp"
+            "temp" in df.columnNames() -> "temp"
+            else -> null
+        }
+
+        val tempMotorCol = when {
+            "temp_motor" in df.columnNames() -> "temp_motor"
+            "temp2" in df.columnNames() -> "temp2"
+            else -> null
+        }
+
+        val iPhaseCol = when {
+            "current_phase" in df.columnNames() -> "current_phase"
+            "phase_current" in df.columnNames() -> "phase_current"
+            else -> null
+        }
+
+        val socCol = listOf("battery_level", "battery", "soc")
+            .firstOrNull { it in df.columnNames() }
+
+        val (wheelKm, kmSource) = SourceDetection.normalizeDistanceTotal(df, source)
+
+        // Estimate Ns from max voltage
+        val vIdleMax = df[vCol].values().filterIsInstance<Number>().maxOfOrNull { it.toDouble() } ?: 0.0
+        val nsEst = round(vIdleMax / 4.2).toInt()
+        val ns = if (nsEst in Constants.NS_MIN..Constants.NS_MAX) nsEst else null
+
+        // SoC reference check
+        var socRefOk = false
+        var socRefVIdle: Double? = null
+
+        if (ns != null && socCol != null) {
+            val dfFull = df.filter {
+                val soc = (it[socCol] as? Number)?.toDouble() ?: 0.0
+                val cur = (it[iCol] as Number).toDouble()
+                soc >= 98.0 && abs(cur) < 2.0
+            }
+
+            if (dfFull.rowsCount() > 0) {
+                val vFull = dfFull[vCol].values().filterIsInstance<Number>().maxOfOrNull { it.toDouble() } ?: 0.0
+                val vCellFull = vFull / ns
+                if (vCellFull in 4.05..4.25) {
+                    socRefOk = true
+                    socRefVIdle = vFull
+                }
+            }
+        }
+
+        // Compute SoC voltage if possible
+        var socVoltCol: String? = null
+        if (ns != null && socRefOk && socRefVIdle != null) {
+            val vCellFull = socRefVIdle / ns
+            val vCellMin = 3.0
+            val span = vCellFull - vCellMin
+
+            if (span > 0.5) {
+                val socVolt = df[vCol].values().map { v ->
+                    val vNum = (v as Number).toDouble()
+                    val vCell = vNum / ns
+                    val soc = ((vCell - vCellMin) / span).coerceIn(0.0, 1.0) * 100.0
+                    soc
+                }
+                // Add column (DataFrame is immutable, we work with data)
+                socVoltCol = "soc_voltage"
+            }
+        }
+
+        // Build V_idle_local
+        val vIdleLocal = VIdleProfileBuilder.buildVIdleProfile(
+            df = df,
+            vCol = vCol,
+            iCol = iCol,
+            socVoltCol = socVoltCol,
+            idleCurrentAbs = 3.0,
+            minIdleDurationS = 5.0,
+            maxDvdtAbs = 0.5
+        )
+
+        // Global V_idle (for export/info)
+        val vIdleGlobal = vIdleLocal.average()
+
+        // Current window
+        val (iMinBase, iMaxBase) = PackInference.chooseBatteryCurrentWindow(ns)
+        var iMin = maxOf(iMinBase, curThr)
+        var iMax = iMaxBase
+
+        // Filter for Req calculation
+        val voltages = df[vCol].values().map { (it as Number).toDouble() }
+        val currents = df[iCol].values().map { (it as Number).toDouble() }
+        val speeds = df[sCol].values().map { (it as Number).toDouble() }
+
+        val socValues = if (socVoltCol != null) {
+            // Use computed SoC voltage
+            List(df.rowsCount()) { i -> (voltages[i] / (ns ?: 1) - 3.0) / 1.2 * 100.0 }
+        } else if (socCol != null) {
+            df[socCol].values().map { (it as? Number)?.toDouble() ?: Double.NaN }
+        } else {
+            List(df.rowsCount()) { Double.NaN }
+        }
+
+        var filteredIndices = (0 until df.rowsCount()).filter { i ->
+            speeds[i] > speedThr &&
+                    abs(currents[i]) >= iMin &&
+                    abs(currents[i]) <= iMax
+        }
+
+        if (filteredIndices.size < 50) {
+            iMin *= 0.7
+            iMax *= 1.3
+            filteredIndices = (0 until df.rowsCount()).filter { i ->
+                speeds[i] > speedThr &&
+                        abs(currents[i]) >= iMin &&
+                        abs(currents[i]) <= iMax
+            }
+        }
+
+        // SoC filtering
+        filteredIndices = filteredIndices.filter { i ->
+            val soc = socValues[i]
+            soc.isNaN() || (soc > 20.0 && soc < 90.0)
+        }
+
+        if (filteredIndices.isEmpty()) return null
+
+        // Compute sag and Req
+        val sags = filteredIndices.map { i ->
+            vIdleLocal[i] - voltages[i]
+        }
+
+        val reqs = filteredIndices.map { i ->
+            sags[filteredIndices.indexOf(i)] / abs(currents[i])
+        }
+
+        val reqMean = reqs.average()
+        val reqMedian = reqs.sorted().let { it[it.size / 2] }
+        val req95p = reqs.sorted().let { it[(it.size * 0.95).toInt().coerceIn(0, it.size - 1)] }
+        val sag95p = sags.sorted().let { it[(it.size * 0.95).toInt().coerceIn(0, it.size - 1)] }
+        val sagMax = sags.maxOrNull() ?: 0.0
+
+        val vMinStrong = filteredIndices.map { voltages[it] }.minOrNull() ?: 0.0
+        val iMax = filteredIndices.map { abs(currents[it]) }.maxOrNull() ?: 0.0
+        val i95p = filteredIndices.map { abs(currents[it]) }.sorted()
+            .let { it[(it.size * 0.95).toInt().coerceIn(0, it.size - 1)] }
+
+        // Temperature
+        val tempBoardMax = tempBoardCol?.let { col ->
+            df[col].values().filterIsInstance<Number>().maxOfOrNull { it.toDouble() }
+        }
+
+        val tempMotorMax = tempMotorCol?.let { col ->
+            df[col].values().filterIsInstance<Number>().maxOfOrNull { it.toDouble() }
+        }
+
+        // Phase current metrics (I²dt dose)
+        var iPhase2Int: Double? = null
+        var iPhaseMax: Double? = null
+        var iPhase95p: Double? = null
+
+        if (iPhaseCol != null) {
+            val iPhaseVals = filteredIndices.mapNotNull { i ->
+                (df[iPhaseCol][i] as? Number)?.toDouble()
+            }
+
+            if (iPhaseVals.isNotEmpty()) {
+                val iPhaseAbs = iPhaseVals.map { abs(it) }
+
+                // I²dt integration (simple: dt ≈ 0.1s)
+                val dt = 0.1
+                iPhase2Int = iPhaseAbs.sumOf { it * it } * dt
+
+                iPhaseMax = iPhaseAbs.maxOrNull()
+                iPhase95p = iPhaseAbs.sorted().let { it[(it.size * 0.95).toInt().coerceIn(0, it.size - 1)] }
+            }
+        }
+
+        val ea = eaJPerMol ?: 20000.0
+
+        val reqMedian25C = ArrheniusNormalizer.normalizeRBattTo25C(
+            rBattMeasured = reqMedian,
+            tempMeasuredC = tempBoardMax,
+            eaJPerMol = ea
+        )
+
+        // MOSFET split if params provided
+        var rMosfetHot: Double? = null
+        var rBattMedian: Double? = null
+        var rBattMedian25C: Double? = null
+
+        if (mosfetParams != null && tempBoardMax != null) {
+            rMosfetHot = mosfetParams.rMosfetAtTemp(tempBoardMax)
+            rBattMedian = maxOf(0.0, reqMedian - rMosfetHot)
+            rBattMedian25C = ArrheniusNormalizer.normalizeRBattTo25C(
+                rBattMeasured = rBattMedian,
+                tempMeasuredC = tempBoardMax,
+                eaJPerMol = ea
+            )
+        }
+
+        val firstDt = SourceDetection.getFirstDatetime(df, source)
+
+        return FileStats(
+            file = csvPath.substringAfterLast('/'),
+            source = source,
+            datetimeFirst = firstDt,
+            wheelKm = wheelKm,
+            wheelKmSource = kmSource,
+            vIdle = vIdleGlobal,
+            ns = ns,
+            socRefOk = socRefOk,
+            socRefVFull = socRefVIdle,
+            nPoints = filteredIndices.size,
+            reqMean = reqMean,
+            reqMedian = reqMedian,
+            reqMedian25C = reqMedian25C,
+            req95p = req95p,
+            sag95p = sag95p,
+            sagMax = sagMax,
+            vMinStrong = vMinStrong,
+            iMax = iMax,
+            i95p = i95p,
+            tempBoardMax = tempBoardMax,
+            tempMotorMax = tempMotorMax,
+            iPhase2Int = iPhase2Int,
+            iPhaseMax = iPhaseMax,
+            iPhase95p = iPhase95p,
+            rMosfetHot = rMosfetHot,
+            rBattMedian = rBattMedian,
+            rBattMedian25C = rBattMedian25C
+        )
+    }
+}
