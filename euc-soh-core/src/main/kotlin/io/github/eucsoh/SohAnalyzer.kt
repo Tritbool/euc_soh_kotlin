@@ -25,6 +25,41 @@ class SohAnalyzer(
         val rPackNominal: Double?
     )
 
+    data class SummaryData(
+        val wheelName: String,
+        val reqBand: ReqBand,
+        val globalStats: GlobalStats,
+        val pack: PackInfo,
+        val socVoltageAvailable: Boolean,
+        val battReqBand: ReqBand?,
+        val arrhenius: ArrheniusInfo,
+        val logs: List<Map<String, Any?>>
+    ) {
+        data class ReqBand(val low: Double, val high: Double)
+        
+        data class GlobalStats(
+            val kmMin: Double,
+            val kmMax: Double,
+            val reqMedianMin: Double,
+            val reqMedianMax: Double,
+            val rBattMedianMin: Double?,
+            val rBattMedianMax: Double?,
+            val rMosfetHotMin: Double?,
+            val rMosfetHotMax: Double?
+        )
+        
+        data class PackInfo(
+            val ns: Int?,
+            val vNominal: Double?,
+            val rPackNominal: Double?
+        )
+        
+        data class ArrheniusInfo(
+            val eaKjPerMol: Double,
+            val autoCalibrated: Boolean
+        )
+    }
+
     /**
      * Analyzes all CSV files in a folder/list.
      * 
@@ -220,6 +255,68 @@ class SohAnalyzer(
             nsGlobal = nsGlobal,
             vNominal = vNominal,
             rPackNominal = rPackNominal
+        )
+    }
+
+    /**
+     * Builds a platform-agnostic summary from analysis results.
+     * Port of build_summary_dict() from soh_core_en.py.
+     * 
+     * @param result Analysis results from analyzeFolderForReq()
+     * @param wheelName Name/identifier of the wheel
+     * @return Structured summary data ready for JSON export or UI display
+     */
+    fun buildSummary(
+        result: AnalysisResult,
+        wheelName: String
+    ): SummaryData {
+        val df = result.stats
+        
+        return SummaryData(
+            wheelName = wheelName,
+            reqBand = SummaryData.ReqBand(
+                low = (df["Req_band_low"][0] as Number).toDouble(),
+                high = (df["Req_band_high"][0] as Number).toDouble()
+            ),
+            globalStats = SummaryData.GlobalStats(
+                kmMin = df["wheel_km"].values().filterIsInstance<Number>().minOf { it.toDouble() },
+                kmMax = df["wheel_km"].values().filterIsInstance<Number>().maxOf { it.toDouble() },
+                reqMedianMin = df["Req_median"].values().filterIsInstance<Number>().minOf { it.toDouble() },
+                reqMedianMax = df["Req_median"].values().filterIsInstance<Number>().maxOf { it.toDouble() },
+                rBattMedianMin = if ("R_batt_median_25C" in df.columnNames()) {
+                    df["R_batt_median_25C"].values().filterIsInstance<Number>().minOfOrNull { it.toDouble() }
+                } else null,
+                rBattMedianMax = if ("R_batt_median_25C" in df.columnNames()) {
+                    df["R_batt_median_25C"].values().filterIsInstance<Number>().maxOfOrNull { it.toDouble() }
+                } else null,
+                rMosfetHotMin = if ("R_mosfet_hot" in df.columnNames()) {
+                    df["R_mosfet_hot"].values().filterIsInstance<Number>().minOfOrNull { it.toDouble() }
+                } else null,
+                rMosfetHotMax = if ("R_mosfet_hot" in df.columnNames()) {
+                    df["R_mosfet_hot"].values().filterIsInstance<Number>().maxOfOrNull { it.toDouble() }
+                } else null
+            ),
+            pack = SummaryData.PackInfo(
+                ns = result.nsGlobal,
+                vNominal = result.vNominal,
+                rPackNominal = result.rPackNominal
+            ),
+            socVoltageAvailable = df["soc_ref_ok"].values()
+                .filterIsInstance<Boolean>()
+                .any { it },
+            battReqBand = if ("R_batt_band_low" in df.columnNames() && "R_batt_band_high" in df.columnNames()) {
+                SummaryData.ReqBand(
+                    low = (df["R_batt_band_low"][0] as Number).toDouble(),
+                    high = (df["R_batt_band_high"][0] as Number).toDouble()
+                )
+            } else null,
+            arrhenius = SummaryData.ArrheniusInfo(
+                eaKjPerMol = result.eaJPerMol / 1000.0,
+                autoCalibrated = (df["arrhenius_auto_calibrated"][0] as Boolean)
+            ),
+            logs = (0 until df.rowsCount()).map { i ->
+                df.columnNames().associateWith { col -> df[col][i] }
+            }
         )
     }
 
