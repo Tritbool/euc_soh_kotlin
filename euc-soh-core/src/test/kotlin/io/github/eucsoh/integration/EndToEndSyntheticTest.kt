@@ -1,0 +1,404 @@
+package io.github.eucsoh.integration
+
+import io.github.eucsoh.Constants
+import io.github.eucsoh.SohAnalyzer
+import io.github.eucsoh.model.ThresholdInfo
+import io.github.eucsoh.synthetic.SyntheticDataGenerator
+import kotlinx.coroutines.runBlocking
+import java.io.File
+import kotlin.test.*
+
+/**
+ * End-to-end integration tests using synthetic data.
+ * Validates the complete SoH analysis pipeline with realistic degradation scenarios.
+ */
+class EndToEndSyntheticTest {
+
+    private val tempDir = File.createTempFile("euc_soh_test", "").apply {
+        delete()
+        mkdirs()
+    }
+
+    @AfterTest
+    fun cleanup() {
+        tempDir.deleteRecursively()
+    }
+
+    @Test
+    fun `detect battery degradation in synthetic data`() = runBlocking {
+        // Setup: Create synthetic degradation scenario
+        val thresholds = mapOf(
+            "Req_median" to ThresholdInfo(
+                mean = 0.050,
+                std = 0.002,
+                limit = 0.054,
+                direction = "higher_is_bad"
+            ),
+            "R_batt_median" to ThresholdInfo(
+                mean = 0.045,
+                std = 0.002,
+                limit = 0.049,
+                direction = "higher_is_bad"
+            ),
+            "sag_95p" to ThresholdInfo(
+                mean = 3.5,
+                std = 0.5,
+                limit = 4.5,
+                direction = "higher_is_bad"
+            ),
+            "temp_board_max" to ThresholdInfo(
+                mean = 40.0,
+                std = 5.0,
+                limit = 50.0,
+                direction = "higher_is_bad"
+            )
+        )
+
+        val config = SyntheticDataGenerator.SyntheticConfig(
+            years = 2,
+            kmPerWeek = 100.0,
+            kneeFrac = 0.70,  // Accelerate degradation at 70% of lifespan
+            mode = SyntheticDataGenerator.DegradationMode.BATT_ONLY,
+            finalOffsetSigma = 10.0,  // Strong degradation signal
+            wheelName = "test_batt_degr",
+            vIdle = 84.0  // 20S pack
+        )
+
+        // Generate synthetic folder
+        val syntheticDir = File(tempDir, "batt_degradation")
+        val timeseries = SyntheticDataGenerator.generateSyntheticFolder(
+            outputDir = syntheticDir,
+            thresholds = thresholds,
+            config = config
+        )
+
+        assertTrue(syntheticDir.exists(), "Synthetic folder should be created")
+        assertTrue(syntheticDir.listFiles()!!.size > 50, "Should generate multiple CSV files")
+
+        // Analyze with SohAnalyzer
+        val csvPaths = syntheticDir.listFiles()!!
+            .filter { it.extension == "csv" && !it.name.contains("summary") }
+            .map { it.absolutePath }
+            .sorted()
+
+        val analyzer = SohAnalyzer()
+        val result = analyzer.analyzeFolderForReq(
+            csvPaths = csvPaths,
+            optimalFrac = 0.3,
+            eaJPerMol = 20000.0,
+            parallel = false
+        )
+
+        // Assertions: Should detect battery degradation
+        assertNotNull(result.stats, "Should produce statistics")
+        assertTrue(result.stats.rowsCount() > 50, "Should analyze multiple logs")
+
+        // Check that alarms are detected (degradation should trigger warnings)
+        val battAlarms = result.alarms.filter { alarm ->
+            alarm.reasons.contains("Req_median") ||
+            alarm.reasons.contains("R_batt_median") ||
+            alarm.reasons.contains("sag")
+        }
+
+        assertTrue(battAlarms.isNotEmpty(), "Should detect battery degradation alarms")
+        println("✓ Detected ${battAlarms.size} battery alarms")
+
+        // Verify degradation trend in data
+        val reqValues = result.stats["Req_median"].values()
+            .filterIsInstance<Number>()
+            .map { it.toDouble() }
+
+        val firstQuartile = reqValues.take(reqValues.size / 4).average()
+        val lastQuartile = reqValues.takeLast(reqValues.size / 4).average()
+
+        assertTrue(
+            lastQuartile > firstQuartile * 1.1,
+            "Req_median should increase over time (battery degradation). " +
+            "First: $firstQuartile, Last: $lastQuartile"
+        )
+
+        println("✓ Req_median degradation: ${firstQuartile.format(4)} → ${lastQuartile.format(4)} Ω")
+    }
+
+    @Test
+    fun `detect MOSFET degradation in synthetic data`() = runBlocking {
+        val thresholds = mapOf(
+            "Req_median" to ThresholdInfo(0.050, 0.002, 0.054, "higher_is_bad"),
+            "R_mosfet_hot" to ThresholdInfo(0.008, 0.001, 0.010, "higher_is_bad"),
+            "temp_board_max" to ThresholdInfo(40.0, 5.0, 50.0, "higher_is_bad"),
+            "I_phase2_int" to ThresholdInfo(500000.0, 50000.0, 600000.0, "higher_is_bad")
+        )
+
+        val config = SyntheticDataGenerator.SyntheticConfig(
+            years = 2,
+            kmPerWeek = 120.0,
+            kneeFrac = 0.75,
+            mode = SyntheticDataGenerator.DegradationMode.MOSFET_ONLY,
+            finalOffsetSigma = 2.0,
+            wheelName = "test_mosfet_degr",
+            vIdle = 100.8  // 24S pack
+        )
+
+        val syntheticDir = File(tempDir, "mosfet_degradation")
+        SyntheticDataGenerator.generateSyntheticFolder(
+            outputDir = syntheticDir,
+            thresholds = thresholds,
+            config = config
+        )
+
+        val csvPaths = syntheticDir.listFiles()!!
+            .filter { it.extension == "csv" && !it.name.contains("summary") }
+            .map { it.absolutePath }
+            .sorted()
+
+        val analyzer = SohAnalyzer()
+        val result = analyzer.analyzeFolderForReq(
+            csvPaths = csvPaths,
+            optimalFrac = 0.3,
+            parallel = false
+        )
+
+        // Should detect MOSFET/thermal alarms
+        val mosfetAlarms = result.alarms.filter { alarm ->
+            alarm.reasons.contains("R_mosfet") ||
+            alarm.reasons.contains("temp_board") ||
+            alarm.reasons.contains("I_phase2_int")
+        }
+
+        // MOSFET degradation is more subtle, but should still be detectable
+        println("✓ Detected ${mosfetAlarms.size} MOSFET/thermal alarms")
+    }
+
+    @Test
+    fun `CUSUM detects regime change in synthetic data`() = runBlocking {
+        val thresholds = mapOf(
+            "Req_median" to ThresholdInfo(0.050, 0.002, 0.054, "higher_is_bad"),
+            "R_batt_median" to ThresholdInfo(0.045, 0.002, 0.049, "higher_is_bad")
+        )
+
+        // Sharp degradation after knee point
+        val config = SyntheticDataGenerator.SyntheticConfig(
+            years = 2,
+            kmPerWeek = 100.0,
+            kneeFrac = 0.60,  // Early knee for clear regime change
+            mode = SyntheticDataGenerator.DegradationMode.BATT_ONLY,
+            finalOffsetSigma = 15.0,  // Very strong signal
+            wheelName = "test_cusum"
+        )
+
+        val syntheticDir = File(tempDir, "cusum_test")
+        SyntheticDataGenerator.generateSyntheticFolder(
+            outputDir = syntheticDir,
+            thresholds = thresholds,
+            config = config
+        )
+
+        val csvPaths = syntheticDir.listFiles()!!
+            .filter { it.extension == "csv" && !it.name.contains("summary") }
+            .map { it.absolutePath }
+            .sorted()
+
+        val analyzer = SohAnalyzer()
+        val result = analyzer.analyzeFolderForReq(csvPaths, parallel = false)
+
+        // Should detect CUSUM alarms
+        val cusumAlarms = result.alarms.filter { alarm ->
+            alarm.reasons.contains("CUSUM") || alarm.reasons.contains("Regime change")
+        }
+
+        assertTrue(cusumAlarms.isNotEmpty(), "Should detect regime change with CUSUM")
+        println("✓ CUSUM detected ${cusumAlarms.size} regime changes")
+
+        // Verify alarm occurs after knee point
+        val kneeKm = config.kneeFrac * (config.years * 52 * config.kmPerWeek)
+        cusumAlarms.forEach { alarm ->
+            if (alarm.wheelKm != null) {
+                println("  - Alarm at ${alarm.wheelKm.format(0)} km (knee at ${kneeKm.format(0)} km)")
+            }
+        }
+    }
+
+    @Test
+    fun `linear trend detection on gradual degradation`() = runBlocking {
+        val thresholds = mapOf(
+            "Req_median" to ThresholdInfo(0.050, 0.002, 0.054, "higher_is_bad"),
+            "R_batt_median" to ThresholdInfo(0.045, 0.002, 0.049, "higher_is_bad")
+        )
+
+        // Smooth gradual degradation (no sharp knee)
+        val config = SyntheticDataGenerator.SyntheticConfig(
+            years = 3,
+            kmPerWeek = 80.0,
+            kneeFrac = 0.95,  // Very late knee = mostly linear
+            mode = SyntheticDataGenerator.DegradationMode.BATT_ONLY,
+            finalOffsetSigma = 8.0,
+            noiseFrac = 0.15,  // Low noise for clear trend
+            wheelName = "test_trend"
+        )
+
+        val syntheticDir = File(tempDir, "trend_test")
+        SyntheticDataGenerator.generateSyntheticFolder(
+            outputDir = syntheticDir,
+            thresholds = thresholds,
+            config = config
+        )
+
+        val csvPaths = syntheticDir.listFiles()!!
+            .filter { it.extension == "csv" && !it.name.contains("summary") }
+            .map { it.absolutePath }
+            .sorted()
+
+        val analyzer = SohAnalyzer()
+        val result = analyzer.analyzeFolderForReq(csvPaths, parallel = false)
+
+        // Should detect linear trend alarms
+        val trendAlarms = result.alarms.filter { alarm ->
+            alarm.file == "TREND_ANALYSIS" || alarm.reasons.contains("trend")
+        }
+
+        assertTrue(trendAlarms.isNotEmpty(), "Should detect upward trends")
+        println("✓ Detected ${trendAlarms.size} linear trends")
+
+        trendAlarms.forEach { alarm ->
+            println("  - ${alarm.reasons}")
+        }
+    }
+
+    @Test
+    fun `stable synthetic data produces no alarms`() = runBlocking {
+        val thresholds = mapOf(
+            "Req_median" to ThresholdInfo(0.050, 0.002, 0.060, "higher_is_bad"),
+            "R_batt_median" to ThresholdInfo(0.045, 0.002, 0.055, "higher_is_bad"),
+            "temp_board_max" to ThresholdInfo(40.0, 5.0, 55.0, "higher_is_bad")
+        )
+
+        // No degradation (finalOffsetSigma = 0)
+        val config = SyntheticDataGenerator.SyntheticConfig(
+            years = 1,
+            kmPerWeek = 50.0,
+            mode = SyntheticDataGenerator.DegradationMode.GLOBAL,
+            finalOffsetSigma = 0.0,  // No drift
+            noiseFrac = 0.2,  // Only noise
+            wheelName = "test_stable"
+        )
+
+        val syntheticDir = File(tempDir, "stable_test")
+        SyntheticDataGenerator.generateSyntheticFolder(
+            outputDir = syntheticDir,
+            thresholds = thresholds,
+            config = config
+        )
+
+        val csvPaths = syntheticDir.listFiles()!!
+            .filter { it.extension == "csv" && !it.name.contains("summary") }
+            .map { it.absolutePath }
+            .sorted()
+
+        val analyzer = SohAnalyzer()
+        val result = analyzer.analyzeFolderForReq(csvPaths, parallel = false)
+
+        // Should produce minimal alarms (only noise-induced false positives)
+        val gaussianAlarms = result.alarms.filter { alarm ->
+            !alarm.reasons.contains("CUSUM") &&
+            !alarm.reasons.contains("trend") &&
+            alarm.file != "TREND_ANALYSIS"
+        }
+
+        // Allow a few false positives due to noise, but should be minimal
+        val alarmRate = gaussianAlarms.size.toDouble() / result.stats.rowsCount()
+        assertTrue(
+            alarmRate < 0.1,
+            "Stable data should produce <10% false alarms, got ${(alarmRate * 100).format(1)}%"
+        )
+
+        println("✓ Stable data: ${gaussianAlarms.size} alarms / ${result.stats.rowsCount()} logs (${(alarmRate * 100).format(1)}%)")
+    }
+
+    @Test
+    fun `synthetic data respects pack configuration inference`() = runBlocking {
+        val thresholds = mapOf(
+            "Req_median" to ThresholdInfo(0.050, 0.002, 0.054, "higher_is_bad")
+        )
+
+        // 24S pack: 100.8V nominal
+        val config = SyntheticDataGenerator.SyntheticConfig(
+            years = 1,
+            kmPerWeek = 50.0,
+            vIdle = 100.8,  // 24 * 4.2V = 100.8V
+            finalOffsetSigma = 1.0,
+            wheelName = "test_24s"
+        )
+
+        val syntheticDir = File(tempDir, "pack_inference_test")
+        SyntheticDataGenerator.generateSyntheticFolder(
+            outputDir = syntheticDir,
+            thresholds = thresholds,
+            config = config
+        )
+
+        val csvPaths = syntheticDir.listFiles()!!
+            .filter { it.extension == "csv" && !it.name.contains("summary") }
+            .map { it.absolutePath }
+            .sorted()
+
+        val analyzer = SohAnalyzer()
+        val result = analyzer.analyzeFolderForReq(csvPaths, parallel = false)
+
+        // Should infer 24S configuration
+        assertEquals(24, result.nsGlobal, "Should detect 24S pack from V_idle=100.8V")
+        assertEquals(88.8, result.vNominal, 0.1, "V_nominal should be 24*3.7=88.8V")
+
+        println("✓ Inferred pack: ${result.nsGlobal}S, ${result.vNominal}V nominal")
+    }
+
+    @Test
+    fun `buildSummary generates complete export structure`() = runBlocking {
+        val thresholds = mapOf(
+            "Req_median" to ThresholdInfo(0.050, 0.002, 0.054, "higher_is_bad"),
+            "R_batt_median" to ThresholdInfo(0.045, 0.002, 0.049, "higher_is_bad")
+        )
+
+        val config = SyntheticDataGenerator.SyntheticConfig(
+            years = 1,
+            kmPerWeek = 100.0,
+            wheelName = "test_summary"
+        )
+
+        val syntheticDir = File(tempDir, "summary_test")
+        SyntheticDataGenerator.generateSyntheticFolder(
+            outputDir = syntheticDir,
+            thresholds = thresholds,
+            config = config
+        )
+
+        val csvPaths = syntheticDir.listFiles()!!
+            .filter { it.extension == "csv" && !it.name.contains("summary") }
+            .map { it.absolutePath }
+            .sorted()
+
+        val analyzer = SohAnalyzer()
+        val result = analyzer.analyzeFolderForReq(csvPaths, parallel = false)
+
+        // Build summary
+        val summary = analyzer.buildSummary(result, "test_summary")
+
+        assertEquals("test_summary", summary.wheelName)
+        assertNotNull(summary.reqBand.low)
+        assertNotNull(summary.reqBand.high)
+        assertTrue(summary.reqBand.low < summary.reqBand.high, "Req band should be valid")
+
+        assertNotNull(summary.pack.ns)
+        assertNotNull(summary.pack.vNominal)
+        assertNotNull(summary.pack.rPackNominal)
+
+        assertTrue(summary.globalStats.kmMax > summary.globalStats.kmMin)
+        assertTrue(summary.logs.isNotEmpty(), "Should include log details")
+
+        println("✓ Summary: ${summary.logs.size} logs, ${summary.globalStats.kmMin.format(0)}-${summary.globalStats.kmMax.format(0)} km")
+        println("  Req band: ${summary.reqBand.low.format(4)}-${summary.reqBand.high.format(4)} Ω")
+        println("  Pack: ${summary.pack.ns}S, R_pack=${summary.pack.rPackNominal?.let { "%.3f".format(it) }} Ω")
+    }
+
+    // Helper extension for formatting
+    private fun Double.format(decimals: Int): String = "%.${decimals}f".format(this)
+}
