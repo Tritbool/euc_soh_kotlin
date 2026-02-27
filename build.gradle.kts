@@ -6,7 +6,7 @@ plugins {
 }
 
 allprojects {
-    group = "com.euc.soh"
+    group = "io.euc.soh"
     version = "1.0.0"
 }
 
