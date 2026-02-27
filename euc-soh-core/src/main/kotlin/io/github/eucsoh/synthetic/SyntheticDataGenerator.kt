@@ -78,10 +78,10 @@ object SyntheticDataGenerator {
      * @param optimalFrac Fraction of best logs to use for threshold computation
      * @return RealSoh with stats, thresholds, and max km
      */
-    suspend fun loadRealSoh(
+    fun loadRealSoh(
         folder: File,
         optimalFrac: Double = 0.3
-    ): RealSoh {
+    ): RealSoh = runBlocking {
         val csvFiles = folder.listFiles()?.filter { it.extension == "csv" } ?: emptyList()
         require(csvFiles.isNotEmpty()) { "No CSV files found in ${folder.absolutePath}" }
 
@@ -105,7 +105,7 @@ object SyntheticDataGenerator {
         val maxKmRow = stats.maxBy { (it["wheel_km"] as? Number)?.toDouble() ?: 0.0 }
         val maxKm = (maxKmRow?.get("wheel_km") as? Number)?.toDouble() ?: 0.0
 
-        return RealSoh(
+        RealSoh(
             stats = stats,
             thresholds = thresholds,
             maxKm = maxKm
@@ -162,7 +162,7 @@ object SyntheticDataGenerator {
      * @param kneeFrac Fraction of lifespan before accelerated degradation
      * @return List of synthetic log metadata
      */
-    suspend fun generateSyntheticFolderFromReal(
+    fun generateSyntheticFolderFromReal(
         inputFolder: File,
         outputFolder: File,
         vIdle: Double,
