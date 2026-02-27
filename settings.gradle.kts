@@ -1,9 +1,8 @@
 rootProject.name = "euc-soh"
 
 include(":euc-soh-core")
-// À décommenter quand les modules seront créés:
-// include(":euc-soh-android")
-// include(":euc-soh-desktop")
+include(":euc-soh-android")
+include(":euc-soh-desktop")
 
 pluginManagement {
     repositories {
