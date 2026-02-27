@@ -14,8 +14,8 @@ dependencies {
     implementation("org.apache.commons:commons-math3:3.6.1")
     implementation("org.slf4j:slf4j-api:2.0.13")
     implementation("ch.qos.logback:logback-classic:1.5.6")
-    // Kotlin DataFrame (pandas-like API) kept for future use
-    implementation("org.jetbrains.kotlinx:dataframe:0.10.0")
+    // Kotlin DataFrame (pandas-like API) for CSV parsing and analysis
+    implementation("org.jetbrains.kotlinx:dataframe:0.14.1")
     // kotlin-csv for robust, simple CSV parsing (fallback / reliable parser)
     implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.9.3")
 

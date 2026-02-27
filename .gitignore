@@ -1,0 +1,37 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+.idea_modules/
+
+# Android Studio
+local.properties
+.DS_Store
+/captures
+.externalNativeBuild
+.cxx
+
+# Kotlin
+*.kotlin_module
+*.kotlin_builtins
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# OS
+.DS_Store
+Thumbs.db
