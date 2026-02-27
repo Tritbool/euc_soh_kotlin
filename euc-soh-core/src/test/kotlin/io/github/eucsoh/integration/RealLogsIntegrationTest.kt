@@ -29,14 +29,14 @@ class RealLogsIntegrationTest {
     private val realLogsFolder = File("src/test/resources/real_logs")
 
     @Test
-    fun `real logs analysis pipeline runs end-to-end`() = runBlocking {
+    fun `real logs analysis pipeline runs end-to-end`() {
         // Check if real logs exist
         val csvFiles = realLogsFolder.listFiles()?.filter { it.extension == "csv" } ?: emptyList()
         
         if (!realLogsFolder.exists() || csvFiles.isEmpty()) {
             println("⊘ Skipping real logs test: no CSV files found in ${realLogsFolder.path}")
             println("  To enable this test, add real EUC log files to this directory")
-            return@runBlocking
+            return
         }
 
         println("✓ Found ${csvFiles.size} real log files in ${realLogsFolder.path}")
@@ -45,12 +45,14 @@ class RealLogsIntegrationTest {
         val csvPaths = csvFiles.map { it.absolutePath }.sorted()
         val analyzer = SohAnalyzer()
 
-        // Run analysis
-        val result = analyzer.analyzeFolderForReq(
-            csvPaths = csvPaths,
-            optimalFrac = 0.3,
-            parallel = false
-        )
+        // Run analysis with runBlocking
+        val result = runBlocking {
+            analyzer.analyzeFolderForReq(
+                csvPaths = csvPaths,
+                optimalFrac = 0.3,
+                parallel = false
+            )
+        }
 
         // Basic assertions
         assertNotNull(result.stats, "Stats should be generated")
