@@ -10,8 +10,7 @@ import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.math.max
-import kotlin.random.Random
-
+import java.util.Random
 /**
  * Synthetic EUC data generator for testing SoH analysis.
  * Port of synth_en.py from EUC_SOH project.
@@ -276,7 +275,7 @@ object SyntheticDataGenerator {
             if (driftScale <= 0.0 || sigma == 0.0) {
                 // No drift, just noise
                 result[metric] = DoubleArray(kmArray.size) {
-                    mu + Random.nextGaussian() * config.noiseFrac * max(sigma, 1e-6)
+                    mu + Random().nextGaussian() * config.noiseFrac * max(sigma, 1e-6)
                 }
                 return@forEach
             }
@@ -314,7 +313,7 @@ object SyntheticDataGenerator {
                     sigmaNoise *= 0.3
                 }
 
-                val noise = Random.nextGaussian() * sigmaNoise
+                val noise = Random().nextGaussian() * sigmaNoise
                 mu + drift + noise
             }
 
@@ -369,12 +368,12 @@ object SyntheticDataGenerator {
 
         // Generate speed (km/h)
         val speed = DoubleArray(nPoints) {
-            (Random.nextGaussian() * 10.0 + 25.0).coerceIn(5.0, 50.0)
+            (Random().nextGaussian() * 10.0 + 25.0).coerceIn(5.0, 50.0)
         }
 
         // Generate battery current (A)
         val current = DoubleArray(nPoints) {
-            (Random.nextGaussian() * 15.0 + 40.0).coerceIn(5.0, 80.0)
+            (Random().nextGaussian() * 15.0 + 40.0).coerceIn(5.0, 80.0)
         }
 
         // Phase current (higher at low speed)
@@ -438,10 +437,10 @@ object SyntheticDataGenerator {
 
         // Add noise to temperatures
         val systemTemp = DoubleArray(nPoints) { i ->
-            tBoard[i] + Random.nextGaussian() * 0.5
+            tBoard[i] + Random().nextGaussian() * 0.5
         }
         val tempMotor = DoubleArray(nPoints) { i ->
-            tMotor[i] + Random.nextGaussian() * 0.8
+            tMotor[i] + Random().nextGaussian() * 0.8
         }
 
         val totalDistance = (kmEnd * 1000.0).toLong()

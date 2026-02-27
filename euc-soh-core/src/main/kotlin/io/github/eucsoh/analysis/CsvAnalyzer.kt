@@ -118,10 +118,11 @@ object CsvAnalyzer {
             val span = vCellFull - vCellMin
 
             if (span > 0.5) {
-                val socVoltage = df[vCol].map<Number, Double> { v ->
-                    val vCell = v.toDouble() / ns
-                    ((vCell - vCellMin) / span).coerceIn(0.0, 1.0) * 100.0
-                }
+                val socVoltage = df.convert(vCol)
+                    .with { v->
+                        val vCell = v as Double / ns
+                        ((vCell - vCellMin) / span).coerceIn(0.0, 1.0) * 100.0
+                    }
                 // Would need to add column to df, skipping for now
                 "soc_voltage"
             } else null
@@ -148,8 +149,8 @@ object CsvAnalyzer {
         }
 
         // Choose current window for Req
-        var (iMin, iMax) = PackInference.chooseBatteryCurrentWindow(ns)
-        iMin = max(iMin, curThr)
+        var (i_Min, i_Max) = PackInference.chooseBatteryCurrentWindow(ns)
+        i_Min = max(i_Max, curThr)
 
         // Filter points for Req calculation
         val voltages = df[vCol].values().filterIsInstance<Number>().map { it.toDouble() }
@@ -157,18 +158,18 @@ object CsvAnalyzer {
 
         var validIndices = (0 until df.rowsCount()).filter { i ->
             speeds[i] > speedThr &&
-            abs(currents[i]) >= iMin &&
-            abs(currents[i]) <= iMax
+            abs(currents[i]) >= i_Min &&
+            abs(currents[i]) <= i_Max
         }
 
         // Relax thresholds if too few points
         if (validIndices.size < 50) {
-            iMin *= 0.7
-            iMax *= 1.3
+            i_Min *= 0.7
+            i_Max *= 1.3
             validIndices = (0 until df.rowsCount()).filter { i ->
                 speeds[i] > speedThr &&
-                abs(currents[i]) >= iMin &&
-                abs(currents[i]) <= iMax
+                abs(currents[i]) >= i_Min &&
+                abs(currents[i]) <= i_Max
             }
         }
 

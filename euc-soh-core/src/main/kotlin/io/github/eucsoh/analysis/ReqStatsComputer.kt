@@ -166,8 +166,8 @@ object ReqStatsComputer {
 
         // Current window
         val (iMinBase, iMaxBase) = PackInference.chooseBatteryCurrentWindow(ns)
-        var iMin = maxOf(iMinBase, curThr)
-        var iMax = iMaxBase
+        var i_Min = maxOf(iMinBase, curThr)
+        var i_Max = iMaxBase
 
         // Filter for Req calculation
         val voltages = df[vCol].values().map { (it as Number).toDouble() }
@@ -185,17 +185,17 @@ object ReqStatsComputer {
 
         var filteredIndices = (0 until df.rowsCount()).filter { i ->
             speeds[i] > speedThr &&
-                    abs(currents[i]) >= iMin &&
-                    abs(currents[i]) <= iMax
+                    abs(currents[i]) >= i_Min &&
+                    abs(currents[i]) <= i_Max
         }
 
         if (filteredIndices.size < 50) {
-            iMin *= 0.7
-            iMax *= 1.3
+            i_Min *= 0.7
+            i_Max *= 1.3
             filteredIndices = (0 until df.rowsCount()).filter { i ->
                 speeds[i] > speedThr &&
-                        abs(currents[i]) >= iMin &&
-                        abs(currents[i]) <= iMax
+                        abs(currents[i]) >= i_Min &&
+                        abs(currents[i]) <= i_Max
             }
         }
 
