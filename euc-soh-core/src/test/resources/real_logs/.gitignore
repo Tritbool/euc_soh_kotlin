@@ -1,0 +1,8 @@
+# Ignore all CSV files (real logs may contain GPS/personal data)
+*.csv
+
+# Allow README to be committed
+!README.md
+
+# If you want to commit specific anonymized logs, use:
+# !anonymized_*.csv
