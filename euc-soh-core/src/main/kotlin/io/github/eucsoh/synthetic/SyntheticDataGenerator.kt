@@ -1,5 +1,8 @@
 package io.github.eucsoh.synthetic
 
+import io.github.eucsoh.Constants.MAXIIMAL_CELL_V
+import io.github.eucsoh.Constants.MINIIMAL_CELL_V
+import io.github.eucsoh.Constants.NS_MIN
 import io.github.eucsoh.SohAnalyzer
 import io.github.eucsoh.analysis.GaussianAlarmDetector
 import io.github.eucsoh.model.ThresholdInfo
@@ -9,6 +12,7 @@ import org.jetbrains.kotlinx.dataframe.api.maxBy
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.math.max
 import java.util.Random
 /**
@@ -55,9 +59,50 @@ object SyntheticDataGenerator {
         val finalOffsetSigma: Double = 2.0,
         val noiseFrac: Double = 0.3,
         val wheelName: String = "synthetic",
-        val vIdle: Double = 134.0,
+        val vIdle: Double = 134.4,
         val startKm: Double = 0.0
     )
+
+    data class BatteryModel(
+        val nSeries: Int,
+        val vCellFull: Double = MAXIIMAL_CELL_V,
+        val vCellEmpty: Double = MINIIMAL_CELL_V
+    ) {
+        // Pairs (Vcell, SoC)
+        private val ocvTable = listOf(
+            4.20 to 1.00,
+            4.15 to 0.95,
+            4.05 to 0.90,
+            3.90 to 0.85,
+            3.80 to 0.80,
+            3.75 to 0.75,
+            3.65 to 0.70,
+            3.55 to 0.60,
+            3.45 to 0.50,
+            3.30 to 0.40,
+            3.20 to 0.25,
+            3.10 to 0.10,
+            3.0 to 0.00
+        ).sortedBy { it.first }
+
+        fun socFromPackVoltage(vPack: Double): Double {
+            val vCell = vPack / nSeries
+            val clamped = vCell.coerceIn(ocvTable.first().first,ocvTable.last().first)
+
+            val upperIndex = ocvTable.indexOfFirst { it.first <= clamped }.let {
+                if (it == -1) ocvTable.lastIndex else it
+            }
+            val lowerIndex = (upperIndex + 1).coerceAtMost(ocvTable.lastIndex)
+
+            val (v1, s1) = ocvTable[lowerIndex]
+            val (v2, s2) = ocvTable[upperIndex]
+
+            if (v1 == v2) return s1
+            val alpha = (clamped - v1) / (v2 - v1)
+            return (s1 + alpha * (s2 - s1)).coerceIn(0.0, 1.0)
+        }
+    }
+
 
     /**
      * Real SoH data loaded from actual logs.
@@ -174,7 +219,7 @@ object SyntheticDataGenerator {
         outputFolder.mkdirs()
 
         val real = loadRealSoh(inputFolder)
-
+        val bm = BatteryModel(nSeries = (vIdle / MAXIIMAL_CELL_V).toInt().coerceAtLeast(NS_MIN))
         val timeseries = generateSohTimeseriesFromReal(
             real = real,
             years = years,
@@ -193,6 +238,7 @@ object SyntheticDataGenerator {
             synthesizeWheellogCsv(
                 outputFile = csvFile,
                 vIdle = vIdle,
+                bm=bm,
                 kmEnd = kmEnd,
                 metrics = row
             )
@@ -356,6 +402,7 @@ object SyntheticDataGenerator {
     fun synthesizeWheellogCsv(
         outputFile: File,
         vIdle: Double,
+        bm: BatteryModel,
         kmEnd: Double,
         metrics: Map<String, Any?>,
         nPoints: Int = 2000
@@ -373,7 +420,7 @@ object SyntheticDataGenerator {
 
         // Generate battery current (A)
         val current = DoubleArray(nPoints) {
-            (Random().nextGaussian() * 15.0 + 40.0).coerceIn(5.0, 80.0)
+            (Random().nextGaussian() * 15.0 + 40.0).coerceIn(1.0, 80.0)
         }
 
         // Phase current (higher at low speed)
@@ -452,20 +499,30 @@ object SyntheticDataGenerator {
 
         // Write CSV
         outputFile.bufferedWriter().use { writer ->
-            writer.write("date,time,totaldistance,voltage,current,phase_current,speed,system_temp,temp_motor\n")
+            writer.write("date,time,totaldistance,voltage,current,phase_current,speed,system_temp,temp_motor, battery_level\n")
 
             for (i in 0 until nPoints) {
                 val timestamp = dt0.plusSeconds((i * dt).toLong())
+                val soc = bm.socFromPackVoltage(voltage[i])
+                val batteryLevelPct = (soc * 100.0).coerceIn(0.0, 100.0)
+                var c = current[i]
+                var v=  voltage[i]
+                var p = phaseCurrent[i]
+                if(c < 3.0){
+                    v=vIdle
+                    p=10.0
+                }
                 val line = listOf(
                     timestamp.toLocalDate().toString(),
                     timestamp.toLocalTime().toString(),
                     totalDistance,
-                    "%.2f".format(voltage[i]),
-                    "%.2f".format(current[i]),
-                    "%.2f".format(phaseCurrent[i]),
-                    "%.2f".format(speed[i]),
-                    "%.2f".format(systemTemp[i]),
-                    "%.2f".format(tempMotor[i])
+                    "%.2f".format(Locale.US,v),
+                    "%.2f".format(Locale.US,c),
+                    "%.2f".format(Locale.US,p),
+                    "%.2f".format(Locale.US,speed[i]),
+                    "%.2f".format(Locale.US,systemTemp[i]),
+                    "%.2f".format(Locale.US,tempMotor[i]),
+                    "%.1f".format(Locale.US,batteryLevelPct)
                 ).joinToString(",")
                 writer.write(line)
                 writer.newLine()
@@ -489,6 +546,7 @@ object SyntheticDataGenerator {
         outputDir.mkdirs()
 
         val timeseries = generateSohTimeseries(thresholds, config)
+        val bm = BatteryModel(nSeries = (config.vIdle / MAXIIMAL_CELL_V).toInt().coerceAtLeast(NS_MIN))
 
         timeseries.forEach { row ->
             val filename = row["file"] as String
@@ -498,6 +556,7 @@ object SyntheticDataGenerator {
             synthesizeWheellogCsv(
                 outputFile = csvFile,
                 vIdle = config.vIdle,
+                bm=bm,
                 kmEnd = kmEnd,
                 metrics = row
             )

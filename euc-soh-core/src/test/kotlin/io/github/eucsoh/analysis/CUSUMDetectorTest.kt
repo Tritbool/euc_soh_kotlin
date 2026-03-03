@@ -89,8 +89,9 @@ class CUSUMDetectorTest {
             df = df,
             metric = "Req_median",
             refKmMax = 300.0,
-            testKmMin = 300.0,
-            cooldownKm = 500.0
+            testKmMin = 100.0,
+            cooldownKm = 800.0,
+            //relativeJumpMin = 0.5
         )
 
         // Should detect the jump, but not re-trigger during cooldown
@@ -174,8 +175,8 @@ class CUSUMDetectorTest {
     fun `detectCUSUM handles zero sigma reference`() {
         // All reference points identical (zero variance)
         val df = dataFrameOf(
-            "wheel_km" to listOf(100.0, 200.0, 300.0, 400.0),
-            "Req_median" to listOf(0.050, 0.050, 0.050, 0.070)
+            "wheel_km" to listOf(100.0, 200.0, 300.0, 400.0, 500.0, 600.0),
+            "Req_median" to listOf(0.050, 0.050, 0.050, 0.050, 0.050, 0.070)
         )
 
         val result = CUSUMDetector.detectCUSUM(

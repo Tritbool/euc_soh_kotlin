@@ -13,6 +13,9 @@ object Constants {
     
     // Battery parameters
     const val NOMINAL_CELL_V = 3.7  // V, nominal Li-ion voltage
+
+    const val MAXIIMAL_CELL_V = 4.2  // V, maximal Li-ion voltage
+    const val MINIIMAL_CELL_V = 3.0  // V, maximal Li-ion voltage
     val KNOWN_SERIES = listOf(16, 20, 24, 28, 30, 32, 40, 48, 52, 60, 64, 72)
     const val NS_MIN = 8
     const val NS_MAX = 80

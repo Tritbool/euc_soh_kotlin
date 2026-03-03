@@ -35,7 +35,7 @@ object CUSUMDetector {
         kSigma: Double = 1.0,
         hSigma: Double = 5.0,
         cooldownKm: Double = 500.0,
-        relativeJumpMin: Double = 0.05,
+        relativeJumpMin: Double = 0.3,
         hSigmaCooldown: Double = 6.0
     ): CUSUMResult {
         if (metric !in df.columnNames() || "wheel_km" !in df.columnNames()) {

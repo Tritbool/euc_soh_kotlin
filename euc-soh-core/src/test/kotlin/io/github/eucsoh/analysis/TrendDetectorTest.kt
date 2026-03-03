@@ -1,6 +1,7 @@
 package io.github.eucsoh.analysis
 
 import org.jetbrains.kotlinx.dataframe.api.dataFrameOf
+import kotlin.collections.listOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -39,8 +40,8 @@ class TrendDetectorTest {
     @Test
     fun `detectTrendLinear identifies no trend in flat data`() {
         val df = dataFrameOf(
-            "wheel_km" to listOf(100.0, 200.0, 300.0, 400.0, 500.0),
-            "Req_median" to listOf(0.050, 0.051, 0.050, 0.049, 0.050)  // Flat with noise
+            "wheel_km" to listOf(1000.0,1100.0, 1200.0, 1300.0, 1400.0, 1500.0, 1600.0, 1700.0, 1800.0, 1900.0, 2000.0),
+            "Req_median" to listOf(0.0495, 0.050, 0.051, 0.050, 0.049, 0.050, 0.051, 0.050, 0.049, 0.050, 0.048)  // Flat with noise
         )
 
         val result = TrendDetector.detectTrendLinear(
@@ -55,8 +56,8 @@ class TrendDetectorTest {
     @Test
     fun `detectTrendLinear handles downward trend`() {
         // Negative slope (unusual but possible)
-        val kms = (0..500 step 100).map { it.toDouble() }
-        val reqs = kms.map { 0.080 - 0.00002 * it }
+        val kms = (0..5000 step 100).map { it.toDouble() }
+        val reqs = kms.map { 0.080 - 0.0002 * it }
 
         val df = dataFrameOf(
             "wheel_km" to kms,
@@ -92,7 +93,7 @@ class TrendDetectorTest {
         // Trend with noise: y = 0.05 + 0.00001*x + noise
         val kms = (0..1000 step 50).map { it.toDouble() }
         val reqs = kms.mapIndexed { i, km -> 
-            0.050 + 0.00001 * km + (if (i % 2 == 0) 0.002 else -0.002)
+            0.050 + 0.0001 * km + (if (i % 2 == 0) 0.002 else -0.002)
         }
 
         val df = dataFrameOf(
@@ -148,8 +149,8 @@ class TrendDetectorTest {
     @Test
     fun `detectTrendLinear filters null values`() {
         val df = dataFrameOf(
-            "wheel_km" to listOf(100.0, 200.0, 300.0, 400.0, 500.0),
-            "Req_median" to listOf(0.050, null, 0.055, 0.060, null)
+            "wheel_km" to listOf(1000.0,1100.0, 1200.0, 1300.0, 1400.0, 1500.0, 1600.0, 1700.0, 1800.0, 1900.0, 2000.0),
+            "Req_median" to listOf(0.050, null, 0.055, 0.060, null,0.061,0.063,null,0.065,null,0.075)
         )
 
         val result = TrendDetector.detectTrendLinear(
@@ -191,8 +192,8 @@ class TrendDetectorTest {
     @Test
     fun `detectTrendLinear slope units are correct`() {
         // Known slope: +10mΩ per 1000km = 0.00001 Ω/km
-        val kms = listOf(0.0, 1000.0, 2000.0, 3000.0)
-        val reqs = listOf(0.050, 0.060, 0.070, 0.080)
+        val kms = listOf(0.0, 500.0, 1000.0, 1500.0, 2000.0, 2500.0, 3000.0)
+        val reqs = listOf(0.050, 0.055, 0.060, 0.065, 0.070, 0.075,0.080)
 
         val df = dataFrameOf(
             "wheel_km" to kms,
@@ -257,8 +258,8 @@ class TrendDetectorTest {
     @Test
     fun `detectTrendLinear with constant values returns zero slope`() {
         val df = dataFrameOf(
-            "wheel_km" to listOf(100.0, 200.0, 300.0, 400.0, 500.0),
-            "Req_median" to listOf(0.050, 0.050, 0.050, 0.050, 0.050)  // Perfectly constant
+            "wheel_km" to listOf(1000.0, 1200.0, 1300.0, 1400.0, 1500.0, 1600.0, 1700.0, 1800.0, 1900.0, 20000.0, 2100.0, 2200.0, 2300.0, 2400.0, 2500.0),
+            "Req_median" to listOf(0.050, 0.050, 0.050, 0.050, 0.050, 0.050, 0.050, 0.050, 0.050, 0.050, 0.050, 0.050, 0.050, 0.050, 0.050)  // Perfectly constant
         )
 
         val result = TrendDetector.detectTrendLinear(

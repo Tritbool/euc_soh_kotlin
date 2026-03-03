@@ -75,7 +75,7 @@ object TrendDetector {
         val tStat = slope / (kotlin.math.sqrt(ssRes / (n - 2)) / kotlin.math.sqrt(sumX2 - sumX * sumX / n))
         val pValue = 2.0 * (1.0 - studentTCDF(abs(tStat), n - 2))
 
-        val isSignificant = slope > 0.0 && pValue < 0.05
+        val isSignificant = abs(slope) > 0.0 && pValue < 0.05
 
         return TrendResult(slope, pValue, isSignificant)
     }
