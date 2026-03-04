@@ -95,7 +95,7 @@ class SohAnalyzer(
                                 mosfetParams = mosfetParams,
                                 eaJPerMol = null
                             )
-                            logger.d("SohAnalyzer", "  [$idx] SUCCESS: ${result.nPoints} points, req=${result.reqMedian}")
+                            logger.d("SohAnalyzer", "  [$idx] SUCCESS: ${result?.nPoints?:0.0} points, req=${result?.reqMedian?:0.0}")
                             result
                         } catch (e: Exception) {
                             logger.e("SohAnalyzer", "  [$idx] FAILED: ${e.javaClass.simpleName}: ${e.message}", e)
@@ -114,7 +114,7 @@ class SohAnalyzer(
                             mosfetParams = mosfetParams,
                             eaJPerMol = null
                         )
-                        logger.d("SohAnalyzer", "  [$idx] SUCCESS: ${result.nPoints} points, req=${result.reqMedian}")
+                        logger.d("SohAnalyzer", "  [$idx] SUCCESS: ${result?.nPoints?:0.0} points, req=${result?.reqMedian?:0.0}")
                         result
                     } catch (e: Exception) {
                         logger.e("SohAnalyzer", "  [$idx] FAILED: ${e.javaClass.simpleName}: ${e.message}", e)

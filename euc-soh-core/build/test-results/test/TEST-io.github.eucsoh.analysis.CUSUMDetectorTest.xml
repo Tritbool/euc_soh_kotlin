@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="io.github.eucsoh.analysis.CUSUMDetectorTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-03-04T15:50:15.102Z" hostname="IlPalazzo" time="0.207">
+  <properties/>
+  <testcase name="detectCUSUM ignores small fluctuations()" classname="io.github.eucsoh.analysis.CUSUMDetectorTest" time="0.197"/>
+  <testcase name="detectCUSUM handles zero sigma reference()" classname="io.github.eucsoh.analysis.CUSUMDetectorTest" time="0.001"/>
+  <testcase name="detectCUSUM computes reference from early data only()" classname="io.github.eucsoh.analysis.CUSUMDetectorTest" time="0.001"/>
+  <testcase name="detectCUSUM handles insufficient reference data()" classname="io.github.eucsoh.analysis.CUSUMDetectorTest" time="0.001"/>
+  <testcase name="detectCUSUM detects upward shift in resistance()" classname="io.github.eucsoh.analysis.CUSUMDetectorTest" time="0.0"/>
+  <testcase name="detectCUSUM with missing metric returns empty()" classname="io.github.eucsoh.analysis.CUSUMDetectorTest" time="0.0"/>
+  <testcase name="detectCUSUM detects no alarm in stable data()" classname="io.github.eucsoh.analysis.CUSUMDetectorTest" time="0.001"/>
+  <testcase name="detectCUSUM resets after cooldown period()" classname="io.github.eucsoh.analysis.CUSUMDetectorTest" time="0.001"/>
+  <testcase name="detectCUSUM sensitivity to kSigma parameter()" classname="io.github.eucsoh.analysis.CUSUMDetectorTest" time="0.001"/>
+  <testcase name="detectCUSUM realistic EUC degradation scenario()" classname="io.github.eucsoh.analysis.CUSUMDetectorTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
