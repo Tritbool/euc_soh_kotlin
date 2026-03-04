@@ -1,6 +1,7 @@
 package io.github.eucsoh.android.data.scanner
 
 import android.content.Context
+import android.util.Log
 import io.github.eucsoh.android.data.model.WheelIdentity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -28,46 +29,99 @@ class WheelScanner(
     private val wheelLogScanner = WheelLogScanner(context)
     private val eucWorldScanner = EucWorldScanner(context)
 
+    companion object {
+        private const val TAG = "WheelScanner"
+    }
+
     /**
      * Scans from rootPath, finding WheelLog and EUC World folders recursively.
      * Returns a map of MAC -> WheelIdentity with aggregated data.
      */
     suspend fun scanAllWheels(): Map<String, WheelIdentity> = withContext(Dispatchers.IO) {
-        if (!rootPath.exists() || !rootPath.isDirectory) {
+        Log.d(TAG, "Starting scan from: ${rootPath.absolutePath}")
+        
+        if (!rootPath.exists()) {
+            Log.e(TAG, "Root path does not exist: ${rootPath.absolutePath}")
             return@withContext emptyMap()
         }
+        
+        if (!rootPath.isDirectory) {
+            Log.e(TAG, "Root path is not a directory: ${rootPath.absolutePath}")
+            return@withContext emptyMap()
+        }
+
+        if (!rootPath.canRead()) {
+            Log.e(TAG, "Root path is not readable: ${rootPath.absolutePath}")
+            return@withContext emptyMap()
+        }
+
+        Log.d(TAG, "Root path is valid, starting recursive search")
 
         // Find WheelLog and EUC World folders recursively
         val wheelLogFolders = mutableListOf<File>()
         val eucWorldFolders = mutableListOf<File>()
 
-        rootPath.walkTopDown()
-            .maxDepth(10)
-            .filter { it.isDirectory }
-            .forEach { dir ->
-                when (dir.name) {
-                    "WheelLog" -> wheelLogFolders.add(dir)
-                    "EUC World" -> eucWorldFolders.add(dir)
+        try {
+            var foldersScanned = 0
+            rootPath.walkTopDown()
+                .maxDepth(10)
+                .onEnter { dir ->
+                    foldersScanned++
+                    if (foldersScanned % 100 == 0) {
+                        Log.d(TAG, "Scanned $foldersScanned folders...")
+                    }
+                    true
                 }
-            }
+                .filter { it.isDirectory }
+                .forEach { dir ->
+                    when {
+                        dir.name.equals("WheelLog", ignoreCase = true) -> {
+                            Log.d(TAG, "Found WheelLog folder: ${dir.absolutePath}")
+                            wheelLogFolders.add(dir)
+                        }
+                        dir.name.equals("EUC World", ignoreCase = true) -> {
+                            Log.d(TAG, "Found EUC World folder: ${dir.absolutePath}")
+                            eucWorldFolders.add(dir)
+                        }
+                    }
+                }
+            
+            Log.d(TAG, "Scan complete: $foldersScanned folders scanned")
+            Log.d(TAG, "Found ${wheelLogFolders.size} WheelLog folders")
+            Log.d(TAG, "Found ${eucWorldFolders.size} EUC World folders")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during folder walk", e)
+        }
 
         // Scan found folders in parallel
         val wheelLogDeferred = async { 
             try {
-                wheelLogFolders.flatMap { folder ->
-                    wheelLogScanner.scanFolder(folder).values
+                val wheels = wheelLogFolders.flatMap { folder ->
+                    Log.d(TAG, "Scanning WheelLog folder: ${folder.absolutePath}")
+                    val result = wheelLogScanner.scanFolder(folder)
+                    Log.d(TAG, "Found ${result.size} wheels in ${folder.name}")
+                    result.values
                 }.associateBy { it.macAddress }
+                Log.d(TAG, "Total WheelLog wheels: ${wheels.size}")
+                wheels
             } catch (e: Exception) {
+                Log.e(TAG, "Error scanning WheelLog folders", e)
                 emptyMap()
             }
         }
         
         val eucWorldDeferred = async { 
             try {
-                eucWorldFolders.flatMap { folder ->
-                    eucWorldScanner.scanFolder(folder).values
+                val wheels = eucWorldFolders.flatMap { folder ->
+                    Log.d(TAG, "Scanning EUC World folder: ${folder.absolutePath}")
+                    val result = eucWorldScanner.scanFolder(folder)
+                    Log.d(TAG, "Found ${result.size} wheels in ${folder.name}")
+                    result.values
                 }.associateBy { it.macAddress }
+                Log.d(TAG, "Total EUC World wheels: ${wheels.size}")
+                wheels
             } catch (e: Exception) {
+                Log.e(TAG, "Error scanning EUC World folders", e)
                 emptyMap()
             }
         }
@@ -76,7 +130,10 @@ class WheelScanner(
         val eucWorldWheels = eucWorldDeferred.await()
 
         // Merge by MAC address
-        mergeWheels(wheelLogWheels, eucWorldWheels)
+        val merged = mergeWheels(wheelLogWheels, eucWorldWheels)
+        Log.d(TAG, "Final merged result: ${merged.size} unique wheels")
+        
+        return@withContext merged
     }
 
     /**
