@@ -75,71 +75,127 @@ class SohAnalyzer(
         parallel: Boolean = false
     ): AnalysisResult = coroutineScope {
 
+        if (Constants.DEBUG) println("[DEBUG] Starting analysis of ${csvPaths.size} files")
+
         // Pass 1: Calibrate Ea if needed
         var ea = eaJPerMol
         if (ea == null) {
+            if (Constants.DEBUG) println("[DEBUG] Pass 1: Ea calibration")
+            
             val tempStats = if (parallel) {
-                csvPaths.map { path ->
+                csvPaths.mapIndexed { idx, path ->
                     async(Dispatchers.IO) {
+                        if (Constants.DEBUG) println("[DEBUG]   Processing [$idx] $path")
+                        try {
+                            ReqStatsComputer.computeReqStatsForFile(
+                                csvPath = path,
+                                csvSource = csvSource,
+                                mosfetParams = mosfetParams,
+                                eaJPerMol = null
+                            )
+                        } catch (e: Exception) {
+                            if (Constants.DEBUG) println("[ERROR]   Failed to process $path: ${e.message}")
+                            null
+                        }
+                    }
+                }.awaitAll().filterNotNull()
+            } else {
+                csvPaths.mapIndexedNotNull { idx, path ->
+                    if (Constants.DEBUG) println("[DEBUG]   Processing [$idx] $path")
+                    try {
                         ReqStatsComputer.computeReqStatsForFile(
                             csvPath = path,
                             csvSource = csvSource,
                             mosfetParams = mosfetParams,
                             eaJPerMol = null
                         )
+                    } catch (e: Exception) {
+                        if (Constants.DEBUG) println("[ERROR]   Failed to process $path: ${e.message}")
+                        null
                     }
-                }.awaitAll().filterNotNull()
-            } else {
-                csvPaths.mapNotNull { path ->
-                    ReqStatsComputer.computeReqStatsForFile(
-                        csvPath = path,
-                        csvSource = csvSource,
-                        mosfetParams = mosfetParams,
-                        eaJPerMol = null
-                    )
                 }
             }
 
+            if (Constants.DEBUG) println("[DEBUG] Pass 1: ${tempStats.size}/${csvPaths.size} files exploitable")
+
             if (tempStats.isEmpty()) {
-                throw RuntimeException("No exploitable logs for calibration")
+                throw RuntimeException("No exploitable logs for calibration (0/${csvPaths.size} files readable)")
             }
 
-            val dfTemp = statsToDataFrame(tempStats)
+            // Filter stats with critical null values for calibration
+            val validTempStats = tempStats.filter { stat ->
+                stat.reqMedian > 0.0 && stat.tempBoardMax != null && stat.nPoints >= 50
+            }
+
+            if (Constants.DEBUG) println("[DEBUG] Pass 1: ${validTempStats.size}/${tempStats.size} stats valid for calibration")
+
+            if (validTempStats.isEmpty()) {
+                throw RuntimeException("No valid logs for calibration: all logs missing temperature or have insufficient data points")
+            }
+
+            val dfTemp = statsToDataFrame(validTempStats)
             ea = ArrheniusNormalizer.calibrateEaFromDataFrame(
                 df = dfTemp,
                 metric = "Req_median",
                 tempCol = "temp_board_max"
             )
+            
+            if (Constants.DEBUG) println("[DEBUG] Calibrated Ea: ${ea / 1000.0} kJ/mol")
         }
 
         // Pass 2: Final analysis with calibrated Ea
+        if (Constants.DEBUG) println("[DEBUG] Pass 2: Final analysis with Ea=${ea / 1000.0} kJ/mol")
+        
         val finalStats = if (parallel) {
-            csvPaths.map { path ->
+            csvPaths.mapIndexed { idx, path ->
                 async(Dispatchers.IO) {
+                    try {
+                        ReqStatsComputer.computeReqStatsForFile(
+                            csvPath = path,
+                            csvSource = csvSource,
+                            mosfetParams = mosfetParams,
+                            eaJPerMol = ea
+                        )
+                    } catch (e: Exception) {
+                        if (Constants.DEBUG) println("[ERROR]   Failed to process $path: ${e.message}")
+                        null
+                    }
+                }
+            }.awaitAll().filterNotNull()
+        } else {
+            csvPaths.mapIndexedNotNull { idx, path ->
+                try {
                     ReqStatsComputer.computeReqStatsForFile(
                         csvPath = path,
                         csvSource = csvSource,
                         mosfetParams = mosfetParams,
                         eaJPerMol = ea
                     )
+                } catch (e: Exception) {
+                    if (Constants.DEBUG) println("[ERROR]   Failed to process $path: ${e.message}")
+                    null
                 }
-            }.awaitAll().filterNotNull()
-        } else {
-            csvPaths.mapNotNull { path ->
-                ReqStatsComputer.computeReqStatsForFile(
-                    csvPath = path,
-                    csvSource = csvSource,
-                    mosfetParams = mosfetParams,
-                    eaJPerMol = ea
-                )
             }
         }
 
+        if (Constants.DEBUG) println("[DEBUG] Pass 2: ${finalStats.size}/${csvPaths.size} files processed")
+
         if (finalStats.isEmpty()) {
-            throw RuntimeException("No exploitable logs in folder")
+            throw RuntimeException("No exploitable logs in folder (0/${csvPaths.size} files readable)")
         }
 
-        var dfStats = statsToDataFrame(finalStats)
+        // Filter stats with minimum required data
+        val validStats = finalStats.filter { stat ->
+            stat.reqMedian > 0.0 && stat.nPoints >= 50
+        }
+
+        if (Constants.DEBUG) println("[DEBUG] Final: ${validStats.size}/${finalStats.size} stats valid")
+
+        if (validStats.isEmpty()) {
+            throw RuntimeException("No valid logs after filtering (all logs have insufficient data points or invalid Req)")
+        }
+
+        var dfStats = statsToDataFrame(validStats)
 
         // Sort by datetime
         dfStats = dfStats.sortBy("datetime_first")
@@ -147,6 +203,10 @@ class SohAnalyzer(
         // Pack inference
         val (nsGlobal, vNominal) = PackInference.inferPackConfig(dfStats)
         val rPackNominal = PackInference.computePackNominalResistance(nsGlobal, vNominal)
+
+        if (Constants.DEBUG) {
+            println("[DEBUG] Pack config: Ns=$nsGlobal, Vnom=$vNominal, Rpack=$rPackNominal")
+        }
 
         // Compute Req band (10th-90th percentile of optimal logs)
         val dfSorted = dfStats.sortBy("Req_median_25C")
@@ -210,7 +270,7 @@ class SohAnalyzer(
                 val firstIdx = cusumResult.alarmIndices.first()
                 cusumAlarms.add(
                     GaussianAlarmDetector.Alarm(
-                        file = (dfStats["file"][firstIdx] as String),
+                        file = (dfStats["file"][firstIdx] as? String) ?: "unknown",
                         wheelKm = (dfStats["wheel_km"][firstIdx] as? Number)?.toDouble(),
                         datetimeFirst = dfStats["datetime_first"][firstIdx] as? String,
                         reasons = "Regime change detected on $metric (CUSUM): " +
@@ -247,6 +307,8 @@ class SohAnalyzer(
 
         val allAlarms = gaussianAlarms + cusumAlarms + trendAlarms
 
+        if (Constants.DEBUG) println("[DEBUG] Analysis complete: ${allAlarms.size} alarms detected")
+
         AnalysisResult(
             stats = dfStats,
             alarms = allAlarms,
@@ -272,17 +334,26 @@ class SohAnalyzer(
     ): SummaryData {
         val df = result.stats
         
+        // Safe getters for DataFrame values
+        fun getDoubleAt(col: String, row: Int): Double? {
+            return (df[col][row] as? Number)?.toDouble()
+        }
+        
+        fun getBooleanAt(col: String, row: Int): Boolean {
+            return (df[col][row] as? Boolean) ?: false
+        }
+        
         return SummaryData(
             wheelName = wheelName,
             reqBand = SummaryData.ReqBand(
-                low = (df["Req_band_low"][0] as Number).toDouble(),
-                high = (df["Req_band_high"][0] as Number).toDouble()
+                low = getDoubleAt("Req_band_low", 0) ?: 0.0,
+                high = getDoubleAt("Req_band_high", 0) ?: 0.0
             ),
             globalStats = SummaryData.GlobalStats(
-                kmMin = df["wheel_km"].values().filterIsInstance<Number>().minOf { it.toDouble() },
-                kmMax = df["wheel_km"].values().filterIsInstance<Number>().maxOf { it.toDouble() },
-                reqMedianMin = df["Req_median"].values().filterIsInstance<Number>().minOf { it.toDouble() },
-                reqMedianMax = df["Req_median"].values().filterIsInstance<Number>().maxOf { it.toDouble() },
+                kmMin = df["wheel_km"].values().filterIsInstance<Number>().minOfOrNull { it.toDouble() } ?: 0.0,
+                kmMax = df["wheel_km"].values().filterIsInstance<Number>().maxOfOrNull { it.toDouble() } ?: 0.0,
+                reqMedianMin = df["Req_median"].values().filterIsInstance<Number>().minOfOrNull { it.toDouble() } ?: 0.0,
+                reqMedianMax = df["Req_median"].values().filterIsInstance<Number>().maxOfOrNull { it.toDouble() } ?: 0.0,
                 rBattMedianMin = if ("R_batt_median_25C" in df.columnNames()) {
                     df["R_batt_median_25C"].values().filterIsInstance<Number>().minOfOrNull { it.toDouble() }
                 } else null,
@@ -305,14 +376,15 @@ class SohAnalyzer(
                 .filterIsInstance<Boolean>()
                 .any { it },
             battReqBand = if ("R_batt_band_low" in df.columnNames() && "R_batt_band_high" in df.columnNames()) {
-                SummaryData.ReqBand(
-                    low = (df["R_batt_band_low"][0] as Number).toDouble(),
-                    high = (df["R_batt_band_high"][0] as Number).toDouble()
-                )
+                val low = getDoubleAt("R_batt_band_low", 0)
+                val high = getDoubleAt("R_batt_band_high", 0)
+                if (low != null && high != null) {
+                    SummaryData.ReqBand(low = low, high = high)
+                } else null
             } else null,
             arrhenius = SummaryData.ArrheniusInfo(
                 eaKjPerMol = result.eaJPerMol / 1000.0,
-                autoCalibrated = (df["arrhenius_auto_calibrated"][0] as Boolean)
+                autoCalibrated = getBooleanAt("arrhenius_auto_calibrated", 0)
             ),
             logs = (0 until df.rowsCount()).map { i ->
                 df.columnNames().associateWith { col -> df[col][i] }
