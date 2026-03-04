@@ -1,6 +1,7 @@
 package io.github.eucsoh.android.data.repository
 
 import android.content.Context
+import android.net.Uri
 import android.os.Environment
 import android.util.Log
 import io.github.eucsoh.android.data.database.WheelDatabase
@@ -17,7 +18,7 @@ import java.io.File
  * Repository for wheel detection with caching.
  * 
  * Strategy:
- * - First load: scan from specified root path + persist to Room
+ * - First load: scan from specified root path/URI + persist to Room
  * - Subsequent loads: use cache unless force refresh
  * - Cache expires after 24h
  */
@@ -25,11 +26,13 @@ class WheelRepository(private val context: Context) {
     
     private val wheelDao = WheelDatabase.getInstance(context).wheelDao()
     private val prefs = context.getSharedPreferences("euc_soh_prefs", Context.MODE_PRIVATE)
+    private val scanner = WheelScanner(context)
     
     companion object {
         private const val TAG = "WheelRepository"
         private const val CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000L  // 24 hours
         private const val PREF_ROOT_PATH = "scan_root_path"
+        private const val PREF_ROOT_URI = "scan_root_uri"
         
         /**
          * Common storage locations to try.
@@ -80,31 +83,49 @@ class WheelRepository(private val context: Context) {
     }
     
     /**
-     * Sets the root path for scanning.
+     * Sets the root path for scanning (File mode).
      */
     fun setRootPath(path: File) {
         Log.d(TAG, "Setting root path: ${path.absolutePath}")
-        prefs.edit().putString(PREF_ROOT_PATH, path.absolutePath).apply()
+        prefs.edit()
+            .putString(PREF_ROOT_PATH, path.absolutePath)
+            .remove(PREF_ROOT_URI)  // Clear URI if switching to File mode
+            .apply()
+    }
+    
+    /**
+     * Sets the root URI for scanning (DocumentFile mode).
+     */
+    fun setRootUri(uri: Uri) {
+        Log.d(TAG, "Setting root URI: $uri")
+        prefs.edit()
+            .putString(PREF_ROOT_URI, uri.toString())
+            .remove(PREF_ROOT_PATH)  // Clear path if switching to URI mode
+            .apply()
+    }
+    
+    /**
+     * Gets the configured root URI (if in DocumentFile mode).
+     */
+    fun getRootUri(): Uri? {
+        val storedUri = prefs.getString(PREF_ROOT_URI, null) ?: return null
+        return Uri.parse(storedUri)
     }
     
     /**
      * Gets all detected wheels, using cache if available and fresh.
      * 
      * @param forceRefresh If true, ignores cache and scans from scratch
-     * @param customPath Optional custom path to scan (overrides configured path)
      * @return Map of MAC address -> WheelIdentity
      */
     suspend fun getWheels(
-        forceRefresh: Boolean = false,
-        customPath: File? = null
+        forceRefresh: Boolean = false
     ): Map<String, WheelIdentity> = withContext(Dispatchers.IO) {
-        val scanPath = customPath ?: getRootPath()
-        Log.d(TAG, "getWheels called: forceRefresh=$forceRefresh, scanPath=${scanPath.absolutePath}")
+        Log.d(TAG, "getWheels called: forceRefresh=$forceRefresh")
         
         if (forceRefresh) {
             Log.d(TAG, "Force refresh requested, scanning...")
-            // Force full scan
-            scanAndCache(scanPath)
+            scanAndCache()
         } else {
             // Try cache first
             val cached = wheelDao.getAllWheels()
@@ -115,31 +136,33 @@ class WheelRepository(private val context: Context) {
                 cached.toWheelIdentities()
             } else {
                 Log.d(TAG, "Cache miss or expired, scanning...")
-                // Cache miss or expired → scan
-                scanAndCache(scanPath)
+                scanAndCache()
             }
         }
     }
     
     /**
-     * Scans from specified root path and updates cache.
+     * Scans using configured path/URI and updates cache.
      */
-    private suspend fun scanAndCache(rootPath: File): Map<String, WheelIdentity> {
-        Log.d(TAG, "Creating scanner for path: ${rootPath.absolutePath}")
+    private suspend fun scanAndCache(): Map<String, WheelIdentity> {
+        // Check if we're in URI mode or File mode
+        val rootUri = getRootUri()
         
-        if (!rootPath.exists()) {
-            Log.e(TAG, "Root path does not exist!")
-            return emptyMap()
+        val wheels = if (rootUri != null) {
+            Log.d(TAG, "Scanning from URI: $rootUri")
+            scanner.scanFromUri(rootUri)
+        } else {
+            val rootPath = getRootPath()
+            Log.d(TAG, "Scanning from File: ${rootPath.absolutePath}")
+            
+            if (!rootPath.exists() || !rootPath.isDirectory) {
+                Log.e(TAG, "Root path is invalid")
+                return emptyMap()
+            }
+            
+            scanner.scanFromFile(rootPath)
         }
         
-        if (!rootPath.isDirectory) {
-            Log.e(TAG, "Root path is not a directory!")
-            return emptyMap()
-        }
-        
-        val scanner = WheelScanner(context, rootPath)
-        Log.d(TAG, "Starting scan...")
-        val wheels = scanner.scanAllWheels()
         Log.d(TAG, "Scan returned ${wheels.size} wheels")
         
         // Update cache
