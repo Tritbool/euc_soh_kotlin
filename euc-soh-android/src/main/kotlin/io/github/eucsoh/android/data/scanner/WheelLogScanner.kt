@@ -9,11 +9,11 @@ import java.io.File
 /**
  * Scanner for WheelLog logs.
  * 
- * WheelLog stores logs in: Download/WheelLog/MAC_ADDRESS/
+ * WheelLog stores logs in: [baseFolder]/WheelLog/MAC_ADDRESS/
  * Each subfolder name IS the MAC address (e.g., "18_7A_3E_9C_56_FC")
  * 
  * Structure:
- * Download/WheelLog/
+ * [baseFolder]/WheelLog/
  *   ├── 18_7A_3E_9C_56_FC/
  *   │   ├── log1.csv
  *   │   └── log2.csv
@@ -21,11 +21,12 @@ import java.io.File
  *       ├── log3.csv
  *       └── log4.csv
  */
-class WheelLogScanner(private val context: Context) {
+class WheelLogScanner(
+    private val context: Context,
+    private val baseFolder: String = "Downloads"
+) {
 
     companion object {
-        private const val WHEELLOG_PATH = "Download/WheelLog"
-        
         // Pattern: XX_YY_ZZ_AA_BB_CC (MAC with underscores)
         private val MAC_FOLDER_PATTERN = Regex(
             """^([0-9A-F]{2}_){5}[0-9A-F]{2}$""", 
@@ -37,7 +38,7 @@ class WheelLogScanner(private val context: Context) {
      * Scans the WheelLog folder and groups CSV files by MAC address.
      */
     fun scan(): Map<String, WheelIdentity> {
-        val wheelLogDir = getExternalStorageFile(WHEELLOG_PATH)
+        val wheelLogDir = getExternalStorageFile("$baseFolder/WheelLog")
         if (wheelLogDir?.exists() != true) {
             return emptyMap()
         }
