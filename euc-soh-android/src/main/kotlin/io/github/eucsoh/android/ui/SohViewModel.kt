@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 
 /**
  * Analysis mode selection.
@@ -28,6 +29,7 @@ enum class AnalysisMode {
 data class SohUiState(
     val detectedWheels: Map<String, WheelIdentity> = emptyMap(),
     val selectedWheel: WheelIdentity? = null,
+    val scanRootPath: String = "",
     val manualFolderUri: Uri? = null,
     val analysisMode: AnalysisMode = AnalysisMode.AUTO_DETECT,
     val isScanning: Boolean = false,
@@ -49,8 +51,33 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
     val state: StateFlow<SohUiState> = _state.asStateFlow()
     
     init {
+        // Load configured root path
+        _state.update { it.copy(scanRootPath = repository.getRootPath().absolutePath) }
         // Auto-scan on startup
         scanWheels(forceRefresh = false)
+    }
+    
+    /**
+     * Sets the root path for scanning and rescans.
+     * 
+     * @param path Absolute path to scan (from folder picker)
+     */
+    fun setScanRootPath(path: String) {
+        val file = File(path)
+        if (file.exists() && file.isDirectory) {
+            repository.setRootPath(file)
+            _state.update { it.copy(scanRootPath = path, error = null) }
+            scanWheels(forceRefresh = true)
+        } else {
+            _state.update { it.copy(error = "Chemin invalide: $path") }
+        }
+    }
+    
+    /**
+     * Gets the current configured scan root path.
+     */
+    fun getScanRootPath(): String {
+        return repository.getRootPath().absolutePath
     }
     
     /**
