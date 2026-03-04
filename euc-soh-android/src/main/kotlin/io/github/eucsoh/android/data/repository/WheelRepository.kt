@@ -30,23 +30,53 @@ class WheelRepository(private val context: Context) {
         private const val TAG = "WheelRepository"
         private const val CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000L  // 24 hours
         private const val PREF_ROOT_PATH = "scan_root_path"
+        
+        /**
+         * Common storage locations to try.
+         */
+        private val STORAGE_LOCATIONS = listOf(
+            "Download",
+            "Downloads", 
+            "" // Root of external storage
+        )
     }
     
     /**
      * Gets the configured root path for scanning.
-     * Defaults to external storage root if not configured.
+     * Tries multiple common locations.
      */
     fun getRootPath(): File {
         val storedPath = prefs.getString(PREF_ROOT_PATH, null)
-        val path = if (storedPath != null) {
-            Log.d(TAG, "Using stored path: $storedPath")
-            File(storedPath)
-        } else {
-            val defaultPath = Environment.getExternalStorageDirectory()
-            Log.d(TAG, "Using default path: ${defaultPath.absolutePath}")
-            defaultPath
+        
+        if (storedPath != null) {
+            val file = File(storedPath)
+            if (file.exists() && file.isDirectory) {
+                Log.d(TAG, "Using stored path: $storedPath")
+                return file
+            }
         }
-        return path
+        
+        // Try common locations
+        val externalStorage = Environment.getExternalStorageDirectory()
+        
+        for (location in STORAGE_LOCATIONS) {
+            val path = if (location.isEmpty()) {
+                externalStorage
+            } else {
+                File(externalStorage, location)
+            }
+            
+            if (path.exists() && path.isDirectory && path.canRead()) {
+                Log.d(TAG, "Found valid storage location: ${path.absolutePath}")
+                // Save for next time
+                setRootPath(path)
+                return path
+            }
+        }
+        
+        // Fallback to external storage root
+        Log.d(TAG, "Using fallback path: ${externalStorage.absolutePath}")
+        return externalStorage
     }
     
     /**
