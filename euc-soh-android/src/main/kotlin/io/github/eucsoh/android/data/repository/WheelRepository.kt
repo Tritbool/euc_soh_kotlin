@@ -4,6 +4,7 @@ import android.content.Context
 import io.github.eucsoh.android.data.database.WheelDatabase
 import io.github.eucsoh.android.data.database.toEntities
 import io.github.eucsoh.android.data.database.toWheelIdentities
+import io.github.eucsoh.android.data.database.toWheelIdentity
 import io.github.eucsoh.android.data.model.WheelIdentity
 import io.github.eucsoh.android.data.scanner.WheelScanner
 import kotlinx.coroutines.Dispatchers
