@@ -33,10 +33,6 @@ jobs:
     - name: Run tests
       run: ./gradlew test --stacktrace
       
-    - name: Generate test report
-      if: always()
-      run: ./gradlew testReport
-      
     - name: Upload test results
       if: always()
       uses: actions/upload-artifact@v4
