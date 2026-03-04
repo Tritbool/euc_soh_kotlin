@@ -12,7 +12,8 @@ import kotlinx.coroutines.*
  */
 class SohAnalyzer(
     private val csvSource: CsvSource? = null,
-    private val mosfetParams: MOSFETParams? = null
+    private val mosfetParams: MOSFETParams? = null,
+    private val logger: Logger = NoOpLogger
 ) {
 
     data class AnalysisResult(
@@ -75,48 +76,54 @@ class SohAnalyzer(
         parallel: Boolean = false
     ): AnalysisResult = coroutineScope {
 
-        if (Constants.DEBUG) println("[DEBUG] Starting analysis of ${csvPaths.size} files")
+        logger.d("SohAnalyzer", "Starting analysis of ${csvPaths.size} files")
 
         // Pass 1: Calibrate Ea if needed
         var ea = eaJPerMol
         if (ea == null) {
-            if (Constants.DEBUG) println("[DEBUG] Pass 1: Ea calibration")
+            logger.d("SohAnalyzer", "Pass 1: Ea calibration")
             
             val tempStats = if (parallel) {
                 csvPaths.mapIndexed { idx, path ->
                     async(Dispatchers.IO) {
-                        if (Constants.DEBUG) println("[DEBUG]   Processing [$idx] $path")
+                        val filename = path.substringAfterLast('/')
+                        logger.d("SohAnalyzer", "  Processing [$idx/${ csvPaths.size}] $filename")
                         try {
-                            ReqStatsComputer.computeReqStatsForFile(
+                            val result = ReqStatsComputer.computeReqStatsForFile(
                                 csvPath = path,
                                 csvSource = csvSource,
                                 mosfetParams = mosfetParams,
                                 eaJPerMol = null
                             )
+                            logger.d("SohAnalyzer", "  [$idx] SUCCESS: ${result.nPoints} points, req=${result.reqMedian}")
+                            result
                         } catch (e: Exception) {
-                            if (Constants.DEBUG) println("[ERROR]   Failed to process $path: ${e.message}")
+                            logger.e("SohAnalyzer", "  [$idx] FAILED: ${e.javaClass.simpleName}: ${e.message}", e)
                             null
                         }
                     }
                 }.awaitAll().filterNotNull()
             } else {
                 csvPaths.mapIndexedNotNull { idx, path ->
-                    if (Constants.DEBUG) println("[DEBUG]   Processing [$idx] $path")
+                    val filename = path.substringAfterLast('/')
+                    logger.d("SohAnalyzer", "  Processing [$idx/${csvPaths.size}] $filename")
                     try {
-                        ReqStatsComputer.computeReqStatsForFile(
+                        val result = ReqStatsComputer.computeReqStatsForFile(
                             csvPath = path,
                             csvSource = csvSource,
                             mosfetParams = mosfetParams,
                             eaJPerMol = null
                         )
+                        logger.d("SohAnalyzer", "  [$idx] SUCCESS: ${result.nPoints} points, req=${result.reqMedian}")
+                        result
                     } catch (e: Exception) {
-                        if (Constants.DEBUG) println("[ERROR]   Failed to process $path: ${e.message}")
+                        logger.e("SohAnalyzer", "  [$idx] FAILED: ${e.javaClass.simpleName}: ${e.message}", e)
                         null
                     }
                 }
             }
 
-            if (Constants.DEBUG) println("[DEBUG] Pass 1: ${tempStats.size}/${csvPaths.size} files exploitable")
+            logger.d("SohAnalyzer", "Pass 1: ${tempStats.size}/${csvPaths.size} files exploitable")
 
             if (tempStats.isEmpty()) {
                 throw RuntimeException("No exploitable logs for calibration (0/${csvPaths.size} files readable)")
@@ -127,7 +134,7 @@ class SohAnalyzer(
                 stat.reqMedian > 0.0 && stat.tempBoardMax != null && stat.nPoints >= 50
             }
 
-            if (Constants.DEBUG) println("[DEBUG] Pass 1: ${validTempStats.size}/${tempStats.size} stats valid for calibration")
+            logger.d("SohAnalyzer", "Pass 1: ${validTempStats.size}/${tempStats.size} stats valid for calibration")
 
             if (validTempStats.isEmpty()) {
                 throw RuntimeException("No valid logs for calibration: all logs missing temperature or have insufficient data points")
@@ -140,11 +147,11 @@ class SohAnalyzer(
                 tempCol = "temp_board_max"
             )
             
-            if (Constants.DEBUG) println("[DEBUG] Calibrated Ea: ${ea / 1000.0} kJ/mol")
+            logger.d("SohAnalyzer", "Calibrated Ea: ${ea / 1000.0} kJ/mol")
         }
 
         // Pass 2: Final analysis with calibrated Ea
-        if (Constants.DEBUG) println("[DEBUG] Pass 2: Final analysis with Ea=${ea / 1000.0} kJ/mol")
+        logger.d("SohAnalyzer", "Pass 2: Final analysis with Ea=${ea / 1000.0} kJ/mol")
         
         val finalStats = if (parallel) {
             csvPaths.mapIndexed { idx, path ->
@@ -157,7 +164,7 @@ class SohAnalyzer(
                             eaJPerMol = ea
                         )
                     } catch (e: Exception) {
-                        if (Constants.DEBUG) println("[ERROR]   Failed to process $path: ${e.message}")
+                        logger.e("SohAnalyzer", "  Pass2 [$idx] FAILED: ${e.message}", e)
                         null
                     }
                 }
@@ -172,13 +179,13 @@ class SohAnalyzer(
                         eaJPerMol = ea
                     )
                 } catch (e: Exception) {
-                    if (Constants.DEBUG) println("[ERROR]   Failed to process $path: ${e.message}")
+                    logger.e("SohAnalyzer", "  Pass2 [$idx] FAILED: ${e.message}", e)
                     null
                 }
             }
         }
 
-        if (Constants.DEBUG) println("[DEBUG] Pass 2: ${finalStats.size}/${csvPaths.size} files processed")
+        logger.d("SohAnalyzer", "Pass 2: ${finalStats.size}/${csvPaths.size} files processed")
 
         if (finalStats.isEmpty()) {
             throw RuntimeException("No exploitable logs in folder (0/${csvPaths.size} files readable)")
@@ -189,7 +196,7 @@ class SohAnalyzer(
             stat.reqMedian > 0.0 && stat.nPoints >= 50
         }
 
-        if (Constants.DEBUG) println("[DEBUG] Final: ${validStats.size}/${finalStats.size} stats valid")
+        logger.d("SohAnalyzer", "Final: ${validStats.size}/${finalStats.size} stats valid")
 
         if (validStats.isEmpty()) {
             throw RuntimeException("No valid logs after filtering (all logs have insufficient data points or invalid Req)")
@@ -204,9 +211,7 @@ class SohAnalyzer(
         val (nsGlobal, vNominal) = PackInference.inferPackConfig(dfStats)
         val rPackNominal = PackInference.computePackNominalResistance(nsGlobal, vNominal)
 
-        if (Constants.DEBUG) {
-            println("[DEBUG] Pack config: Ns=$nsGlobal, Vnom=$vNominal, Rpack=$rPackNominal")
-        }
+        logger.d("SohAnalyzer", "Pack config: Ns=$nsGlobal, Vnom=$vNominal, Rpack=$rPackNominal")
 
         // Compute Req band (10th-90th percentile of optimal logs)
         val dfSorted = dfStats.sortBy("Req_median_25C")
@@ -307,7 +312,7 @@ class SohAnalyzer(
 
         val allAlarms = gaussianAlarms + cusumAlarms + trendAlarms
 
-        if (Constants.DEBUG) println("[DEBUG] Analysis complete: ${allAlarms.size} alarms detected")
+        logger.d("SohAnalyzer", "Analysis complete: ${allAlarms.size} alarms detected")
 
         AnalysisResult(
             stats = dfStats,
