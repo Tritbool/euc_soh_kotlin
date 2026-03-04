@@ -9,7 +9,10 @@ import java.io.File
 /**
  * Scanner for EUC World logs.
  * 
- * EUC World stores logs in: Download/EUC World/EUC Data Logs/ (or localized variants)
+ * EUC World stores logs in: [baseFolder]/EUC World/[subfolders]/
+ * 
+ * This scanner recursively walks the base folder to find ANY "EUC World" directory,
+ * then scans ALL subdirectories for CSV files (avoiding hardcoded localized folder names).
  * 
  * Each CSV has a column 'extra' containing ONE key=value pair per row.
  * We need to scan all rows to build the metadata dictionary:
@@ -19,41 +22,44 @@ import java.io.File
  * - euc.model
  * - euc.serial
  */
-class EucWorldScanner(private val context: Context) {
-
-    companion object {
-        private val EUC_WORLD_PATHS = listOf(
-            "Download/EUC World/EUC Data Logs",
-            "Download/EUC World/EUC Journaux de données",  // French
-            "Download/EUC World/EUC Datenprotokolle",      // German
-            "Download/EUC World/EUC データログ"              // Japanese
-        )
-    }
+class EucWorldScanner(
+    private val context: Context,
+    private val baseFolder: String = "Downloads"
+) {
 
     /**
-     * Scans known EUC World folders and groups CSV files by MAC address.
+     * Scans for EUC World folders and groups CSV files by MAC address.
+     * Recursively walks baseFolder to find all "EUC World" directories.
      */
     fun scan(): Map<String, WheelIdentity> {
         val result = mutableMapOf<String, WheelIdentity>()
-
-        // Try all known path variants
-        for (path in EUC_WORLD_PATHS) {
-            val folder = getExternalStorageFile(path)
-            if (folder?.exists() == true) {
-                result.putAll(scanFolder(folder))
-            }
+        val base = getExternalStorageFile(baseFolder) ?: return emptyMap()
+        
+        if (!base.exists() || !base.isDirectory) {
+            return emptyMap()
         }
+
+        // Recursively find all "EUC World" folders
+        base.walkTopDown()
+            .maxDepth(5)  // Limit depth to avoid scanning entire filesystem
+            .filter { it.isDirectory && it.name.equals("EUC World", ignoreCase = true) }
+            .forEach { eucWorldDir ->
+                // Scan all subdirectories of EUC World for CSVs
+                result.putAll(scanEucWorldFolder(eucWorldDir))
+            }
 
         return result
     }
 
     /**
-     * Scans a specific EUC World folder.
+     * Scans a specific EUC World directory.
+     * Walks through ALL subdirectories and collects CSV files.
      */
-    fun scanFolder(folder: File): Map<String, WheelIdentity> {
+    private fun scanEucWorldFolder(eucWorldDir: File): Map<String, WheelIdentity> {
         val result = mutableMapOf<String, WheelIdentity>()
 
-        val csvFiles = folder.walkTopDown()
+        // Walk through ALL subdirectories and find CSV files
+        val csvFiles = eucWorldDir.walkTopDown()
             .filter { it.isFile && it.extension.equals("csv", ignoreCase = true) }
 
         for (file in csvFiles) {
