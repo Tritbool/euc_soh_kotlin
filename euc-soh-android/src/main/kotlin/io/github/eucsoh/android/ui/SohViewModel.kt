@@ -57,18 +57,39 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
     
     init {
         Log.d(TAG, "ViewModel initialized")
-        // Load configured root path
-        val rootPath = repository.getRootPath().absolutePath
-        Log.d(TAG, "Initial root path: $rootPath")
-        _state.update { it.copy(scanRootPath = rootPath) }
+        updateScanPathDisplay()
         // Auto-scan on startup
         scanWheels(forceRefresh = false)
     }
     
     /**
+     * Updates the scan path display in UI state.
+     */
+    private fun updateScanPathDisplay() {
+        val uri = repository.getRootUri()
+        val path = if (uri != null) {
+            "URI: $uri"
+        } else {
+            repository.getRootPath().absolutePath
+        }
+        Log.d(TAG, "Current scan path: $path")
+        _state.update { it.copy(scanRootPath = path) }
+    }
+    
+    /**
+     * Sets the root URI for scanning (from folder picker) and rescans.
+     */
+    fun setRootUri(uri: Uri) {
+        Log.d(TAG, "Setting root URI: $uri")
+        repository.setRootUri(uri)
+        updateScanPathDisplay()
+        scanWheels(forceRefresh = true)
+    }
+    
+    /**
      * Sets the root path for scanning and rescans.
      * 
-     * @param path Absolute path to scan (from folder picker)
+     * @param path Absolute path to scan
      */
     fun setScanRootPath(path: String) {
         Log.d(TAG, "Setting scan root path: $path")
@@ -97,7 +118,7 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
         
         Log.d(TAG, "Path is valid, saving and rescanning")
         repository.setRootPath(file)
-        _state.update { it.copy(scanRootPath = path, error = null) }
+        updateScanPathDisplay()
         scanWheels(forceRefresh = true)
     }
     
