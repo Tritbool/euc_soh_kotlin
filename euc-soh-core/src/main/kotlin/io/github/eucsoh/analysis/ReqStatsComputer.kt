@@ -116,9 +116,9 @@ object ReqStatsComputer {
 
         if (ns != null && socCol != null) {
             val dfFull = df.filter {
-                val soc = (it[socCol] as? Number)?.toDouble() ?: 0.0
-                val cur = (it[iCol] as Number).toDouble()
-                soc >= 98.0 && abs(cur) < 2.0
+                val soc = (it[socCol] as? Number)?.toDouble()
+                val cur = (it[iCol] as? Number)?.toDouble()
+                soc != null && cur != null && soc >= 98.0 && abs(cur) < 2.0
             }
 
             if (dfFull.rowsCount() > 0) {
