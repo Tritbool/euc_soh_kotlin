@@ -15,10 +15,13 @@ import kotlinx.coroutines.withContext
  * 
  * Result: One WheelIdentity per MAC with all CSV files and best available metadata.
  */
-class WheelScanner(private val context: Context) {
+class WheelScanner(
+    private val context: Context,
+    private val baseFolder: String = "Downloads"
+) {
 
-    private val wheelLogScanner = WheelLogScanner(context)
-    private val eucWorldScanner = EucWorldScanner(context)
+    private val wheelLogScanner = WheelLogScanner(context, baseFolder)
+    private val eucWorldScanner = EucWorldScanner(context, baseFolder)
 
     /**
      * Scans all known sources (WheelLog + EUC World) in parallel.
