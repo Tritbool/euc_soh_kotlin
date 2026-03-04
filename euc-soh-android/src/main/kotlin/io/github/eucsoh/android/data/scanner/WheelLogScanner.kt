@@ -9,11 +9,11 @@ import java.io.File
 /**
  * Scanner for WheelLog logs.
  * 
- * WheelLog stores logs in: [baseFolder]/WheelLog/MAC_ADDRESS/
+ * WheelLog stores logs in: WheelLog/MAC_ADDRESS/
  * Each subfolder name IS the MAC address (e.g., "18_7A_3E_9C_56_FC")
  * 
  * Structure:
- * [baseFolder]/WheelLog/
+ * WheelLog/
  *   ├── 18_7A_3E_9C_56_FC/
  *   │   ├── log1.csv
  *   │   └── log2.csv
@@ -21,10 +21,7 @@ import java.io.File
  *       ├── log3.csv
  *       └── log4.csv
  */
-class WheelLogScanner(
-    private val context: Context,
-    private val baseFolder: String = "Downloads"
-) {
+class WheelLogScanner(private val context: Context) {
 
     companion object {
         // Pattern: XX_YY_ZZ_AA_BB_CC (MAC with underscores)
@@ -35,21 +32,16 @@ class WheelLogScanner(
     }
 
     /**
-     * Scans the WheelLog folder and groups CSV files by MAC address.
+     * Scans a specific WheelLog folder structure.
+     * 
+     * @param wheelLogDir The WheelLog directory to scan (absolute path)
+     * @return Map of MAC address -> WheelIdentity
      */
-    fun scan(): Map<String, WheelIdentity> {
-        val wheelLogDir = getExternalStorageFile("$baseFolder/WheelLog")
-        if (wheelLogDir?.exists() != true) {
+    fun scanFolder(wheelLogDir: File): Map<String, WheelIdentity> {
+        if (!wheelLogDir.exists() || !wheelLogDir.isDirectory) {
             return emptyMap()
         }
 
-        return scanFolder(wheelLogDir)
-    }
-
-    /**
-     * Scans a specific WheelLog folder structure.
-     */
-    fun scanFolder(wheelLogDir: File): Map<String, WheelIdentity> {
         val result = mutableMapOf<String, WheelIdentity>()
 
         wheelLogDir.listFiles()?.forEach { macFolder ->
@@ -75,10 +67,5 @@ class WheelLogScanner(
         }
 
         return result
-    }
-
-    private fun getExternalStorageFile(relativePath: String): File? {
-        val externalStorage = android.os.Environment.getExternalStorageDirectory()
-        return File(externalStorage, relativePath)
     }
 }
