@@ -2,9 +2,12 @@ package io.github.eucsoh.android.data.scanner
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
+import androidx.documentfile.provider.DocumentFile
 import io.github.eucsoh.android.data.model.WheelDataSource
 import io.github.eucsoh.android.data.model.WheelIdentity
 import java.io.File
+import java.io.InputStream
 
 /**
  * Scanner for EUC World logs.
@@ -22,8 +25,12 @@ import java.io.File
  */
 class EucWorldScanner(private val context: Context) {
 
+    companion object {
+        private const val TAG = "EucWorldScanner"
+    }
+
     /**
-     * Scans a specific EUC World directory.
+     * Scans a specific EUC World directory (File-based).
      * Walks through ALL subdirectories and collects CSV files.
      * 
      * @param eucWorldDir The "EUC World" directory to scan (absolute path)
@@ -31,6 +38,7 @@ class EucWorldScanner(private val context: Context) {
      */
     fun scanFolder(eucWorldDir: File): Map<String, WheelIdentity> {
         if (!eucWorldDir.exists() || !eucWorldDir.isDirectory) {
+            Log.w(TAG, "EUC World directory not valid: ${eucWorldDir.absolutePath}")
             return emptyMap()
         }
 
@@ -42,8 +50,9 @@ class EucWorldScanner(private val context: Context) {
 
         for (file in csvFiles) {
             try {
-                val info = extractWheelInfoFromCsv(file) ?: continue
+                val info = extractWheelInfoFromFile(file) ?: continue
                 val mac = info.macAddress
+                Log.d(TAG, "Extracted info from ${file.name}: MAC=$mac")
 
                 // Merge with existing entry (aggregate CSV files)
                 result.merge(mac, info) { existing, new ->
@@ -59,7 +68,7 @@ class EucWorldScanner(private val context: Context) {
                     )
                 }
             } catch (e: Exception) {
-                // Skip corrupted files
+                Log.w(TAG, "Failed to extract info from ${file.name}", e)
                 continue
             }
         }
@@ -68,7 +77,90 @@ class EucWorldScanner(private val context: Context) {
     }
 
     /**
-     * Extracts wheel metadata from EUC World CSV.
+     * Scans a specific EUC World directory (DocumentFile-based).
+     * Walks through ALL subdirectories and collects CSV files.
+     * 
+     * @param eucWorldDoc The "EUC World" directory document
+     * @return Map of MAC address -> WheelIdentity
+     */
+    fun scanDocument(eucWorldDoc: DocumentFile): Map<String, WheelIdentity> {
+        if (!eucWorldDoc.exists() || !eucWorldDoc.isDirectory) {
+            Log.w(TAG, "EUC World document not valid: ${eucWorldDoc.uri}")
+            return emptyMap()
+        }
+
+        val result = mutableMapOf<String, WheelIdentity>()
+        val csvDocs = mutableListOf<DocumentFile>()
+
+        // Collect all CSV files recursively
+        collectCsvDocuments(eucWorldDoc, csvDocs)
+        Log.d(TAG, "Found ${csvDocs.size} CSV files in EUC World")
+
+        for (doc in csvDocs) {
+            try {
+                val info = extractWheelInfoFromDocument(doc) ?: continue
+                val mac = info.macAddress
+                Log.d(TAG, "Extracted info from ${doc.name}: MAC=$mac")
+
+                // Merge with existing entry (aggregate CSV files)
+                result.merge(mac, info) { existing, new ->
+                    existing.copy(
+                        csvFiles = (existing.csvFiles + new.csvFiles).distinct(),
+                        manufacturer = new.manufacturer ?: existing.manufacturer,
+                        model = new.model ?: existing.model,
+                        serialNumber = new.serialNumber ?: existing.serialNumber,
+                        displayName = if (new.displayName != new.macAddress) 
+                            new.displayName 
+                        else 
+                            existing.displayName
+                    )
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to extract info from ${doc.name}", e)
+                continue
+            }
+        }
+
+        return result
+    }
+
+    /**
+     * Recursively collects CSV documents.
+     */
+    private fun collectCsvDocuments(doc: DocumentFile, collector: MutableList<DocumentFile>) {
+        if (doc.isFile) {
+            val name = doc.name ?: return
+            if (name.endsWith(".csv", ignoreCase = true)) {
+                collector.add(doc)
+            }
+        } else if (doc.isDirectory) {
+            doc.listFiles().forEach { child ->
+                collectCsvDocuments(child, collector)
+            }
+        }
+    }
+
+    /**
+     * Extracts wheel metadata from EUC World CSV file.
+     */
+    private fun extractWheelInfoFromFile(csvFile: File): WheelIdentity? {
+        return csvFile.inputStream().use { stream ->
+            extractWheelInfoFromStream(stream, Uri.fromFile(csvFile))
+        }
+    }
+
+    /**
+     * Extracts wheel metadata from EUC World CSV document.
+     */
+    private fun extractWheelInfoFromDocument(csvDoc: DocumentFile): WheelIdentity? {
+        val stream = context.contentResolver.openInputStream(csvDoc.uri) ?: return null
+        return stream.use { 
+            extractWheelInfoFromStream(it, csvDoc.uri)
+        }
+    }
+
+    /**
+     * Extracts wheel metadata from CSV input stream.
      * 
      * The 'extra' column contains ONE key=value per row:
      * - Row 1: euc.batteryCircuitResistance=0.3
@@ -76,7 +168,7 @@ class EucWorldScanner(private val context: Context) {
      * - ...
      * - Row N: euc.btAddress=E9:A8:39:04:B4:8C
      */
-    private fun extractWheelInfoFromCsv(csvFile: File): WheelIdentity? {
+    private fun extractWheelInfoFromStream(stream: InputStream, uri: Uri): WheelIdentity? {
         val metadata = mutableMapOf<String, String>()
         var foundMac = false
         var foundBtName = false
@@ -84,7 +176,7 @@ class EucWorldScanner(private val context: Context) {
         var foundModel = false
         var foundSerial = false
 
-        csvFile.bufferedReader().use { reader ->
+        stream.bufferedReader().use { reader ->
             val header = reader.readLine() ?: return null
             val columns = header.split(",")
             val extraIndex = columns.indexOfFirst { 
@@ -146,7 +238,7 @@ class EucWorldScanner(private val context: Context) {
             displayName = metadata["euc.btName"] ?:
                 "${metadata["euc.make"] ?: ""} ${metadata["euc.model"] ?: ""}".trim()
                     .ifEmpty { mac },
-            csvFiles = listOf(Uri.fromFile(csvFile)),
+            csvFiles = listOf(uri),
             manufacturer = metadata["euc.make"],
             model = metadata["euc.model"],
             serialNumber = metadata["euc.serial"],
