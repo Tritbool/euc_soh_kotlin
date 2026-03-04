@@ -4,7 +4,7 @@ package io.github.eucsoh
  * Constants from soh_core_en.py
  */
 object Constants {
-    const val DEBUG = false
+    const val DEBUG = true  // Activé pour débogage Android
     
     // Absolute limits
     const val ABS_REQ_LIMIT = 0.8  // Ω
