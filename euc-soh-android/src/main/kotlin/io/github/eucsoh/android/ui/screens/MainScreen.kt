@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -249,7 +248,7 @@ fun WheelCard(
 
 @Composable
 fun ResultsSummary(
-    result: io.github.eucsoh.model.AnalysisResult,
+    result: Map<String, Any?>,
     onDismiss: () -> Unit
 ) {
     Card(
@@ -265,22 +264,12 @@ fun ResultsSummary(
             )
             Spacer(Modifier.height(8.dp))
 
-            result.reqBand?.let { band ->
-                Text("Req band: ${band.lowerBound} - ${band.upperBound}")
-            }
-
-            result.packConfig?.let { config ->
-                Text("Configuration: ${config.pCellsSeries}S${config.pCellsParallel}P")
-            }
-
-            if (result.alarms.isNotEmpty()) {
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    "Alarmes: ${result.alarms.size}",
-                    color = MaterialTheme.colorScheme.error,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            // Display generic result data
+            val dataStr = result["data"] as? String ?: "Aucune donnée"
+            Text(
+                dataStr,
+                style = MaterialTheme.typography.bodyMedium
+            )
 
             Spacer(Modifier.height(16.dp))
             TextButton(onClick = onDismiss) {
