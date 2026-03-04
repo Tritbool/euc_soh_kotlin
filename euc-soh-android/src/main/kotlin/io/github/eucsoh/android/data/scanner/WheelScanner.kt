@@ -5,9 +5,14 @@ import io.github.eucsoh.android.data.model.WheelIdentity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
+import java.io.File
 
 /**
  * Unified scanner that aggregates results from WheelLog and EUC World.
+ * 
+ * Starts from an absolute path (user-selected folder) and recursively searches for:
+ * - WheelLog folders
+ * - EUC World folders
  * 
  * Merges data by MAC address:
  * - WheelLog provides MAC (from folder name) + CSV files
@@ -17,21 +22,41 @@ import kotlinx.coroutines.withContext
  */
 class WheelScanner(
     private val context: Context,
-    private val baseFolder: String = "Downloads"
+    private val rootPath: File
 ) {
 
-    private val wheelLogScanner = WheelLogScanner(context, baseFolder)
-    private val eucWorldScanner = EucWorldScanner(context, baseFolder)
+    private val wheelLogScanner = WheelLogScanner(context)
+    private val eucWorldScanner = EucWorldScanner(context)
 
     /**
-     * Scans all known sources (WheelLog + EUC World) in parallel.
+     * Scans from rootPath, finding WheelLog and EUC World folders recursively.
      * Returns a map of MAC -> WheelIdentity with aggregated data.
      */
     suspend fun scanAllWheels(): Map<String, WheelIdentity> = withContext(Dispatchers.IO) {
-        // Launch both scans in parallel
+        if (!rootPath.exists() || !rootPath.isDirectory) {
+            return@withContext emptyMap()
+        }
+
+        // Find WheelLog and EUC World folders recursively
+        val wheelLogFolders = mutableListOf<File>()
+        val eucWorldFolders = mutableListOf<File>()
+
+        rootPath.walkTopDown()
+            .maxDepth(10)
+            .filter { it.isDirectory }
+            .forEach { dir ->
+                when (dir.name) {
+                    "WheelLog" -> wheelLogFolders.add(dir)
+                    "EUC World" -> eucWorldFolders.add(dir)
+                }
+            }
+
+        // Scan found folders in parallel
         val wheelLogDeferred = async { 
             try {
-                wheelLogScanner.scan()
+                wheelLogFolders.flatMap { folder ->
+                    wheelLogScanner.scanFolder(folder).values
+                }.associateBy { it.macAddress }
             } catch (e: Exception) {
                 emptyMap()
             }
@@ -39,7 +64,9 @@ class WheelScanner(
         
         val eucWorldDeferred = async { 
             try {
-                eucWorldScanner.scan()
+                eucWorldFolders.flatMap { folder ->
+                    eucWorldScanner.scanFolder(folder).values
+                }.associateBy { it.macAddress }
             } catch (e: Exception) {
                 emptyMap()
             }
