@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.eucsoh.SohAnalyzer
 import io.github.eucsoh.android.AndroidCsvSource
+import io.github.eucsoh.android.AndroidLogger
 import io.github.eucsoh.android.data.model.CsvFileInfo
 import io.github.eucsoh.android.data.model.WheelIdentity
 import io.github.eucsoh.android.data.repository.WheelRepository
@@ -53,7 +54,11 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
     
     private val repository = WheelRepository(application)
     private val csvSource = AndroidCsvSource(application)
-    private val analyzer = SohAnalyzer(csvSource = csvSource)
+    private val logger = AndroidLogger()
+    private val analyzer = SohAnalyzer(
+        csvSource = csvSource,
+        logger = logger
+    )
     
     private val _state = MutableStateFlow(SohUiState())
     val state: StateFlow<SohUiState> = _state.asStateFlow()
