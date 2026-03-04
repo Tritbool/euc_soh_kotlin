@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     kotlin("android") version "2.1.0"
     kotlin("plugin.serialization") version "2.1.0"
+    kotlin("plugin.compose") version "2.1.0"  // Compose Compiler for Kotlin 2.0+
     id("com.google.devtools.ksp") version "2.1.0-1.0.29"
 }
 
@@ -28,16 +29,12 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
 
-    kotlinOptions {
-        jvmTarget = "21"
+    kotlin {
+        jvmToolchain(21)
     }
     
     buildFeatures {
         compose = true
-    }
-    
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.15"
     }
 }
 
