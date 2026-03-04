@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -23,8 +22,7 @@ import io.github.eucsoh.android.ui.SohViewModel
 @Composable
 fun MainScreen(
     viewModel: SohViewModel,
-    onRequestPermissions: () -> Unit,
-    onRequestFolderPicker: () -> Unit
+    onRequestPermissions: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -33,9 +31,6 @@ fun MainScreen(
             TopAppBar(
                 title = { Text("EUC SoH Analyzer") },
                 actions = {
-                    IconButton(onClick = onRequestFolderPicker) {
-                        Icon(Icons.Default.Settings, "Configurer le dossier de scan")
-                    }
                     IconButton(onClick = { viewModel.scanWheels(forceRefresh = true) }) {
                         Icon(Icons.Default.Refresh, "Rafraîchir")
                     }
@@ -54,11 +49,19 @@ fun MainScreen(
                     color = MaterialTheme.colorScheme.secondaryContainer,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(
-                        "Dossier de scan: ${state.scanRootPath}",
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(8.dp)
-                    )
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        Text(
+                            "Dossier de scan:",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        Text(
+                            state.scanRootPath,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
                 }
             }
             
@@ -72,7 +75,6 @@ fun MainScreen(
                 state.detectedWheels.isEmpty() -> {
                     EmptyStateScreen(
                         onRequestPermissions = onRequestPermissions,
-                        onRequestFolderPicker = onRequestFolderPicker,
                         onRetry = { viewModel.scanWheels(forceRefresh = true) },
                         scanPath = state.scanRootPath
                     )
@@ -117,7 +119,6 @@ fun LoadingScreen(message: String) {
 @Composable
 fun EmptyStateScreen(
     onRequestPermissions: () -> Unit,
-    onRequestFolderPicker: () -> Unit,
     onRetry: () -> Unit,
     scanPath: String
 ) {
@@ -138,14 +139,11 @@ fun EmptyStateScreen(
                 "Le scanner cherche récursivement les dossiers:\n" +
                         "- WheelLog/\n" +
                         "- EUC World/\n\n" +
-                        "dans: $scanPath",
+                        "dans: $scanPath\n\n" +
+                        "Assurez-vous que vos logs sont bien dans ce dossier.",
                 style = MaterialTheme.typography.bodyMedium
             )
             Spacer(Modifier.height(24.dp))
-            Button(onClick = onRequestFolderPicker) {
-                Text("Choisir un autre dossier")
-            }
-            Spacer(Modifier.height(8.dp))
             Button(onClick = onRequestPermissions) {
                 Text("Vérifier les permissions")
             }
