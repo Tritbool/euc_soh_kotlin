@@ -45,8 +45,8 @@ data class SohUiState(
 class SohViewModel(application: Application) : AndroidViewModel(application) {
     
     private val repository = WheelRepository(application)
-    private val analyzer = SohAnalyzer()
     private val csvSource = AndroidCsvSource(application)
+    private val analyzer = SohAnalyzer(csvSource = csvSource)
     
     private val _state = MutableStateFlow(SohUiState())
     val state: StateFlow<SohUiState> = _state.asStateFlow()
@@ -223,6 +223,9 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
         }
         
         Log.d(TAG, "Analyzing ${csvPaths.size} files")
+        csvPaths.forEach { path ->
+            Log.d(TAG, "  - CSV: $path")
+        }
         
         viewModelScope.launch {
             _state.update { it.copy(isAnalyzing = true, error = null) }
@@ -242,6 +245,7 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
             } catch (e: Exception) {
                 val error = "Erreur analyse: ${e.message}"
                 Log.e(TAG, error, e)
+                e.printStackTrace()
                 _state.update { it.copy(
                     isAnalyzing = false,
                     error = error
