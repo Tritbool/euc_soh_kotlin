@@ -7,13 +7,17 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.eucsoh.SohAnalyzer
 import io.github.eucsoh.android.AndroidCsvSource
+import io.github.eucsoh.android.data.model.CsvFileInfo
 import io.github.eucsoh.android.data.model.WheelIdentity
 import io.github.eucsoh.android.data.repository.WheelRepository
+import io.github.eucsoh.analysis.ReqStatsComputer
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 /**
@@ -34,7 +38,10 @@ data class SohUiState(
     val manualFolderUri: Uri? = null,
     val analysisMode: AnalysisMode = AnalysisMode.AUTO_DETECT,
     val isScanning: Boolean = false,
+    val isValidating: Boolean = false,
     val isAnalyzing: Boolean = false,
+    val csvFileDetails: List<CsvFileInfo> = emptyList(),
+    val showFileDetails: Boolean = false,
     val analysisResult: SohAnalyzer.AnalysisResult? = null,
     val error: String? = null
 )
@@ -166,8 +173,156 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
         _state.update { it.copy(
             selectedWheel = wheel,
             analysisMode = AnalysisMode.AUTO_DETECT,
-            error = null
+            error = null,
+            showFileDetails = false,
+            csvFileDetails = emptyList()
         )}
+    }
+    
+    /**
+     * Validates all CSV files and shows details.
+     */
+    fun validateFiles() {
+        Log.d(TAG, "Validating files")
+        val currentState = _state.value
+        
+        val csvPaths = when (currentState.analysisMode) {
+            AnalysisMode.AUTO_DETECT -> {
+                currentState.selectedWheel?.csvFiles?.map { it.toString() }
+            }
+            AnalysisMode.MANUAL_FOLDER -> {
+                currentState.manualFolderUri?.let { uri ->
+                    listOf(uri.toString())
+                }
+            }
+        }
+        
+        if (csvPaths.isNullOrEmpty()) {
+            val error = "Aucun fichier à valider"
+            Log.w(TAG, error)
+            _state.update { it.copy(error = error) }
+            return
+        }
+        
+        viewModelScope.launch {
+            _state.update { it.copy(isValidating = true, error = null) }
+            
+            try {
+                val fileInfos = withContext(Dispatchers.IO) {
+                    csvPaths.map { path ->
+                        validateCsvFile(path)
+                    }
+                }
+                
+                val validCount = fileInfos.count { it.isValid && !it.isExcluded }
+                Log.d(TAG, "Validation complete: $validCount/${fileInfos.size} files valid")
+                
+                _state.update { it.copy(
+                    csvFileDetails = fileInfos,
+                    showFileDetails = true,
+                    isValidating = false
+                )}
+            } catch (e: Exception) {
+                val error = "Erreur validation: ${e.message}"
+                Log.e(TAG, error, e)
+                _state.update { it.copy(
+                    isValidating = false,
+                    error = error
+                )}
+            }
+        }
+    }
+    
+    /**
+     * Validates a single CSV file and returns info.
+     */
+    private suspend fun validateCsvFile(csvPath: String): CsvFileInfo {
+        val uri = Uri.parse(csvPath)
+        val fileName = csvPath.substringAfterLast('/')
+        
+        // Try to get file size
+        val sizeBytes = try {
+            val cursor = getApplication<Application>().contentResolver.query(
+                uri, null, null, null, null
+            )
+            cursor?.use {
+                val sizeIndex = it.getColumnIndex(android.provider.OpenableColumns.SIZE)
+                if (it.moveToFirst() && sizeIndex >= 0) {
+                    it.getLong(sizeIndex)
+                } else 0L
+            } ?: 0L
+        } catch (e: Exception) {
+            0L
+        }
+        
+        // Try to compute stats
+        val stats = try {
+            ReqStatsComputer.computeReqStatsForFile(
+                csvPath = csvPath,
+                csvSource = csvSource
+            )
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to process $fileName: ${e.message}")
+            null
+        }
+        
+        return if (stats == null) {
+            CsvFileInfo(
+                uri = uri,
+                fileName = fileName,
+                sizeBytes = sizeBytes,
+                isValid = false,
+                validationMessage = "❌ Illisible ou colonnes manquantes",
+                nPoints = null,
+                hasTemperature = false,
+                reqMedian = null,
+                wheelKm = null
+            )
+        } else {
+            val isValid = stats.nPoints >= 50 && stats.reqMedian > 0.0 && stats.tempBoardMax != null
+            val message = when {
+                stats.nPoints < 50 -> "❌ Trop court (${stats.nPoints} points)"
+                stats.tempBoardMax == null -> "❌ Pas de données température"
+                stats.reqMedian <= 0.0 -> "❌ Req invalide"
+                else -> "✓ Valide (${stats.nPoints} points)"
+            }
+            
+            CsvFileInfo(
+                uri = uri,
+                fileName = fileName,
+                sizeBytes = sizeBytes,
+                isValid = isValid,
+                validationMessage = message,
+                nPoints = stats.nPoints,
+                hasTemperature = stats.tempBoardMax != null,
+                reqMedian = stats.reqMedian,
+                wheelKm = stats.wheelKm
+            )
+        }
+    }
+    
+    /**
+     * Toggles exclusion of a file.
+     */
+    fun toggleFileExclusion(fileInfo: CsvFileInfo) {
+        Log.d(TAG, "Toggling exclusion for ${fileInfo.fileName}")
+        _state.update { state ->
+            state.copy(
+                csvFileDetails = state.csvFileDetails.map { info ->
+                    if (info.uri == fileInfo.uri) {
+                        info.copy(isExcluded = !info.isExcluded)
+                    } else info
+                }
+            )
+        }
+    }
+    
+    /**
+     * Hides file details view.
+     */
+    fun hideFileDetails() {
+        Log.d(TAG, "Hiding file details")
+        _state.update { it.copy(showFileDetails = false) }
     }
     
     /**
@@ -201,22 +356,26 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
         Log.d(TAG, "Starting analysis")
         val currentState = _state.value
         
-        val csvPaths = when (currentState.analysisMode) {
-            AnalysisMode.AUTO_DETECT -> {
-                currentState.selectedWheel?.csvFiles?.map { it.toString() }
-            }
-            AnalysisMode.MANUAL_FOLDER -> {
-                // TODO: List CSV files in manual folder
-                currentState.manualFolderUri?.let { uri ->
-                    // For now, just use the URI as single CSV
-                    // In practice, need to enumerate folder contents
-                    listOf(uri.toString())
+        // Use filtered file list if available
+        val csvPaths = if (currentState.csvFileDetails.isNotEmpty()) {
+            currentState.csvFileDetails
+                .filter { it.isValid && !it.isExcluded }
+                .map { it.uri.toString() }
+        } else {
+            when (currentState.analysisMode) {
+                AnalysisMode.AUTO_DETECT -> {
+                    currentState.selectedWheel?.csvFiles?.map { it.toString() }
+                }
+                AnalysisMode.MANUAL_FOLDER -> {
+                    currentState.manualFolderUri?.let { uri ->
+                        listOf(uri.toString())
+                    }
                 }
             }
         }
         
         if (csvPaths.isNullOrEmpty()) {
-            val error = "Aucun fichier à analyser"
+            val error = "Aucun fichier valide à analyser"
             Log.w(TAG, error)
             _state.update { it.copy(error = error) }
             return
@@ -247,7 +406,8 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
                 
                 _state.update { it.copy(
                     analysisResult = result,
-                    isAnalyzing = false
+                    isAnalyzing = false,
+                    showFileDetails = false
                 )}
             } catch (e: ClassCastException) {
                 val error = "Erreur de type dans les données CSV: ${e.message}\n\nCertaines colonnes attendues sont manquantes ou invalides. Vérifiez que vos logs contiennent toutes les données nécessaires (tension, courant, température, etc.)."
