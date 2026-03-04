@@ -139,11 +139,12 @@ object ReqStatsComputer {
             val span = vCellFull - vCellMin
 
             if (span > 0.5) {
-                val socVolt = df[vCol].values().map { v ->
-                    val vNum = (v as Number).toDouble()
-                    val vCell = vNum / ns
-                    val soc = ((vCell - vCellMin) / span).coerceIn(0.0, 1.0) * 100.0
-                    soc
+                val socVolt = df[vCol].values().mapNotNull { v ->
+                    (v as? Number)?.toDouble()?.let { vNum ->
+                        val vCell = vNum / ns
+                        val soc = ((vCell - vCellMin) / span).coerceIn(0.0, 1.0) * 100.0
+                        soc
+                    }
                 }
                 // Add column (DataFrame is immutable, we work with data)
                 socVoltCol = "soc_voltage"
@@ -169,10 +170,16 @@ object ReqStatsComputer {
         var i_Min = maxOf(iMinBase, curThr)
         var i_Max = iMaxBase
 
-        // Filter for Req calculation
-        val voltages = df[vCol].values().map { (it as Number).toDouble() }
-        val currents = df[iCol].values().map { (it as Number).toDouble() }
-        val speeds = df[sCol].values().map { (it as Number).toDouble() }
+        // Filter for Req calculation - with null safety
+        val voltages = df[vCol].values().mapNotNull { (it as? Number)?.toDouble() }
+        val currents = df[iCol].values().mapNotNull { (it as? Number)?.toDouble() }
+        val speeds = df[sCol].values().mapNotNull { (it as? Number)?.toDouble() }
+
+        // Check if we have data after filtering nulls
+        if (voltages.size != df.rowsCount() || currents.size != df.rowsCount() || speeds.size != df.rowsCount()) {
+            if (Constants.DEBUG) println("[WARNING] Null values found in critical columns for $csvPath")
+            return null
+        }
 
         val socValues = if (socVoltCol != null) {
             // Use computed SoC voltage
