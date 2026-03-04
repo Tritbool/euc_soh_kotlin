@@ -2,6 +2,7 @@ package io.github.eucsoh.android.data.repository
 
 import android.content.Context
 import android.os.Environment
+import android.util.Log
 import io.github.eucsoh.android.data.database.WheelDatabase
 import io.github.eucsoh.android.data.database.toEntities
 import io.github.eucsoh.android.data.database.toWheelIdentities
@@ -26,6 +27,7 @@ class WheelRepository(private val context: Context) {
     private val prefs = context.getSharedPreferences("euc_soh_prefs", Context.MODE_PRIVATE)
     
     companion object {
+        private const val TAG = "WheelRepository"
         private const val CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000L  // 24 hours
         private const val PREF_ROOT_PATH = "scan_root_path"
     }
@@ -36,17 +38,22 @@ class WheelRepository(private val context: Context) {
      */
     fun getRootPath(): File {
         val storedPath = prefs.getString(PREF_ROOT_PATH, null)
-        return if (storedPath != null) {
+        val path = if (storedPath != null) {
+            Log.d(TAG, "Using stored path: $storedPath")
             File(storedPath)
         } else {
-            Environment.getExternalStorageDirectory()
+            val defaultPath = Environment.getExternalStorageDirectory()
+            Log.d(TAG, "Using default path: ${defaultPath.absolutePath}")
+            defaultPath
         }
+        return path
     }
     
     /**
      * Sets the root path for scanning.
      */
     fun setRootPath(path: File) {
+        Log.d(TAG, "Setting root path: ${path.absolutePath}")
         prefs.edit().putString(PREF_ROOT_PATH, path.absolutePath).apply()
     }
     
@@ -62,17 +69,22 @@ class WheelRepository(private val context: Context) {
         customPath: File? = null
     ): Map<String, WheelIdentity> = withContext(Dispatchers.IO) {
         val scanPath = customPath ?: getRootPath()
+        Log.d(TAG, "getWheels called: forceRefresh=$forceRefresh, scanPath=${scanPath.absolutePath}")
         
         if (forceRefresh) {
+            Log.d(TAG, "Force refresh requested, scanning...")
             // Force full scan
             scanAndCache(scanPath)
         } else {
             // Try cache first
             val cached = wheelDao.getAllWheels()
+            Log.d(TAG, "Cache contains ${cached.size} wheels")
             
             if (cached.isNotEmpty() && !isCacheExpired(cached)) {
+                Log.d(TAG, "Using cached data")
                 cached.toWheelIdentities()
             } else {
+                Log.d(TAG, "Cache miss or expired, scanning...")
                 // Cache miss or expired → scan
                 scanAndCache(scanPath)
             }
@@ -83,12 +95,28 @@ class WheelRepository(private val context: Context) {
      * Scans from specified root path and updates cache.
      */
     private suspend fun scanAndCache(rootPath: File): Map<String, WheelIdentity> {
+        Log.d(TAG, "Creating scanner for path: ${rootPath.absolutePath}")
+        
+        if (!rootPath.exists()) {
+            Log.e(TAG, "Root path does not exist!")
+            return emptyMap()
+        }
+        
+        if (!rootPath.isDirectory) {
+            Log.e(TAG, "Root path is not a directory!")
+            return emptyMap()
+        }
+        
         val scanner = WheelScanner(context, rootPath)
+        Log.d(TAG, "Starting scan...")
         val wheels = scanner.scanAllWheels()
+        Log.d(TAG, "Scan returned ${wheels.size} wheels")
         
         // Update cache
+        Log.d(TAG, "Updating cache...")
         wheelDao.clearAll()
         wheelDao.insertWheels(wheels.toEntities())
+        Log.d(TAG, "Cache updated")
         
         return wheels
     }
@@ -102,7 +130,9 @@ class WheelRepository(private val context: Context) {
         val now = System.currentTimeMillis()
         val oldestTimestamp = cached.minOfOrNull { it.lastScanTimestamp } ?: return true
         
-        return (now - oldestTimestamp) > CACHE_MAX_AGE_MS
+        val expired = (now - oldestTimestamp) > CACHE_MAX_AGE_MS
+        Log.d(TAG, "Cache age: ${(now - oldestTimestamp) / 1000 / 60} minutes, expired=$expired")
+        return expired
     }
     
     /**
@@ -116,6 +146,7 @@ class WheelRepository(private val context: Context) {
      * Clears all cached data.
      */
     suspend fun clearCache() = withContext(Dispatchers.IO) {
+        Log.d(TAG, "Clearing cache")
         wheelDao.clearAll()
     }
 }
