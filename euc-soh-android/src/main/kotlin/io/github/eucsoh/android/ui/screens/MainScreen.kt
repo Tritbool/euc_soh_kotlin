@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import io.github.eucsoh.SohAnalyzer
 import io.github.eucsoh.android.data.model.WheelIdentity
 import io.github.eucsoh.android.ui.SohViewModel
 
@@ -248,7 +249,7 @@ fun WheelCard(
 
 @Composable
 fun ResultsSummary(
-    result: Map<String, Any?>,
+    result: SohAnalyzer.AnalysisResult,
     onDismiss: () -> Unit
 ) {
     Card(
@@ -264,12 +265,66 @@ fun ResultsSummary(
             )
             Spacer(Modifier.height(8.dp))
 
-            // Display generic result data
-            val dataStr = result["data"] as? String ?: "Aucune donnée"
+            // Pack configuration
+            result.nsGlobal?.let { ns ->
+                result.vNominal?.let { v ->
+                    Text(
+                        "Configuration: ${ns}S (${String.format("%.1f", v)}V nominal)",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
+            result.rPackNominal?.let { rPack ->
+                Text(
+                    "Résistance pack nominale: ${String.format("%.1f", rPack * 1000)} mΩ",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            // Arrhenius info
             Text(
-                dataStr,
-                style = MaterialTheme.typography.bodyMedium
+                "Ea (Arrhenius): ${String.format("%.1f", result.eaJPerMol / 1000)} kJ/mol",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            // Alarms
+            if (result.alarms.isNotEmpty()) {
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    "⚠️ Alarmes détectées: ${result.alarms.size}",
+                    color = MaterialTheme.colorScheme.error,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                
+                // Show first 3 alarms
+                result.alarms.take(3).forEach { alarm ->
+                    Text(
+                        "  • ${alarm.file}: ${alarm.reasons}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+                
+                if (result.alarms.size > 3) {
+                    Text(
+                        "  ... et ${result.alarms.size - 3} autres",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            } else {
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    "✓ Aucune alarme détectée",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
+                )
+            }
 
             Spacer(Modifier.height(16.dp))
             TextButton(onClick = onDismiss) {
