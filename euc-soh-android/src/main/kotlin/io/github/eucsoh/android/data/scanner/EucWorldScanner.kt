@@ -9,10 +9,8 @@ import java.io.File
 /**
  * Scanner for EUC World logs.
  * 
- * EUC World stores logs in: [baseFolder]/EUC World/[subfolders]/
- * 
- * This scanner recursively walks the base folder to find ANY "EUC World" directory,
- * then scans ALL subdirectories for CSV files (avoiding hardcoded localized folder names).
+ * EUC World stores logs in subdirectories under "EUC World".
+ * This scanner recursively walks ALL subdirectories to find CSV files.
  * 
  * Each CSV has a column 'extra' containing ONE key=value pair per row.
  * We need to scan all rows to build the metadata dictionary:
@@ -22,40 +20,20 @@ import java.io.File
  * - euc.model
  * - euc.serial
  */
-class EucWorldScanner(
-    private val context: Context,
-    private val baseFolder: String = "Downloads"
-) {
-
-    /**
-     * Scans for EUC World folders and groups CSV files by MAC address.
-     * Recursively walks baseFolder to find all "EUC World" directories.
-     */
-    fun scan(): Map<String, WheelIdentity> {
-        val result = mutableMapOf<String, WheelIdentity>()
-        val base = getExternalStorageFile(baseFolder) ?: return emptyMap()
-        
-        if (!base.exists() || !base.isDirectory) {
-            return emptyMap()
-        }
-
-        // Recursively find all "EUC World" folders
-        base.walkTopDown()
-            .maxDepth(5)  // Limit depth to avoid scanning entire filesystem
-            .filter { it.isDirectory && it.name.equals("EUC World", ignoreCase = true) }
-            .forEach { eucWorldDir ->
-                // Scan all subdirectories of EUC World for CSVs
-                result.putAll(scanEucWorldFolder(eucWorldDir))
-            }
-
-        return result
-    }
+class EucWorldScanner(private val context: Context) {
 
     /**
      * Scans a specific EUC World directory.
      * Walks through ALL subdirectories and collects CSV files.
+     * 
+     * @param eucWorldDir The "EUC World" directory to scan (absolute path)
+     * @return Map of MAC address -> WheelIdentity
      */
-    private fun scanEucWorldFolder(eucWorldDir: File): Map<String, WheelIdentity> {
+    fun scanFolder(eucWorldDir: File): Map<String, WheelIdentity> {
+        if (!eucWorldDir.exists() || !eucWorldDir.isDirectory) {
+            return emptyMap()
+        }
+
         val result = mutableMapOf<String, WheelIdentity>()
 
         // Walk through ALL subdirectories and find CSV files
@@ -200,10 +178,5 @@ class EucWorldScanner(
         cells.add(currentCell.toString())
 
         return cells.map { it.trim() }
-    }
-
-    private fun getExternalStorageFile(relativePath: String): File? {
-        val externalStorage = android.os.Environment.getExternalStorageDirectory()
-        return File(externalStorage, relativePath)
     }
 }
