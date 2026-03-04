@@ -32,7 +32,7 @@ data class SohUiState(
     val analysisMode: AnalysisMode = AnalysisMode.AUTO_DETECT,
     val isScanning: Boolean = false,
     val isAnalyzing: Boolean = false,
-    val analysisResult: io.github.eucsoh.model.AnalysisResult? = null,
+    val analysisResult: Map<String, Any?>? = null,  // Generic result map for now
     val error: String? = null
 )
 
@@ -143,8 +143,14 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
                     parallel = false
                 )
                 
+                // Convert result to generic map for UI display
+                val resultMap = mapOf(
+                    "success" to true,
+                    "data" to result?.toString()
+                )
+                
                 _state.update { it.copy(
-                    analysisResult = result,
+                    analysisResult = resultMap,
                     isAnalyzing = false
                 )}
             } catch (e: Exception) {
