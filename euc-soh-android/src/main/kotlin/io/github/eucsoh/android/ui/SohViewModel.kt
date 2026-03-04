@@ -2,6 +2,7 @@ package io.github.eucsoh.android.ui
 
 import android.app.Application
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.eucsoh.SohAnalyzer
@@ -50,9 +51,16 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
     private val _state = MutableStateFlow(SohUiState())
     val state: StateFlow<SohUiState> = _state.asStateFlow()
     
+    companion object {
+        private const val TAG = "SohViewModel"
+    }
+    
     init {
+        Log.d(TAG, "ViewModel initialized")
         // Load configured root path
-        _state.update { it.copy(scanRootPath = repository.getRootPath().absolutePath) }
+        val rootPath = repository.getRootPath().absolutePath
+        Log.d(TAG, "Initial root path: $rootPath")
+        _state.update { it.copy(scanRootPath = rootPath) }
         // Auto-scan on startup
         scanWheels(forceRefresh = false)
     }
@@ -63,14 +71,34 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
      * @param path Absolute path to scan (from folder picker)
      */
     fun setScanRootPath(path: String) {
+        Log.d(TAG, "Setting scan root path: $path")
         val file = File(path)
-        if (file.exists() && file.isDirectory) {
-            repository.setRootPath(file)
-            _state.update { it.copy(scanRootPath = path, error = null) }
-            scanWheels(forceRefresh = true)
-        } else {
-            _state.update { it.copy(error = "Chemin invalide: $path") }
+        
+        if (!file.exists()) {
+            val error = "Chemin inexistant: $path"
+            Log.e(TAG, error)
+            _state.update { it.copy(error = error) }
+            return
         }
+        
+        if (!file.isDirectory) {
+            val error = "Pas un dossier: $path"
+            Log.e(TAG, error)
+            _state.update { it.copy(error = error) }
+            return
+        }
+        
+        if (!file.canRead()) {
+            val error = "Dossier non lisible: $path"
+            Log.e(TAG, error)
+            _state.update { it.copy(error = error) }
+            return
+        }
+        
+        Log.d(TAG, "Path is valid, saving and rescanning")
+        repository.setRootPath(file)
+        _state.update { it.copy(scanRootPath = path, error = null) }
+        scanWheels(forceRefresh = true)
     }
     
     /**
@@ -84,19 +112,26 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
      * Scans for wheels (with optional force refresh).
      */
     fun scanWheels(forceRefresh: Boolean = false) {
+        Log.d(TAG, "Starting wheel scan (forceRefresh=$forceRefresh)")
         viewModelScope.launch {
             _state.update { it.copy(isScanning = true, error = null) }
             
             try {
                 val wheels = repository.getWheels(forceRefresh)
+                Log.d(TAG, "Scan complete: ${wheels.size} wheels found")
+                wheels.forEach { (mac, wheel) ->
+                    Log.d(TAG, "  - $mac: ${wheel.displayName} (${wheel.csvFiles.size} files)")
+                }
                 _state.update { it.copy(
                     detectedWheels = wheels,
                     isScanning = false
                 )}
             } catch (e: Exception) {
+                val error = "Erreur scan: ${e.message}"
+                Log.e(TAG, error, e)
                 _state.update { it.copy(
                     isScanning = false,
-                    error = "Erreur scan: ${e.message}"
+                    error = error
                 )}
             }
         }
@@ -106,6 +141,7 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
      * Selects a wheel for analysis (auto-detect mode).
      */
     fun selectWheel(wheel: WheelIdentity) {
+        Log.d(TAG, "Wheel selected: ${wheel.displayName}")
         _state.update { it.copy(
             selectedWheel = wheel,
             analysisMode = AnalysisMode.AUTO_DETECT,
@@ -117,6 +153,7 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
      * Switches to manual folder selection mode.
      */
     fun switchToManualMode() {
+        Log.d(TAG, "Switched to manual mode")
         _state.update { it.copy(
             analysisMode = AnalysisMode.MANUAL_FOLDER,
             selectedWheel = null,
@@ -128,6 +165,7 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
      * Selects a manual folder.
      */
     fun selectManualFolder(folderUri: Uri) {
+        Log.d(TAG, "Manual folder selected: $folderUri")
         _state.update { it.copy(
             manualFolderUri = folderUri,
             analysisMode = AnalysisMode.MANUAL_FOLDER,
@@ -139,6 +177,7 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
      * Starts SoH analysis.
      */
     fun startAnalysis() {
+        Log.d(TAG, "Starting analysis")
         val currentState = _state.value
         
         val csvPaths = when (currentState.analysisMode) {
@@ -156,9 +195,13 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
         }
         
         if (csvPaths.isNullOrEmpty()) {
-            _state.update { it.copy(error = "Aucun fichier à analyser") }
+            val error = "Aucun fichier à analyser"
+            Log.w(TAG, error)
+            _state.update { it.copy(error = error) }
             return
         }
+        
+        Log.d(TAG, "Analyzing ${csvPaths.size} files")
         
         viewModelScope.launch {
             _state.update { it.copy(isAnalyzing = true, error = null) }
@@ -170,14 +213,17 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
                     parallel = false
                 )
                 
+                Log.d(TAG, "Analysis complete")
                 _state.update { it.copy(
                     analysisResult = result,
                     isAnalyzing = false
                 )}
             } catch (e: Exception) {
+                val error = "Erreur analyse: ${e.message}"
+                Log.e(TAG, error, e)
                 _state.update { it.copy(
                     isAnalyzing = false,
-                    error = "Erreur analyse: ${e.message}"
+                    error = error
                 )}
             }
         }
@@ -187,6 +233,7 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
      * Clears analysis results.
      */
     fun clearResults() {
+        Log.d(TAG, "Clearing results")
         _state.update { it.copy(
             analysisResult = null,
             error = null
@@ -197,6 +244,7 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
      * Clears error message.
      */
     fun clearError() {
+        Log.d(TAG, "Clearing error")
         _state.update { it.copy(error = null) }
     }
 }
