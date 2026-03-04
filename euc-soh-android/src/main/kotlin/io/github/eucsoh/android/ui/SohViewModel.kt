@@ -222,29 +222,60 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
         
-        Log.d(TAG, "Analyzing ${csvPaths.size} files")
-        csvPaths.forEach { path ->
-            Log.d(TAG, "  - CSV: $path")
+        Log.d(TAG, "Analyzing ${csvPaths.size} files:")
+        csvPaths.forEachIndexed { idx, path ->
+            Log.d(TAG, "  [$idx] $path")
         }
         
         viewModelScope.launch {
             _state.update { it.copy(isAnalyzing = true, error = null) }
             
             try {
+                Log.d(TAG, "Calling analyzer.analyzeFolderForReq()...")
                 val result = analyzer.analyzeFolderForReq(
                     csvPaths = csvPaths,
                     optimalFrac = 0.3,
                     parallel = false
                 )
                 
-                Log.d(TAG, "Analysis complete")
+                Log.d(TAG, "Analysis completed successfully")
+                Log.d(TAG, "  - Ns: ${result.nsGlobal}")
+                Log.d(TAG, "  - V nominal: ${result.vNominal}")
+                Log.d(TAG, "  - R pack nominal: ${result.rPackNominal}")
+                Log.d(TAG, "  - Ea: ${result.eaJPerMol / 1000} kJ/mol")
+                Log.d(TAG, "  - Alarms: ${result.alarms.size}")
+                
                 _state.update { it.copy(
                     analysisResult = result,
                     isAnalyzing = false
                 )}
+            } catch (e: ClassCastException) {
+                val error = "Erreur de type dans les données CSV: ${e.message}\n\nCertaines colonnes attendues sont manquantes ou invalides. Vérifiez que vos logs contiennent toutes les données nécessaires (tension, courant, température, etc.)."
+                Log.e(TAG, "ClassCastException during analysis", e)
+                e.printStackTrace()
+                _state.update { it.copy(
+                    isAnalyzing = false,
+                    error = error
+                )}
+            } catch (e: RuntimeException) {
+                val error = when {
+                    e.message?.contains("No exploitable logs") == true -> {
+                        "Aucun log exploitable pour calibration.\n\nPossibles causes:\n" +
+                        "- Logs trop courts (<100 points)\n" +
+                        "- Colonnes manquantes (voltage, current, extra)\n" +
+                        "- Pas assez de variation de température"
+                    }
+                    else -> "Erreur analyse: ${e.message}"
+                }
+                Log.e(TAG, "RuntimeException during analysis", e)
+                e.printStackTrace()
+                _state.update { it.copy(
+                    isAnalyzing = false,
+                    error = error
+                )}
             } catch (e: Exception) {
-                val error = "Erreur analyse: ${e.message}"
-                Log.e(TAG, error, e)
+                val error = "Erreur inattendue: ${e.javaClass.simpleName}: ${e.message}"
+                Log.e(TAG, "Unexpected exception during analysis", e)
                 e.printStackTrace()
                 _state.update { it.copy(
                     isAnalyzing = false,
