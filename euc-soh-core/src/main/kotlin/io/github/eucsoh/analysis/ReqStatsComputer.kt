@@ -139,14 +139,15 @@ object ReqStatsComputer {
             val span = vCellFull - vCellMin
 
             if (span > 0.5) {
-                val socVolt = df[vCol].values().mapNotNull { v ->
-                    (v as? Number)?.toDouble()?.let { vNum ->
-                        val vCell = vNum / ns
-                        val soc = ((vCell - vCellMin) / span).coerceIn(0.0, 1.0) * 100.0
-                        soc
+                val socVolt = df[vCol].values()
+                    .filterNotNull()
+                    .mapNotNull { v ->
+                        (v as? Number)?.toDouble()?.let { vNum ->
+                            val vCell = vNum / ns
+                            val soc = ((vCell - vCellMin) / span).coerceIn(0.0, 1.0) * 100.0
+                            soc
+                        }
                     }
-                }
-                // Add column (DataFrame is immutable, we work with data)
 
                 socVoltCol = "soc_voltage"
                 df = df.add(socVoltCol) { socVolt }
@@ -173,9 +174,15 @@ object ReqStatsComputer {
         var i_Max = iMaxBase
 
         // Filter for Req calculation - with null safety
-        val voltages = df[vCol].values().mapNotNull { (it as? Number)?.toDouble() }
-        val currents = df[iCol].values().mapNotNull { (it as? Number)?.toDouble() }
-        val speeds = df[sCol].values().mapNotNull { (it as? Number)?.toDouble() }
+        val voltages = df[vCol].values()
+            .filterNotNull()
+            .mapNotNull { (it as? Number)?.toDouble() }
+        val currents = df[iCol].values()
+            .filterNotNull()
+            .mapNotNull { (it as? Number)?.toDouble() }
+        val speeds = df[sCol].values()
+            .filterNotNull()
+            .mapNotNull { (it as? Number)?.toDouble() }
 
         // Check if we have data after filtering nulls
         if (voltages.size != df.rowsCount() || currents.size != df.rowsCount() || speeds.size != df.rowsCount()) {
