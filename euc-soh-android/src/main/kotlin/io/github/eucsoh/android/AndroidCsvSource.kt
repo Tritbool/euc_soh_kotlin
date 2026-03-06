@@ -7,6 +7,9 @@ import java.io.InputStream
 
 /**
  * Android implementation of CsvSource using ContentResolver.
+ * 
+ * IMPORTANT: The InputStream returned by openCsvStream() must be closed
+ * by the caller using .use {} to prevent resource leaks.
  */
 class AndroidCsvSource(private val context: Context) : CsvSource {
 
