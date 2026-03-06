@@ -41,6 +41,9 @@ data class SohUiState(
     val isScanning: Boolean = false,
     val isValidating: Boolean = false,
     val isAnalyzing: Boolean = false,
+    val currentFile: Int = 0,
+    val totalFiles: Int = 0,
+    val currentFileName: String = "",
     val csvFileDetails: List<CsvFileInfo> = emptyList(),
     val showFileDetails: Boolean = false,
     val analysisResult: SohAnalyzer.AnalysisResult? = null,
@@ -355,7 +358,7 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
     }
     
     /**
-     * Starts SoH analysis.
+     * Starts SoH analysis with progress tracking.
      */
     fun startAnalysis() {
         Log.d(TAG, "Starting analysis")
@@ -391,12 +394,57 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
             Log.d(TAG, "  [$idx] $path")
         }
         
-        viewModelScope.launch {
-            _state.update { it.copy(isAnalyzing = true, error = null) }
+        viewModelScope.launch(Dispatchers.IO) {
+            // Update UI on Main thread
+            withContext(Dispatchers.Main) {
+                _state.update { it.copy(
+                    isAnalyzing = true,
+                    currentFile = 0,
+                    totalFiles = csvPaths.size,
+                    currentFileName = "",
+                    error = null
+                )}
+            }
             
             try {
                 Log.d(TAG, "Calling analyzer.analyzeFolderForReq()...")
-                val result = analyzer.analyzeFolderForReq(
+                
+                // Create a custom logger that updates progress
+                val progressLogger = object : io.github.eucsoh.Logger {
+                    override fun d(tag: String, message: String) {
+                        logger.d(tag, message)
+                        
+                        // Extract progress from log messages
+                        if (message.contains("Processing [")) {
+                            val match = "Processing \\[(\\d+)/(\\d+)\\] (.+)".toRegex().find(message)
+                            if (match != null) {
+                                val current = match.groupValues[1].toIntOrNull() ?: 0
+                                val total = match.groupValues[2].toIntOrNull() ?: 0
+                                val filename = match.groupValues[3]
+                                
+                                viewModelScope.launch(Dispatchers.Main) {
+                                    _state.update { it.copy(
+                                        currentFile = current + 1,
+                                        totalFiles = total,
+                                        currentFileName = filename
+                                    )}
+                                }
+                            }
+                        }
+                    }
+                    
+                    override fun e(tag: String, message: String, throwable: Throwable?) {
+                        logger.e(tag, message, throwable)
+                    }
+                }
+                
+                // Run analysis with progress tracking
+                val analyzerWithProgress = SohAnalyzer(
+                    csvSource = csvSource,
+                    logger = progressLogger
+                )
+                
+                val result = analyzerWithProgress.analyzeFolderForReq(
                     csvPaths = csvPaths,
                     optimalFrac = 0.3,
                     parallel = false
@@ -409,19 +457,23 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
                 Log.d(TAG, "  - Ea: ${result.eaJPerMol / 1000} kJ/mol")
                 Log.d(TAG, "  - Alarms: ${result.alarms.size}")
                 
-                _state.update { it.copy(
-                    analysisResult = result,
-                    isAnalyzing = false,
-                    showFileDetails = false
-                )}
+                withContext(Dispatchers.Main) {
+                    _state.update { it.copy(
+                        analysisResult = result,
+                        isAnalyzing = false,
+                        showFileDetails = false
+                    )}
+                }
             } catch (e: ClassCastException) {
                 val error = "Erreur de type dans les données CSV: ${e.message}\n\nCertaines colonnes attendues sont manquantes ou invalides. Vérifiez que vos logs contiennent toutes les données nécessaires (tension, courant, température, etc.)."
                 Log.e(TAG, "ClassCastException during analysis", e)
                 e.printStackTrace()
-                _state.update { it.copy(
-                    isAnalyzing = false,
-                    error = error
-                )}
+                withContext(Dispatchers.Main) {
+                    _state.update { it.copy(
+                        isAnalyzing = false,
+                        error = error
+                    )}
+                }
             } catch (e: RuntimeException) {
                 val error = when {
                     e.message?.contains("No exploitable logs") == true -> {
@@ -434,18 +486,22 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 Log.e(TAG, "RuntimeException during analysis", e)
                 e.printStackTrace()
-                _state.update { it.copy(
-                    isAnalyzing = false,
-                    error = error
-                )}
+                withContext(Dispatchers.Main) {
+                    _state.update { it.copy(
+                        isAnalyzing = false,
+                        error = error
+                    )}
+                }
             } catch (e: Exception) {
                 val error = "Erreur inattendue: ${e.javaClass.simpleName}: ${e.message}"
                 Log.e(TAG, "Unexpected exception during analysis", e)
                 e.printStackTrace()
-                _state.update { it.copy(
-                    isAnalyzing = false,
-                    error = error
-                )}
+                withContext(Dispatchers.Main) {
+                    _state.update { it.copy(
+                        isAnalyzing = false,
+                        error = error
+                    )}
+                }
             }
         }
     }
