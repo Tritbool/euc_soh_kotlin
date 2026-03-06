@@ -46,7 +46,11 @@ object VIdleProfileBuilder {
         idleCurrentAbs: Double
     ): List<Segment> {
         val n = df.rowsCount()
-        val currents = df[iCol].values().map { (it as Number).toDouble() }
+        val currents = df[iCol].values().mapNotNull { (it as? Number)?.toDouble() }
+        
+        // Si on a perdu des valeurs, retour vide
+        if (currents.size != n) return emptyList()
+        
         val lowMask = BooleanArray(n) { abs(currents[it]) < idleCurrentAbs }
 
         val segments = mutableListOf<Segment>()
@@ -92,7 +96,11 @@ object VIdleProfileBuilder {
 
         val dt = estimateDtSeries(df) ?: return DoubleArray(n) { 0.0 }
 
-        val voltages = df[vCol].values().map { (it as Number).toDouble() }
+        val voltages = df[vCol].values().mapNotNull { (it as? Number)?.toDouble() }
+        
+        // Si on a perdu des valeurs, retour 0
+        if (voltages.size != n) return DoubleArray(n) { 0.0 }
+        
         val segments = detectIdleSegments(df, iCol, idleCurrentAbs)
 
         if (segments.isEmpty()) {
@@ -141,8 +149,12 @@ object VIdleProfileBuilder {
 
             // SoC if available
             if (socVoltCol != null && socVoltCol in df.columnNames()) {
-                val socVals = stableIndices.map { (df[socVoltCol][it] as Number).toDouble() }
-                socIdleSegments.add(socVals.average())
+                val socVals = stableIndices.mapNotNull { (df[socVoltCol][it] as? Number)?.toDouble() }
+                if (socVals.isNotEmpty()) {
+                    socIdleSegments.add(socVals.average())
+                } else {
+                    socIdleSegments.add(null)
+                }
             } else {
                 socIdleSegments.add(null)
             }
