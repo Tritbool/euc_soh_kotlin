@@ -22,6 +22,7 @@ class FileManager(private val context: Context) {
 
     /**
      * List all CSV files in the wheel directory.
+     * Returns lightweight CsvFileInfo without full validation for performance.
      */
     suspend fun listCsvFiles(wheelDirUri: Uri): List<CsvFileInfo> = withContext(Dispatchers.IO) {
         val wheelDir = DocumentFile.fromTreeUri(context, wheelDirUri)
@@ -31,13 +32,19 @@ class FileManager(private val context: Context) {
             .filter { it.isFile && it.name?.endsWith(".csv", ignoreCase = true) == true }
             .map { docFile ->
                 CsvFileInfo(
-                    name = docFile.name ?: "unknown.csv",
-                    uri = docFile.uri.toString(),
+                    uri = docFile.uri,
+                    fileName = docFile.name ?: "unknown.csv",
                     sizeBytes = docFile.length(),
-                    lastModified = docFile.lastModified()
+                    isValid = true, // Assume valid for listing, full validation happens during analysis
+                    validationMessage = "",
+                    nPoints = null,
+                    hasTemperature = false,
+                    reqMedian = null,
+                    wheelKm = null,
+                    isExcluded = false
                 )
             }
-            .sortedByDescending { it.lastModified }
+            .sortedByDescending { it.sizeBytes }
     }
 
     /**
@@ -45,7 +52,7 @@ class FileManager(private val context: Context) {
      */
     suspend fun previewCsv(fileUri: Uri, maxLines: Int = 20): List<String> = withContext(Dispatchers.IO) {
         try {
-            context.contentResolver.openInputStream(Uri.parse(fileUri))?.use { inputStream ->
+            context.contentResolver.openInputStream(fileUri)?.use { inputStream ->
                 BufferedReader(InputStreamReader(inputStream)).useLines { lines ->
                     lines.take(maxLines).toList()
                 }
@@ -60,7 +67,7 @@ class FileManager(private val context: Context) {
      */
     suspend fun countLines(fileUri: Uri): Int = withContext(Dispatchers.IO) {
         try {
-            context.contentResolver.openInputStream(Uri.parse(fileUri))?.use { inputStream ->
+            context.contentResolver.openInputStream(fileUri)?.use { inputStream ->
                 BufferedReader(InputStreamReader(inputStream)).useLines { lines ->
                     lines.count()
                 }
