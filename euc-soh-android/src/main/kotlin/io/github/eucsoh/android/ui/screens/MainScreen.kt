@@ -105,7 +105,9 @@ fun MainScreen(
                         onSelectWheel = viewModel::selectWheel,
                         onAnalyze = viewModel::startAnalysis,
                         error = state.error,
-                        onDismissError = viewModel::clearError
+                        onDismissError = viewModel::clearError,
+                        useParallelProcessing = state.useParallelProcessing,
+                        onToggleParallel = viewModel::toggleParallelProcessing
                     )
                 }
             }
@@ -237,7 +239,9 @@ fun WheelListContent(
     onSelectWheel: (WheelIdentity) -> Unit,
     onAnalyze: () -> Unit,
     error: String?,
-    onDismissError: () -> Unit
+    onDismissError: () -> Unit,
+    useParallelProcessing: Boolean,
+    onToggleParallel: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
@@ -282,6 +286,37 @@ fun WheelListContent(
                         Text("OK")
                     }
                 }
+            }
+        }
+        
+        // Parallel processing toggle
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "Traitement parallèle",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        if (useParallelProcessing) "Plusieurs fichiers en même temps" else "Un fichier à la fois",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Switch(
+                    checked = useParallelProcessing,
+                    onCheckedChange = { onToggleParallel() }
+                )
             }
         }
 
