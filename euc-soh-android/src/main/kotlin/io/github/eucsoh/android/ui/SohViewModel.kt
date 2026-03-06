@@ -372,12 +372,19 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
                 Log.d(TAG, "  - Alarms: ${result.alarms.size}")
                 Log.d(TAG, "  - MOSFET used: ${mosfetParams != null}")
                 
-                // Check if R_batt columns present
-                val hasBattColumns = result.stats.columnNames().any { it.startsWith("R_batt") }
-                if (hasBattColumns) {
-                    Log.d(TAG, "  ✓ R_batt separation successful")
-                } else {
-                    Log.d(TAG, "  - R_batt not computed (no MOSFET config or missing data)")
+                // Check if R_batt separation worked by looking at summary
+                if (mosfetParams != null) {
+                    try {
+                        val summary = analyzerWithConfig.buildSummary(result, selectedWheel?.displayName ?: "unknown")
+                        val hasBattData = summary.globalStats.rBattMedianMin != null
+                        if (hasBattData) {
+                            Log.d(TAG, "  ✓ R_batt separation successful")
+                        } else {
+                            Log.d(TAG, "  - R_batt not computed (missing temperature or SoC data)")
+                        }
+                    } catch (e: Exception) {
+                        Log.w(TAG, "  - Could not verify R_batt status: ${e.message}")
+                    }
                 }
                 
                 withContext(Dispatchers.Main) {
