@@ -46,7 +46,9 @@ object VIdleProfileBuilder {
         idleCurrentAbs: Double
     ): List<Segment> {
         val n = df.rowsCount()
-        val currents = df[iCol].values().mapNotNull { (it as? Number)?.toDouble() }
+        val currents = df[iCol].values()
+            .filterNotNull()
+            .mapNotNull { (it as? Number)?.toDouble() }
         
         // Si on a perdu des valeurs, retour vide
         if (currents.size != n) return emptyList()
@@ -96,7 +98,9 @@ object VIdleProfileBuilder {
 
         val dt = estimateDtSeries(df) ?: return DoubleArray(n) { 0.0 }
 
-        val voltages = df[vCol].values().mapNotNull { (it as? Number)?.toDouble() }
+        val voltages = df[vCol].values()
+            .filterNotNull()
+            .mapNotNull { (it as? Number)?.toDouble() }
         
         // Si on a perdu des valeurs, retour 0
         if (voltages.size != n) return DoubleArray(n) { 0.0 }
