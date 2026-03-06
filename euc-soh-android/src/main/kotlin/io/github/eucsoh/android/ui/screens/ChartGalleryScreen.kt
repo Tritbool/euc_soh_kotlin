@@ -19,16 +19,16 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import io.github.eucsoh.android.data.model.ReqStatsResult
 import io.github.eucsoh.android.visualization.PdfExportService
-import io.github.eucsoh.android.visualization.SohChartGenerator
+import io.github.eucsoh.android.visualization.SohChartGeneratorFixed
 import kotlinx.coroutines.launch
 
 /**
  * Chart gallery screen showing all SoH metrics visualizations.
  * 
- * Features:
- * - Display all generated charts
- * - Tap to view full-screen
- * - Export all to PDF
+ * NOW USES SohChartGeneratorFixed with:
+ * - Corrected danger thresholds (3σ instead of 2σ)
+ * - Color bands (green = ±1σ, orange = ±2σ)
+ * - Fixed Y-axis label count
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,7 +38,7 @@ fun ChartGalleryScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
-    val chartGenerator = remember { SohChartGenerator(context) }
+    val chartGenerator = remember { SohChartGeneratorFixed(context) }
     val pdfExporter = remember { PdfExportService(context) }
     val scope = rememberCoroutineScope()
 
@@ -157,7 +157,7 @@ fun ChartGalleryScreen(
                         modifier = Modifier.fillMaxSize()
                     ) {
                         TopAppBar(
-                            title = { Text(SohChartGenerator.METRIC_LABELS[name] ?: name) },
+                            title = { Text(SohChartGeneratorFixed.METRIC_LABELS[name] ?: name) },
                             navigationIcon = {
                                 IconButton(onClick = { selectedChart = null }) {
                                     Icon(Icons.Default.Close, "Close")
@@ -196,7 +196,7 @@ fun ChartCard(
                 .padding(12.dp)
         ) {
             Text(
-                text = SohChartGenerator.METRIC_LABELS[metricName] ?: metricName,
+                text = SohChartGeneratorFixed.METRIC_LABELS[metricName] ?: metricName,
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
