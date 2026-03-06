@@ -9,8 +9,11 @@ import androidx.lifecycle.viewModelScope
 import io.github.eucsoh.SohAnalyzer
 import io.github.eucsoh.android.AndroidCsvSource
 import io.github.eucsoh.android.AndroidLogger
+import io.github.eucsoh.android.data.model.WheelConfig
 import io.github.eucsoh.android.data.model.WheelIdentity
+import io.github.eucsoh.android.data.repository.WheelConfigRepository
 import io.github.eucsoh.android.data.repository.WheelRepository
+import io.github.eucsoh.model.MOSFETParams
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +21,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 
 /**
  * Analysis mode selection.
@@ -44,7 +46,11 @@ data class SohUiState(
     val currentFileName: String = "",
     val analysisResult: SohAnalyzer.AnalysisResult? = null,
     val error: String? = null,
-    val useParallelProcessing: Boolean = false
+    val useParallelProcessing: Boolean = false,
+    // MOSFET config support
+    val wheelConfigs: Map<String, WheelConfig> = emptyMap(),
+    val showMosfetDialog: Boolean = false,
+    val configDialogWheel: WheelIdentity? = null
 )
 
 /**
@@ -53,12 +59,9 @@ data class SohUiState(
 class SohViewModel(application: Application) : AndroidViewModel(application) {
     
     private val repository = WheelRepository(application)
+    private val configRepository = WheelConfigRepository(application)
     private val csvSource = AndroidCsvSource(application)
     private val logger = AndroidLogger()
-    private val analyzer = SohAnalyzer(
-        csvSource = csvSource,
-        logger = logger
-    )
     
     private val _state = MutableStateFlow(SohUiState())
     val state: StateFlow<SohUiState> = _state.asStateFlow()
@@ -118,6 +121,26 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
     }
     
     /**
+     * Loads wheel configs from repository.
+     */
+    private fun loadWheelConfigs() {
+        Log.d(TAG, "Loading wheel configs...")
+        viewModelScope.launch {
+            val wheels = _state.value.detectedWheels
+            val configs = wheels.keys.associateWith { mac ->
+                configRepository.getConfig(mac)
+            }
+            Log.d(TAG, "Loaded ${configs.size} wheel configs")
+            configs.forEach { (mac, config) ->
+                if (config.hasMosfetConfig()) {
+                    Log.d(TAG, "  $mac: MOSFET configured (R_ds=${config.mosfetParams?.rDsOn25cTotal})")
+                }
+            }
+            _state.update { it.copy(wheelConfigs = configs) }
+        }
+    }
+    
+    /**
      * Scans for wheels (with optional force refresh).
      */
     fun scanWheels(forceRefresh: Boolean = false) {
@@ -135,6 +158,9 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
                     detectedWheels = wheels,
                     isScanning = false
                 )}
+                
+                // Load configs after scan
+                loadWheelConfigs()
             } catch (e: Exception) {
                 val error = "Erreur scan: ${e.message}"
                 Log.e(TAG, error, e)
@@ -156,6 +182,86 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
             analysisMode = AnalysisMode.AUTO_DETECT,
             error = null
         )}
+    }
+    
+    /**
+     * Shows MOSFET config dialog for a wheel.
+     */
+    fun showMosfetConfig(wheel: WheelIdentity) {
+        Log.d(TAG, "Showing MOSFET config for ${wheel.displayName}")
+        _state.update { it.copy(
+            showMosfetDialog = true,
+            configDialogWheel = wheel
+        )}
+    }
+    
+    /**
+     * Saves MOSFET config for current dialog wheel.
+     */
+    fun saveMosfetConfig(params: MOSFETParams) {
+        val wheel = _state.value.configDialogWheel
+        if (wheel == null) {
+            Log.w(TAG, "Cannot save MOSFET config: no wheel selected")
+            return
+        }
+        
+        Log.d(TAG, "Saving MOSFET config for ${wheel.displayName}: R_ds=${params.rDsOn25cTotal}")
+        viewModelScope.launch {
+            try {
+                configRepository.saveMosfetParams(
+                    macAddress = wheel.macAddress,
+                    rDsOn25cTotal = params.rDsOn25cTotal,
+                    tempCoeffRel = params.tempCoeffRel,
+                    rWiring = params.rWiring
+                )
+                Log.d(TAG, "MOSFET config saved successfully")
+                
+                // Reload configs
+                loadWheelConfigs()
+                
+                // Close dialog
+                _state.update { it.copy(showMosfetDialog = false) }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to save MOSFET config", e)
+                _state.update { it.copy(error = "Erreur sauvegarde config: ${e.message}") }
+            }
+        }
+    }
+    
+    /**
+     * Clears MOSFET config for current dialog wheel.
+     */
+    fun clearMosfetConfig() {
+        val wheel = _state.value.configDialogWheel
+        if (wheel == null) {
+            Log.w(TAG, "Cannot clear MOSFET config: no wheel selected")
+            return
+        }
+        
+        Log.d(TAG, "Clearing MOSFET config for ${wheel.displayName}")
+        viewModelScope.launch {
+            try {
+                configRepository.clearMosfetParams(wheel.macAddress)
+                Log.d(TAG, "MOSFET config cleared successfully")
+                
+                // Reload configs
+                loadWheelConfigs()
+                
+                // Close dialog
+                _state.update { it.copy(showMosfetDialog = false) }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to clear MOSFET config", e)
+                _state.update { it.copy(error = "Erreur suppression config: ${e.message}") }
+            }
+        }
+    }
+    
+    /**
+     * Dismisses MOSFET config dialog.
+     */
+    fun dismissMosfetDialog() {
+        Log.d(TAG, "Dismissing MOSFET config dialog")
+        _state.update { it.copy(showMosfetDialog = false) }
     }
     
     /**
@@ -181,6 +287,18 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
             Log.w(TAG, error)
             _state.update { it.copy(error = error) }
             return
+        }
+        
+        // Get MOSFET config if available
+        val selectedWheel = currentState.selectedWheel
+        val mosfetParams = selectedWheel?.let { wheel ->
+            currentState.wheelConfigs[wheel.macAddress]?.mosfetParams
+        }
+        
+        if (mosfetParams != null) {
+            Log.d(TAG, "Using MOSFET params: R_ds=${mosfetParams.rDsOn25cTotal}, coeff=${mosfetParams.tempCoeffRel}")
+        } else {
+            Log.d(TAG, "No MOSFET params configured, using Req mode")
         }
         
         Log.d(TAG, "Analyzing ${csvPaths.size} files:")
@@ -233,13 +351,14 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
                     }
                 }
                 
-                // Run analysis with progress tracking
-                val analyzerWithProgress = SohAnalyzer(
+                // Run analysis with progress tracking AND mosfet params
+                val analyzerWithConfig = SohAnalyzer(
                     csvSource = csvSource,
+                    mosfetParams = mosfetParams,  // Pass MOSFET config here
                     logger = progressLogger
                 )
                 
-                val result = analyzerWithProgress.analyzeFolderForReq(
+                val result = analyzerWithConfig.analyzeFolderForReq(
                     csvPaths = csvPaths,
                     optimalFrac = 0.3,
                     parallel = currentState.useParallelProcessing
@@ -251,6 +370,15 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
                 Log.d(TAG, "  - R pack nominal: ${result.rPackNominal}")
                 Log.d(TAG, "  - Ea: ${result.eaJPerMol / 1000} kJ/mol")
                 Log.d(TAG, "  - Alarms: ${result.alarms.size}")
+                Log.d(TAG, "  - MOSFET used: ${mosfetParams != null}")
+                
+                // Check if R_batt columns present
+                val hasBattColumns = result.stats.columnNames().any { it.startsWith("R_batt") }
+                if (hasBattColumns) {
+                    Log.d(TAG, "  ✓ R_batt separation successful")
+                } else {
+                    Log.d(TAG, "  - R_batt not computed (no MOSFET config or missing data)")
+                }
                 
                 withContext(Dispatchers.Main) {
                     _state.update { it.copy(
