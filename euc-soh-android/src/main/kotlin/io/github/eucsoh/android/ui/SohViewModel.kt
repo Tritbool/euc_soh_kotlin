@@ -1,6 +1,7 @@
 package io.github.eucsoh.android.ui
 
 import android.app.Application
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
@@ -47,7 +48,8 @@ data class SohUiState(
     val csvFileDetails: List<CsvFileInfo> = emptyList(),
     val showFileDetails: Boolean = false,
     val analysisResult: SohAnalyzer.AnalysisResult? = null,
-    val error: String? = null
+    val error: String? = null,
+    val useParallelProcessing: Boolean = false
 )
 
 /**
@@ -66,15 +68,34 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
     private val _state = MutableStateFlow(SohUiState())
     val state: StateFlow<SohUiState> = _state.asStateFlow()
     
+    private val prefs = application.getSharedPreferences("euc_soh_prefs", Context.MODE_PRIVATE)
+    
     companion object {
         private const val TAG = "SohViewModel"
+        private const val PREF_PARALLEL_PROCESSING = "parallel_processing"
     }
     
     init {
         Log.d(TAG, "ViewModel initialized")
+        
+        // Load parallel processing preference
+        val useParallel = prefs.getBoolean(PREF_PARALLEL_PROCESSING, false)
+        _state.update { it.copy(useParallelProcessing = useParallel) }
+        
         updateScanPathDisplay()
         // Auto-scan on startup
         scanWheels(forceRefresh = false)
+    }
+    
+    /**
+     * Toggles parallel processing on/off.
+     */
+    fun toggleParallelProcessing() {
+        val newValue = !_state.value.useParallelProcessing
+        Log.d(TAG, "Toggling parallel processing: $newValue")
+        
+        prefs.edit().putBoolean(PREF_PARALLEL_PROCESSING, newValue).apply()
+        _state.update { it.copy(useParallelProcessing = newValue) }
     }
     
     /**
@@ -390,6 +411,7 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
         }
         
         Log.d(TAG, "Analyzing ${csvPaths.size} files:")
+        Log.d(TAG, "  Parallel processing: ${currentState.useParallelProcessing}")
         csvPaths.forEachIndexed { idx, path ->
             Log.d(TAG, "  [$idx] $path")
         }
@@ -447,7 +469,7 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
                 val result = analyzerWithProgress.analyzeFolderForReq(
                     csvPaths = csvPaths,
                     optimalFrac = 0.3,
-                    parallel = false
+                    parallel = currentState.useParallelProcessing
                 )
                 
                 Log.d(TAG, "Analysis completed successfully")
