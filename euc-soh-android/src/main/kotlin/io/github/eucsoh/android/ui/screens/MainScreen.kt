@@ -4,6 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Refresh
@@ -14,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.eucsoh.SohAnalyzer
 import io.github.eucsoh.android.data.model.WheelIdentity
@@ -75,7 +78,17 @@ fun MainScreen(
                     LoadingScreen("Recherche des roues...")
                 }
                 state.isAnalyzing -> {
-                    LoadingScreen("Analyse en cours...")
+                    AnalysisProgressScreen(
+                        currentFile = state.currentFile,
+                        totalFiles = state.totalFiles,
+                        fileName = state.currentFileName
+                    )
+                }
+                state.analysisResult != null -> {
+                    ResultsScreen(
+                        result = state.analysisResult!!,
+                        onBack = viewModel::clearResults
+                    )
                 }
                 state.detectedWheels.isEmpty() -> {
                     EmptyStateScreen(
@@ -96,14 +109,6 @@ fun MainScreen(
                     )
                 }
             }
-
-            // Show results if available
-            state.analysisResult?.let { result ->
-                ResultsSummary(
-                    result = result,
-                    onDismiss = viewModel::clearResults
-                )
-            }
         }
     }
 }
@@ -118,6 +123,65 @@ fun LoadingScreen(message: String) {
             CircularProgressIndicator()
             Spacer(Modifier.height(16.dp))
             Text(message)
+        }
+    }
+}
+
+@Composable
+fun AnalysisProgressScreen(
+    currentFile: Int,
+    totalFiles: Int,
+    fileName: String
+) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(32.dp)
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(64.dp)
+            )
+            
+            Spacer(Modifier.height(24.dp))
+            
+            Text(
+                "Analyse en cours...",
+                style = MaterialTheme.typography.headlineSmall
+            )
+            
+            Spacer(Modifier.height(16.dp))
+            
+            if (totalFiles > 0) {
+                Text(
+                    "Fichier $currentFile / $totalFiles",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                
+                Spacer(Modifier.height(8.dp))
+                
+                LinearProgressIndicator(
+                    progress = { currentFile.toFloat() / totalFiles.toFloat() },
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .height(8.dp),
+                )
+                
+                Spacer(Modifier.height(16.dp))
+                
+                if (fileName.isNotEmpty()) {
+                    Text(
+                        fileName,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
         }
     }
 }
@@ -285,87 +349,176 @@ fun WheelCard(
 }
 
 @Composable
-fun ResultsSummary(
+fun ResultsScreen(
     result: SohAnalyzer.AnalysisResult,
-    onDismiss: () -> Unit
+    onBack: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp)
+    ) {
+        Text(
+            "Résultats d'analyse",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
+        )
+        
+        Spacer(Modifier.height(16.dp))
+        
+        // Arrhenius activation energy
+        StatCard(
+            title = "Énergie d'activation (Ea)",
+            value = String.format("%.1f kJ/mol", result.eaJPerMol / 1000),
+            description = "Paramètre d'Arrhenius pour la température"
+        )
+        
+        Spacer(Modifier.height(12.dp))
+        
+        // Pack configuration
+        result.nsGlobal?.let { ns ->
+            StatCard(
+                title = "Configuration pack",
+                value = "${ns}S",
+                description = result.vNominal?.let { 
+                    "Tension nominale: ${String.format("%.1f V", it)}"
+                }
+            )
+            Spacer(Modifier.height(12.dp))
+        }
+        
+        // Pack resistance
+        result.rPackNominal?.let { rPack ->
+            StatCard(
+                title = "Résistance pack nominale",
+                value = String.format("%.1f mΩ", rPack * 1000),
+                description = "Résistance interne du pack batterie"
+            )
+            Spacer(Modifier.height(12.dp))
+        }
+        
+        // Alarms section
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = if (result.alarms.isEmpty())
+                    MaterialTheme.colorScheme.primaryContainer
+                else
+                    MaterialTheme.colorScheme.errorContainer
+            )
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    "Alarmes détectées",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = if (result.alarms.isEmpty())
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    else
+                        MaterialTheme.colorScheme.onErrorContainer
+                )
+                
+                Spacer(Modifier.height(8.dp))
+                
+                if (result.alarms.isEmpty()) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            "✓",
+                            style = MaterialTheme.typography.headlineLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Text(
+                            "Aucune anomalie détectée",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                } else {
+                    Text(
+                        "${result.alarms.size} anomalie(s) trouvée(s)",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                    
+                    Spacer(Modifier.height(12.dp))
+                    
+                    result.alarms.take(5).forEach { alarm ->
+                        Surface(
+                            color = MaterialTheme.colorScheme.surface,
+                            shape = MaterialTheme.shapes.small,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(12.dp)) {
+                                Text(
+                                    alarm.file,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    alarm.reasons,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                    
+                    if (result.alarms.size > 5) {
+                        Text(
+                            "... et ${result.alarms.size - 5} autre(s)",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
+                }
+            }
+        }
+        
+        Spacer(Modifier.height(24.dp))
+        
+        Button(
+            onClick = onBack,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Retour")
+        }
+    }
+}
+
+@Composable
+fun StatCard(
+    title: String,
+    value: String,
+    description: String? = null
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
+        modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                "Résultats de l'analyse",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(Modifier.height(8.dp))
-
-            // Pack configuration
-            result.nsGlobal?.let { ns ->
-                result.vNominal?.let { v ->
-                    Text(
-                        "Configuration: ${ns}S (${String.format("%.1f", v)}V nominal)",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-
-            result.rPackNominal?.let { rPack ->
-                Text(
-                    "Résistance pack nominale: ${String.format("%.1f", rPack * 1000)} mΩ",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            // Arrhenius info
-            Text(
-                "Ea (Arrhenius): ${String.format("%.1f", result.eaJPerMol / 1000)} kJ/mol",
-                style = MaterialTheme.typography.bodySmall,
+                title,
+                style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-
-            // Alarms
-            if (result.alarms.isNotEmpty()) {
-                Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(4.dp))
+            Text(
+                value,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold
+            )
+            description?.let {
+                Spacer(Modifier.height(4.dp))
                 Text(
-                    "⚠️ Alarmes détectées: ${result.alarms.size}",
-                    color = MaterialTheme.colorScheme.error,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.bodyMedium
+                    it,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                
-                // Show first 3 alarms
-                result.alarms.take(3).forEach { alarm ->
-                    Text(
-                        "  • ${alarm.file}: ${alarm.reasons}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-                
-                if (result.alarms.size > 3) {
-                    Text(
-                        "  ... et ${result.alarms.size - 3} autres",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            } else {
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    "✓ Aucune alarme détectée",
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Spacer(Modifier.height(16.dp))
-            TextButton(onClick = onDismiss) {
-                Text("Fermer")
             }
         }
     }
