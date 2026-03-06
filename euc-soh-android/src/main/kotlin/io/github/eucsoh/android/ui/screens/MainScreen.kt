@@ -82,7 +82,8 @@ fun MainScreen(
                     AnalysisProgressScreen(
                         currentFile = state.currentFile,
                         totalFiles = state.totalFiles,
-                        fileName = state.currentFileName
+                        fileName = state.currentFileName,
+                        isParallel = state.useParallelProcessing
                     )
                 }
                 state.analysisResult != null -> {
@@ -134,7 +135,8 @@ fun LoadingScreen(message: String) {
 fun AnalysisProgressScreen(
     currentFile: Int,
     totalFiles: Int,
-    fileName: String
+    fileName: String,
+    isParallel: Boolean
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -157,32 +159,42 @@ fun AnalysisProgressScreen(
             
             Spacer(Modifier.height(16.dp))
             
-            if (totalFiles > 0) {
+            if (isParallel) {
+                // Parallel mode: no detailed progress, just file count
                 Text(
-                    "Fichier $currentFile / $totalFiles",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    "Traitement parallèle de $totalFiles fichiers",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                
-                Spacer(Modifier.height(8.dp))
-                
-                LinearProgressIndicator(
-                    progress = { currentFile.toFloat() / totalFiles.toFloat() },
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .height(8.dp),
-                )
-                
-                Spacer(Modifier.height(16.dp))
-                
-                if (fileName.isNotEmpty()) {
+            } else {
+                // Sequential mode: show detailed progress
+                if (totalFiles > 0) {
                     Text(
-                        fileName,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
+                        "Fichier $currentFile / $totalFiles",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
                     )
+                    
+                    Spacer(Modifier.height(8.dp))
+                    
+                    LinearProgressIndicator(
+                        progress = { currentFile.toFloat() / totalFiles.toFloat() },
+                        modifier = Modifier
+                            .fillMaxWidth(0.8f)
+                            .height(8.dp),
+                    )
+                    
+                    Spacer(Modifier.height(16.dp))
+                    
+                    if (fileName.isNotEmpty()) {
+                        Text(
+                            fileName,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
         }
@@ -309,7 +321,7 @@ fun WheelListContent(
                         fontWeight = FontWeight.Medium
                     )
                     Text(
-                        if (useParallelProcessing) "Plusieurs fichiers en même temps" else "Un fichier à la fois",
+                        if (useParallelProcessing) "Plus rapide, pas de suivi détaillé" else "Suivi fichier par fichier",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
