@@ -87,4 +87,10 @@ dependencies {
     
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    
+    // Charts - MPAndroidChart
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    
+    // PDF Export - iText7 for Android
+    implementation("com.itextpdf:itext7-core:7.2.5")
 }
