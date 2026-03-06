@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-03-04T15:58:16.426Z" hostname="IlPalazzo" time="0.022">
+<testsuite name="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-03-06T10:11:58.821Z" hostname="IlPalazzo" time="0.022">
   <properties/>
-  <testcase name="computeThresholds uses optimal fraction correctly()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.003"/>
-  <testcase name="detectAlarms filters null values correctly()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.005"/>
+  <testcase name="computeThresholds uses optimal fraction correctly()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.002"/>
+  <testcase name="detectAlarms filters null values correctly()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.006"/>
   <testcase name="computeThresholds higher_is_bad sets limit above mean()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.002"/>
   <testcase name="computeThresholds calculates correct mean and std()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.001"/>
   <testcase name="detectAlarms identifies outlier beyond threshold()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.001"/>

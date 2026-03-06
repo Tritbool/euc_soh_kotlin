@@ -56,7 +56,7 @@ object ReqStatsComputer {
         mosfetParams: MOSFETParams? = null,
         eaJPerMol: Double? = null
     ): FileStats? {
-        val df = try {
+        var df = try {
             if (csvSource != null) {
                 val stream = csvSource.openCsvStream(csvPath)
                 DataFrame.readCSV(stream)
@@ -147,7 +147,9 @@ object ReqStatsComputer {
                     }
                 }
                 // Add column (DataFrame is immutable, we work with data)
+
                 socVoltCol = "soc_voltage"
+                df = df.add(socVoltCol) { socVolt }
             }
         }
 
