@@ -1,15 +1,13 @@
 package io.github.eucsoh.android.ui.screens
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -19,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import io.github.eucsoh.SohAnalyzer
 import io.github.eucsoh.android.data.model.WheelIdentity
 import io.github.eucsoh.android.ui.SohViewModel
 
@@ -87,7 +84,6 @@ fun MainScreen(
                     )
                 }
                 state.analysisResult != null -> {
-                    // USE ENHANCED VERSION WITH FILES + CHARTS BUTTONS
                     ResultsScreenEnhanced(
                         result = state.analysisResult!!,
                         selectedWheel = state.selectedWheel,
@@ -106,14 +102,30 @@ fun MainScreen(
                     WheelListContent(
                         wheels = state.detectedWheels.values.toList(),
                         selectedWheel = state.selectedWheel,
+                        wheelConfigs = state.wheelConfigs,
                         onSelectWheel = viewModel::selectWheel,
                         onAnalyze = viewModel::startAnalysis,
+                        onConfigMosfet = viewModel::showMosfetConfig,
                         error = state.error,
                         onDismissError = viewModel::clearError,
                         useParallelProcessing = state.useParallelProcessing,
                         onToggleParallel = viewModel::toggleParallelProcessing
                     )
                 }
+            }
+            
+            // MOSFET config dialog
+            if (state.showMosfetDialog && state.configDialogWheel != null) {
+                val wheel = state.configDialogWheel!!
+                val currentParams = state.wheelConfigs[wheel.macAddress]?.mosfetParams
+                
+                MosfetConfigDialog(
+                    wheelName = wheel.displayName,
+                    currentParams = currentParams,
+                    onSave = viewModel::saveMosfetConfig,
+                    onClear = viewModel::clearMosfetConfig,
+                    onDismiss = viewModel::dismissMosfetDialog
+                )
             }
         }
     }
@@ -162,14 +174,12 @@ fun AnalysisProgressScreen(
             Spacer(Modifier.height(16.dp))
             
             if (isParallel) {
-                // Parallel mode: no detailed progress, just file count
                 Text(
                     "Traitement parallèle de $totalFiles fichiers",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else {
-                // Sequential mode: show detailed progress
                 if (totalFiles > 0) {
                     Text(
                         "Fichier $currentFile / $totalFiles",
@@ -251,8 +261,10 @@ fun EmptyStateScreen(
 fun WheelListContent(
     wheels: List<WheelIdentity>,
     selectedWheel: WheelIdentity?,
+    wheelConfigs: Map<String, io.github.eucsoh.android.data.model.WheelConfig>,
     onSelectWheel: (WheelIdentity) -> Unit,
     onAnalyze: () -> Unit,
+    onConfigMosfet: (WheelIdentity) -> Unit,
     error: String?,
     onDismissError: () -> Unit,
     useParallelProcessing: Boolean,
@@ -274,7 +286,9 @@ fun WheelListContent(
                 WheelCard(
                     wheel = wheel,
                     isSelected = wheel == selectedWheel,
-                    onClick = { onSelectWheel(wheel) }
+                    onClick = { onSelectWheel(wheel) },
+                    hasMosfetConfig = wheelConfigs[wheel.macAddress]?.hasMosfetConfig() == true,
+                    onConfigClick = { onConfigMosfet(wheel) }
                 )
             }
         }
@@ -353,7 +367,9 @@ fun WheelListContent(
 fun WheelCard(
     wheel: WheelIdentity,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    hasMosfetConfig: Boolean,
+    onConfigClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -366,34 +382,91 @@ fun WheelCard(
                 MaterialTheme.colorScheme.surface
         )
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                wheel.displayName,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            wheel.manufacturer?.let { make ->
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Left: wheel info
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    "${make}${wheel.model?.let { " $it" } ?: ""}",
-                    style = MaterialTheme.typography.bodyMedium,
+                    wheel.displayName,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                wheel.manufacturer?.let { make ->
+                    Text(
+                        "${make}${wheel.model?.let { " $it" } ?: ""}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Spacer(Modifier.height(4.dp))
+
+                Text(
+                    "${wheel.csvFiles.size} fichiers CSV",
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+
+                Text(
+                    "MAC: ${wheel.macAddress}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.outline
+                )
             }
-
-            Spacer(Modifier.height(4.dp))
-
-            Text(
-                "${wheel.csvFiles.size} fichiers CSV",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Text(
-                "MAC: ${wheel.macAddress}",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline
-            )
+            
+            // Right: MOSFET badge + config button
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // MOSFET badge
+                if (hasMosfetConfig) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = MaterialTheme.shapes.small
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Settings,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                "MOSFET",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
+                }
+                
+                // Config button
+                IconButton(
+                    onClick = onConfigClick,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Settings,
+                        contentDescription = "Config MOSFET",
+                        tint = if (hasMosfetConfig)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }
