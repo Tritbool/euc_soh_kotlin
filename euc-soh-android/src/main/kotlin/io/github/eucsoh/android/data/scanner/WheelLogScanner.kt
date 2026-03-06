@@ -72,6 +72,9 @@ class WheelLogScanner(private val context: Context) {
                     )
                 }
             }
+            else{
+                Log.w(TAG, "WheelLog directory name does not match MAC pattern ${wheelLogDir.absolutePath}/${macFolder}")
+            }
         }
 
         return result

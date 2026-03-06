@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="io.github.eucsoh.analysis.ArrheniusNormalizerTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-03-06T10:11:58.585Z" hostname="IlPalazzo" time="0.03">
+<testsuite name="io.github.eucsoh.analysis.ArrheniusNormalizerTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-03-06T10:51:45.198Z" hostname="IlPalazzo" time="0.032">
   <properties/>
   <testcase name="normalizeRBattTo25C at 25C returns same value()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.011"/>
   <testcase name="normalizeRBattTo25C handles high temperature()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.001"/>
@@ -9,9 +9,9 @@
   <testcase name="normalizeRBattTo25C is symmetric()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.001"/>
   <testcase name="normalizeRBattTo25C clamps negative results to zero()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.0"/>
   <testcase name="normalizeRBattTo25C with null temperature returns measured value()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.0"/>
-  <testcase name="normalizeRBattTo25C at higher temperature reduces resistance()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.0"/>
+  <testcase name="normalizeRBattTo25C at higher temperature reduces resistance()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.001"/>
   <testcase name="normalizeRBattTo25C returns zero for zero input()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.0"/>
-  <testcase name="normalizeRBattTo25C different Ea values change sensitivity()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.001"/>
+  <testcase name="normalizeRBattTo25C different Ea values change sensitivity()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.0"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>
