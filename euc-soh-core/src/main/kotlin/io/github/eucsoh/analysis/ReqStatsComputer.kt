@@ -173,45 +173,50 @@ object ReqStatsComputer {
         var i_Min = maxOf(iMinBase, curThr)
         var i_Max = iMaxBase
 
-        // Filter for Req calculation - with null safety
-        val voltages = df[vCol].values()
-            .filterNotNull()
-            .mapNotNull { (it as? Number)?.toDouble() }
-        val currents = df[iCol].values()
-            .filterNotNull()
-            .mapNotNull { (it as? Number)?.toDouble() }
-        val speeds = df[sCol].values()
-            .filterNotNull()
-            .mapNotNull { (it as? Number)?.toDouble() }
-
-        // Check if we have data after filtering nulls
-        if (voltages.size != df.rowsCount() || currents.size != df.rowsCount() || speeds.size != df.rowsCount()) {
-            if (Constants.DEBUG) println("[WARNING] Null values found in critical columns for $csvPath")
-            return null
+        // Build arrays with null-safe extraction
+        // Python implicitly filters nulls via boolean conditions - we do the same
+        val rowCount = df.rowsCount()
+        val voltages = DoubleArray(rowCount)
+        val currents = DoubleArray(rowCount)
+        val speeds = DoubleArray(rowCount)
+        
+        for (i in 0 until rowCount) {
+            voltages[i] = (df[vCol][i] as? Number)?.toDouble() ?: Double.NaN
+            currents[i] = (df[iCol][i] as? Number)?.toDouble() ?: Double.NaN
+            speeds[i] = (df[sCol][i] as? Number)?.toDouble() ?: Double.NaN
         }
 
         val socValues = if (socVoltCol != null) {
             // Use computed SoC voltage
-            List(df.rowsCount()) { i -> (voltages[i] / (ns ?: 1) - 3.0) / 1.2 * 100.0 }
+            DoubleArray(rowCount) { i -> 
+                val v = voltages[i]
+                if (v.isNaN()) Double.NaN
+                else (v / (ns ?: 1) - 3.0) / 1.2 * 100.0
+            }
         } else if (socCol != null) {
-            df[socCol].values().map { (it as? Number)?.toDouble() ?: Double.NaN }
+            DoubleArray(rowCount) { i ->
+                (df[socCol][i] as? Number)?.toDouble() ?: Double.NaN
+            }
         } else {
-            List(df.rowsCount()) { Double.NaN }
+            DoubleArray(rowCount) { Double.NaN }
         }
 
-        var filteredIndices = (0 until df.rowsCount()).filter { i ->
+        // Filter indices - nulls (NaN) will naturally fail the comparison conditions
+        var filteredIndices = (0 until rowCount).filter { i ->
+            !speeds[i].isNaN() && !currents[i].isNaN() && !voltages[i].isNaN() &&
             speeds[i] > speedThr &&
-                    abs(currents[i]) >= i_Min &&
-                    abs(currents[i]) <= i_Max
+            abs(currents[i]) >= i_Min &&
+            abs(currents[i]) <= i_Max
         }
 
         if (filteredIndices.size < 50) {
             i_Min *= 0.7
             i_Max *= 1.3
-            filteredIndices = (0 until df.rowsCount()).filter { i ->
+            filteredIndices = (0 until rowCount).filter { i ->
+                !speeds[i].isNaN() && !currents[i].isNaN() && !voltages[i].isNaN() &&
                 speeds[i] > speedThr &&
-                        abs(currents[i]) >= i_Min &&
-                        abs(currents[i]) <= i_Max
+                abs(currents[i]) >= i_Min &&
+                abs(currents[i]) <= i_Max
             }
         }
 
