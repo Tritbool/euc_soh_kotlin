@@ -3,9 +3,11 @@ package io.github.eucsoh.analysis
 import io.github.eucsoh.Constants
 import io.github.eucsoh.CsvSource
 import io.github.eucsoh.model.MOSFETParams
+import org.apache.http.entity.InputStreamEntity
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
 import org.jetbrains.kotlinx.dataframe.io.readCSV
+import java.io.InputStream
 import kotlin.math.abs
 import kotlin.math.round
 
@@ -56,9 +58,10 @@ object ReqStatsComputer {
         mosfetParams: MOSFETParams? = null,
         eaJPerMol: Double? = null
     ): FileStats? {
+        var stream: InputStream?=null
         var df = try {
             if (csvSource != null) {
-                val stream = csvSource.openCsvStream(csvPath)
+                stream = csvSource.openCsvStream(csvPath)
                 DataFrame.readCSV(stream)
             } else {
                 DataFrame.readCSV(csvPath)
@@ -67,9 +70,12 @@ object ReqStatsComputer {
             if (Constants.DEBUG) println("[ERROR] Failed to read $csvPath: ${e.message}")
             return null
         }
+        finally{
+            try{stream?.close()}
+            catch (e:Exception){}
+        }
 
         if (df.rowsCount() == 0) return null
-
         val source = SourceDetection.detectSource(df)
 
         val vCol = "voltage"
