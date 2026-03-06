@@ -55,9 +55,10 @@ class WheelLogScanner(private val context: Context) {
                 val mac = macFolder.name.replace("_", ":").uppercase()
                 Log.d(TAG, "Found MAC folder: ${macFolder.name} -> $mac")
 
-                // Find all CSV files in this folder
+                // Find all CSV files in this folder (exclude RAW_*.csv)
                 val csvFiles = macFolder.walkTopDown()
                     .filter { it.isFile && it.extension.equals("csv", ignoreCase = true) }
+                    .filter { !it.name.startsWith("RAW_", ignoreCase = true) }
                     .map { Uri.fromFile(it) }
                     .toList()
 
@@ -98,7 +99,7 @@ class WheelLogScanner(private val context: Context) {
                 val mac = folderName.replace("_", ":").uppercase()
                 Log.d(TAG, "Found MAC folder: $folderName -> $mac")
 
-                // Find all CSV files recursively in this folder
+                // Find all CSV files recursively in this folder (exclude RAW_*.csv)
                 val csvFiles = mutableListOf<Uri>()
                 collectCsvFiles(macFolder, csvFiles)
 
@@ -119,11 +120,13 @@ class WheelLogScanner(private val context: Context) {
 
     /**
      * Recursively collects CSV file URIs from a DocumentFile tree.
+     * Excludes RAW_*.csv files (binary dumps).
      */
     private fun collectCsvFiles(doc: DocumentFile, collector: MutableList<Uri>) {
         if (doc.isFile) {
             val name = doc.name ?: return
-            if (name.endsWith(".csv", ignoreCase = true)) {
+            if (name.endsWith(".csv", ignoreCase = true) && 
+                !name.startsWith("RAW_", ignoreCase = true)) {
                 collector.add(doc.uri)
             }
         } else if (doc.isDirectory) {
