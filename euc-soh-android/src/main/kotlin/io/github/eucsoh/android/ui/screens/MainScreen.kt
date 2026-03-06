@@ -87,8 +87,10 @@ fun MainScreen(
                     )
                 }
                 state.analysisResult != null -> {
-                    ResultsScreen(
+                    // USE ENHANCED VERSION WITH FILES + CHARTS BUTTONS
+                    ResultsScreenEnhanced(
                         result = state.analysisResult!!,
+                        selectedWheel = state.selectedWheel,
                         onBack = viewModel::clearResults
                     )
                 }
@@ -394,139 +396,4 @@ fun WheelCard(
             )
         }
     }
-}
-
-@Composable
-fun ResultsScreen(
-    result: SohAnalyzer.AnalysisResult,
-    onBack: () -> Unit
-) {
-    // Convert DataFrame to simple structure for UI
-    val summary = result.buildSummary("Current Wheel")
-    val columnNames = summary.logs.firstOrNull()?.keys?.toList() ?: emptyList()
-    val rows = summary.logs
-    
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        // Header with summary
-        Surface(
-            color = MaterialTheme.colorScheme.primaryContainer,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    "Résultats d'analyse",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    "${rows.size} fichiers analysés, ${columnNames.size} métriques calculées",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Text(
-                    "Ea = ${String.format("%.1f", summary.arrhenius.eaKjPerMol)} kJ/mol",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                if (result.alarms.isNotEmpty()) {
-                    Text(
-                        "⚠️ ${result.alarms.size} alarme(s)",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.error,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-        }
-        
-        // Data table with horizontal and vertical scroll
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
-                .verticalScroll(rememberScrollState())
-        ) {
-            Column {
-                // Header row
-                Row(modifier = Modifier.padding(8.dp)) {
-                    columnNames.forEach { colName ->
-                        Text(
-                            colName,
-                            modifier = Modifier
-                                .width(150.dp)
-                                .padding(horizontal = 4.dp),
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-                
-                HorizontalDivider()
-                
-                // Data rows
-                rows.forEachIndexed { rowIdx, row ->
-                    Surface(
-                        color = if (rowIdx % 2 == 0) 
-                            MaterialTheme.colorScheme.surface 
-                        else 
-                            MaterialTheme.colorScheme.surfaceVariant,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(modifier = Modifier.padding(8.dp)) {
-                            columnNames.forEach { colName ->
-                                val value = row[colName]
-                                Text(
-                                    formatValue(value),
-                                    modifier = Modifier
-                                        .width(150.dp)
-                                        .padding(horizontal = 4.dp),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-        // Back button
-        Button(
-            onClick = onBack,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text("Retour")
-        }
-    }
-}
-
-private fun formatValue(value: Any?): String {
-    return when (value) {
-        null -> ""
-        is Double -> if (value.isNaN() || value.isInfinite()) "N/A" else String.format("%.4f", value)
-        is Float -> if (value.isNaN() || value.isInfinite()) "N/A" else String.format("%.4f", value)
-        is Number -> value.toString()
-        is Boolean -> if (value) "✓" else "✗"
-        else -> value.toString()
-    }
-}
-
-private fun SohAnalyzer.AnalysisResult.buildSummary(wheelName: String): SohAnalyzer.SummaryData {
-    val analyzer = SohAnalyzer(
-        csvSource = null,
-        mosfetParams = null,
-        logger = object : io.github.eucsoh.Logger {
-            override fun d(tag: String, message: String) {}
-            override fun e(tag: String, message: String, throwable: Throwable?) {}
-        }
-    )
-    return analyzer.buildSummary(this, wheelName)
 }
