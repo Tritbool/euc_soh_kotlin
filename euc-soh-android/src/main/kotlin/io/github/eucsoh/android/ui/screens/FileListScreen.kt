@@ -22,6 +22,7 @@ import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.core.net.toUri
 
 /**
  * File list screen for a wheel.
@@ -111,12 +112,12 @@ fun FileListScreen(
         selectedFileForPreview?.let { fileInfo ->
             var previewLines by remember { mutableStateOf<List<String>>(emptyList()) }
             LaunchedEffect(fileInfo) {
-                previewLines = fileManager.previewCsv(Uri.parse(fileInfo.uri))
+                previewLines = fileManager.previewCsv(fileInfo.uri.toString().toUri())
             }
 
             AlertDialog(
                 onDismissRequest = { selectedFileForPreview = null },
-                title = { Text("Preview: ${fileInfo.name}") },
+                title = { Text("Preview: ${fileInfo.fileName}") },
                 text = {
                     LazyColumn {
                         items(previewLines) { line ->
@@ -160,7 +161,7 @@ fun FileListItem(
         ) {
             // File name
             Text(
-                text = fileInfo.name,
+                text = fileInfo.fileName,
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -180,7 +181,7 @@ fun FileListItem(
                 )
 
                 Text(
-                    text = dateFormatter.format(Date(fileInfo.lastModified)),
+                    text = dateFormatter.format((fileInfo.isValid)),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -200,7 +201,7 @@ fun FileListItem(
                     Text("Preview")
                 }
 
-                TextButton(onClick = { onOpenWith(fileInfo.uri) }) {
+                TextButton(onClick = { onOpenWith(fileInfo.uri.toString()) }) {
                     Icon(Icons.Default.OpenInNew, "Open", modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("Open")

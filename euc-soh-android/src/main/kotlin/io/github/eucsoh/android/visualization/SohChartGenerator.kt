@@ -208,7 +208,7 @@ class SohChartGenerator(private val context: Context) {
         val yAxisLeft = chart.axisLeft
         yAxisLeft.textSize = 12f
         yAxisLeft.setDrawGridLines(true)
-        yAxisLeft.granularityEnabled = true
+        yAxisLeft.setLabelCount(6, false)
 
         chart.axisRight.isEnabled = false
     }

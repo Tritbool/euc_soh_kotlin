@@ -69,6 +69,7 @@ MERGED from [androidx.sqlite:sqlite:2.4.0] /home/tritbool/.gradle/caches/9.3.0/t
 MERGED from [androidx.annotation:annotation-experimental:1.4.1] /home/tritbool/.gradle/caches/9.3.0/transforms/81bdf505d2e7b28aebc83a2e23ee5b92/transformed/annotation-experimental-1.4.1/AndroidManifest.xml:2:1-7:12
 MERGED from [io.github.oshai:kotlin-logging-android:7.0.0] /home/tritbool/.gradle/caches/9.3.0/transforms/b7cb918f7553d7b9586540813911090a/transformed/kotlin-logging-release/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/tritbool/.gradle/caches/9.3.0/transforms/de058ff62351ee108557114251ad411c/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:17:1-27:12
+MERGED from [com.github.PhilJay:MPAndroidChart:v3.1.0] /home/tritbool/.gradle/caches/9.3.0/transforms/3ef53bbb128f4fe3854df4f522c74086/transformed/MPAndroidChart-v3.1.0/AndroidManifest.xml:2:1-20:12
 MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /home/tritbool/.gradle/caches/9.3.0/transforms/a9f69e97ae8b7d8cbec6a6701dab2e97/transformed/cursoradapter-1.0.0/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/tritbool/.gradle/caches/9.3.0/transforms/8f179887b6d9645efd1ea65dc41b0bf4/transformed/profileinstaller-1.3.1/AndroidManifest.xml:17:1-55:12
 MERGED from [androidx.cardview:cardview:1.0.0] /home/tritbool/.gradle/caches/9.3.0/transforms/d52dd0acf69a774953141a844be20c45/transformed/cardview-1.0.0/AndroidManifest.xml:17:1-22:12
@@ -296,6 +297,8 @@ MERGED from [io.github.oshai:kotlin-logging-android:7.0.0] /home/tritbool/.gradl
 MERGED from [io.github.oshai:kotlin-logging-android:7.0.0] /home/tritbool/.gradle/caches/9.3.0/transforms/b7cb918f7553d7b9586540813911090a/transformed/kotlin-logging-release/AndroidManifest.xml:5:5-44
 MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/tritbool/.gradle/caches/9.3.0/transforms/de058ff62351ee108557114251ad411c/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/tritbool/.gradle/caches/9.3.0/transforms/de058ff62351ee108557114251ad411c/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [com.github.PhilJay:MPAndroidChart:v3.1.0] /home/tritbool/.gradle/caches/9.3.0/transforms/3ef53bbb128f4fe3854df4f522c74086/transformed/MPAndroidChart-v3.1.0/AndroidManifest.xml:16:5-18:41
+MERGED from [com.github.PhilJay:MPAndroidChart:v3.1.0] /home/tritbool/.gradle/caches/9.3.0/transforms/3ef53bbb128f4fe3854df4f522c74086/transformed/MPAndroidChart-v3.1.0/AndroidManifest.xml:16:5-18:41
 MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /home/tritbool/.gradle/caches/9.3.0/transforms/a9f69e97ae8b7d8cbec6a6701dab2e97/transformed/cursoradapter-1.0.0/AndroidManifest.xml:20:5-44
 MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /home/tritbool/.gradle/caches/9.3.0/transforms/a9f69e97ae8b7d8cbec6a6701dab2e97/transformed/cursoradapter-1.0.0/AndroidManifest.xml:20:5-44
 MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/tritbool/.gradle/caches/9.3.0/transforms/8f179887b6d9645efd1ea65dc41b0bf4/transformed/profileinstaller-1.3.1/AndroidManifest.xml:21:5-44

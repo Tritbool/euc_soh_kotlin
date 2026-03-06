@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="io.github.eucsoh.analysis.ArrheniusNormalizerTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-03-06T14:03:03.166Z" hostname="IlPalazzo" time="0.038">
+<testsuite name="io.github.eucsoh.analysis.ArrheniusNormalizerTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-03-06T14:42:21.643Z" hostname="IlPalazzo" time="0.199">
   <properties/>
-  <testcase name="normalizeRBattTo25C at 25C returns same value()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.014"/>
-  <testcase name="normalizeRBattTo25C handles high temperature()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.001"/>
-  <testcase name="normalizeRBattTo25C typical EUC scenario()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.002"/>
-  <testcase name="normalizeRBattTo25C at lower temperature increases resistance()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.0"/>
-  <testcase name="normalizeRBattTo25C handles extreme cold()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.0"/>
-  <testcase name="normalizeRBattTo25C is symmetric()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.0"/>
-  <testcase name="normalizeRBattTo25C clamps negative results to zero()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.0"/>
-  <testcase name="normalizeRBattTo25C with null temperature returns measured value()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.001"/>
-  <testcase name="normalizeRBattTo25C at higher temperature reduces resistance()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.0"/>
-  <testcase name="normalizeRBattTo25C returns zero for zero input()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.0"/>
-  <testcase name="normalizeRBattTo25C different Ea values change sensitivity()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.0"/>
+  <testcase name="normalizeRBattTo25C at 25C returns same value()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.05"/>
+  <testcase name="normalizeRBattTo25C handles high temperature()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.002"/>
+  <testcase name="normalizeRBattTo25C typical EUC scenario()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.031"/>
+  <testcase name="normalizeRBattTo25C at lower temperature increases resistance()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.003"/>
+  <testcase name="normalizeRBattTo25C handles extreme cold()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.001"/>
+  <testcase name="normalizeRBattTo25C is symmetric()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.008"/>
+  <testcase name="normalizeRBattTo25C clamps negative results to zero()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.009"/>
+  <testcase name="normalizeRBattTo25C with null temperature returns measured value()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.002"/>
+  <testcase name="normalizeRBattTo25C at higher temperature reduces resistance()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.002"/>
+  <testcase name="normalizeRBattTo25C returns zero for zero input()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.002"/>
+  <testcase name="normalizeRBattTo25C different Ea values change sensitivity()" classname="io.github.eucsoh.analysis.ArrheniusNormalizerTest" time="0.002"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>
