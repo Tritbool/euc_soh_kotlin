@@ -1,6 +1,7 @@
 package io.github.eucsoh.android.ui.screens
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -388,173 +389,119 @@ fun ResultsScreen(
     result: SohAnalyzer.AnalysisResult,
     onBack: () -> Unit
 ) {
+    val df = result.stats
+    val columnNames = df.columnNames()
+    val rowCount = df.rowsCount()
+    
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
     ) {
-        Text(
-            "Résultats d'analyse",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
-        )
-        
-        Spacer(Modifier.height(16.dp))
-        
-        // Arrhenius activation energy
-        StatCard(
-            title = "Énergie d'activation (Ea)",
-            value = String.format("%.1f kJ/mol", result.eaJPerMol / 1000),
-            description = "Paramètre d'Arrhenius pour la température"
-        )
-        
-        Spacer(Modifier.height(12.dp))
-        
-        // Pack configuration
-        result.nsGlobal?.let { ns ->
-            StatCard(
-                title = "Configuration pack",
-                value = "${ns}S",
-                description = result.vNominal?.let { 
-                    "Tension nominale: ${String.format("%.1f V", it)}"
-                }
-            )
-            Spacer(Modifier.height(12.dp))
-        }
-        
-        // Pack resistance
-        result.rPackNominal?.let { rPack ->
-            StatCard(
-                title = "Résistance pack nominale",
-                value = String.format("%.1f mΩ", rPack * 1000),
-                description = "Résistance interne du pack batterie"
-            )
-            Spacer(Modifier.height(12.dp))
-        }
-        
-        // Alarms section
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = if (result.alarms.isEmpty())
-                    MaterialTheme.colorScheme.primaryContainer
-                else
-                    MaterialTheme.colorScheme.errorContainer
-            )
+        // Header with summary
+        Surface(
+            color = MaterialTheme.colorScheme.primaryContainer,
+            modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    "Alarmes détectées",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = if (result.alarms.isEmpty())
-                        MaterialTheme.colorScheme.onPrimaryContainer
-                    else
-                        MaterialTheme.colorScheme.onErrorContainer
+                    "Résultats d'analyse",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
                 )
-                
                 Spacer(Modifier.height(8.dp))
-                
-                if (result.alarms.isEmpty()) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "$rowCount fichiers analysés, ${columnNames.size} métriques calculées",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    "Ea = ${String.format("%.1f", result.eaJPerMol / 1000)} kJ/mol",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                if (result.alarms.isNotEmpty()) {
+                    Text(
+                        "⚠️ ${result.alarms.size} alarme(s)",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+        
+        // Data table with horizontal and vertical scroll
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .verticalScroll(rememberScrollState())
+        ) {
+            Column {
+                // Header row
+                Row(modifier = Modifier.padding(8.dp)) {
+                    columnNames.forEach { colName ->
                         Text(
-                            "✓",
-                            style = MaterialTheme.typography.headlineLarge,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(Modifier.width(12.dp))
-                        Text(
-                            "Aucune anomalie détectée",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                            colName,
+                            modifier = Modifier
+                                .width(150.dp)
+                                .padding(horizontal = 4.dp),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
-                } else {
-                    Text(
-                        "${result.alarms.size} anomalie(s) trouvée(s)",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onErrorContainer
-                    )
-                    
-                    Spacer(Modifier.height(12.dp))
-                    
-                    result.alarms.take(5).forEach { alarm ->
-                        Surface(
-                            color = MaterialTheme.colorScheme.surface,
-                            shape = MaterialTheme.shapes.small,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp)
-                        ) {
-                            Column(modifier = Modifier.padding(12.dp)) {
+                }
+                
+                Divider()
+                
+                // Data rows
+                (0 until rowCount).forEach { rowIdx ->
+                    Surface(
+                        color = if (rowIdx % 2 == 0) 
+                            MaterialTheme.colorScheme.surface 
+                        else 
+                            MaterialTheme.colorScheme.surfaceVariant,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(modifier = Modifier.padding(8.dp)) {
+                            columnNames.forEach { colName ->
+                                val value = df[colName][rowIdx]
                                 Text(
-                                    alarm.file,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    alarm.reasons,
+                                    formatValue(value),
+                                    modifier = Modifier
+                                        .width(150.dp)
+                                        .padding(horizontal = 4.dp),
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         }
-                    }
-                    
-                    if (result.alarms.size > 5) {
-                        Text(
-                            "... et ${result.alarms.size - 5} autre(s)",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onErrorContainer,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
                     }
                 }
             }
         }
         
-        Spacer(Modifier.height(24.dp))
-        
+        // Back button
         Button(
             onClick = onBack,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
         ) {
             Text("Retour")
         }
     }
 }
 
-@Composable
-fun StatCard(
-    title: String,
-    value: String,
-    description: String? = null
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                title,
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                value,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
-            )
-            description?.let {
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    it,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
+private fun formatValue(value: Any?): String {
+    return when (value) {
+        null -> ""
+        is Double -> if (value.isNaN() || value.isInfinite()) "N/A" else String.format("%.4f", value)
+        is Float -> if (value.isNaN() || value.isInfinite()) "N/A" else String.format("%.4f", value)
+        is Number -> value.toString()
+        is Boolean -> if (value) "✓" else "✗"
+        else -> value.toString()
     }
 }
