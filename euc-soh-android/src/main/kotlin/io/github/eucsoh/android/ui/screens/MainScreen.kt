@@ -389,9 +389,10 @@ fun ResultsScreen(
     result: SohAnalyzer.AnalysisResult,
     onBack: () -> Unit
 ) {
-    val df = result.stats
-    val columnNames = df.columnNames()
-    val rowCount = df.rowsCount()
+    // Convert DataFrame to simple structure for UI
+    val summary = result.buildSummary("Current Wheel")
+    val columnNames = summary.logs.firstOrNull()?.keys?.toList() ?: emptyList()
+    val rows = summary.logs
     
     Column(
         modifier = Modifier
@@ -410,11 +411,11 @@ fun ResultsScreen(
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "$rowCount fichiers analysés, ${columnNames.size} métriques calculées",
+                    "${rows.size} fichiers analysés, ${columnNames.size} métriques calculées",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    "Ea = ${String.format("%.1f", result.eaJPerMol / 1000)} kJ/mol",
+                    "Ea = ${String.format("%.1f", summary.arrhenius.eaKjPerMol)} kJ/mol",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 if (result.alarms.isNotEmpty()) {
@@ -453,10 +454,10 @@ fun ResultsScreen(
                     }
                 }
                 
-                Divider()
+                HorizontalDivider()
                 
                 // Data rows
-                (0 until rowCount).forEach { rowIdx ->
+                rows.forEachIndexed { rowIdx, row ->
                     Surface(
                         color = if (rowIdx % 2 == 0) 
                             MaterialTheme.colorScheme.surface 
@@ -466,7 +467,7 @@ fun ResultsScreen(
                     ) {
                         Row(modifier = Modifier.padding(8.dp)) {
                             columnNames.forEach { colName ->
-                                val value = df[colName][rowIdx]
+                                val value = row[colName]
                                 Text(
                                     formatValue(value),
                                     modifier = Modifier
@@ -504,4 +505,16 @@ private fun formatValue(value: Any?): String {
         is Boolean -> if (value) "✓" else "✗"
         else -> value.toString()
     }
+}
+
+private fun SohAnalyzer.AnalysisResult.buildSummary(wheelName: String): SohAnalyzer.SummaryData {
+    val analyzer = SohAnalyzer(
+        csvSource = null,
+        mosfetParams = null,
+        logger = object : io.github.eucsoh.Logger {
+            override fun d(tag: String, message: String) {}
+            override fun e(tag: String, message: String, throwable: Throwable?) {}
+        }
+    )
+    return analyzer.buildSummary(this, wheelName)
 }
