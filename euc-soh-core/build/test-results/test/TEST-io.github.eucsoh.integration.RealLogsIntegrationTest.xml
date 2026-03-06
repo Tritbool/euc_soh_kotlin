@@ -1,11 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="io.github.eucsoh.integration.RealLogsIntegrationTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-03-06T10:52:32.670Z" hostname="IlPalazzo" time="0.001">
+<testsuite name="io.github.eucsoh.integration.RealLogsIntegrationTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-03-06T14:03:58.798Z" hostname="IlPalazzo" time="4.579">
   <properties/>
-  <testcase name="real logs analysis pipeline runs end-to-end()" classname="io.github.eucsoh.integration.RealLogsIntegrationTest" time="0.0"/>
-  <testcase name="real logs folder structure is correct if it exists()" classname="io.github.eucsoh.integration.RealLogsIntegrationTest" time="0.0"/>
-  <system-out><![CDATA[⊘ Skipping real logs test: no CSV files found in src/test/resources/real_logs
-  To enable this test, add real EUC log files to this directory
-⊘ Warning: real_logs folder exists but contains no CSV files
+  <testcase name="real logs analysis pipeline runs end-to-end()" classname="io.github.eucsoh.integration.RealLogsIntegrationTest" time="4.576"/>
+  <testcase name="real logs folder structure is correct if it exists()" classname="io.github.eucsoh.integration.RealLogsIntegrationTest" time="0.001"/>
+  <system-out><![CDATA[✓ Found 7 real log files in src/test/resources/real_logs
+  Running full analysis pipeline...
+[calibrateEa] Calibrated Ea=10.0kJ/mol (T range: 22.0–35.0°C, n=7)
+  ✓ Analyzed 7 logs
+  ✓ Inferred pack: 32S, 118.4V nominal
+  ✓ Req_median threshold: μ=0,0428Ω, σ=0,0359Ω
+  ✓ All critical metrics present
+  ✓ Km range: 2293 - 7929 km (Δ=5636 km)
+  ✓ Detected 4 alarms
+    - Gaussian: 4 alarms
+  ✓ Summary built successfully
+    Req band: 0,0081 - 0,0462 Ω
+    Pack: 32S, R_pack=0,448Ω
+
+✓ Real logs integration test PASSED
+✓ Found 7 valid CSV files in real_logs folder
 ]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

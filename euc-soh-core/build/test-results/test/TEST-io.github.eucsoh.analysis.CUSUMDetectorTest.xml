@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="io.github.eucsoh.analysis.CUSUMDetectorTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-03-06T10:51:45.232Z" hostname="IlPalazzo" time="0.185">
+<testsuite name="io.github.eucsoh.analysis.CUSUMDetectorTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-03-06T14:03:03.207Z" hostname="IlPalazzo" time="0.181">
   <properties/>
-  <testcase name="detectCUSUM ignores small fluctuations()" classname="io.github.eucsoh.analysis.CUSUMDetectorTest" time="0.176"/>
+  <testcase name="detectCUSUM ignores small fluctuations()" classname="io.github.eucsoh.analysis.CUSUMDetectorTest" time="0.172"/>
   <testcase name="detectCUSUM handles zero sigma reference()" classname="io.github.eucsoh.analysis.CUSUMDetectorTest" time="0.002"/>
   <testcase name="detectCUSUM computes reference from early data only()" classname="io.github.eucsoh.analysis.CUSUMDetectorTest" time="0.001"/>
   <testcase name="detectCUSUM handles insufficient reference data()" classname="io.github.eucsoh.analysis.CUSUMDetectorTest" time="0.0"/>

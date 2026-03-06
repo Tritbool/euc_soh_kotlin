@@ -87,6 +87,9 @@ object ReqStatsComputer {
             if (Constants.DEBUG) println("[ERROR] Missing required columns in $csvPath")
             return null
         }
+        df= df.filter { row ->
+            row[vCol] != null && row[iCol] != null
+        }
 
         val tempBoardCol = when {
             "system_temp" in df.columnNames() -> "system_temp"

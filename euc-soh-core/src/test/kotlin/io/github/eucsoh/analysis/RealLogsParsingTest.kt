@@ -1,5 +1,7 @@
 package io.github.eucsoh.analysis
 
+import io.github.eucsoh.Constants.KNOWN_SERIES
+import io.github.eucsoh.Constants.MAXIIMAL_CELL_V
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -233,7 +235,7 @@ class RealLogsParsingTest {
 
             // Typical EUC voltage ranges (16s ≈ 67V, 24s ≈ 100V)
             assertTrue(
-                result.vIdle in 50.0..120.0,
+                result.vIdle in 50.0..KNOWN_SERIES.last()*MAXIIMAL_CELL_V,
                 "${file.name}: V_idle ${result.vIdle}V is outside typical EUC range (50-120V)"
             )
 
@@ -246,7 +248,7 @@ class RealLogsParsingTest {
             // Ns should be typical EUC pack size (16s to 24s)
             assertNotNull(result.ns, "${file.name} should detect Ns")
             assertTrue(
-                result.ns!! in 12..30,
+                result.ns!! in KNOWN_SERIES,
                 "${file.name}: Ns ${result.ns} is outside typical EUC range (12-30)"
             )
         }
