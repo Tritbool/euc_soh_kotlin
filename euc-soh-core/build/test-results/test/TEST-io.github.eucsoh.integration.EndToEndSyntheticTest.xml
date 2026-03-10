@@ -1,38 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="io.github.eucsoh.integration.EndToEndSyntheticTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-03-06T14:42:41.379Z" hostname="IlPalazzo" time="58.782">
+<testsuite name="io.github.eucsoh.integration.EndToEndSyntheticTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-03-10T09:48:19.287Z" hostname="IlPalazzo" time="49.858">
   <properties/>
-  <testcase name="synthetic data respects pack configuration inference()" classname="io.github.eucsoh.integration.EndToEndSyntheticTest" time="22.046"/>
-  <testcase name="CUSUM detects regime change in synthetic data()" classname="io.github.eucsoh.integration.EndToEndSyntheticTest" time="4.654"/>
-  <testcase name="detect MOSFET degradation in synthetic data()" classname="io.github.eucsoh.integration.EndToEndSyntheticTest" time="4.747"/>
-  <testcase name="buildSummary generates complete export structure()" classname="io.github.eucsoh.integration.EndToEndSyntheticTest" time="7.149"/>
-  <testcase name="detect battery degradation in synthetic data()" classname="io.github.eucsoh.integration.EndToEndSyntheticTest" time="6.584"/>
-  <testcase name="stable synthetic data produces no alarms()" classname="io.github.eucsoh.integration.EndToEndSyntheticTest" time="2.274"/>
-  <testcase name="linear trend detection on gradual degradation()" classname="io.github.eucsoh.integration.EndToEndSyntheticTest" time="11.322"/>
-  <system-out><![CDATA[[calibrateEa] Temperature span too narrow (1.5200000000000031°C < 5°C), using default
+  <testcase name="synthetic data respects pack configuration inference()" classname="io.github.eucsoh.integration.EndToEndSyntheticTest" time="13.041"/>
+  <testcase name="CUSUM detects regime change in synthetic data()" classname="io.github.eucsoh.integration.EndToEndSyntheticTest" time="4.491"/>
+  <testcase name="detect MOSFET degradation in synthetic data()" classname="io.github.eucsoh.integration.EndToEndSyntheticTest" time="4.61"/>
+  <testcase name="buildSummary generates complete export structure()" classname="io.github.eucsoh.integration.EndToEndSyntheticTest" time="6.899"/>
+  <testcase name="detect battery degradation in synthetic data()" classname="io.github.eucsoh.integration.EndToEndSyntheticTest" time="6.793"/>
+  <testcase name="stable synthetic data produces no alarms()" classname="io.github.eucsoh.integration.EndToEndSyntheticTest" time="2.269"/>
+  <testcase name="linear trend detection on gradual degradation()" classname="io.github.eucsoh.integration.EndToEndSyntheticTest" time="11.751"/>
+  <system-out><![CDATA[[calibrateEa] Temperature span too narrow (1.480000000000004°C < 5°C), using default
 ✓ Inferred pack: 24S, 88.80000000000001V nominal
-[calibrateEa] Temperature span too narrow (0.980000000000004°C < 5°C), using default
+[calibrateEa] Temperature span too narrow (1.1199999999999974°C < 5°C), using default
 ✓ CUSUM detected 5 regime changes
-  - Alarm at 1900 km (knee at 6240 km)
+  - Alarm at 300 km (knee at 6240 km)
+  - Alarm at 700 km (knee at 6240 km)
+  - Alarm at 300 km (knee at 6240 km)
+  - Alarm at 900 km (knee at 6240 km)
   - Alarm at 500 km (knee at 6240 km)
-  - Alarm at 1400 km (knee at 6240 km)
-  - Alarm at 700 km (knee at 6240 km)
-  - Alarm at 700 km (knee at 6240 km)
-[calibrateEa] Calibrated Ea=10.0kJ/mol (T range: 40.83–61.46°C, n=104)
-✓ Detected 9 MOSFET/thermal alarms
-[ERROR] Missing required columns in /tmp/euc_soh_test5611060930825455150/summary_test/test_summary_summary.csv
+[calibrateEa] Calibrated Ea=10.0kJ/mol (T range: 40.48–60.53°C, n=104)
+✓ Detected 15 MOSFET/thermal alarms
+[ERROR] Missing required columns in /tmp/euc_soh_test4218617462560301517/summary_test/test_summary_summary.csv
 [calibrateEa] Temperature span too narrow (1.1999999999999957°C < 5°C), using default
-[ERROR] Missing required columns in /tmp/euc_soh_test5611060930825455150/summary_test/test_summary_summary.csv
+[ERROR] Missing required columns in /tmp/euc_soh_test4218617462560301517/summary_test/test_summary_summary.csv
 ✓ Summary: 156 logs, 150-23400 km
-  Req band: 0,2819-0,2831 Ω
+  Req band: 0,2816-0,2831 Ω
   Pack: 32S, R_pack=0,448 Ω
-✓ Detected 31 battery alarms
-[calibrateEa] Temperature span too narrow (1.7899999999999991°C < 5°C), using default
-✓ Stable data: 5 alarms / 52 logs (9,6%)
-[calibrateEa] Temperature span too narrow (4.489999999999995°C < 5°C), using default
+✓ Detected 23 battery alarms
+[calibrateEa] Temperature span too narrow (1.4399999999999977°C < 5°C), using default
+✓ Stable data: 4 alarms / 52 logs (7,7%)
+[calibrateEa] Temperature span too narrow (4.530000000000001°C < 5°C), using default
 ✓ Detected 3 linear trends
   - Upward trend on R_batt_median_25C: +-0,0000Ω/1000km (p=0,000)
   - Upward trend on R_mosfet_hot: +0,0001Ω/1000km (p=0,000)
-  - Upward trend on temp_board_max: +0,0492Ω/1000km (p=0,000)
+  - Upward trend on temp_board_max: +0,0467Ω/1000km (p=0,000)
 ]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

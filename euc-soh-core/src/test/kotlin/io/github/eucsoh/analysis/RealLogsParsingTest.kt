@@ -249,7 +249,7 @@ class RealLogsParsingTest {
             assertNotNull(result.ns, "${file.name} should detect Ns")
             assertTrue(
                 result.ns!! in KNOWN_SERIES,
-                "${file.name}: Ns ${result.ns} is outside typical EUC range (12-30)"
+                "${file.name}: Ns ${result.ns} is outside typical EUC range"
             )
         }
     }
