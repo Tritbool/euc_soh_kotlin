@@ -1,4 +1,4 @@
-#Tue Mar 10 13:11:21 CET 2026
+#Tue Mar 10 15:08:33 CET 2026
 base.0=/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/build/intermediates/dex/release/mergeDexRelease/classes.dex
 base.1=/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/build/intermediates/dex/release/mergeDexRelease/classes2.dex
 base.2=/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/build/intermediates/dex/release/mergeDexRelease/classes3.dex

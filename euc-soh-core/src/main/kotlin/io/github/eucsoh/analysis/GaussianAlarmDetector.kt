@@ -1,6 +1,8 @@
 package io.github.eucsoh.analysis
 
 import io.github.eucsoh.Constants
+import io.github.eucsoh.Logger
+import io.github.eucsoh.NoOpLogger
 import io.github.eucsoh.model.ThresholdInfo
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
@@ -12,7 +14,10 @@ import kotlin.math.pow
  * Port of detect_alarms_gauss() from soh_core_en.py.
  */
 object GaussianAlarmDetector {
-
+    private val logger = object : io.github.eucsoh.Logger {
+        override fun d(tag: String, message: String) {}
+        override fun e(tag: String, message: String, throwable: Throwable?) {}
+    }
     data class Alarm(
         val file: String,
         val wheelKm: Double?,
@@ -65,7 +70,7 @@ object GaussianAlarmDetector {
         val dfSorted = df.sortBy("Req_median")
         val nOpt = maxOf(3, (dfSorted.rowsCount() * optimalFrac).toInt())
         val dfOpt = dfSorted.take(nOpt)
-
+        logger.d("GaussianAlarmDetector", "total=${df.rowsCount()}, nOpt=$nOpt")
         for (metric in METRICS) {
             if (metric !in df.columnNames()) continue
 
