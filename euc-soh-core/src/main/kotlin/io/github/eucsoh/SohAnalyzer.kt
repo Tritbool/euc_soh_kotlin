@@ -214,7 +214,7 @@ class SohAnalyzer(
         logger.d("SohAnalyzer", "Pack config: Ns=$nsGlobal, Vnom=$vNominal, Rpack=$rPackNominal")
 
         // Compute Req band (10th-90th percentile of optimal logs)
-        val dfSorted = dfStats.sortBy("Req_median")
+        val dfSorted = dfStats.sortBy("Req_median_25C")
         val nOpt = maxOf(3, (dfSorted.rowsCount() * optimalFrac).toInt())
         val dfOpt = dfSorted.take(nOpt)
 

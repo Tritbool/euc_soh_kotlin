@@ -360,7 +360,7 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
                 
                 val result = analyzerWithConfig.analyzeFolderForReq(
                     csvPaths = csvPaths,
-                    optimalFrac = 0.5,
+                    optimalFrac = 1.0,
                     parallel = currentState.useParallelProcessing
                 )
                 

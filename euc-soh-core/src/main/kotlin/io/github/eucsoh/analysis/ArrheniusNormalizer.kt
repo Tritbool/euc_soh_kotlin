@@ -106,7 +106,7 @@ object ArrheniusNormalizer {
         val slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX)
         val eaCalibrated = slope * R_GAS
 
-        val eaClamped = eaCalibrated.coerceIn(DEFAULT_EA, 50000.0)
+        val eaClamped = eaCalibrated.coerceIn(10000.0, 50000.0)
 
         if (Constants.DEBUG) {
             println("[calibrateEa] Calibrated Ea=${eaClamped / 1000}kJ/mol (T range: $tMin–$tMax°C, n=$n)")

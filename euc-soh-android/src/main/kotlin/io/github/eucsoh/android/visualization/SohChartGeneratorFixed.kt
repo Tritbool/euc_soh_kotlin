@@ -36,7 +36,7 @@ class SohChartGeneratorFixed(private val context: Context) {
         const val CHART_HEIGHT = 800
 
         // Fraction des meilleurs logs (triés par reqMedian) pour calculer μ/σ de référence
-        const val OPTIMAL_FRAC = 0.5f
+        const val OPTIMAL_FRAC = 1.0f
 
         // Seuils gaussiens — iso Python : n_sigma_band=1.0, n_sigma_danger=2.0
         const val N_SIGMA_BAND    = 1.0f  // Lignes vertes  : μ ± 1σ
@@ -106,8 +106,8 @@ class SohChartGeneratorFixed(private val context: Context) {
         val globalMax = allValues.maxOrNull()?.toFloat() ?: mu
 
         // 5. Calcul des seuils gaussiens
-        val greenLow  = mu - N_SIGMA_BAND * sigma
-        val greenHigh = mu + N_SIGMA_BAND * sigma
+        val greenLow  = if (higherIsBad) mu - N_SIGMA_BAND * sigma else mu + N_SIGMA_BAND * sigma
+        val greenHigh = if (higherIsBad) mu + N_SIGMA_BAND * sigma else mu - N_SIGMA_BAND * sigma
         // danger et warning : côté "bad" uniquement, iso Python axhspan asymétrique
         val warningThreshold = if (higherIsBad) mu + N_SIGMA_WARNING * sigma else mu - N_SIGMA_WARNING * sigma
         val dangerThreshold  = if (higherIsBad) mu + N_SIGMA_DANGER  * sigma else mu - N_SIGMA_DANGER  * sigma
@@ -144,9 +144,9 @@ class SohChartGeneratorFixed(private val context: Context) {
         })
         // Vert haut (labelisé)
         yAxis.addLimitLine(LimitLine(greenHigh, "±1σ").apply {
-            lineColor = COLOR_GREEN
+            lineColor = COLOR_ORANGE
             lineWidth = 1.5f
-            textColor = COLOR_GREEN
+            textColor = COLOR_ORANGE
             textSize = 10f
         })
         // Orange : côté bad uniquement

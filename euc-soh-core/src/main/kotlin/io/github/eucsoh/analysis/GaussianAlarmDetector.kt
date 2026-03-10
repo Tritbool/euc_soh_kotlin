@@ -62,7 +62,9 @@ object GaussianAlarmDetector {
         logger: Logger = NoOpLogger
     ): Map<String, ThresholdInfo> {
         val thresholds = mutableMapOf<String, ThresholdInfo>()
-
+        for (i in 0 until minOf(5, df.rowsCount())) {
+            logger.d("GaussianAlarmDetector", "raw[$i] Req_median=${df["Req_median"][i]}")
+        }
         // Sort by Req_median to pick optimal logs
         val dfSorted = df.sortBy("Req_median")
         val nOpt = maxOf(3, (dfSorted.rowsCount() * optimalFrac).toInt())

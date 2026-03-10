@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-03-10T14:08:12.050Z" hostname="IlPalazzo" time="0.053">
+<testsuite name="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-03-10T14:56:02.777Z" hostname="IlPalazzo" time="0.102">
   <properties/>
-  <testcase name="computeThresholds uses optimal fraction correctly()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.013"/>
-  <testcase name="detectAlarms filters null values correctly()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.011"/>
-  <testcase name="computeThresholds higher_is_bad sets limit above mean()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.003"/>
-  <testcase name="computeThresholds calculates correct mean and std()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.002"/>
-  <testcase name="detectAlarms identifies outlier beyond threshold()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.002"/>
-  <testcase name="computeThresholds lower_is_bad sets limit below mean()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.002"/>
-  <testcase name="detectAlarms realistic EUC scenario()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.005"/>
+  <testcase name="computeThresholds uses optimal fraction correctly()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.019"/>
+  <testcase name="detectAlarms filters null values correctly()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.017"/>
+  <testcase name="computeThresholds higher_is_bad sets limit above mean()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.011"/>
+  <testcase name="computeThresholds calculates correct mean and std()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.004"/>
+  <testcase name="detectAlarms identifies outlier beyond threshold()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.004"/>
+  <testcase name="computeThresholds lower_is_bad sets limit below mean()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.003"/>
+  <testcase name="detectAlarms realistic EUC scenario()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.009"/>
   <testcase name="detectAlarms no alarm when all within threshold()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.001"/>
-  <testcase name="detectAlarms handles multiple metric violations()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.001"/>
-  <testcase name="computeThresholds handles insufficient data gracefully()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.002"/>
-  <testcase name="detectAlarms checks absolute limit when enabled()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.006"/>
+  <testcase name="detectAlarms handles multiple metric violations()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.002"/>
+  <testcase name="computeThresholds handles insufficient data gracefully()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.004"/>
+  <testcase name="detectAlarms checks absolute limit when enabled()" classname="io.github.eucsoh.analysis.GaussianAlarmDetectorTest" time="0.008"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>
