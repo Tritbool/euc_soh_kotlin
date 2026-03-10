@@ -19,8 +19,8 @@
 /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/visualization/SohChartGenerator.kt:130: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
             "Danger: ${String.format("%.3f", dangerThreshold)}"
                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/visualization/SohChartGeneratorFixed.kt:153: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
-            "Danger: ${String.format("%.3f", dangerThreshold)}"
+/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/visualization/SohChartGeneratorFixed.kt:162: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+            "Danger: ${String.format("%.3f", dangerThreshold)}").apply {
                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
    Explanation for issues of type "DefaultLocale":

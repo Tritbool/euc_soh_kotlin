@@ -137,11 +137,11 @@
         explanation="Calling `String#toLowerCase()` or `#toUpperCase()` **without specifying an explicit locale** is a common source of bugs. The reason for that is that those methods will use the current locale on the user&apos;s device, and even though the code appears to work correctly when you are developing the app, it will fail in some locales. For example, in the Turkish locale, the uppercase replacement for `i` is **not** `I`.&#xA;&#xA;If you want the methods to just perform ASCII replacement, for example to convert an enum name, call `String#toUpperCase(Locale.ROOT)` instead. If you really want to use the current locale, call `String#toUpperCase(Locale.getDefault())` instead."
         url="https://developer.android.com/reference/java/util/Locale.html#default_locale"
         urls="https://developer.android.com/reference/java/util/Locale.html#default_locale"
-        errorLine1="            &quot;Danger: ${String.format(&quot;%.3f&quot;, dangerThreshold)}&quot;"
+        errorLine1="            &quot;Danger: ${String.format(&quot;%.3f&quot;, dangerThreshold)}&quot;).apply {"
         errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/visualization/SohChartGeneratorFixed.kt"
-            line="153"
+            line="162"
             column="24"/>
     </issue>
 

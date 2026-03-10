@@ -179,7 +179,7 @@ document.getElementById(id).style.display = 'none';
     <div class="mdl-layout__header-row">
       <span class="mdl-layout-title">Lint Report: 27 warnings</span>
       <div class="mdl-layout-spacer"></div>
-      <nav class="mdl-navigation mdl-layout--large-screen-only">Check performed at Fri Mar 06 16:57:40 CET 2026 by AGP (8.5.0)</nav>
+      <nav class="mdl-navigation mdl-layout--large-screen-only">Check performed at Tue Mar 10 13:11:29 CET 2026 by AGP (8.5.0)</nav>
     </div>
   </header>
   <div class="mdl-layout__drawer">
@@ -329,14 +329,15 @@ Dismiss</button>            </div>
 <span class="lineno"> 132 </span>        dangerLine.lineColor = COLOR_RED_LINE
 <span class="lineno"> 133 </span>        dangerLine.lineWidth = <span class="number">2f</span></pre>
 
-<span class="location"><a href="../../src/main/kotlin/io/github/eucsoh/android/visualization/SohChartGeneratorFixed.kt">../../src/main/kotlin/io/github/eucsoh/android/visualization/SohChartGeneratorFixed.kt</a>:153</span>: <span class="message">Implicitly using the default locale is a common source of bugs: Use <code>String.format(Locale, ...)</code> instead</span><br /><pre class="errorlines">
-<span class="lineno"> 150 </span>        yAxis.removeAllLimitLines()
-<span class="lineno"> 151 </span>        <span class="keyword">val</span> dangerLine = LimitLine(
-<span class="lineno"> 152 </span>            dangerThreshold,
-<span class="caretline"><span class="lineno"> 153 </span>            <span class="string">"Danger: ${</span><span class="warning">String.format(<span class="string">"%.3f"</span>, dangerThreshold)</span><span class="string">}"</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-<span class="lineno"> 154 </span>        )
-<span class="lineno"> 155 </span>        dangerLine.lineColor = COLOR_RED_LINE
-<span class="lineno"> 156 </span>        dangerLine.lineWidth = <span class="number">3f</span></pre>
+<span class="location"><a href="../../src/main/kotlin/io/github/eucsoh/android/visualization/SohChartGeneratorFixed.kt">../../src/main/kotlin/io/github/eucsoh/android/visualization/SohChartGeneratorFixed.kt</a>:162</span>: <span class="message">Implicitly using the default locale is a common source of bugs: Use <code>String.format(Locale, ...)</code> instead</span><br /><pre class="errorlines">
+<span class="lineno"> 159 </span>  <span class="comment">// Rouge danger (pointillé) — même valeur que warning car N_SIGMA_DANGER=N_SIGMA_WARNING=2.0</span>
+<span class="lineno"> 160 </span>  <span class="comment">// On ajoute quand même la ligne rouge pour la lisibilité (label "Danger: X.XXX")</span>
+<span class="lineno"> 161 </span>  yAxis.addLimitLine(LimitLine(dangerThreshold,
+<span class="caretline"><span class="lineno"> 162 </span>      <span class="string">"Danger: ${</span><span class="warning">String.format(<span class="string">"%.3f"</span>, dangerThreshold)</span><span class="string">}"</span>).apply {&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+<span class="lineno"> 163 </span>      lineColor = COLOR_RED
+<span class="lineno"> 164 </span>      lineWidth = <span class="number">3f</span>
+<span class="lineno"> 165 </span>      enableDashedLine(<span class="number">12f</span>, <span class="number">8f</span>, <span class="number">0f</span>)
+</pre>
 
 </div>
 <div class="metadata"><div class="explanation" id="explanationDefaultLocale" style="display: none;">

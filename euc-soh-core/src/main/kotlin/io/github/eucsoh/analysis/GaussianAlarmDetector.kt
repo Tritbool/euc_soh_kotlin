@@ -5,6 +5,7 @@ import io.github.eucsoh.model.ThresholdInfo
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
 import kotlin.math.abs
+import kotlin.math.pow
 
 /**
  * Gaussian-based alarm detection for SoH metrics.
@@ -76,7 +77,8 @@ object GaussianAlarmDetector {
             if (vals.size < 3) continue
 
             val mean = vals.average()
-            val std = kotlin.math.sqrt(vals.sumOf { (it - mean) * (it - mean) } / (vals.size - 1))
+            // Bessel corrected std dev.
+            val std = kotlin.math.sqrt(vals.sumOf { (it - mean).pow(2) } / (vals.size - 1))
 
             val direction = DIRECTION[metric] ?: "higher_is_bad"
             val limit = if (direction == "higher_is_bad") {

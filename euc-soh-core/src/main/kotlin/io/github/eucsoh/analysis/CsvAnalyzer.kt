@@ -1,6 +1,8 @@
 package io.github.eucsoh.analysis
 
 import io.github.eucsoh.Constants
+import io.github.eucsoh.Constants.KNOWN_SERIES
+import io.github.eucsoh.Constants.MAXIIMAL_CELL_V
 import io.github.eucsoh.CsvSource
 import io.github.eucsoh.model.FileStats
 import io.github.eucsoh.model.MOSFETParams
@@ -8,6 +10,7 @@ import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
 import org.jetbrains.kotlinx.dataframe.io.readCSV
 import kotlin.math.abs
+import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.round
 
@@ -85,10 +88,14 @@ object CsvAnalyzer {
 
         if (socCol != null) {
             val vIdleMax = df[vCol].values().filterIsInstance<Number>().maxOfOrNull { it.toDouble() } ?: 0.0
-            val nsEst = round(vIdleMax / 4.2).toInt()
+            val nsEst = {
+                val ceiled = ceil(vIdleMax / MAXIIMAL_CELL_V).toInt()
+                val rounded = round(vIdleMax / MAXIIMAL_CELL_V).toInt()
+                if (ceiled in KNOWN_SERIES) ceiled else rounded
+            }
 
-            if (nsEst in Constants.NS_MIN..Constants.NS_MAX) {
-                ns = nsEst
+            if (nsEst() in Constants.NS_MIN..Constants.NS_MAX) {
+                ns = nsEst()
 
                 // Check if we have a valid SoC reference at full charge
                 val fullMask = df.filter {

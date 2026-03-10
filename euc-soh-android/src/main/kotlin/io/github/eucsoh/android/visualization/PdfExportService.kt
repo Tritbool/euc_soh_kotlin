@@ -46,7 +46,7 @@ class PdfExportService(private val context: Context) {
             throw IllegalArgumentException("Cannot export empty stats")
         }
 
-        val chartGenerator = SohChartGenerator(context)
+        val chartGenerator = SohChartGeneratorFixed(context)
         val document = PdfDocument()
 
         try {
@@ -69,7 +69,7 @@ class PdfExportService(private val context: Context) {
                 paint.textSize = 24f
                 paint.color = android.graphics.Color.BLACK
                 canvas.drawText(
-                    "$wheelName - ${SohChartGenerator.METRIC_LABELS[metricName] ?: metricName}",
+                    "$wheelName - ${SohChartGeneratorFixed.METRIC_LABELS[metricName] ?: metricName}",
                     MARGIN.toFloat(),
                     50f,
                     paint
