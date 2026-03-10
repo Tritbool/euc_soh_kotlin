@@ -242,7 +242,8 @@ class SohAnalyzer(
             df = dfStats,
             optimalFrac = optimalFrac,
             nSigma = 2.0,
-            useBattMetric = true
+            useBattMetric = true,
+            logger = logger
         )
 
         // Detect alarms

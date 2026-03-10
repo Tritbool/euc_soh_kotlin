@@ -14,10 +14,6 @@ import kotlin.math.pow
  * Port of detect_alarms_gauss() from soh_core_en.py.
  */
 object GaussianAlarmDetector {
-    private val logger = object : io.github.eucsoh.Logger {
-        override fun d(tag: String, message: String) {}
-        override fun e(tag: String, message: String, throwable: Throwable?) {}
-    }
     data class Alarm(
         val file: String,
         val wheelKm: Double?,
@@ -62,7 +58,8 @@ object GaussianAlarmDetector {
         df: DataFrame<*>,
         optimalFrac: Double = 0.5,
         nSigma: Double = 2.0,
-        useBattMetric: Boolean = false
+        useBattMetric: Boolean = false,
+        logger: Logger = NoOpLogger
     ): Map<String, ThresholdInfo> {
         val thresholds = mutableMapOf<String, ThresholdInfo>()
 
@@ -91,7 +88,7 @@ object GaussianAlarmDetector {
             } else {
                 mean - nSigma * std
             }
-
+            logger.d("GaussianAlarmDetector", "$metric: vals=${vals.size}, mean=$mean, std=$std, limit=$limit")
             thresholds[metric] = ThresholdInfo(
                 mean = mean,
                 std = std,
