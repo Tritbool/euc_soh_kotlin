@@ -50,8 +50,8 @@ class SohChartGeneratorFixed(private val context: Context) {
         const val COLOR_DATA_BLUE = 0xFF2196F3.toInt()
 
         val METRIC_LABELS = mapOf(
-            "reqMedian"    to "Rₑₖ median (Ω)",
-            "req95p"       to "Rₑₖ 95p (Ω)",
+            "reqMedian"    to "Req median (Ω)",
+            "req95p"       to "Req 95p (Ω)",
             "sagMedian"    to "Sag median (V)",
             "sag95p"       to "Sag 95p (V)",
             "sagMax"       to "Sag max (V)",

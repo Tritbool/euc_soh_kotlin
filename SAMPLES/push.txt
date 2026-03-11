@@ -1,0 +1,3 @@
+adb push EUC\ World/     /storage/0000-0000/Downloads/EUC\ World
+
+adb push WheelLog/     /storage/0000-0000/Downloads/WheelLog
