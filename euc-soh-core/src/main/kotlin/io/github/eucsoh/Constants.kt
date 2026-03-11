@@ -24,21 +24,56 @@ object Constants {
 
     const val LOWER_IS_BAD = "lower_is_bad"
 
-    enum class MetaColumns(val csv_code: String){
+    enum class CommonColumns(val csv_code: String) {
+        VOLTAGE("voltage"),
+        CURRENT("current"),
+        SPEED("speed"),
+    }
+
+    enum class WheelLogColumns(val csv_code: String) {
+        SOC("battery_level"),
+        BOARD_TEMPERATURE("temp"),
+        MOTOR_TEMPERATURE("temp2"),
+        CURRENT_PHASE("phase_current"),
+    }
+
+    enum class EUCWorldColumns(val csv_code: String) {
+        BOARD_TEMPERATURE("system_temp"),
+        MOTOR_TEMPERATURE("temp_motor"),
+        CURRENT_PHASE("current_phase"),
+        SOC("battery")
+    }
+
+    enum class MetaColumns(val csv_code: String) {
         FILE("file"),
         DATETIME_FIRST("datetime_first"),
         WHEEL_KM("wheel_km"),
         WHEEL_KM_SOURCE("wheel_km_source"),
         SOC_REF_OK("soc_ref_ok"),
+        SOC_REF_V_FULL("soc_ref_v_full"),
+        NS("Ns"),
+        NS_GLOBAL("ns_global"),
+        V_NOMINAL("v_nominal"),
+        V_IDLE("v_idle"),
+        R_PACK_NOMINAL("r_pack_nominal"),
+        SOURCE("source"),
+        N_POINTS("n_points"),
+
+
     }
 
-    enum class Metrics(val csv_code: String, val higher_is_bad: Boolean=true, val label: String? = null) {
+    enum class Metrics(
+        val csv_code: String,
+        val higher_is_bad: Boolean = true,
+        val label: String? = null
+    ) {
         I_MAX("i_max", true, "Max battery current (A)"),
         I_95P("i_95p", true, "Battery current 95th percentile (A)"),
         I_PHASE_MAX("i_phase_max", true, "Max phase current (A)"),
         I_PHASE_95P("i_phase_95p", true, "Phase current 95th percentile (A)"),
         I_PHASE2_INT("I_phase2_int", true, "Phase I² dose – ∫ I_phase² dt (A²·s)"),
         R_BATT_MEDIAN("R_batt_median", true, "R_batt median (Ω)"),
+        REQ_MEAN("Req_mean", true, "Equivalent resistance mean (Ω)"),
         REQ_MEDIAN("Req_median", true, "Equivalent resistance median (Ω)"),
         REQ_MEDIAN_25C("Req_median_25C", true, "Equivalent resistance median @25°C (Ω)"),
         REQ_95P("Req_95p", true, "Equivalent resistance 95th percentile (Ω)"),

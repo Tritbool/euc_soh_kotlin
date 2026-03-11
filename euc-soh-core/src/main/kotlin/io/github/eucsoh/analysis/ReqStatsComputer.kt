@@ -1,11 +1,13 @@
 package io.github.eucsoh.analysis
 
 import io.github.eucsoh.Constants
+import io.github.eucsoh.Constants.CommonColumns
+import io.github.eucsoh.Constants.WheelLogColumns
+import io.github.eucsoh.Constants.EUCWorldColumns
 import io.github.eucsoh.Constants.KNOWN_SERIES
 import io.github.eucsoh.Constants.MAXIIMAL_CELL_V
 import io.github.eucsoh.CsvSource
 import io.github.eucsoh.model.MOSFETParams
-import org.apache.http.entity.InputStreamEntity
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
 import org.jetbrains.kotlinx.dataframe.io.readCSV
@@ -81,9 +83,9 @@ object ReqStatsComputer {
         if (df.rowsCount() == 0) return null
         val source = SourceDetection.detectSource(df)
 
-        val vCol = "voltage"
-        val iCol = "current"
-        val sCol = "speed"
+        val vCol = CommonColumns.VOLTAGE.csv_code
+        val iCol = CommonColumns.CURRENT.csv_code
+        val sCol = CommonColumns.SPEED.csv_code
 
         // Check required columns
         if (vCol !in df.columnNames() || iCol !in df.columnNames() || sCol !in df.columnNames()) {
@@ -95,24 +97,24 @@ object ReqStatsComputer {
         }
 
         val tempBoardCol = when {
-            "system_temp" in df.columnNames() -> "system_temp"
-            "temp" in df.columnNames() -> "temp"
+            EUCWorldColumns.BOARD_TEMPERATURE.csv_code in df.columnNames() -> EUCWorldColumns.BOARD_TEMPERATURE.csv_code
+            WheelLogColumns.BOARD_TEMPERATURE.csv_code in df.columnNames() -> WheelLogColumns.BOARD_TEMPERATURE.csv_code
             else -> null
         }
 
         val tempMotorCol = when {
-            "temp_motor" in df.columnNames() -> "temp_motor"
-            "temp2" in df.columnNames() -> "temp2"
+            EUCWorldColumns.MOTOR_TEMPERATURE.csv_code in df.columnNames() -> EUCWorldColumns.MOTOR_TEMPERATURE.csv_code
+            WheelLogColumns.MOTOR_TEMPERATURE.csv_code in df.columnNames() -> WheelLogColumns.MOTOR_TEMPERATURE.csv_code
             else -> null
         }
 
         val iPhaseCol = when {
-            "current_phase" in df.columnNames() -> "current_phase"
-            "phase_current" in df.columnNames() -> "phase_current"
+            EUCWorldColumns.CURRENT_PHASE.csv_code in df.columnNames() -> EUCWorldColumns.CURRENT_PHASE.csv_code
+            WheelLogColumns.CURRENT_PHASE.csv_code in df.columnNames() -> WheelLogColumns.CURRENT_PHASE.csv_code
             else -> null
         }
 
-        val socCol = listOf("battery_level", "battery", "soc")
+        val socCol = listOf(WheelLogColumns.SOC.csv_code, EUCWorldColumns.SOC.csv_code, "soc")
             .firstOrNull { it in df.columnNames() }
 
         val (wheelKm, kmSource) = SourceDetection.normalizeDistanceTotal(df, source)

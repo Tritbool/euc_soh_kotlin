@@ -1,6 +1,7 @@
 package io.github.eucsoh.integration
 
-import io.github.eucsoh.Constants
+import io.github.eucsoh.Constants.HIGHER_IS_BAD
+import io.github.eucsoh.Constants.Metrics.*
 import io.github.eucsoh.SohAnalyzer
 import io.github.eucsoh.model.MOSFETParams
 import io.github.eucsoh.model.ThresholdInfo
@@ -36,29 +37,29 @@ class EndToEndSyntheticTest {
     fun `detect battery degradation in synthetic data`() = runBlocking {
         // Setup: Create synthetic degradation scenario
         val thresholds = mapOf(
-            "Req_median" to ThresholdInfo(
+            REQ_MEDIAN.csv_code to ThresholdInfo(
                 mean = 0.050,
                 std = 0.002,
                 limit = 0.054,
-                direction = "higher_is_bad"
+                direction = HIGHER_IS_BAD
             ),
-            "R_batt_median" to ThresholdInfo(
+            R_BATT_MEDIAN.csv_code to ThresholdInfo(
                 mean = 0.045,
                 std = 0.002,
                 limit = 0.049,
-                direction = "higher_is_bad"
+                direction = HIGHER_IS_BAD
             ),
-            "sag_95p" to ThresholdInfo(
+            SAG_95P.csv_code to ThresholdInfo(
                 mean = 3.5,
                 std = 0.5,
                 limit = 4.5,
-                direction = "higher_is_bad"
+                direction = HIGHER_IS_BAD
             ),
-            "temp_board_max" to ThresholdInfo(
+            TEMP_BOARD_MAX.csv_code to ThresholdInfo(
                 mean = 40.0,
                 std = 5.0,
                 limit = 50.0,
-                direction = "higher_is_bad"
+                direction = HIGHER_IS_BAD
             )
         )
 
@@ -103,10 +104,10 @@ class EndToEndSyntheticTest {
 
         // Check that alarms are detected (degradation should trigger warnings)
         val battAlarms = result.alarms.filter { alarm ->
-            alarm.reasons.contains("Req_95p") ||
-                    alarm.reasons.contains("R_batt_median") ||
-                    alarm.reasons.contains("Req_median") ||
-                    alarm.reasons.contains("sag_95p")
+            alarm.reasons.contains(REQ_95P.csv_code) ||
+                    alarm.reasons.contains(R_BATT_MEDIAN.csv_code) ||
+                    alarm.reasons.contains(REQ_MEDIAN.csv_code) ||
+                    alarm.reasons.contains(SAG_95P.csv_code)
         }
 
         assertTrue(battAlarms.isNotEmpty(), "Should detect battery degradation alarms")
@@ -115,7 +116,7 @@ class EndToEndSyntheticTest {
         // OVERKILL => tested in linear trend detection
         /*
         // Verify degradation trend in data
-        val reqValues = result.stats["R_batt_median"].values()
+        val reqValues = result.stats[R_BATT_MEDIAN.csv_code].values()
             .filterIsInstance<Number>()
             .map { it.toDouble() }
 
@@ -135,10 +136,10 @@ class EndToEndSyntheticTest {
     @Test
     fun `detect MOSFET degradation in synthetic data`() = runBlocking {
         val thresholds = mapOf(
-            "Req_median" to ThresholdInfo(0.050, 0.002, 0.054, "higher_is_bad"),
-            "R_mosfet_hot" to ThresholdInfo(0.008, 0.001, 0.010, "higher_is_bad"),
-            "temp_board_max" to ThresholdInfo(40.0, 5.0, 50.0, "higher_is_bad"),
-            "I_phase2_int" to ThresholdInfo(500000.0, 50000.0, 600000.0, "higher_is_bad")
+            REQ_MEDIAN.csv_code to ThresholdInfo(0.050, 0.002, 0.054, HIGHER_IS_BAD),
+            R_MOSFET_HOT.csv_code to ThresholdInfo(0.008, 0.001, 0.010, HIGHER_IS_BAD),
+            TEMP_BOARD_MAX.csv_code to ThresholdInfo(40.0, 5.0, 50.0, HIGHER_IS_BAD),
+            I_PHASE2_INT.csv_code to ThresholdInfo(500000.0, 50000.0, 600000.0, HIGHER_IS_BAD)
         )
 
         val config = SyntheticDataGenerator.SyntheticConfig(
@@ -174,7 +175,7 @@ class EndToEndSyntheticTest {
         val mosfetAlarms = result.alarms.filter { alarm ->
             alarm.reasons.contains("R_mosfet") ||
             alarm.reasons.contains("temp_board") ||
-            alarm.reasons.contains("I_phase2_int")
+            alarm.reasons.contains(I_PHASE2_INT.csv_code)
         }
 
         // MOSFET degradation is more subtle, but should still be detectable
@@ -184,8 +185,8 @@ class EndToEndSyntheticTest {
     @Test
     fun `CUSUM detects regime change in synthetic data`() = runBlocking {
         val thresholds = mapOf(
-            "Req_median" to ThresholdInfo(0.050, 0.002, 0.054, "higher_is_bad"),
-            "R_batt_median" to ThresholdInfo(0.045, 0.002, 0.049, "higher_is_bad")
+            REQ_MEDIAN.csv_code to ThresholdInfo(0.050, 0.002, 0.054, HIGHER_IS_BAD),
+            R_BATT_MEDIAN.csv_code to ThresholdInfo(0.045, 0.002, 0.049, HIGHER_IS_BAD)
         )
 
         // Sharp degradation after knee point
@@ -234,29 +235,29 @@ class EndToEndSyntheticTest {
     fun `linear trend detection on gradual degradation`() = runBlocking {
         // Setup: Create synthetic degradation scenario
         val thresholds = mapOf(
-            "Req_median" to ThresholdInfo(
+            REQ_MEDIAN.csv_code to ThresholdInfo(
                 mean = 0.050,
                 std = 0.002,
                 limit = 0.054,
-                direction = "higher_is_bad"
+                direction = HIGHER_IS_BAD
             ),
-            "R_batt_median" to ThresholdInfo(
+            R_BATT_MEDIAN.csv_code to ThresholdInfo(
                 mean = 0.045,
                 std = 0.002,
                 limit = 0.049,
-                direction = "higher_is_bad"
+                direction = HIGHER_IS_BAD
             ),
-            "sag_95p" to ThresholdInfo(
+            SAG_95P.csv_code to ThresholdInfo(
                 mean = 3.5,
                 std = 0.5,
                 limit = 4.5,
-                direction = "higher_is_bad"
+                direction = HIGHER_IS_BAD
             ),
-            "temp_board_max" to ThresholdInfo(
+            TEMP_BOARD_MAX.csv_code to ThresholdInfo(
                 mean = 40.0,
                 std = 5.0,
                 limit = 50.0,
-                direction = "higher_is_bad"
+                direction = HIGHER_IS_BAD
             )
         )
 
@@ -302,9 +303,9 @@ class EndToEndSyntheticTest {
     @Test
     fun `stable synthetic data produces no alarms`() = runBlocking {
         val thresholds = mapOf(
-            "Req_median" to ThresholdInfo(0.050, 0.002, 0.060, "higher_is_bad"),
-            "R_batt_median" to ThresholdInfo(0.045, 0.002, 0.055, "higher_is_bad"),
-            "temp_board_max" to ThresholdInfo(40.0, 5.0, 55.0, "higher_is_bad")
+            REQ_MEDIAN.csv_code to ThresholdInfo(0.050, 0.002, 0.060, HIGHER_IS_BAD),
+            R_BATT_MEDIAN.csv_code to ThresholdInfo(0.045, 0.002, 0.055, HIGHER_IS_BAD),
+            TEMP_BOARD_MAX.csv_code to ThresholdInfo(40.0, 5.0, 55.0, HIGHER_IS_BAD)
         )
 
         // No degradation (finalOffsetSigma = 0)
@@ -352,7 +353,7 @@ class EndToEndSyntheticTest {
     @Test
     fun `synthetic data respects pack configuration inference`() = runBlocking {
         val thresholds = mapOf(
-            "Req_median" to ThresholdInfo(0.050, 0.002, 0.054, "higher_is_bad")
+            REQ_MEDIAN.csv_code to ThresholdInfo(0.050, 0.002, 0.054, HIGHER_IS_BAD)
         )
 
         // 24S pack: 100.8V nominal
@@ -389,8 +390,8 @@ class EndToEndSyntheticTest {
     @Test
     fun `buildSummary generates complete export structure`() = runBlocking {
         val thresholds = mapOf(
-            "Req_median" to ThresholdInfo(0.050, 0.002, 0.056, "higher_is_bad"),
-            "R_batt_median" to ThresholdInfo(0.045, 0.002, 0.052, "higher_is_bad")
+            REQ_MEDIAN.csv_code to ThresholdInfo(0.050, 0.002, 0.056, HIGHER_IS_BAD),
+            R_BATT_MEDIAN.csv_code to ThresholdInfo(0.045, 0.002, 0.052, HIGHER_IS_BAD)
         )
 
         val config = SyntheticDataGenerator.SyntheticConfig(
