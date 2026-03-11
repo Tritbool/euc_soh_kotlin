@@ -20,15 +20,29 @@ import androidx.compose.ui.window.DialogProperties
 import io.github.eucsoh.android.data.model.ReqStatsResult
 import io.github.eucsoh.android.visualization.PdfExportService
 import io.github.eucsoh.android.visualization.SohChartGeneratorFixed
+import io.github.eucsoh.android.visualization.SohTrendCusumChartGenerator
 import kotlinx.coroutines.launch
+
+/** Onglets disponibles dans la galerie. */
+private enum class ChartTab(val label: String) {
+    GAUSSIAN("Gaussian"),
+    TREND("Trend"),
+    CUSUM("CUSUM"),
+    INFLEXION("Inflexion")
+}
 
 /**
  * Chart gallery screen showing all SoH metrics visualizations.
- * 
- * NOW USES SohChartGeneratorFixed with:
- * - Corrected danger thresholds (3σ instead of 2σ)
- * - Color bands (green = ±1σ, orange = ±2σ)
- * - Fixed Y-axis label count
+ *
+ * 4 tabs :
+ * - Gaussian  : bandes gaussiennes ±1σ / ±2σ (SohChartGeneratorFixed)
+ * - Trend     : régression linéaire + droite (SohTrendCusumChartGenerator)
+ * - CUSUM     : Normal / Change detected + µ_ref (SohTrendCusumChartGenerator)
+ * - Inflexion : Slow regime / Sustained inflexion + danger threshold
+ *               (SohTrendCusumChartGenerator)
+ *
+ * Chaque tab génère ses charts au premier affichage (lazy) pour ne pas
+ * bloquer le démarrage avec 4× le coût de génération.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,34 +52,72 @@ fun ChartGalleryScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
-    val chartGenerator = remember { SohChartGeneratorFixed(context) }
-    val pdfExporter = remember { PdfExportService(context) }
-    val scope = rememberCoroutineScope()
+    val gaussGenerator  = remember { SohChartGeneratorFixed(context) }
+    val trendGenerator  = remember { SohTrendCusumChartGenerator(context) }
+    val pdfExporter     = remember { PdfExportService(context) }
+    val scope           = rememberCoroutineScope()
 
-    var charts by remember { mutableStateOf<List<Pair<String, Bitmap>>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
-    var selectedChart by remember { mutableStateOf<Pair<String, Bitmap>?>(null) }
+    // Charts par onglet — null = pas encore généré
+    var gaussCharts    by remember { mutableStateOf<List<Pair<String, Bitmap>>?>(null) }
+    var trendCharts    by remember { mutableStateOf<List<Pair<String, Bitmap>>?>(null) }
+    var cusumCharts    by remember { mutableStateOf<List<Pair<String, Bitmap>>?>(null) }
+    var inflexCharts   by remember { mutableStateOf<List<Pair<String, Bitmap>>?>(null) }
+
+    var isLoading      by remember { mutableStateOf(false) }
+    var selectedChart  by remember { mutableStateOf<Pair<String, Bitmap>?>(null) }
     var isExportingPdf by remember { mutableStateOf(false) }
-    var exportMessage by remember { mutableStateOf<String?>(null) }
+    var exportMessage  by remember { mutableStateOf<String?>(null) }
+    var selectedTab    by remember { mutableStateOf(ChartTab.GAUSSIAN) }
 
-    // Generate charts on composition
-    LaunchedEffect(stats) {
+    // Helper : résout le label d'une métrique dans les deux maps
+    fun resolveLabel(key: String): String =
+        SohChartGeneratorFixed.METRIC_LABELS[key]
+            ?: SohTrendCusumChartGenerator.METRIC_LABELS[key]
+            ?: key
+
+    // Génère les charts de l'onglet actif si pas encore fait
+    LaunchedEffect(selectedTab, stats) {
         isLoading = true
-        charts = chartGenerator.generateOverviewCharts(stats)
+        when (selectedTab) {
+            ChartTab.GAUSSIAN -> {
+                if (gaussCharts == null)
+                    gaussCharts = gaussGenerator.generateOverviewCharts(stats)
+            }
+            ChartTab.TREND -> {
+                if (trendCharts == null)
+                    trendCharts = trendGenerator.generateAllTrendCharts(stats, wheelName)
+            }
+            ChartTab.CUSUM -> {
+                if (cusumCharts == null)
+                    cusumCharts = trendGenerator.generateAllCusumCharts(stats, wheelName)
+            }
+            ChartTab.INFLEXION -> {
+                if (inflexCharts == null)
+                    inflexCharts = trendGenerator.generateAllInflexionCharts(stats, wheelName)
+            }
+        }
         isLoading = false
+    }
+
+    // Charts visibles pour l'onglet actif
+    val currentCharts: List<Pair<String, Bitmap>>? = when (selectedTab) {
+        ChartTab.GAUSSIAN  -> gaussCharts
+        ChartTab.TREND     -> trendCharts
+        ChartTab.CUSUM     -> cusumCharts
+        ChartTab.INFLEXION -> inflexCharts
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Charts - $wheelName") },
+                title = { Text("Charts — $wheelName") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, "Back")
                     }
                 },
                 actions = {
-                    if (charts.isNotEmpty()) {
+                    if (!currentCharts.isNullOrEmpty()) {
                         IconButton(
                             onClick = {
                                 scope.launch {
@@ -102,62 +154,73 @@ fun ChartGalleryScreen(
                             Text("Dismiss")
                         }
                     }
-                ) {
-                    Text(msg)
-                }
+                ) { Text(msg) }
             }
         }
     ) { padding ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            when {
-                isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
+            // ─── Tabs ──────────────────────────────────────────────────
+            TabRow(selectedTabIndex = selectedTab.ordinal) {
+                ChartTab.entries.forEach { tab ->
+                    Tab(
+                        selected  = selectedTab == tab,
+                        onClick   = { selectedTab = tab },
+                        text      = { Text(tab.label) }
                     )
                 }
-                charts.isEmpty() -> {
-                    Text(
-                        "No charts available (insufficient data)",
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        items(charts) { (name, bitmap) ->
-                            ChartCard(
-                                metricName = name,
-                                bitmap = bitmap,
-                                onClick = { selectedChart = name to bitmap }
-                            )
+            }
+
+            // ─── Contenu de l'onglet actif ────────────────────────────────
+            Box(modifier = Modifier.fillMaxSize()) {
+                when {
+                    isLoading -> {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+                    currentCharts.isNullOrEmpty() -> {
+                        Text(
+                            "No charts available (insufficient data)",
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+                    else -> {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            items(currentCharts) { (key, bitmap) ->
+                                ChartCard(
+                                    metricName  = key,
+                                    metricLabel = resolveLabel(key),
+                                    bitmap      = bitmap,
+                                    onClick     = { selectedChart = key to bitmap }
+                                )
+                            }
                         }
                     }
                 }
             }
         }
 
-        // Full-screen chart dialog
-        selectedChart?.let { (name, bitmap) ->
+        // ─── Dialog plein écran ───────────────────────────────────────
+        selectedChart?.let { (key, bitmap) ->
             Dialog(
                 onDismissRequest = { selectedChart = null },
                 properties = DialogProperties(usePlatformDefaultWidth = false)
             ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color    = MaterialTheme.colorScheme.background
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
+                    Column(modifier = Modifier.fillMaxSize()) {
                         TopAppBar(
-                            title = { Text(SohChartGeneratorFixed.METRIC_LABELS[name] ?: name) },
+                            title = { Text(resolveLabel(key)) },
                             navigationIcon = {
                                 IconButton(onClick = { selectedChart = null }) {
                                     Icon(Icons.Default.Close, "Close")
@@ -165,9 +228,9 @@ fun ChartGalleryScreen(
                             }
                         )
                         Image(
-                            bitmap = bitmap.asImageBitmap(),
-                            contentDescription = name,
-                            modifier = Modifier
+                            bitmap             = bitmap.asImageBitmap(),
+                            contentDescription = key,
+                            modifier           = Modifier
                                 .fillMaxSize()
                                 .padding(16.dp)
                         )
@@ -180,12 +243,13 @@ fun ChartGalleryScreen(
 
 @Composable
 fun ChartCard(
-    metricName: String,
-    bitmap: Bitmap,
-    onClick: () -> Unit
+    metricName  : String,
+    metricLabel : String,
+    bitmap      : Bitmap,
+    onClick     : () -> Unit
 ) {
     Card(
-        modifier = Modifier
+        modifier  = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -196,27 +260,25 @@ fun ChartCard(
                 .padding(12.dp)
         ) {
             Text(
-                text = SohChartGeneratorFixed.METRIC_LABELS[metricName] ?: metricName,
-                style = MaterialTheme.typography.titleMedium,
+                text     = metricLabel,
+                style    = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
-
             Image(
-                bitmap = bitmap.asImageBitmap(),
+                bitmap             = bitmap.asImageBitmap(),
                 contentDescription = metricName,
-                modifier = Modifier
+                modifier           = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 200.dp, max = 400.dp)
             )
-
             Row(
-                modifier = Modifier
+                modifier              = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp),
                 horizontalArrangement = Arrangement.End
             ) {
                 Text(
-                    text = "Tap to enlarge",
+                    text  = "Tap to enlarge",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
