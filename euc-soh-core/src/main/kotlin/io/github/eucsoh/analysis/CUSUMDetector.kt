@@ -1,5 +1,6 @@
 package io.github.eucsoh.analysis
 
+import io.github.eucsoh.Constants.MetaColumns.WHEEL_KM
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
 import kotlin.math.max
@@ -38,14 +39,14 @@ object CUSUMDetector {
         relativeJumpMin: Double = 0.3,
         hSigmaCooldown: Double = 6.0
     ): CUSUMResult {
-        if (metric !in df.columnNames() || "wheel_km" !in df.columnNames()) {
+        if (metric !in df.columnNames() || WHEEL_KM.csv_code !in df.columnNames()) {
             return CUSUMResult(emptyList(), null, null)
         }
 
         val dfClean = df.filter {
-            it[metric] != null && it["wheel_km"] != null &&
-                    !(it[metric] as Double).isNaN() && !(it["wheel_km"] as Double).isNaN()
-        }.sortBy("wheel_km")
+            it[metric] != null && it[WHEEL_KM.csv_code] != null &&
+                    !(it[metric] as Double).isNaN() && !(it[WHEEL_KM.csv_code] as Double).isNaN()
+        }.sortBy(WHEEL_KM.csv_code)
 
         if (dfClean.rowsCount() < 5) {
             return CUSUMResult(emptyList(), null, null)
@@ -53,7 +54,7 @@ object CUSUMDetector {
 
         // Reference regime
         val dfRef = if (refKmMax != null) {
-            dfClean.filter { (it["wheel_km"] as Double) <= refKmMax }
+            dfClean.filter { (it[WHEEL_KM.csv_code] as Double) <= refKmMax }
         } else {
             dfClean
         }
@@ -81,7 +82,7 @@ object CUSUMDetector {
 
         // Test regime
         val dfTest = if (testKmMin != null) {
-            dfClean.filter { (it["wheel_km"] as Double) >= testKmMin }
+            dfClean.filter { (it[WHEEL_KM.csv_code] as Double) >= testKmMin }
         } else {
             dfClean
         }
@@ -91,7 +92,7 @@ object CUSUMDetector {
         }
 
         val yTest = dfTest[metric].values().map { (it as Number).toDouble() }
-        val kmTest = dfTest["wheel_km"].values().map { (it as Number).toDouble() }
+        val kmTest = dfTest[WHEEL_KM.csv_code].values().map { (it as Number).toDouble() }
 
         val k = kSigma * sigmaRef
         val hNormal = hSigma * sigmaRef

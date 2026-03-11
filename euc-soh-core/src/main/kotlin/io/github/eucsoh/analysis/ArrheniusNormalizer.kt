@@ -56,8 +56,8 @@ object ArrheniusNormalizer {
      */
     fun calibrateEaFromDataFrame(
         df: DataFrame<*>,
-        metric: String = "Req_median",
-        tempCol: String = "temp_board_max"
+        metric: String = Constants.Metrics.REQ_MEDIAN.csv_code,
+        tempCol: String = Constants.Metrics.TEMP_BOARD_MAX.csv_code
     ): Double {
         if (metric !in df.columnNames() || tempCol !in df.columnNames()) {
             return DEFAULT_EA

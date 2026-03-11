@@ -1,6 +1,7 @@
 package io.github.eucsoh.analysis
 
 import io.github.eucsoh.Constants
+import io.github.eucsoh.Constants.MetaColumns.*
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
 
@@ -35,12 +36,12 @@ object PackInference {
      * Infers global pack config (Ns, V_nominal) from DataFrame with "Ns" and "soc_ref_ok" columns.
      */
     fun inferPackConfig(df: DataFrame<*>): Pair<Int?, Double?> {
-        if ("Ns" !in df.columnNames() || "soc_ref_ok" !in df.columnNames()) {
+        if (NS.csv_code !in df.columnNames() || SOC_REF_OK.csv_code !in df.columnNames()) {
             return null to null
         }
 
-        val dfOk = df.filter { it["soc_ref_ok"] == true }
-        val nsSeries = dfOk["Ns"].values()
+        val dfOk = df.filter { it[SOC_REF_OK.csv_code] == true }
+        val nsSeries = dfOk[NS.csv_code].values()
             .filterNotNull()
             .map { (it as Number).toDouble() }
 

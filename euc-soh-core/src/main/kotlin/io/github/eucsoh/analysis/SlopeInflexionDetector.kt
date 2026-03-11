@@ -1,5 +1,6 @@
 package io.github.eucsoh.analysis
 
+import io.github.eucsoh.Constants.MetaColumns.WHEEL_KM
 import io.github.eucsoh.model.ThresholdInfo
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
@@ -31,14 +32,14 @@ object SlopeInflexionDetector {
         slopeFactor: Double = 1.5,
         minFractionAboveLimit: Double = 0.6
     ): InflexionResult {
-        if (metric !in df.columnNames() || "wheel_km" !in df.columnNames()) {
+        if (metric !in df.columnNames() || WHEEL_KM.csv_code !in df.columnNames()) {
             return InflexionResult(emptyList(), emptyList(), emptyMap())
         }
 
         val dfClean = df.filter {
-            it[metric] != null && it["wheel_km"] != null &&
-            !(it[metric] as Double).isNaN() && !(it["wheel_km"] as Double).isNaN()
-        }.sortBy("wheel_km")
+            it[metric] != null && it[WHEEL_KM.csv_code] != null &&
+            !(it[metric] as Double).isNaN() && !(it[WHEEL_KM.csv_code] as Double).isNaN()
+        }.sortBy(WHEEL_KM.csv_code)
 
         if (dfClean.rowsCount() < 10) {
             return InflexionResult(
@@ -48,7 +49,7 @@ object SlopeInflexionDetector {
             )
         }
 
-        val x = dfClean["wheel_km"].values().filterIsInstance<Number>().map { it.toDouble() }
+        val x = dfClean[WHEEL_KM.csv_code].values().filterIsInstance<Number>().map { it.toDouble() }
         val y = dfClean[metric].values().filterIsInstance<Number>().map { it.toDouble() }
 
         val spanKm = x.maxOrNull()!! - x.minOrNull()!!

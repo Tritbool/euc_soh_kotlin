@@ -6,6 +6,9 @@ package io.github.eucsoh
 object Constants {
     const val DEBUG = true  // Activé pour débogage Android
 
+    const val EUC_WORLD="euc_world"
+    const val WHEELLOG="wheellog"
+
     // Absolute limits
     const val ABS_REQ_LIMIT = 0.8  // Ω
     const val ABS_KM_LIMIT = 5000.0  // km
@@ -28,6 +31,7 @@ object Constants {
         VOLTAGE("voltage"),
         CURRENT("current"),
         SPEED("speed"),
+        DISTANCE("distance")
     }
 
     enum class WheelLogColumns(val csv_code: String) {
@@ -35,13 +39,19 @@ object Constants {
         BOARD_TEMPERATURE("temp"),
         MOTOR_TEMPERATURE("temp2"),
         CURRENT_PHASE("phase_current"),
+        DATE("date"),
+        TIME("time"),
+        DISTANCE_TOTAL("totaldistance")
     }
 
     enum class EUCWorldColumns(val csv_code: String) {
         BOARD_TEMPERATURE("system_temp"),
         MOTOR_TEMPERATURE("temp_motor"),
         CURRENT_PHASE("current_phase"),
-        SOC("battery")
+        SOC("battery"),
+        TIMESTAMP("datetime"),
+        GPS_TIMESTAMP("gps_datetime"),
+        DISTANCE_TOTAL("distance_total")
     }
 
     enum class MetaColumns(val csv_code: String) {

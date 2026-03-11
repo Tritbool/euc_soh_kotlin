@@ -1,5 +1,6 @@
 package io.github.eucsoh.analysis
 
+import io.github.eucsoh.Constants
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
 import kotlin.math.abs
@@ -21,11 +22,11 @@ object VIdleProfileBuilder {
         if (n < 2) return null
 
         // Try datetime column
-        if ("datetime" in df.columnNames()) {
+        if (Constants.EUCWorldColumns.TIMESTAMP.csv_code in df.columnNames()) {
             try {
                 // Simple numeric diff approach (assumes timestamps in seconds or parseable)
                 // For production, use proper datetime parsing
-                val times = df["datetime"].values().map { it.toString() }
+                val times = df[Constants.EUCWorldColumns.TIMESTAMP.csv_code].values().map { it.toString() }
                 // Fallback to 0.1s if datetime parsing fails
                 return DoubleArray(n) { 0.1 }
             } catch (e: Exception) {

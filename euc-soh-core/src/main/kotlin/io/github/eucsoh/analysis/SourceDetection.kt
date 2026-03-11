@@ -1,5 +1,11 @@
 package io.github.eucsoh.analysis
 
+import io.github.eucsoh.Constants
+import io.github.eucsoh.Constants.EUCWorldColumns
+import io.github.eucsoh.Constants.EUC_WORLD
+import io.github.eucsoh.Constants.WHEELLOG
+import io.github.eucsoh.Constants.WheelLogColumns
+import io.github.eucsoh.Constants.CommonColumns
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
 
@@ -15,13 +21,13 @@ object SourceDetection {
     fun detectSource(df: DataFrame<*>): String {
         val cols = df.columnNames().toSet()
 
-        if ("datetime" in cols && "distance_total" in cols) {
-            return "euc_world"
+        if (EUCWorldColumns.TIMESTAMP.csv_code in cols && EUCWorldColumns.DISTANCE_TOTAL.csv_code in cols) {
+            return EUC_WORLD
         }
-        if ("date" in cols && "time" in cols && "totaldistance" in cols) {
-            return "wheellog"
+        if (WheelLogColumns.DATE.csv_code in cols && WheelLogColumns.TIME.csv_code in cols && WheelLogColumns.DISTANCE_TOTAL.csv_code in cols) {
+            return WHEELLOG
         }
-        return if ("datetime" in cols) "euc_world" else "wheellog"
+        return if (EUCWorldColumns.TIMESTAMP.csv_code in cols) EUC_WORLD else WHEELLOG
     }
 
     /**
@@ -31,29 +37,29 @@ object SourceDetection {
     fun normalizeDistanceTotal(df: DataFrame<*>, source: String): Pair<Double?, String?> {
         val cols = df.columnNames().toSet()
 
-        if (source == "euc_world") {
-            if ("distance_total" in cols) {
-                val maxDist = df["distance_total"].values()
+        if (source == EUC_WORLD) {
+            if (EUCWorldColumns.DISTANCE_TOTAL.csv_code in cols) {
+                val maxDist = df[EUCWorldColumns.DISTANCE_TOTAL.csv_code].values()
                     .filterIsInstance<Number>()
                     .maxOfOrNull { it.toDouble() }
                 return maxDist to "distance_total_km_euc"
             }
-            if ("distance" in cols) {
-                val maxDist = df["distance"].values()
+            if (CommonColumns.DISTANCE.csv_code in cols) {
+                val maxDist = df[CommonColumns.DISTANCE.csv_code].values()
                     .filterIsInstance<Number>()
                     .maxOfOrNull { it.toDouble() }
                 return maxDist to "distance_log_km_euc"
             }
         } else {
             // WheelLog: totaldistance in meters
-            if ("totaldistance" in cols) {
-                val maxDist = df["totaldistance"].values()
+            if (WheelLogColumns.DISTANCE_TOTAL.csv_code in cols) {
+                val maxDist = df[WheelLogColumns.DISTANCE_TOTAL.csv_code].values()
                     .filterIsInstance<Number>()
                     .maxOfOrNull { it.toDouble() }
                 return (maxDist?.div(1000.0)) to "totaldistance_m_wl"
             }
-            if ("distance" in cols) {
-                val maxDist = df["distance"].values()
+            if (CommonColumns.DISTANCE.csv_code in cols) {
+                val maxDist = df[CommonColumns.DISTANCE.csv_code].values()
                     .filterIsInstance<Number>()
                     .maxOfOrNull { it.toDouble() }
                 return maxDist to "distance_log_km_wl"
@@ -69,8 +75,8 @@ object SourceDetection {
     fun getFirstDatetime(df: DataFrame<*>, source: String): String? {
         if (df.rowsCount() == 0) return null
 
-        if (source == "euc_world") {
-            for (col in listOf("datetime", "gps_datetime")) {
+        if (source == EUC_WORLD) {
+            for (col in listOf(EUCWorldColumns.TIMESTAMP.csv_code, EUCWorldColumns.GPS_TIMESTAMP.csv_code)) {
                 if (col in df.columnNames()) {
                     return df[col][0]?.toString()
                 }
@@ -78,8 +84,8 @@ object SourceDetection {
             return null
         } else {
             // WheelLog
-            val date = if ("date" in df.columnNames()) df["date"][0]?.toString() else null
-            val time = if ("time" in df.columnNames()) df["time"][0]?.toString() else null
+            val date = if (WheelLogColumns.DATE.csv_code in df.columnNames()) df[WheelLogColumns.DATE.csv_code][0]?.toString() else null
+            val time = if (WheelLogColumns.TIME.csv_code in df.columnNames()) df[WheelLogColumns.TIME.csv_code][0]?.toString() else null
 
             return when {
                 date != null && time != null -> "$date $time"

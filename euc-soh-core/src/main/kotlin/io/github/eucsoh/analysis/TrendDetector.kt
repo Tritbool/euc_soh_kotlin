@@ -1,5 +1,7 @@
 package io.github.eucsoh.analysis
 
+import io.github.eucsoh.Constants
+import io.github.eucsoh.Constants.MetaColumns.WHEEL_KM
 import io.github.eucsoh.model.ThresholdInfo
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
@@ -33,20 +35,20 @@ object TrendDetector {
         metric: String,
         kmMinSpan: Double = 1000.0
     ): TrendResult {
-        if (metric !in df.columnNames() || "wheel_km" !in df.columnNames()) {
+        if (metric !in df.columnNames() || WHEEL_KM.csv_code !in df.columnNames()) {
             return TrendResult(null, null, false)
         }
 
         val dfClean = df.filter {
-            it[metric] != null && it["wheel_km"] != null &&
-                    !(it[metric] as Double).isNaN() && !(it["wheel_km"] as Double).isNaN()
-        }.sortBy("wheel_km")
+            it[metric] != null && it[WHEEL_KM.csv_code] != null &&
+                    !(it[metric] as Double).isNaN() && !(it[WHEEL_KM.csv_code] as Double).isNaN()
+        }.sortBy(WHEEL_KM.csv_code)
 
         if (dfClean.rowsCount() < 5) {
             return TrendResult(null, null, false)
         }
 
-        val x = dfClean["wheel_km"].values().map { (it as Number).toDouble() }
+        val x = dfClean[WHEEL_KM.csv_code].values().map { (it as Number).toDouble() }
         val y = dfClean[metric].values().map { (it as Number).toDouble() }
 
         val spanKm = x.maxOrNull()!! - x.minOrNull()!!
@@ -93,14 +95,14 @@ object TrendDetector {
         slopeFactor: Double = 1.5,
         minFractionAboveLimit: Double = 0.6
     ): SlopeInflexionResult {
-        if (metric !in df.columnNames() || "wheel_km" !in df.columnNames()) {
+        if (metric !in df.columnNames() || WHEEL_KM.csv_code !in df.columnNames()) {
             return SlopeInflexionResult(emptyList(), emptyList(), emptyMap())
         }
 
         val dfClean = df.filter {
-            it[metric] != null && it["wheel_km"] != null &&
-                    !(it[metric] as Double).isNaN() && !(it["wheel_km"] as Double).isNaN()
-        }.sortBy("wheel_km")
+            it[metric] != null && it[WHEEL_KM.csv_code] != null &&
+                    !(it[metric] as Double).isNaN() && !(it[WHEEL_KM.csv_code] as Double).isNaN()
+        }.sortBy(WHEEL_KM.csv_code)
 
         if (dfClean.rowsCount() < 10) {
             return SlopeInflexionResult(
@@ -110,7 +112,7 @@ object TrendDetector {
             )
         }
 
-        val x = dfClean["wheel_km"].values().map { (it as Number).toDouble() }
+        val x = dfClean[WHEEL_KM.csv_code].values().map { (it as Number).toDouble() }
         val y = dfClean[metric].values().map { (it as Number).toDouble() }
 
         val spanKm = x.maxOrNull()!! - x.minOrNull()!!
