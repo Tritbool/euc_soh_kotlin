@@ -372,7 +372,7 @@ class SohTrendCusumChartGenerator(private val context: Context) {
      * Seules les métriques ayant un extracteur sont incluses.
      */
     private fun metricsWithExtractors(): List<Pair<Metrics, (ReqStatsResult) -> Double?>> =
-        Metrics.entries.mapNotNull { metric ->
+        Metrics.values().mapNotNull { metric ->
             val ext = ReqStatsResult.extractors[metric] ?: return@mapNotNull null
             metric to ext
         }
