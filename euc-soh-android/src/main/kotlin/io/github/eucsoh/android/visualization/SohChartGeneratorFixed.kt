@@ -208,11 +208,17 @@ class SohChartGeneratorFixed(private val context: Context) {
             Triple("reqMedian",    { s: ReqStatsResult -> s.reqMedian },    true),
             Triple("req95p",       { s: ReqStatsResult -> s.req95p },       true),
             Triple("sag95p",       { s: ReqStatsResult -> s.sag95p },       true),
+            Triple("rBattMedian25C",       { s: ReqStatsResult -> s.rBattMedian25C },       true),
+            Triple("rMosfetHot",       { s: ReqStatsResult -> s.rMosfetHot },       true),
             Triple("sagMax",       { s: ReqStatsResult -> s.sagMax },       true),
             Triple("vMinStrong",   { s: ReqStatsResult -> s.vMinStrong },   false),  // lower_is_bad
             Triple("iMax",         { s: ReqStatsResult -> s.iMax },         true),
             Triple("i95p",         { s: ReqStatsResult -> s.i95p },         true),
-            Triple("tempBoardMax", { s: ReqStatsResult -> s.tempBoardMax }, true)
+            Triple("iPhase2Int",         { s: ReqStatsResult -> s.iPhase2Int },         true),
+            Triple("iPhase95p",         { s: ReqStatsResult -> s.iPhase95p },         true),
+            Triple("iPhaseMax",         { s: ReqStatsResult -> s.iPhaseMax },         true),
+            Triple("tempBoardMax", { s: ReqStatsResult -> s.tempBoardMax }, true),
+            Triple("tempMotorMax", { s: ReqStatsResult -> s.tempMotorMax }, true)
         )
 
         return metrics.mapNotNull { (name, extractor, higherIsBad) ->

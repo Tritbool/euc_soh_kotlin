@@ -15,7 +15,7 @@
         errorLine2="                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/ui/screens/MainScreenEnhanced.kt"
-            line="101"
+            line="108"
             column="37"/>
     </issue>
 
@@ -33,7 +33,7 @@
         errorLine2="                                                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/ui/screens/MainScreenEnhanced.kt"
-            line="233"
+            line="240"
             column="74"/>
     </issue>
 
@@ -51,7 +51,7 @@
         errorLine2="                                                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/ui/screens/MainScreenEnhanced.kt"
-            line="234"
+            line="241"
             column="73"/>
     </issue>
 

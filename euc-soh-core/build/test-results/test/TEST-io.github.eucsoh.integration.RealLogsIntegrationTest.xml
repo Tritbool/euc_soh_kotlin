@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="io.github.eucsoh.integration.RealLogsIntegrationTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-03-10T14:57:11.153Z" hostname="IlPalazzo" time="4.662">
+<testsuite name="io.github.eucsoh.integration.RealLogsIntegrationTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-03-11T11:05:19.475Z" hostname="IlPalazzo" time="4.659">
   <properties/>
-  <testcase name="real logs analysis pipeline runs end-to-end()" classname="io.github.eucsoh.integration.RealLogsIntegrationTest" time="4.66"/>
+  <testcase name="real logs analysis pipeline runs end-to-end()" classname="io.github.eucsoh.integration.RealLogsIntegrationTest" time="4.657"/>
   <testcase name="real logs folder structure is correct if it exists()" classname="io.github.eucsoh.integration.RealLogsIntegrationTest" time="0.001"/>
   <system-out><![CDATA[✓ Found 8 real log files in src/test/resources/real_logs
   Running full analysis pipeline...
-[calibrateEa] Calibrated Ea=20.0kJ/mol (T range: 16.0–35.0°C, n=8)
+[calibrateEa] Calibrated Ea=10.0kJ/mol (T range: 16.0–35.0°C, n=8)
   ✓ Analyzed 8 logs
   ✓ Inferred pack: 32S, 118.4V nominal
   ✓ Req_median threshold: μ=0,0241Ω, σ=0,0254Ω
@@ -14,7 +14,7 @@
   ✓ Detected 5 alarms
     - Gaussian: 5 alarms
   ✓ Summary built successfully
-    Req band: 0,0055 - 0,0422 Ω
+    Req band: 0,0056 - 0,0437 Ω
     Pack: 32S, R_pack=0,448Ω
 
 ✓ Real logs integration test PASSED

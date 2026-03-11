@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="io.github.eucsoh.analysis.TrendDetectorTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-03-10T14:56:15.330Z" hostname="IlPalazzo" time="0.016">
+<testsuite name="io.github.eucsoh.analysis.TrendDetectorTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-03-11T11:04:23.210Z" hostname="IlPalazzo" time="0.012">
   <properties/>
-  <testcase name="detectTrendLinear identifies no trend in flat data()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.003"/>
+  <testcase name="detectTrendLinear identifies no trend in flat data()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.002"/>
   <testcase name="detectTrendLinear identifies clear upward trend()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.001"/>
   <testcase name="detectTrendLinear realistic EUC degradation()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.001"/>
-  <testcase name="detectTrendLinear with noisy data()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.001"/>
+  <testcase name="detectTrendLinear with noisy data()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.0"/>
   <testcase name="detectTrendLinear handles missing metric gracefully()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.0"/>
   <testcase name="detectTrendLinear with constant values returns zero slope()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.001"/>
   <testcase name="detectTrendLinear with very weak trend()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.001"/>
-  <testcase name="detectTrendLinear filters null values()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.001"/>
+  <testcase name="detectTrendLinear filters null values()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.0"/>
   <testcase name="detectTrendLinear requires minimum points()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.0"/>
   <testcase name="detectTrendLinear slope units are correct()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.001"/>
   <testcase name="detectTrendLinear handles downward trend()" classname="io.github.eucsoh.analysis.TrendDetectorTest" time="0.001"/>

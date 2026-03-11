@@ -179,7 +179,7 @@ document.getElementById(id).style.display = 'none';
     <div class="mdl-layout__header-row">
       <span class="mdl-layout-title">Lint Report: 27 warnings</span>
       <div class="mdl-layout-spacer"></div>
-      <nav class="mdl-navigation mdl-layout--large-screen-only">Check performed at Tue Mar 10 15:56:32 CET 2026 by AGP (8.5.0)</nav>
+      <nav class="mdl-navigation mdl-layout--large-screen-only">Check performed at Wed Mar 11 12:04:46 CET 2026 by AGP (8.5.0)</nav>
     </div>
   </header>
   <div class="mdl-layout__drawer">
@@ -261,33 +261,33 @@ Dismiss</button>            </div>
               <div class="mdl-card__supporting-text">
 <div class="issue">
 <div class="warningslist">
-<span class="location"><a href="../../src/main/kotlin/io/github/eucsoh/android/ui/screens/MainScreenEnhanced.kt">../../src/main/kotlin/io/github/eucsoh/android/ui/screens/MainScreenEnhanced.kt</a>:101</span>: <span class="message">Implicitly using the default locale is a common source of bugs: Use <code>String.format(Locale, ...)</code> instead</span><br /><pre class="errorlines">
-<span class="lineno">  98 </span>      style = MaterialTheme.typography.bodyMedium
-<span class="lineno">  99 </span>  )
-<span class="lineno"> 100 </span>  Text(
-<span class="caretline"><span class="lineno"> 101 </span>      <span class="string">"Ea = ${</span><span class="warning">String.format(<span class="string">"%.1f"</span>, summary.arrhenius.eaKjPerMol)</span><span class="string">} kJ/mol"</span>,&nbsp;&nbsp;&nbsp;</span>
-<span class="lineno"> 102 </span>      style = MaterialTheme.typography.bodyMedium
-<span class="lineno"> 103 </span>  )
-<span class="lineno"> 104 </span>  <span class="keyword">if</span> (result.alarms.isNotEmpty()) {
+<span class="location"><a href="../../src/main/kotlin/io/github/eucsoh/android/ui/screens/MainScreenEnhanced.kt">../../src/main/kotlin/io/github/eucsoh/android/ui/screens/MainScreenEnhanced.kt</a>:108</span>: <span class="message">Implicitly using the default locale is a common source of bugs: Use <code>String.format(Locale, ...)</code> instead</span><br /><pre class="errorlines">
+<span class="lineno"> 105 </span>      style = MaterialTheme.typography.bodyMedium
+<span class="lineno"> 106 </span>  )
+<span class="lineno"> 107 </span>  Text(
+<span class="caretline"><span class="lineno"> 108 </span>      <span class="string">"Ea = ${</span><span class="warning">String.format(<span class="string">"%.1f"</span>, summary.arrhenius.eaKjPerMol)</span><span class="string">} kJ/mol"</span>,&nbsp;&nbsp;&nbsp;</span>
+<span class="lineno"> 109 </span>      style = MaterialTheme.typography.bodyMedium
+<span class="lineno"> 110 </span>  )
+<span class="lineno"> 111 </span>  <span class="keyword">if</span> (result.alarms.isNotEmpty()) {
 </pre>
 
-<span class="location"><a href="../../src/main/kotlin/io/github/eucsoh/android/ui/screens/MainScreenEnhanced.kt">../../src/main/kotlin/io/github/eucsoh/android/ui/screens/MainScreenEnhanced.kt</a>:233</span>: <span class="message">Implicitly using the default locale is a common source of bugs: Use <code>String.format(Locale, ...)</code> instead</span><br /><pre class="errorlines">
-<span class="lineno"> 230 </span>private <span class="keyword">fun</span> formatValue(value: Any?): String {
-<span class="lineno"> 231 </span>    <span class="keyword">return</span> <span class="keyword">when</span> (value) {
-<span class="lineno"> 232 </span>        <span class="keyword">null</span> -> <span class="string">""</span>
-<span class="caretline"><span class="lineno"> 233 </span>        <span class="keyword">is</span> Double -> <span class="keyword">if</span> (value.isNaN() || value.isInfinite()) <span class="string">"N/A"</span> <span class="keyword">else</span> <span class="warning">String.format(<span class="string">"%.4f"</span>, value)</span></span>
-<span class="lineno"> 234 </span>        <span class="keyword">is</span> Float -> <span class="keyword">if</span> (value.isNaN() || value.isInfinite()) <span class="string">"N/A"</span> <span class="keyword">else</span> String.format(<span class="string">"%.4f"</span>, value)
-<span class="lineno"> 235 </span>        <span class="keyword">is</span> Number -> value.toString()
-<span class="lineno"> 236 </span>        <span class="keyword">is</span> Boolean -> <span class="keyword">if</span> (value) <span class="string">"✓"</span> <span class="keyword">else</span> <span class="string">"✗"</span></pre>
+<span class="location"><a href="../../src/main/kotlin/io/github/eucsoh/android/ui/screens/MainScreenEnhanced.kt">../../src/main/kotlin/io/github/eucsoh/android/ui/screens/MainScreenEnhanced.kt</a>:240</span>: <span class="message">Implicitly using the default locale is a common source of bugs: Use <code>String.format(Locale, ...)</code> instead</span><br /><pre class="errorlines">
+<span class="lineno"> 237 </span>private <span class="keyword">fun</span> formatValue(value: Any?): String {
+<span class="lineno"> 238 </span>    <span class="keyword">return</span> <span class="keyword">when</span> (value) {
+<span class="lineno"> 239 </span>        <span class="keyword">null</span> -> <span class="string">""</span>
+<span class="caretline"><span class="lineno"> 240 </span>        <span class="keyword">is</span> Double -> <span class="keyword">if</span> (value.isNaN() || value.isInfinite()) <span class="string">"N/A"</span> <span class="keyword">else</span> <span class="warning">String.format(<span class="string">"%.4f"</span>, value)</span></span>
+<span class="lineno"> 241 </span>        <span class="keyword">is</span> Float -> <span class="keyword">if</span> (value.isNaN() || value.isInfinite()) <span class="string">"N/A"</span> <span class="keyword">else</span> String.format(<span class="string">"%.4f"</span>, value)
+<span class="lineno"> 242 </span>        <span class="keyword">is</span> Number -> value.toString()
+<span class="lineno"> 243 </span>        <span class="keyword">is</span> Boolean -> <span class="keyword">if</span> (value) <span class="string">"✓"</span> <span class="keyword">else</span> <span class="string">"✗"</span></pre>
 
-<span class="location"><a href="../../src/main/kotlin/io/github/eucsoh/android/ui/screens/MainScreenEnhanced.kt">../../src/main/kotlin/io/github/eucsoh/android/ui/screens/MainScreenEnhanced.kt</a>:234</span>: <span class="message">Implicitly using the default locale is a common source of bugs: Use <code>String.format(Locale, ...)</code> instead</span><br /><pre class="errorlines">
-<span class="lineno"> 231 </span>  <span class="keyword">return</span> <span class="keyword">when</span> (value) {
-<span class="lineno"> 232 </span>      <span class="keyword">null</span> -> <span class="string">""</span>
-<span class="lineno"> 233 </span>      <span class="keyword">is</span> Double -> <span class="keyword">if</span> (value.isNaN() || value.isInfinite()) <span class="string">"N/A"</span> <span class="keyword">else</span> String.format(<span class="string">"%.4f"</span>, value)
-<span class="caretline"><span class="lineno"> 234 </span>      <span class="keyword">is</span> Float -> <span class="keyword">if</span> (value.isNaN() || value.isInfinite()) <span class="string">"N/A"</span> <span class="keyword">else</span> <span class="warning">String.format(<span class="string">"%.4f"</span>, value)</span></span>
-<span class="lineno"> 235 </span>      <span class="keyword">is</span> Number -> value.toString()
-<span class="lineno"> 236 </span>      <span class="keyword">is</span> Boolean -> <span class="keyword">if</span> (value) <span class="string">"✓"</span> <span class="keyword">else</span> <span class="string">"✗"</span>
-<span class="lineno"> 237 </span>      <span class="keyword">else</span> -> value.toString()
+<span class="location"><a href="../../src/main/kotlin/io/github/eucsoh/android/ui/screens/MainScreenEnhanced.kt">../../src/main/kotlin/io/github/eucsoh/android/ui/screens/MainScreenEnhanced.kt</a>:241</span>: <span class="message">Implicitly using the default locale is a common source of bugs: Use <code>String.format(Locale, ...)</code> instead</span><br /><pre class="errorlines">
+<span class="lineno"> 238 </span>  <span class="keyword">return</span> <span class="keyword">when</span> (value) {
+<span class="lineno"> 239 </span>      <span class="keyword">null</span> -> <span class="string">""</span>
+<span class="lineno"> 240 </span>      <span class="keyword">is</span> Double -> <span class="keyword">if</span> (value.isNaN() || value.isInfinite()) <span class="string">"N/A"</span> <span class="keyword">else</span> String.format(<span class="string">"%.4f"</span>, value)
+<span class="caretline"><span class="lineno"> 241 </span>      <span class="keyword">is</span> Float -> <span class="keyword">if</span> (value.isNaN() || value.isInfinite()) <span class="string">"N/A"</span> <span class="keyword">else</span> <span class="warning">String.format(<span class="string">"%.4f"</span>, value)</span></span>
+<span class="lineno"> 242 </span>      <span class="keyword">is</span> Number -> value.toString()
+<span class="lineno"> 243 </span>      <span class="keyword">is</span> Boolean -> <span class="keyword">if</span> (value) <span class="string">"✓"</span> <span class="keyword">else</span> <span class="string">"✗"</span>
+<span class="lineno"> 244 </span>      <span class="keyword">else</span> -> value.toString()
 </pre>
 
 <span class="location"><a href="../../src/main/kotlin/io/github/eucsoh/android/ui/screens/MosfetConfigDialog.kt">../../src/main/kotlin/io/github/eucsoh/android/ui/screens/MosfetConfigDialog.kt</a>:167</span>: <span class="message">Implicitly using the default locale is a common source of bugs: Use <code>String.format(Locale, ...)</code> instead</span><br /><pre class="errorlines">

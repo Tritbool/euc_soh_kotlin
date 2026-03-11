@@ -1,10 +1,10 @@
-/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/ui/screens/MainScreenEnhanced.kt:101: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/ui/screens/MainScreenEnhanced.kt:108: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
                             "Ea = ${String.format("%.1f", summary.arrhenius.eaKjPerMol)} kJ/mol",
                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/ui/screens/MainScreenEnhanced.kt:233: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/ui/screens/MainScreenEnhanced.kt:240: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
         is Double -> if (value.isNaN() || value.isInfinite()) "N/A" else String.format("%.4f", value)
                                                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/ui/screens/MainScreenEnhanced.kt:234: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/ui/screens/MainScreenEnhanced.kt:241: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
         is Float -> if (value.isNaN() || value.isInfinite()) "N/A" else String.format("%.4f", value)
                                                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/ui/screens/MosfetConfigDialog.kt:167: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]

@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="io.github.eucsoh.analysis.PackInferenceTest" tests="18" skipped="0" failures="0" errors="0" timestamp="2026-03-10T14:56:02.881Z" hostname="IlPalazzo" time="0.065">
+<testsuite name="io.github.eucsoh.analysis.PackInferenceTest" tests="18" skipped="0" failures="0" errors="0" timestamp="2026-03-11T11:04:13.248Z" hostname="IlPalazzo" time="0.032">
   <properties/>
-  <testcase name="inferPackConfig detects 20S pack from typical voltages()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.008"/>
+  <testcase name="inferPackConfig detects 20S pack from typical voltages()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.004"/>
   <testcase name="chooseBatteryCurrentWindow for 30S pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.001"/>
-  <testcase name="computePackNominalResistance with null Ns returns null()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.002"/>
+  <testcase name="computePackNominalResistance with null Ns returns null()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.001"/>
   <testcase name="chooseBatteryCurrentWindow for null Ns uses default()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.0"/>
-  <testcase name="inferPackConfig detects 16S small pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.002"/>
-  <testcase name="computePackNominalResistance for 20S pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.001"/>
-  <testcase name="inferPackConfig detects 24S pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.002"/>
+  <testcase name="inferPackConfig detects 16S small pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.0"/>
+  <testcase name="computePackNominalResistance for 20S pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.0"/>
+  <testcase name="inferPackConfig detects 24S pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.0"/>
   <testcase name="inferPackConfig rounds to nearest known series()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.001"/>
-  <testcase name="inferPackConfig with empty valid data returns null()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.027"/>
+  <testcase name="inferPackConfig with empty valid data returns null()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.015"/>
   <testcase name="estimateCellResistanceMOhm for different voltages()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.001"/>
-  <testcase name="chooseBatteryCurrentWindow for 24S pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.001"/>
-  <testcase name="chooseBatteryCurrentWindow for 16S pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.001"/>
-  <testcase name="computePackNominalResistance for 30S high-voltage pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.0"/>
-  <testcase name="computePackNominalResistance for 16S small pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.001"/>
+  <testcase name="chooseBatteryCurrentWindow for 24S pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.0"/>
+  <testcase name="chooseBatteryCurrentWindow for 16S pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.0"/>
+  <testcase name="computePackNominalResistance for 30S high-voltage pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.001"/>
+  <testcase name="computePackNominalResistance for 16S small pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.0"/>
   <testcase name="inferPackConfig ignores invalid SoC references()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.001"/>
   <testcase name="chooseBatteryCurrentWindow for 40S+ high-power pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.001"/>
-  <testcase name="chooseBatteryCurrentWindow for 20S pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.001"/>
+  <testcase name="chooseBatteryCurrentWindow for 20S pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.0"/>
   <testcase name="inferPackConfig detects 30S high-voltage pack()" classname="io.github.eucsoh.analysis.PackInferenceTest" time="0.001"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>

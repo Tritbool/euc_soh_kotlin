@@ -12,8 +12,13 @@ data class ReqStatsResult(
     
     // Resistance metrics
     val reqMedian: Double? = null,
+    val reqMedian25C: Double? = null,
     val req95p: Double? = null,
-    
+
+    // Battery metrics
+    val rBattMedian: Double? = null,
+    val rBattMedian25C: Double? = null,
+
     // Voltage sag metrics
     val sagMedian: Double? = null,
     val sag95p: Double? = null,
@@ -22,8 +27,14 @@ data class ReqStatsResult(
     
     // Current metrics
     val iMax: Double? = null,
+    val iPhaseMax: Double? = null,
     val i95p: Double? = null,
-    
+    val iPhase95p: Double? = null,
+    val iPhase2Int: Double? = null,
+
+    // Mosfets metrics
+    val rMosfetHot : Double? = null,
+
     // Temperature metrics
     val tempBoardMax: Double? = null,
     val tempMotorMax: Double? = null
