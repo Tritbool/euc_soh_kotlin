@@ -177,16 +177,16 @@ document.getElementById(id).style.display = 'none';
 <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
   <header class="mdl-layout__header">
     <div class="mdl-layout__header-row">
-      <span class="mdl-layout-title">Lint Report: 27 warnings</span>
+      <span class="mdl-layout-title">Lint Report: 30 warnings</span>
       <div class="mdl-layout-spacer"></div>
-      <nav class="mdl-navigation mdl-layout--large-screen-only">Check performed at Wed Mar 11 12:04:46 CET 2026 by AGP (8.5.0)</nav>
+      <nav class="mdl-navigation mdl-layout--large-screen-only">Check performed at Wed Mar 11 15:40:09 CET 2026 by AGP (8.5.0)</nav>
     </div>
   </header>
   <div class="mdl-layout__drawer">
     <span class="mdl-layout-title">Issue Types</span>
     <nav class="mdl-navigation">
       <a class="mdl-navigation__link" href="#overview"><i class="material-icons">dashboard</i>Overview</a>
-      <a class="mdl-navigation__link" href="#DefaultLocale"><i class="material-icons warning-icon">warning</i>Implied default locale in case conversion (8)</a>
+      <a class="mdl-navigation__link" href="#DefaultLocale"><i class="material-icons warning-icon">warning</i>Implied default locale in case conversion (11)</a>
       <a class="mdl-navigation__link" href="#OldTargetApi"><i class="material-icons warning-icon">warning</i>Target SDK attribute is not targeting latest version (1)</a>
       <a class="mdl-navigation__link" href="#SelectedPhotoAccess"><i class="material-icons warning-icon">warning</i>Behavior change when requesting photo library access (2)</a>
       <a class="mdl-navigation__link" href="#GradleDependency"><i class="material-icons warning-icon">warning</i>Obsolete Gradle Dependency (10)</a>
@@ -209,7 +209,7 @@ document.getElementById(id).style.display = 'none';
 <tr><td class="countColumn"></td><td class="categoryColumn"><a href="#Correctness">Correctness</a>
 </td></tr>
 <tr>
-<td class="countColumn">8</td><td class="issueColumn"><i class="material-icons warning-icon">warning</i>
+<td class="countColumn">11</td><td class="issueColumn"><i class="material-icons warning-icon">warning</i>
 <a href="#DefaultLocale">DefaultLocale</a>: Implied default locale in case conversion</td></tr>
 <tr>
 <td class="countColumn">1</td><td class="issueColumn"><i class="material-icons warning-icon">warning</i>
@@ -310,6 +310,8 @@ Dismiss</button>            </div>
 <span class="lineno"> 174 </span>    <span class="keyword">if</span> (currentParams.rWiring > <span class="number">0</span>) {
 </pre>
 
+<button class="mdl-button mdl-js-button mdl-button--primary" id="DefaultLocaleDivLink" onclick="reveal('DefaultLocaleDiv');" />+ 6 More Occurrences...</button>
+<div id="DefaultLocaleDiv" style="display: none">
 <span class="location"><a href="../../src/main/kotlin/io/github/eucsoh/android/ui/screens/MosfetConfigDialog.kt">../../src/main/kotlin/io/github/eucsoh/android/ui/screens/MosfetConfigDialog.kt</a>:176</span>: <span class="message">Implicitly using the default locale is a common source of bugs: Use <code>String.format(Locale, ...)</code> instead</span><br /><pre class="errorlines">
 <span class="lineno"> 173 </span>  )
 <span class="lineno"> 174 </span>  <span class="keyword">if</span> (currentParams.rWiring > <span class="number">0</span>) {
@@ -339,6 +341,36 @@ Dismiss</button>            </div>
 <span class="lineno"> 165 </span>      enableDashedLine(<span class="number">12f</span>, <span class="number">8f</span>, <span class="number">0f</span>)
 </pre>
 
+<span class="location"><a href="../../src/main/kotlin/io/github/eucsoh/android/visualization/SohTrendCusumChartGenerator.kt">../../src/main/kotlin/io/github/eucsoh/android/visualization/SohTrendCusumChartGenerator.kt</a>:166</span>: <span class="message">Implicitly using the default locale is a common source of bugs: Use <code>String.format(Locale, ...)</code> instead</span><br /><pre class="errorlines">
+<span class="lineno"> 163 </span>        )
+<span class="lineno"> 164 </span>        <span class="keyword">val</span> regressionSet = LineDataSet(
+<span class="lineno"> 165 </span>            regressionEntries,
+<span class="caretline"><span class="lineno"> 166 </span>            <span class="string">"Trend: $sign${</span><span class="warning">String.format(<span class="string">"%.4f"</span>, slopePerThousand)</span><span class="string">} /1000 km"</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+<span class="lineno"> 167 </span>        ).apply {
+<span class="lineno"> 168 </span>            color = COLOR_REGRESSION
+<span class="lineno"> 169 </span>            lineWidth = <span class="number">2.5f</span></pre>
+
+<span class="location"><a href="../../src/main/kotlin/io/github/eucsoh/android/visualization/SohTrendCusumChartGenerator.kt">../../src/main/kotlin/io/github/eucsoh/android/visualization/SohTrendCusumChartGenerator.kt</a>:331</span>: <span class="message">Implicitly using the default locale is a common source of bugs: Use <code>String.format(Locale, ...)</code> instead</span><br /><pre class="errorlines">
+<span class="lineno"> 328 </span>
+<span class="lineno"> 329 </span>        <span class="comment">// µ_ref (vert)</span>
+<span class="lineno"> 330 </span>        yAxis.addLimitLine(LimitLine(muRef.toFloat(),
+<span class="caretline"><span class="lineno"> 331 </span>            <span class="string">"µ_ref = ${</span><span class="warning">String.format(<span class="string">"%.4f"</span>, muRef)</span><span class="string">}"</span>).apply {&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+<span class="lineno"> 332 </span>            lineColor = COLOR_MU_REF
+<span class="lineno"> 333 </span>            lineWidth = <span class="number">2f</span>
+<span class="lineno"> 334 </span>            textColor = COLOR_MU_REF
+</pre>
+
+<span class="location"><a href="../../src/main/kotlin/io/github/eucsoh/android/visualization/SohTrendCusumChartGenerator.kt">../../src/main/kotlin/io/github/eucsoh/android/visualization/SohTrendCusumChartGenerator.kt</a>:513</span>: <span class="message">Implicitly using the default locale is a common source of bugs: Use <code>String.format(Locale, ...)</code> instead</span><br /><pre class="errorlines">
+<span class="lineno"> 510 </span>        <span class="keyword">val</span> yAxis = chart.axisLeft
+<span class="lineno"> 511 </span>        yAxis.removeAllLimitLines()
+<span class="lineno"> 512 </span>        yAxis.addLimitLine(LimitLine(limit.toFloat(),
+<span class="caretline"><span class="lineno"> 513 </span>            <span class="string">"danger threshold ≈ ${</span><span class="warning">String.format(<span class="string">"%.2f"</span>, limit)</span><span class="string">}"</span>).apply {&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+<span class="lineno"> 514 </span>            lineColor = COLOR_DANGER
+<span class="lineno"> 515 </span>            lineWidth = <span class="number">2f</span>
+<span class="lineno"> 516 </span>            textColor = COLOR_DANGER
+</pre>
+
+</div>
 </div>
 <div class="metadata"><div class="explanation" id="explanationDefaultLocale" style="display: none;">
 Calling <code>String#toLowerCase()</code> or <code>#toUpperCase()</code> <b>without specifying an explicit locale</b> is a common source of bugs. The reason for that is that those methods will use the current locale on the user's device, and even though the code appears to work correctly when you are developing the app, it will fail in some locales. For example, in the Turkish locale, the uppercase replacement for <code>i</code> is <b>not</b> <code>I</code>.<br/>

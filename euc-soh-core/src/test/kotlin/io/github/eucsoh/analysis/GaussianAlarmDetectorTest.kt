@@ -1,11 +1,13 @@
 package io.github.eucsoh.analysis
 
+import io.github.eucsoh.Constants
 import io.github.eucsoh.model.ThresholdInfo
 import org.jetbrains.kotlinx.dataframe.api.dataFrameOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-
+import io.github.eucsoh.Constants.Metrics.*
+import io.github.eucsoh.Constants.MetaColumns.*
 /**
  * Unit tests for GaussianAlarmDetector.
  * Validates threshold computation and alarm detection using Gaussian statistics.
@@ -15,8 +17,8 @@ class GaussianAlarmDetectorTest {
     @Test
     fun `computeThresholds calculates correct mean and std`() {
         val df = dataFrameOf(
-            "Req_median" to listOf(0.048, 0.050, 0.052, 0.049, 0.051, 0.100, 0.110),
-            "soc_ref_ok" to listOf(true, true, true, true, true, true, true)
+            REQ_MEDIAN.csv_code to listOf(0.048, 0.050, 0.052, 0.049, 0.051, 0.100, 0.110),
+            SOC_REF_OK.csv_code to listOf(true, true, true, true, true, true, true)
         )
 
         val thresholds = GaussianAlarmDetector.computeThresholds(
@@ -25,7 +27,7 @@ class GaussianAlarmDetectorTest {
             nSigma = 2.0
         )
 
-        val reqThreshold = thresholds["Req_median"]
+        val reqThreshold = thresholds[REQ_MEDIAN.csv_code]
         assertTrue(reqThreshold != null, "Req_median threshold should exist")
         
         // Best values should be ~0.048-0.051 -> mean ~0.050
@@ -36,8 +38,8 @@ class GaussianAlarmDetectorTest {
     @Test
     fun `computeThresholds higher_is_bad sets limit above mean`() {
         val df = dataFrameOf(
-            "Req_median" to listOf(0.050, 0.051, 0.052, 0.053, 0.054),
-            "soc_ref_ok" to listOf(true, true, true, true, true)
+            REQ_MEDIAN.csv_code to listOf(0.050, 0.051, 0.052, 0.053, 0.054),
+            SOC_REF_OK.csv_code to listOf(true, true, true, true, true)
         )
 
         val thresholds = GaussianAlarmDetector.computeThresholds(
@@ -46,17 +48,17 @@ class GaussianAlarmDetectorTest {
             nSigma = 2.0
         )
 
-        val reqThreshold = thresholds["Req_median"]!!
-        assertEquals("higher_is_bad", reqThreshold.direction, "Req_median should be higher_is_bad")
+        val reqThreshold = thresholds[REQ_MEDIAN.csv_code]!!
+        assertEquals(Constants.HIGHER_IS_BAD, reqThreshold.direction, "Req_median should be higher_is_bad")
         assertTrue(reqThreshold.limit > reqThreshold.mean, "Limit should be above mean for higher_is_bad")
     }
 
     @Test
     fun `computeThresholds lower_is_bad sets limit below mean`() {
         val df = dataFrameOf(
-            "v_min_strong" to listOf(70.0, 71.0, 72.0, 73.0, 74.0),
-            "Req_median" to listOf(0.050, 0.051, 0.052, 0.053, 0.054),  // For sorting
-            "soc_ref_ok" to listOf(true, true, true, true, true)
+            V_MIN_STRONG.csv_code to listOf(70.0, 71.0, 72.0, 73.0, 74.0),
+            REQ_MEDIAN.csv_code to listOf(0.050, 0.051, 0.052, 0.053, 0.054),  // For sorting
+            SOC_REF_OK.csv_code to listOf(true, true, true, true, true)
         )
 
         val thresholds = GaussianAlarmDetector.computeThresholds(
@@ -65,9 +67,9 @@ class GaussianAlarmDetectorTest {
             nSigma = 2.0
         )
 
-        val vMinThreshold = thresholds["v_min_strong"]
+        val vMinThreshold = thresholds[V_MIN_STRONG.csv_code]
         if (vMinThreshold != null) {
-            assertEquals("lower_is_bad", vMinThreshold.direction, "v_min_strong should be lower_is_bad")
+            assertEquals(Constants.LOWER_IS_BAD, vMinThreshold.direction, "v_min_strong should be lower_is_bad")
             assertTrue(vMinThreshold.limit < vMinThreshold.mean, "Limit should be below mean for lower_is_bad")
         }
     }
@@ -75,19 +77,19 @@ class GaussianAlarmDetectorTest {
     @Test
     fun `detectAlarms identifies outlier beyond threshold`() {
         val df = dataFrameOf(
-            "file" to listOf("log1.csv", "log2.csv", "log3.csv", "log4.csv", "log5.csv"),
-            "wheel_km" to listOf(100.0, 200.0, 300.0, 400.0, 500.0),
-            "datetime_first" to listOf("2024-01-01", "2024-02-01", "2024-03-01", "2024-04-01", "2024-05-01"),
-            "Req_median" to listOf(0.050, 0.051, 0.052, 0.053, 0.100),  // Last one is outlier
-            "soc_ref_ok" to listOf(true, true, true, true, true)
+            FILE.csv_code to listOf("log1.csv", "log2.csv", "log3.csv", "log4.csv", "log5.csv"),
+            WHEEL_KM.csv_code to listOf(100.0, 200.0, 300.0, 400.0, 500.0),
+            DATETIME_FIRST.csv_code to listOf("2024-01-01", "2024-02-01", "2024-03-01", "2024-04-01", "2024-05-01"),
+            REQ_MEDIAN.csv_code to listOf(0.050, 0.051, 0.052, 0.053, 0.100),  // Last one is outlier
+            SOC_REF_OK.csv_code to listOf(true, true, true, true, true)
         )
 
         val thresholds = mapOf(
-            "Req_median" to ThresholdInfo(
+            REQ_MEDIAN.csv_code to ThresholdInfo(
                 mean = 0.051,
                 std = 0.002,
                 limit = 0.055,  // 2σ above mean
-                direction = "higher_is_bad"
+                direction = Constants.HIGHER_IS_BAD
             )
         )
 
@@ -104,19 +106,19 @@ class GaussianAlarmDetectorTest {
     @Test
     fun `detectAlarms no alarm when all within threshold`() {
         val df = dataFrameOf(
-            "file" to listOf("log1.csv", "log2.csv", "log3.csv"),
-            "wheel_km" to listOf(100.0, 200.0, 300.0),
-            "datetime_first" to listOf("2024-01-01", "2024-02-01", "2024-03-01"),
-            "Req_median" to listOf(0.050, 0.051, 0.052),
-            "soc_ref_ok" to listOf(true, true, true)
+            FILE.csv_code to listOf("log1.csv", "log2.csv", "log3.csv"),
+            WHEEL_KM.csv_code to listOf(100.0, 200.0, 300.0),
+            DATETIME_FIRST.csv_code to listOf("2024-01-01", "2024-02-01", "2024-03-01"),
+            REQ_MEDIAN.csv_code to listOf(0.050, 0.051, 0.052),
+            SOC_REF_OK.csv_code to listOf(true, true, true)
         )
 
         val thresholds = mapOf(
-            "Req_median" to ThresholdInfo(
+            REQ_MEDIAN.csv_code to ThresholdInfo(
                 mean = 0.051,
                 std = 0.002,
                 limit = 0.060,  // Well above all values
-                direction = "higher_is_bad"
+                direction = Constants.HIGHER_IS_BAD
             )
         )
 
@@ -132,11 +134,11 @@ class GaussianAlarmDetectorTest {
     @Test
     fun `detectAlarms checks absolute limit when enabled`() {
         val df = dataFrameOf(
-            "file" to listOf("log1.csv", "log2.csv"),
-            "wheel_km" to listOf(5500.0, 6000.0),  // Above ABS_KM_LIMIT
-            "datetime_first" to listOf("2024-01-01", "2024-02-01"),
-            "Req_median" to listOf(0.050, 0.150),  // Second one very high
-            "soc_ref_ok" to listOf(true, true)
+            FILE.csv_code to listOf("log1.csv", "log2.csv"),
+            WHEEL_KM.csv_code to listOf(5500.0, 6000.0),  // Above ABS_KM_LIMIT
+            DATETIME_FIRST.csv_code to listOf("2024-01-01", "2024-02-01"),
+            REQ_MEDIAN.csv_code to listOf(0.050, 0.150),  // Second one very high
+            SOC_REF_OK.csv_code to listOf(true, true)
         )
 
         val thresholds = mapOf<String, ThresholdInfo>()
@@ -158,26 +160,26 @@ class GaussianAlarmDetectorTest {
     @Test
     fun `detectAlarms handles multiple metric violations`() {
         val df = dataFrameOf(
-            "file" to listOf("log1.csv", "log2.csv", "log3.csv"),
-            "wheel_km" to listOf(100.0, 200.0, 300.0),
-            "datetime_first" to listOf("2024-01-01", "2024-02-01", "2024-03-01"),
-            "Req_median" to listOf(0.050, 0.051, 0.100),  // Last is bad
-            "temp_board_max" to listOf(40.0, 42.0, 80.0),  // Last is bad
-            "soc_ref_ok" to listOf(true, true, true)
+            FILE.csv_code to listOf("log1.csv", "log2.csv", "log3.csv"),
+            WHEEL_KM.csv_code to listOf(100.0, 200.0, 300.0),
+            DATETIME_FIRST.csv_code to listOf("2024-01-01", "2024-02-01", "2024-03-01"),
+            REQ_MEDIAN.csv_code to listOf(0.050, 0.051, 0.100),  // Last is bad
+            TEMP_BOARD_MAX.csv_code to listOf(40.0, 42.0, 80.0),  // Last is bad
+            SOC_REF_OK.csv_code to listOf(true, true, true)
         )
 
         val thresholds = mapOf(
-            "Req_median" to ThresholdInfo(
+            REQ_MEDIAN.csv_code to ThresholdInfo(
                 mean = 0.051,
                 std = 0.002,
                 limit = 0.060,
-                direction = "higher_is_bad"
+                direction = Constants.HIGHER_IS_BAD
             ),
-            "temp_board_max" to ThresholdInfo(
+            TEMP_BOARD_MAX.csv_code to ThresholdInfo(
                 mean = 41.0,
                 std = 2.0,
                 limit = 50.0,
-                direction = "higher_is_bad"
+                direction = Constants.HIGHER_IS_BAD
             )
         )
 
@@ -190,7 +192,7 @@ class GaussianAlarmDetectorTest {
         assertTrue(alarms.isNotEmpty(), "Should detect alarms")
         val lastAlarm = alarms.first()
         assertTrue(
-            lastAlarm.reasons.contains("Req_median") && lastAlarm.reasons.contains("temp_board_max"),
+            lastAlarm.reasons.contains(REQ_MEDIAN.csv_code) && lastAlarm.reasons.contains(TEMP_BOARD_MAX.csv_code),
             "Should mention both violated metrics"
         )
     }
@@ -198,8 +200,8 @@ class GaussianAlarmDetectorTest {
     @Test
     fun `computeThresholds handles insufficient data gracefully`() {
         val df = dataFrameOf(
-            "Req_median" to listOf(0.050, 0.051),  // Only 2 points
-            "soc_ref_ok" to listOf(true, true)
+            REQ_MEDIAN.csv_code to listOf(0.050, 0.051),  // Only 2 points
+            SOC_REF_OK.csv_code to listOf(true, true)
         )
 
         val thresholds = GaussianAlarmDetector.computeThresholds(
@@ -216,26 +218,26 @@ class GaussianAlarmDetectorTest {
     @Test
     fun `detectAlarms filters null values correctly`() {
         val df = dataFrameOf(
-            "file" to listOf("log1.csv", "log2.csv", "log3.csv"),
-            "wheel_km" to listOf(100.0, 200.0, 300.0),
-            "datetime_first" to listOf("2024-01-01", "2024-02-01", "2024-03-01"),
-            "Req_median" to listOf(0.050, null, 0.100),  // Middle value null
-            "temp_board_max" to listOf(40.0, 42.0, null),  // Last value null
-            "soc_ref_ok" to listOf(true, true, true)
+            FILE.csv_code to listOf("log1.csv", "log2.csv", "log3.csv"),
+            WHEEL_KM.csv_code to listOf(100.0, 200.0, 300.0),
+            DATETIME_FIRST.csv_code to listOf("2024-01-01", "2024-02-01", "2024-03-01"),
+            REQ_MEDIAN.csv_code to listOf(0.050, null, 0.100),  // Middle value null
+            TEMP_BOARD_MAX.csv_code to listOf(40.0, 42.0, null),  // Last value null
+            SOC_REF_OK.csv_code to listOf(true, true, true)
         )
 
         val thresholds = mapOf(
-            "Req_median" to ThresholdInfo(
+            REQ_MEDIAN.csv_code to ThresholdInfo(
                 mean = 0.051,
                 std = 0.002,
                 limit = 0.060,
-                direction = "higher_is_bad"
+                direction = Constants.HIGHER_IS_BAD
             ),
-            "temp_board_max" to ThresholdInfo(
+            TEMP_BOARD_MAX.csv_code to ThresholdInfo(
                 mean = 41.0,
                 std = 2.0,
                 limit = 50.0,
-                direction = "higher_is_bad"
+                direction = Constants.HIGHER_IS_BAD
             )
         )
 
@@ -252,8 +254,8 @@ class GaussianAlarmDetectorTest {
     @Test
     fun `computeThresholds uses optimal fraction correctly`() {
         val df = dataFrameOf(
-            "Req_median" to listOf(0.040, 0.045, 0.050, 0.055, 0.100, 0.110, 0.120, 0.130, 0.140, 0.150),
-            "soc_ref_ok" to listOf(true, true, true, true, true, true, true, true, true, true)
+            REQ_MEDIAN.csv_code to listOf(0.040, 0.045, 0.050, 0.055, 0.100, 0.110, 0.120, 0.130, 0.140, 0.150),
+            SOC_REF_OK.csv_code to listOf(true, true, true, true, true, true, true, true, true, true)
         )
 
         // Use only best 30% (3 values: 0.040, 0.045, 0.050)
@@ -270,8 +272,8 @@ class GaussianAlarmDetectorTest {
             nSigma = 2.0
         )
 
-        val mean30 = thresholds30["Req_median"]?.mean
-        val mean50 = thresholds50["Req_median"]?.mean
+        val mean30 = thresholds30[REQ_MEDIAN.csv_code]?.mean
+        val mean50 = thresholds50[REQ_MEDIAN.csv_code]?.mean
 
         assertTrue(mean30!! < mean50!!, "30% should have lower mean than 50%")
         assertTrue(mean30 < 0.048, "30% should be dominated by lowest values")
@@ -281,18 +283,18 @@ class GaussianAlarmDetectorTest {
     fun `detectAlarms realistic EUC scenario`() {
         // Simulate realistic degradation scenario
         val df = dataFrameOf(
-            "file" to (1..10).map { "log$it.csv" },
-            "wheel_km" to listOf(100.0, 500.0, 1000.0, 1500.0, 2000.0, 2500.0, 3000.0, 3500.0, 4000.0, 4500.0),
-            "datetime_first" to (1..10).map { "2024-${String.format("%02d", it)}-01" },
-            "Req_median" to listOf(
+            FILE.csv_code to (1..10).map { "log$it.csv" },
+            WHEEL_KM.csv_code to listOf(100.0, 500.0, 1000.0, 1500.0, 2000.0, 2500.0, 3000.0, 3500.0, 4000.0, 4500.0),
+            DATETIME_FIRST.csv_code to (1..10).map { "2024-${String.format("%02d", it)}-01" },
+            REQ_MEDIAN.csv_code to listOf(
                 0.048, 0.050, 0.049, 0.051, 0.052,  // Normal first 5
                 0.053, 0.055, 0.070, 0.072, 0.075   // Degradation in last 5
             ),
-            "temp_board_max" to listOf(
+            TEMP_BOARD_MAX.csv_code to listOf(
                 38.0, 40.0, 39.0, 41.0, 40.0,
                 42.0, 43.0, 45.0, 46.0, 47.0
             ),
-            "soc_ref_ok" to List(10) { true }
+            SOC_REF_OK.csv_code to List(10) { true }
         )
 
         val thresholds = GaussianAlarmDetector.computeThresholds(

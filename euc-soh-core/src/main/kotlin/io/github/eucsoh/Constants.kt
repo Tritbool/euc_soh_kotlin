@@ -5,12 +5,12 @@ package io.github.eucsoh
  */
 object Constants {
     const val DEBUG = true  // Activé pour débogage Android
-    
+
     // Absolute limits
     const val ABS_REQ_LIMIT = 0.8  // Ω
     const val ABS_KM_LIMIT = 5000.0  // km
     const val ABS_REQ_FACTOR = 1.8
-    
+
     // Battery parameters
     const val NOMINAL_CELL_V = 3.7  // V, nominal Li-ion voltage
 
@@ -19,44 +19,56 @@ object Constants {
     val KNOWN_SERIES = listOf(16, 20, 24, 28, 30, 32, 40, 48, 52, 60, 64, 72)
     const val NS_MIN = 8
     const val NS_MAX = 80
-    
+
+    const val HIGHER_IS_BAD = "higher_is_bad"
+
+    const val LOWER_IS_BAD = "lower_is_bad"
+
+    enum class MetaColumns(val csv_code: String){
+        FILE("file"),
+        DATETIME_FIRST("datetime_first"),
+        WHEEL_KM("wheel_km"),
+        WHEEL_KM_SOURCE("wheel_km_source"),
+        SOC_REF_OK("soc_ref_ok"),
+    }
+
+    enum class Metrics(val csv_code: String, val higher_is_bad: Boolean=true, val label: String? = null) {
+        I_MAX("i_max", true, "Max battery current (A)"),
+        I_95P("i_95p", true, "Battery current 95th percentile (A)"),
+        I_PHASE_MAX("i_phase_max", true, "Max phase current (A)"),
+        I_PHASE_95P("i_phase_95p", true, "Phase current 95th percentile (A)"),
+        I_PHASE2_INT("I_phase2_int", true, "Phase I² dose – ∫ I_phase² dt (A²·s)"),
+        R_BATT_MEDIAN("R_batt_median", true, "R_batt median (Ω)"),
+        REQ_MEDIAN("Req_median", true, "Equivalent resistance median (Ω)"),
+        REQ_MEDIAN_25C("Req_median_25C", true, "Equivalent resistance median @25°C (Ω)"),
+        REQ_95P("Req_95p", true, "Equivalent resistance 95th percentile (Ω)"),
+        V_MIN_STRONG("v_min_strong", false, "Maximum voltage collapse under load (V)"),
+        R_BATT_MEDIAN_25C("R_batt_median_25C", true, "R_batt median @25°C (Ω)"),
+        R_MOSFET_HOT("R_mosfet_hot", true, "R_MOSFET hot (Ω)"),
+        SAG_95P("sag_95p", true, "Sag 95th percentile (V)"),
+        SAG_MAX("sag_max", true, "Sag max (V)"),
+        TEMP_BOARD_MAX("temp_board_max", true, "Max board temperature (°C)"),
+        TEMP_MOTOR_MAX("temp_motor_max", true, "Max motor temperature (°C)")
+    }
+
     // Metrics for CUSUM and trend detection
     val CUSUM_METRICS = listOf(
-        "R_batt_median_25C",
-        "R_mosfet_hot",
-        "Req_median",
-        "temp_motor_max",
-        "temp_board_max",
-        "I_phase2_int",
-        "sag_95p"
+        Metrics.R_BATT_MEDIAN_25C.csv_code,
+        Metrics.R_MOSFET_HOT.csv_code,
+        Metrics.REQ_MEDIAN.csv_code,
+        Metrics.TEMP_MOTOR_MAX.csv_code,
+        Metrics.TEMP_BOARD_MAX.csv_code,
+        Metrics.I_PHASE2_INT.csv_code,
+        Metrics.SAG_95P.csv_code
     )
-    
+
     val TREND_METRICS = listOf(
-        "R_batt_median_25C",
-        "R_mosfet_hot",
-        "Req_median",
-        "temp_motor_max",
-        "temp_board_max",
-        "I_phase2_int",
-        "sag_95p"
-    )
-    
-    val Y_LABELS = mapOf(
-        "i_max" to "Max battery current (A)",
-        "i_95p" to "Battery current 95th percentile (A)",
-        "i_phase_max" to "Max phase current (A)",
-        "i_phase_95p" to "Phase current 95th percentile (A)",
-        "I_phase2_int" to "Phase I² dose – ∫ I_phase² dt (A²·s)",
-        "R_batt_median" to "R_batt median (Ω)",
-        "Req_median" to "Equivalent resistance median (Ω)",
-        "Req_median_25C" to "Equivalent resistance median @25°C (Ω)",
-        "Req_95p" to "Equivalent resistance 95th percentile (Ω)",
-        "v_min_strong" to "Maximum voltage collapse under load (V)",
-        "R_batt_median_25C" to "R_batt median @25°C (Ω)",
-        "R_mosfet_hot" to "R_MOSFET hot (Ω)",
-        "sag_95p" to "Sag 95th percentile (V)",
-        "sag_max" to "Sag max (V)",
-        "temp_board_max" to "Max board temperature (°C)",
-        "temp_motor_max" to "Max motor temperature (°C)"
+        Metrics.R_BATT_MEDIAN_25C.csv_code,
+        Metrics.R_MOSFET_HOT.csv_code,
+        Metrics.REQ_MEDIAN.csv_code,
+        Metrics.TEMP_MOTOR_MAX.csv_code,
+        Metrics.TEMP_BOARD_MAX.csv_code,
+        Metrics.I_PHASE2_INT.csv_code,
+        Metrics.SAG_95P.csv_code
     )
 }

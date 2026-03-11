@@ -1,12 +1,15 @@
 package io.github.eucsoh.analysis
 
 import io.github.eucsoh.Constants
+import io.github.eucsoh.Constants.HIGHER_IS_BAD
+import io.github.eucsoh.Constants.LOWER_IS_BAD
+import io.github.eucsoh.Constants.Metrics.*
+import io.github.eucsoh.Constants.MetaColumns.*
 import io.github.eucsoh.Logger
 import io.github.eucsoh.NoOpLogger
 import io.github.eucsoh.model.ThresholdInfo
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
-import kotlin.math.abs
 import kotlin.math.pow
 
 /**
@@ -20,35 +23,20 @@ object GaussianAlarmDetector {
         val datetimeFirst: String?,
         val reasons: String
     )
-
+    private val TAG:String="GaussianAlarmDetector"
     private val METRICS = listOf(
-        "Req_median",
-        "Req_95p",
-        "sag_95p",
-        "sag_max",
-        "temp_board_max",
-        "temp_motor_max",
-        "v_min_strong",
-        "R_batt_median",
-        "R_mosfet_hot",
-        "I_phase2_int",
-        "i_phase_max",
-        "i_phase_95p"
-    )
-
-    private val DIRECTION = mapOf(
-        "Req_median" to "higher_is_bad",
-        "Req_95p" to "higher_is_bad",
-        "sag_95p" to "higher_is_bad",
-        "sag_max" to "higher_is_bad",
-        "temp_board_max" to "higher_is_bad",
-        "temp_motor_max" to "higher_is_bad",
-        "R_batt_median" to "higher_is_bad",
-        "R_mosfet_hot" to "higher_is_bad",
-        "v_min_strong" to "lower_is_bad",
-        "I_phase2_int" to "higher_is_bad",
-        "i_phase_max" to "higher_is_bad",
-        "i_phase_95p" to "higher_is_bad"
+        REQ_MEDIAN,
+        REQ_95P,
+        SAG_95P,
+        SAG_MAX,
+        TEMP_BOARD_MAX,
+        TEMP_MOTOR_MAX,
+        V_MIN_STRONG,
+        R_BATT_MEDIAN,
+        R_MOSFET_HOT,
+        I_PHASE2_INT,
+        I_PHASE_MAX,
+        I_PHASE_95P
     )
 
     /**
@@ -63,14 +51,16 @@ object GaussianAlarmDetector {
     ): Map<String, ThresholdInfo> {
         val thresholds = mutableMapOf<String, ThresholdInfo>()
         for (i in 0 until minOf(5, df.rowsCount())) {
-            logger.d("GaussianAlarmDetector", "raw[$i] Req_median=${df["Req_median"][i]}")
+            logger.d(TAG, "raw[$i] Req_median=${df[REQ_MEDIAN.csv_code][i]}")
         }
         // Sort by Req_median to pick optimal logs
-        val dfSorted = df.sortBy("Req_median")
+        val dfSorted = df.sortBy(REQ_MEDIAN.csv_code)
         val nOpt = maxOf(3, (dfSorted.rowsCount() * optimalFrac).toInt())
         val dfOpt = dfSorted.take(nOpt)
-        logger.d("GaussianAlarmDetector", "total=${df.rowsCount()}, nOpt=$nOpt")
-        for (metric in METRICS) {
+        logger.d(TAG, "total=${df.rowsCount()}, nOpt=$nOpt")
+        for (metricInfo in METRICS) {
+            val metric = metricInfo.csv_code
+            val direction = metricInfo.higher_is_bad
             if (metric !in df.columnNames()) continue
 
             val vals = dfOpt[metric].values()
@@ -84,18 +74,20 @@ object GaussianAlarmDetector {
             // Bessel corrected std dev.
             val std = kotlin.math.sqrt(vals.sumOf { (it - mean).pow(2) } / (vals.size - 1))
 
-            val direction = DIRECTION[metric] ?: "higher_is_bad"
-            val limit = if (direction == "higher_is_bad") {
+            val limit = if (direction) {
                 mean + nSigma * std
             } else {
                 mean - nSigma * std
             }
-            logger.d("GaussianAlarmDetector", "$metric: vals=${vals.size}, mean=$mean, std=$std, limit=$limit")
+            logger.d(
+                TAG,
+                "$metric: vals=${vals.size}, mean=$mean, std=$std, limit=$limit"
+            )
             thresholds[metric] = ThresholdInfo(
                 mean = mean,
                 std = std,
                 limit = limit,
-                direction = direction
+                direction = if(direction) HIGHER_IS_BAD else LOWER_IS_BAD
             )
         }
 
@@ -123,7 +115,7 @@ object GaussianAlarmDetector {
                 val value = (df[metric][i] as? Number)?.toDouble() ?: continue
                 if (value.isNaN()) continue
 
-                val bad = if (info.direction == "higher_is_bad") {
+                val bad = if (info.direction == HIGHER_IS_BAD) {
                     value > info.limit
                 } else {
                     value < info.limit
@@ -132,7 +124,11 @@ object GaussianAlarmDetector {
                 if (bad) {
                     reasons.add(
                         "$metric (${info.direction}) limit=${"%.3f".format(info.limit)}, " +
-                                "val=${"%.3f".format(value)}, µ=${"%.3f".format(info.mean)}, σ=${"%.3f".format(info.std)}"
+                                "val=${"%.3f".format(value)}, µ=${"%.3f".format(info.mean)}, σ=${
+                                    "%.3f".format(
+                                        info.std
+                                    )
+                                }"
                     )
                 }
             }
@@ -140,9 +136,9 @@ object GaussianAlarmDetector {
             if (reasons.isNotEmpty()) {
                 alarms.add(
                     Alarm(
-                        file = (df["file"][i] as? String) ?: "",
-                        wheelKm = (df["wheel_km"][i] as? Number)?.toDouble(),
-                        datetimeFirst = df["datetime_first"][i] as? String,
+                        file = (df[FILE.csv_code][i] as? String) ?: "",
+                        wheelKm = (df[WHEEL_KM.csv_code][i] as? Number)?.toDouble(),
+                        datetimeFirst = df[DATETIME_FIRST.csv_code][i] as? String,
                         reasons = reasons.joinToString("; ")
                     )
                 )
@@ -150,7 +146,7 @@ object GaussianAlarmDetector {
         }
 
         // Absolute Req limit check
-        if (checkAbsoluteLimit && "Req_median" in df.columnNames() && "wheel_km" in df.columnNames()) {
+        if (checkAbsoluteLimit && REQ_MEDIAN.csv_code in df.columnNames() && WHEEL_KM.csv_code in df.columnNames()) {
             val absLimit = if (rPackNominal != null) {
                 rPackNominal * Constants.ABS_REQ_FACTOR
             } else {
@@ -158,16 +154,16 @@ object GaussianAlarmDetector {
             }
 
             for (i in 0 until df.rowsCount()) {
-                val req = (df["Req_median"][i] as? Number)?.toDouble() ?: continue
-                val km = (df["wheel_km"][i] as? Number)?.toDouble() ?: continue
+                val req = (df[REQ_MEDIAN.csv_code][i] as? Number)?.toDouble() ?: continue
+                val km = (df[WHEEL_KM.csv_code][i] as? Number)?.toDouble() ?: continue
 
                 if (req > absLimit && km >= Constants.ABS_KM_LIMIT) {
                     val factor = if (rPackNominal != null) req / rPackNominal else 0.0
                     alarms.add(
                         Alarm(
-                            file = (df["file"][i] as? String) ?: "",
+                            file = (df[FILE.csv_code][i] as? String) ?: "",
                             wheelKm = km,
-                            datetimeFirst = df["datetime_first"][i] as? String,
+                            datetimeFirst = df[DATETIME_FIRST.csv_code][i] as? String,
                             reasons = "Absolute high Req_median: ${"%.3f".format(req)}Ω " +
                                     "(> ${"%.3f".format(absLimit)}Ω ≈ ${"%.1f".format(factor)}×R_pack_nom) " +
                                     "at ${"%.0f".format(km)} km"

@@ -22,6 +22,15 @@
 /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/visualization/SohChartGeneratorFixed.kt:162: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
             "Danger: ${String.format("%.3f", dangerThreshold)}").apply {
                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/visualization/SohTrendCusumChartGenerator.kt:166: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+            "Trend: $sign${String.format("%.4f", slopePerThousand)} /1000 km"
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/visualization/SohTrendCusumChartGenerator.kt:331: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+            "µ_ref = ${String.format("%.4f", muRef)}").apply {
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/visualization/SohTrendCusumChartGenerator.kt:513: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+            "danger threshold ≈ ${String.format("%.2f", limit)}").apply {
+                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
    Explanation for issues of type "DefaultLocale":
    Calling String#toLowerCase() or #toUpperCase() without specifying an
@@ -174,4 +183,4 @@
    There are quickfixes to automatically extract this hardcoded string into a
    resource lookup.
 
-0 errors, 27 warnings
+0 errors, 30 warnings
