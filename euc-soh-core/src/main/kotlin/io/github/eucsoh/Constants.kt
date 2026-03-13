@@ -41,7 +41,8 @@ object Constants {
         CURRENT_PHASE("phase_current"),
         DATE("date"),
         TIME("time"),
-        DISTANCE_TOTAL("totaldistance")
+        DISTANCE_TOTAL("totaldistance"),
+        PWM("pwm")
     }
 
     enum class EUCWorldColumns(val csv_code: String) {
@@ -51,7 +52,10 @@ object Constants {
         SOC("battery"),
         TIMESTAMP("datetime"),
         GPS_TIMESTAMP("gps_datetime"),
-        DISTANCE_TOTAL("distance_total")
+        DISTANCE_TOTAL("distance_total"),
+        PWM("safety_margin"),
+
+        DURATION("duration")
     }
 
     enum class MetaColumns(val csv_code: String) {
@@ -93,7 +97,10 @@ object Constants {
         SAG_95P("sag_95p", true, "Sag 95th percentile (V)"),
         SAG_MAX("sag_max", true, "Sag max (V)"),
         TEMP_BOARD_MAX("temp_board_max", true, "Max board temperature (°C)"),
-        TEMP_MOTOR_MAX("temp_motor_max", true, "Max motor temperature (°C)")
+        TEMP_MOTOR_MAX("temp_motor_max", true, "Max motor temperature (°C)"),
+        PWM_95P("pwm_95p", true, "PWM 95th percentile (%)"),
+
+        PWM_MAX("pwm_max", true, "PWM max (%)")
     }
 
     // Metrics for CUSUM and trend detection
@@ -101,9 +108,9 @@ object Constants {
         Metrics.R_BATT_MEDIAN_25C.csv_code,
         Metrics.R_MOSFET_HOT.csv_code,
         Metrics.REQ_MEDIAN.csv_code,
+        Metrics.REQ_MEDIAN_25C.csv_code,
         Metrics.TEMP_MOTOR_MAX.csv_code,
         Metrics.TEMP_BOARD_MAX.csv_code,
-        Metrics.I_PHASE2_INT.csv_code,
         Metrics.SAG_95P.csv_code
     )
 
@@ -111,9 +118,9 @@ object Constants {
         Metrics.R_BATT_MEDIAN_25C.csv_code,
         Metrics.R_MOSFET_HOT.csv_code,
         Metrics.REQ_MEDIAN.csv_code,
+        Metrics.REQ_MEDIAN_25C.csv_code,
         Metrics.TEMP_MOTOR_MAX.csv_code,
         Metrics.TEMP_BOARD_MAX.csv_code,
-        Metrics.I_PHASE2_INT.csv_code,
         Metrics.SAG_95P.csv_code
     )
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="io.github.eucsoh.integration.RealLogsIntegrationTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-03-11T15:59:23.601Z" hostname="IlPalazzo" time="4.429">
+<testsuite name="io.github.eucsoh.integration.RealLogsIntegrationTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-03-13T15:48:57.232Z" hostname="IlPalazzo" time="4.593">
   <properties/>
-  <testcase name="real logs analysis pipeline runs end-to-end()" classname="io.github.eucsoh.integration.RealLogsIntegrationTest" time="4.426"/>
+  <testcase name="real logs analysis pipeline runs end-to-end()" classname="io.github.eucsoh.integration.RealLogsIntegrationTest" time="4.592"/>
   <testcase name="real logs folder structure is correct if it exists()" classname="io.github.eucsoh.integration.RealLogsIntegrationTest" time="0.001"/>
   <system-out><![CDATA[✓ Found 8 real log files in src/test/resources/real_logs
   Running full analysis pipeline...

@@ -69,7 +69,7 @@ class PdfExportService(private val context: Context) {
                 paint.textSize = 24f
                 paint.color = android.graphics.Color.BLACK
                 canvas.drawText(
-                    "$wheelName - ${SohChartGeneratorFixed.METRIC_LABELS[metricName] ?: metricName}",
+                    "$wheelName - ",//${SohChartGeneratorFixed.METRIC_LABELS[metricName] ?: metricName}",
                     MARGIN.toFloat(),
                     50f,
                     paint

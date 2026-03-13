@@ -1,11 +1,14 @@
 package io.github.eucsoh.analysis
 
+import com.google.common.base.Objects
 import io.github.eucsoh.Constants
 import io.github.eucsoh.Constants.CommonColumns
 import io.github.eucsoh.Constants.WheelLogColumns
 import io.github.eucsoh.Constants.EUCWorldColumns
+import io.github.eucsoh.Constants.EUC_WORLD
 import io.github.eucsoh.Constants.KNOWN_SERIES
 import io.github.eucsoh.Constants.MAXIIMAL_CELL_V
+import io.github.eucsoh.Constants.WHEELLOG
 import io.github.eucsoh.CsvSource
 import io.github.eucsoh.model.MOSFETParams
 import org.jetbrains.kotlinx.dataframe.DataFrame
@@ -49,7 +52,9 @@ object ReqStatsComputer {
         val iPhase95p: Double?,
         val rMosfetHot: Double?,
         val rBattMedian: Double?,
-        val rBattMedian25C: Double?
+        val rBattMedian25C: Double?,
+        val pwm95p: Double?,
+        val pwmMax: Double?
     )
 
     /**
@@ -63,7 +68,7 @@ object ReqStatsComputer {
         mosfetParams: MOSFETParams? = null,
         eaJPerMol: Double? = null
     ): FileStats? {
-        var stream: InputStream?=null
+        var stream: InputStream? = null
         var df = try {
             if (csvSource != null) {
                 stream = csvSource.openCsvStream(csvPath)
@@ -74,10 +79,11 @@ object ReqStatsComputer {
         } catch (e: Exception) {
             if (Constants.DEBUG) println("[ERROR] Failed to read $csvPath: ${e.message}")
             return null
-        }
-        finally{
-            try{stream?.close()}
-            catch (e:Exception){}
+        } finally {
+            try {
+                stream?.close()
+            } catch (e: Exception) {
+            }
         }
 
         if (df.rowsCount() == 0) return null
@@ -92,7 +98,7 @@ object ReqStatsComputer {
             if (Constants.DEBUG) println("[ERROR] Missing required columns in $csvPath")
             return null
         }
-        df= df.filter { row ->
+        df = df.filter { row ->
             row[vCol] != null && row[iCol] != null
         }
 
@@ -113,14 +119,19 @@ object ReqStatsComputer {
             WheelLogColumns.CURRENT_PHASE.csv_code in df.columnNames() -> WheelLogColumns.CURRENT_PHASE.csv_code
             else -> null
         }
-
+        val pwmCol = when {
+            EUCWorldColumns.PWM.csv_code in df.columnNames() -> EUCWorldColumns.PWM.csv_code
+            WheelLogColumns.PWM.csv_code in df.columnNames() -> WheelLogColumns.PWM.csv_code
+            else -> null
+        }
         val socCol = listOf(WheelLogColumns.SOC.csv_code, EUCWorldColumns.SOC.csv_code, "soc")
             .firstOrNull { it in df.columnNames() }
 
         val (wheelKm, kmSource) = SourceDetection.normalizeDistanceTotal(df, source)
 
         // Estimate Ns from max voltage
-        val vIdleMax = df[vCol].values().filterIsInstance<Number>().maxOfOrNull { it.toDouble() } ?: 0.0
+        val vIdleMax =
+            df[vCol].values().filterIsInstance<Number>().maxOfOrNull { it.toDouble() } ?: 0.0
         val nsEst = {
             val ceiled = ceil(vIdleMax / MAXIIMAL_CELL_V).toInt()
             val rounded = round(vIdleMax / MAXIIMAL_CELL_V).toInt()
@@ -140,7 +151,9 @@ object ReqStatsComputer {
             }
 
             if (dfFull.rowsCount() > 0) {
-                val vFull = dfFull[vCol].values().filterIsInstance<Number>().maxOfOrNull { it.toDouble() } ?: 0.0
+                val vFull =
+                    dfFull[vCol].values().filterIsInstance<Number>().maxOfOrNull { it.toDouble() }
+                        ?: 0.0
                 val vCellFull = vFull / ns
                 if (vCellFull in 4.05..4.25) {
                     socRefOk = true
@@ -197,7 +210,7 @@ object ReqStatsComputer {
         val voltages = DoubleArray(rowCount)
         val currents = DoubleArray(rowCount)
         val speeds = DoubleArray(rowCount)
-        
+
         for (i in 0 until rowCount) {
             voltages[i] = (df[vCol][i] as? Number)?.toDouble() ?: Double.NaN
             currents[i] = (df[iCol][i] as? Number)?.toDouble() ?: Double.NaN
@@ -206,7 +219,7 @@ object ReqStatsComputer {
 
         val socValues = if (socVoltCol != null) {
             // Use computed SoC voltage
-            DoubleArray(rowCount) { i -> 
+            DoubleArray(rowCount) { i ->
                 val v = voltages[i]
                 if (v.isNaN()) Double.NaN
                 else (v / (ns ?: 1) - 3.0) / 1.2 * 100.0
@@ -222,9 +235,9 @@ object ReqStatsComputer {
         // Filter indices - nulls (NaN) will naturally fail the comparison conditions
         var filteredIndices = (0 until rowCount).filter { i ->
             !speeds[i].isNaN() && !currents[i].isNaN() && !voltages[i].isNaN() &&
-            speeds[i] > speedThr &&
-            abs(currents[i]) >= i_Min &&
-            abs(currents[i]) <= i_Max
+                    speeds[i] > speedThr &&
+                    abs(currents[i]) >= i_Min &&
+                    abs(currents[i]) <= i_Max
         }
 
         if (filteredIndices.size < 50) {
@@ -232,9 +245,9 @@ object ReqStatsComputer {
             i_Max *= 1.3
             filteredIndices = (0 until rowCount).filter { i ->
                 !speeds[i].isNaN() && !currents[i].isNaN() && !voltages[i].isNaN() &&
-                speeds[i] > speedThr &&
-                abs(currents[i]) >= i_Min &&
-                abs(currents[i]) <= i_Max
+                        speeds[i] > speedThr &&
+                        abs(currents[i]) >= i_Min &&
+                        abs(currents[i]) <= i_Max
             }
         }
 
@@ -275,25 +288,105 @@ object ReqStatsComputer {
             df[col].values().filterIsInstance<Number>().maxOfOrNull { it.toDouble() }
         }
 
-        // Phase current metrics (I²dt dose)
+        val pwm95p = pwmCol?.let { col ->
+            df[col].values().filterIsInstance<Number>().maxOfOrNull { it.toDouble() }
+        }
+
+        val pwmMax = pwmCol?.let { col ->
+            df[col].values().filterIsInstance<Number>().maxOfOrNull { it.toDouble() }
+        }
+
+// Phase current metrics (I²dt dose, normalized by ride duration like Python)
         var iPhase2Int: Double? = null
         var iPhaseMax: Double? = null
         var iPhase95p: Double? = null
 
         if (iPhaseCol != null) {
-            val iPhaseVals = filteredIndices.mapNotNull { i ->
-                (df[iPhaseCol][i] as? Number)?.toDouble()
+            val iPhaseVals = filteredIndices.mapNotNull { idx ->
+                (df[iPhaseCol][idx] as? Number)?.toDouble()
             }
 
             if (iPhaseVals.isNotEmpty()) {
                 val iPhaseAbs = iPhaseVals.map { abs(it) }
 
-                // I²dt integration (simple: dt ≈ 0.1s)
-                val dt = 0.1
-                iPhase2Int = iPhaseAbs.sumOf { it * it } * dt
+                // 1) Estime la durée de ride en secondes
+                val rideDurationSeconds: Double? = when (source) {
+                    EUC_WORLD -> {
+                        when {
+                            // a) Colonne duration (en secondes ou ms selon ton CSV)
+                            EUCWorldColumns.DURATION.csv_code in df.columnNames() -> {
+                                df[EUCWorldColumns.DURATION.csv_code].values()
+                                    .filterIsInstance<Number>()
+                                    .maxOfOrNull { it.toDouble() }
+                            }
+                            // b) datetime/gps_datetime : max - min
+                            EUCWorldColumns.TIMESTAMP.csv_code in df.columnNames() -> {
+                                val times = df[EUCWorldColumns.TIMESTAMP.csv_code].values()
+                                    .filterIsInstance<java.time.temporal.Temporal>()
+                                if (times.isNotEmpty()) {
+                                    val tMin = times.minByOrNull { it.toString() }!!
+                                    val tMax = times.maxByOrNull { it.toString() }!!
+                                    java.time.Duration.between(tMin, tMax).seconds.toDouble()
+                                } else null
+                            }
+
+                            else -> null
+                        }
+                    }
+
+                    WHEELLOG -> {
+                        when {
+                            // d) date + time -> construire LocalDateTime si tu les as comme String
+                            WheelLogColumns.DATE.csv_code in df.columnNames() &&
+                                    WheelLogColumns.TIME.csv_code in df.columnNames() -> {
+                                val datetimeDf =
+                                    df.select { WheelLogColumns.DATE.csv_code and WheelLogColumns.TIME.csv_code }
+                                        .merge { WheelLogColumns.DATE.csv_code and WheelLogColumns.TIME.csv_code }
+                                        .by("T").into("datetime")
+
+                                val first = java.time.LocalDateTime.parse(
+                                    datetimeDf["datetime"].first().toString()
+                                )
+                                val last = java.time.LocalDateTime.parse(
+                                    datetimeDf["datetime"].last().toString()
+                                )
+                                java.time.Duration.between(first, last).seconds.toDouble()
+
+                            }
+
+                            else -> null
+                        }
+                    }
+
+                    else -> null
+                }
+
+                // 2) Intégration I²dt
+                val i2dtRaw: Double =
+                    if (rideDurationSeconds != null && rideDurationSeconds > 10.0) {
+                        // Si tu as un vrai temps, tu peux approximer dt = rideDuration / N
+                        val n = iPhaseAbs.size
+                        if (n > 1) {
+                            val dt = rideDurationSeconds / (n - 1)
+                            iPhaseAbs.sumOf { it * it * dt }
+                        } else {
+                            0.0
+                        }
+                    } else {
+                        // Fallback Python: dt ≈ 0.1 s
+                        val dtFallback = 0.1
+                        iPhaseAbs.sumOf { it * it * dtFallback }
+                    }
+
+                iPhase2Int = if (rideDurationSeconds != null && rideDurationSeconds > 10.0) {
+                    i2dtRaw / rideDurationSeconds
+                } else {
+                    i2dtRaw
+                }
 
                 iPhaseMax = iPhaseAbs.maxOrNull()
-                iPhase95p = iPhaseAbs.sorted().let { it[(it.size * 0.95).toInt().coerceIn(0, it.size - 1)] }
+                iPhase95p = iPhaseAbs.sorted()
+                    .let { it[(it.size * 0.95).toInt().coerceIn(0, it.size - 1)] }
             }
         }
 
@@ -349,7 +442,9 @@ object ReqStatsComputer {
             iPhase95p = iPhase95p,
             rMosfetHot = rMosfetHot,
             rBattMedian = rBattMedian,
-            rBattMedian25C = rBattMedian25C
+            rBattMedian25C = rBattMedian25C,
+            pwm95p = pwm95p,
+            pwmMax = pwmMax
         )
     }
 }

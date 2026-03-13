@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="io.github.eucsoh.analysis.SourceDetectionTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2026-03-11T15:58:28.208Z" hostname="IlPalazzo" time="0.008">
+<testsuite name="io.github.eucsoh.analysis.SourceDetectionTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2026-03-13T15:47:58.545Z" hostname="IlPalazzo" time="0.011">
   <properties/>
   <testcase name="detectSource defaults to euc_world if datetime present()" classname="io.github.eucsoh.analysis.SourceDetectionTest" time="0.0"/>
   <testcase name="getFirstDatetime returns null when no datetime columns()" classname="io.github.eucsoh.analysis.SourceDetectionTest" time="0.0"/>
   <testcase name="detectSource defaults to wheellog if date and time present()" classname="io.github.eucsoh.analysis.SourceDetectionTest" time="0.0"/>
   <testcase name="detectSource identifies WheelLog format()" classname="io.github.eucsoh.analysis.SourceDetectionTest" time="0.001"/>
   <testcase name="getFirstDatetime for WheelLog combines date and time()" classname="io.github.eucsoh.analysis.SourceDetectionTest" time="0.0"/>
-  <testcase name="normalizeDistanceTotal for EUC World distance_total in km()" classname="io.github.eucsoh.analysis.SourceDetectionTest" time="0.001"/>
-  <testcase name="getFirstDatetime for EUC World()" classname="io.github.eucsoh.analysis.SourceDetectionTest" time="0.0"/>
+  <testcase name="normalizeDistanceTotal for EUC World distance_total in km()" classname="io.github.eucsoh.analysis.SourceDetectionTest" time="0.0"/>
+  <testcase name="getFirstDatetime for EUC World()" classname="io.github.eucsoh.analysis.SourceDetectionTest" time="0.001"/>
   <testcase name="normalizeDistanceTotal fallback to distance column for EUC World()" classname="io.github.eucsoh.analysis.SourceDetectionTest" time="0.0"/>
   <testcase name="normalizeDistanceTotal returns null when no distance columns()" classname="io.github.eucsoh.analysis.SourceDetectionTest" time="0.0"/>
-  <testcase name="getFirstDatetime uses gps_datetime as fallback()" classname="io.github.eucsoh.analysis.SourceDetectionTest" time="0.0"/>
-  <testcase name="detectSource mixed format prefers EUC World indicators()" classname="io.github.eucsoh.analysis.SourceDetectionTest" time="0.001"/>
-  <testcase name="detectSource identifies EUC World format()" classname="io.github.eucsoh.analysis.SourceDetectionTest" time="0.0"/>
+  <testcase name="getFirstDatetime uses gps_datetime as fallback()" classname="io.github.eucsoh.analysis.SourceDetectionTest" time="0.001"/>
+  <testcase name="detectSource mixed format prefers EUC World indicators()" classname="io.github.eucsoh.analysis.SourceDetectionTest" time="0.0"/>
+  <testcase name="detectSource identifies EUC World format()" classname="io.github.eucsoh.analysis.SourceDetectionTest" time="0.001"/>
   <testcase name="getFirstDatetime prefers datetime over gps_datetime()" classname="io.github.eucsoh.analysis.SourceDetectionTest" time="0.0"/>
   <testcase name="getFirstDatetime for WheelLog with only date()" classname="io.github.eucsoh.analysis.SourceDetectionTest" time="0.001"/>
   <testcase name="normalizeDistanceTotal for WheelLog totaldistance in meters()" classname="io.github.eucsoh.analysis.SourceDetectionTest" time="0.0"/>

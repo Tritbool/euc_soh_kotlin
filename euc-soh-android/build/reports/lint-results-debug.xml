@@ -119,29 +119,11 @@
         explanation="Calling `String#toLowerCase()` or `#toUpperCase()` **without specifying an explicit locale** is a common source of bugs. The reason for that is that those methods will use the current locale on the user&apos;s device, and even though the code appears to work correctly when you are developing the app, it will fail in some locales. For example, in the Turkish locale, the uppercase replacement for `i` is **not** `I`.&#xA;&#xA;If you want the methods to just perform ASCII replacement, for example to convert an enum name, call `String#toUpperCase(Locale.ROOT)` instead. If you really want to use the current locale, call `String#toUpperCase(Locale.getDefault())` instead."
         url="https://developer.android.com/reference/java/util/Locale.html#default_locale"
         urls="https://developer.android.com/reference/java/util/Locale.html#default_locale"
-        errorLine1="            &quot;Danger: ${String.format(&quot;%.3f&quot;, dangerThreshold)}&quot;"
-        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/visualization/SohChartGenerator.kt"
-            line="130"
-            column="24"/>
-    </issue>
-
-    <issue
-        id="DefaultLocale"
-        severity="Warning"
-        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
-        category="Correctness"
-        priority="6"
-        summary="Implied default locale in case conversion"
-        explanation="Calling `String#toLowerCase()` or `#toUpperCase()` **without specifying an explicit locale** is a common source of bugs. The reason for that is that those methods will use the current locale on the user&apos;s device, and even though the code appears to work correctly when you are developing the app, it will fail in some locales. For example, in the Turkish locale, the uppercase replacement for `i` is **not** `I`.&#xA;&#xA;If you want the methods to just perform ASCII replacement, for example to convert an enum name, call `String#toUpperCase(Locale.ROOT)` instead. If you really want to use the current locale, call `String#toUpperCase(Locale.getDefault())` instead."
-        url="https://developer.android.com/reference/java/util/Locale.html#default_locale"
-        urls="https://developer.android.com/reference/java/util/Locale.html#default_locale"
         errorLine1="            &quot;Danger: ${String.format(&quot;%.3f&quot;, dangerThreshold)}&quot;).apply {"
         errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/visualization/SohChartGeneratorFixed.kt"
-            line="162"
+            line="128"
             column="24"/>
     </issue>
 
@@ -159,7 +141,7 @@
         errorLine2="                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/visualization/SohTrendCusumChartGenerator.kt"
-            line="166"
+            line="97"
             column="28"/>
     </issue>
 
@@ -177,7 +159,7 @@
         errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/visualization/SohTrendCusumChartGenerator.kt"
-            line="331"
+            line="208"
             column="24"/>
     </issue>
 
@@ -195,7 +177,7 @@
         errorLine2="                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/visualization/SohTrendCusumChartGenerator.kt"
-            line="513"
+            line="335"
             column="35"/>
     </issue>
 
@@ -256,7 +238,7 @@
     <issue
         id="GradleDependency"
         severity="Warning"
-        message="A newer version of androidx.core:core-ktx than 1.13.1 is available: 1.17.0"
+        message="A newer version of androidx.core:core-ktx than 1.13.1 is available: 1.18.0"
         category="Correctness"
         priority="4"
         summary="Obsolete Gradle Dependency"
@@ -288,7 +270,7 @@
     <issue
         id="GradleDependency"
         severity="Warning"
-        message="A newer version of androidx.activity:activity-compose than 1.9.3 is available: 1.12.4"
+        message="A newer version of androidx.activity:activity-compose than 1.9.3 is available: 1.13.0"
         category="Correctness"
         priority="4"
         summary="Obsolete Gradle Dependency"

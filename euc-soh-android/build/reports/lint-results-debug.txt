@@ -16,19 +16,16 @@
 /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/ui/screens/MosfetConfigDialog.kt:176: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
                                     "Wiring: ${String.format("%.6f", currentParams.rWiring)} Ω",
                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/visualization/SohChartGenerator.kt:130: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
-            "Danger: ${String.format("%.3f", dangerThreshold)}"
-                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/visualization/SohChartGeneratorFixed.kt:162: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/visualization/SohChartGeneratorFixed.kt:128: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
             "Danger: ${String.format("%.3f", dangerThreshold)}").apply {
                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/visualization/SohTrendCusumChartGenerator.kt:166: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/visualization/SohTrendCusumChartGenerator.kt:97: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
             "Trend: $sign${String.format("%.4f", slopePerThousand)} /1000 km"
                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/visualization/SohTrendCusumChartGenerator.kt:331: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/visualization/SohTrendCusumChartGenerator.kt:208: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
             "µ_ref = ${String.format("%.4f", muRef)}").apply {
                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/visualization/SohTrendCusumChartGenerator.kt:513: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/kotlin/io/github/eucsoh/android/visualization/SohTrendCusumChartGenerator.kt:335: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
             "danger threshold ≈ ${String.format("%.2f", limit)}").apply {
                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -86,13 +83,13 @@
 
    https://developer.android.com/about/versions/14/changes/partial-photo-video-access
 
-/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/build.gradle.kts:59: Warning: A newer version of androidx.core:core-ktx than 1.13.1 is available: 1.17.0 [GradleDependency]
+/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/build.gradle.kts:59: Warning: A newer version of androidx.core:core-ktx than 1.13.1 is available: 1.18.0 [GradleDependency]
     implementation("androidx.core:core-ktx:1.13.1")
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/build.gradle.kts:60: Warning: A newer version of androidx.appcompat:appcompat than 1.7.0 is available: 1.7.1 [GradleDependency]
     implementation("androidx.appcompat:appcompat:1.7.0")
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/build.gradle.kts:61: Warning: A newer version of androidx.activity:activity-compose than 1.9.3 is available: 1.12.4 [GradleDependency]
+/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/build.gradle.kts:61: Warning: A newer version of androidx.activity:activity-compose than 1.9.3 is available: 1.13.0 [GradleDependency]
     implementation("androidx.activity:activity-compose:1.9.3")
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/build.gradle.kts:62: Warning: A newer version of androidx.lifecycle:lifecycle-runtime-ktx than 2.8.7 is available: 2.10.0 [GradleDependency]
@@ -183,4 +180,4 @@
    There are quickfixes to automatically extract this hardcoded string into a
    resource lookup.
 
-0 errors, 30 warnings
+0 errors, 29 warnings

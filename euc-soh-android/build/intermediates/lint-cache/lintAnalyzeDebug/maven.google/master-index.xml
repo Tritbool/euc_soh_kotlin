@@ -117,6 +117,7 @@
   <androidx.remotecallback/>
   <androidx.resourceinspection/>
   <androidx.room/>
+  <androidx.room3/>
   <androidx.savedstate/>
   <androidx.security/>
   <androidx.sharetarget/>
