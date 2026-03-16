@@ -124,6 +124,7 @@ object ReqStatsComputer {
             WheelLogColumns.PWM.csv_code in df.columnNames() -> WheelLogColumns.PWM.csv_code
             else -> null
         }
+        
         val socCol = listOf(WheelLogColumns.SOC.csv_code, EUCWorldColumns.SOC.csv_code, "soc")
             .firstOrNull { it in df.columnNames() }
 
@@ -288,13 +289,27 @@ object ReqStatsComputer {
             df[col].values().filterIsInstance<Number>().maxOfOrNull { it.toDouble() }
         }
 
-        val pwm95p = pwmCol?.let { col ->
-            df[col].values().filterIsInstance<Number>().maxOfOrNull { it.toDouble() }
-        }
+        val pwms: DoubleArray =
+            if (pwmCol != null && pwmCol == EUCWorldColumns.PWM.csv_code) {
+                df.rows()                                     // iterable of rows
+                    .asSequence()
+                    .mapNotNull { row ->
+                        val speed = (row[sCol] as? Number)?.toDouble() ?: return@mapNotNull null
+                        if (speed <= speedThr) return@mapNotNull null
 
-        val pwmMax = pwmCol?.let { col ->
-            df[col].values().filterIsInstance<Number>().maxOfOrNull { it.toDouble() }
-        }
+                        val pwm = row[pwmCol] as? Number ?: return@mapNotNull null
+                        100.0 - pwm.toDouble()
+                    }
+                    .toList()
+                    .toDoubleArray()
+            } else {
+                DoubleArray(0)
+            }
+            
+        val pwmMax = pwms.maxOrNull() ?: 0.0
+
+        val pwm95p = if(pwms.isEmpty()) 0.0 else pwms.sorted().let { it[(it.size * 0.95).toInt().coerceIn(0, it.size - 1)] }
+        
 
 // Phase current metrics (I²dt dose, normalized by ride duration like Python)
         var iPhase2Int: Double? = null
