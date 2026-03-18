@@ -331,98 +331,64 @@ object ReqStatsComputer {
             if (iPhaseVals.isNotEmpty()) {
                 val iPhaseAbs = iPhaseVals.map { abs(it) }
 
-                // 1) Estime la durée de ride en secondes
-                val rideDurationSeconds: Double? = when (source) {
+                // Extraire les timestamps réels des filteredIndices
+                val tSecFiltered: DoubleArray? = when (source) {
                     EUC_WORLD -> {
-                        when {
-
-                            // a) Colonne duration (en secondes ou ms selon ton CSV)
-                            EUCWorldColumns.DURATION.csv_code in df.columnNames() -> {
-                                logger.d(
-                                    TAG,
-                                    "Phase integration dt : ${EUCWorldColumns.DURATION.csv_code}"
-                                )
-                                df[EUCWorldColumns.DURATION.csv_code].values()
-                                    .filterIsInstance<Number>()
-                                    .maxOfOrNull { it.toDouble() }
-                            }
-                            // b) datetime/gps_datetime : max - min
-
-                            EUCWorldColumns.TIMESTAMP.csv_code in df.columnNames() -> {
-                                logger.d(
-                                    TAG,
-                                    "Phase integration dt : ${EUCWorldColumns.TIMESTAMP.csv_code}"
-                                )
-                                val times = df[EUCWorldColumns.TIMESTAMP.csv_code].values()
-                                    .filterIsInstance<java.time.temporal.Temporal>()
-                                if (times.isNotEmpty()) {
-                                    val tMin = times.minByOrNull { it.toString() }!!
-                                    val tMax = times.maxByOrNull { it.toString() }!!
-                                    java.time.Duration.between(tMin, tMax).seconds.toDouble()
-                                } else null
-                            }
-
-
-                            else -> null
-                        }
+                        if (EUCWorldColumns.TIMESTAMP.csv_code in df.columnNames()) {
+                            val t0 = df[EUCWorldColumns.TIMESTAMP.csv_code].values()
+                                .filterIsInstance<java.time.temporal.Temporal>()
+                                .minByOrNull { it.toString() } ?: return null
+                            filteredIndices.map { idx ->
+                                val t =
+                                    df[EUCWorldColumns.TIMESTAMP.csv_code][idx] as? java.time.temporal.Temporal
+                                if (t != null) java.time.Duration.between(t0, t).toMillis() / 1000.0
+                                else Double.NaN
+                            }.toDoubleArray()
+                        } else null
                     }
 
                     WHEELLOG -> {
-                        when {
-                            // d) date + time -> construire LocalDateTime si tu les as comme String
-                            WheelLogColumns.DATE.csv_code in df.columnNames() &&
-                                    WheelLogColumns.TIME.csv_code in df.columnNames() -> {
-                                logger.d(
-                                    TAG,
-                                    "Phase integration dt : ${WheelLogColumns.DATE.csv_code} and ${WheelLogColumns.TIME.csv_code}"
-                                )
-                                val datetimeDf =
-                                    df.select { WheelLogColumns.DATE.csv_code and WheelLogColumns.TIME.csv_code }
-                                        .merge { WheelLogColumns.DATE.csv_code and WheelLogColumns.TIME.csv_code }
-                                        .by("T").into("datetime")
-                                        .sortBy("datetime")
-
-
-                                val first = java.time.LocalDateTime.parse(
-                                    datetimeDf["datetime"].first().toString()
-                                )
-                                logger.d(TAG, "First datetime: $first")
-                                val last = java.time.LocalDateTime.parse(
-                                    datetimeDf["datetime"].last().toString()
-                                )
-                                logger.d(TAG, "Last datetime: $last")
-                                java.time.Duration.between(first, last).seconds.toDouble()
-
+                        if (WheelLogColumns.DATE.csv_code in df.columnNames() &&
+                            WheelLogColumns.TIME.csv_code in df.columnNames()
+                        ) {
+                            val parsedTimes = filteredIndices.map { idx ->
+                                val d = df[WheelLogColumns.DATE.csv_code][idx]?.toString()
+                                    ?: return@map Double.NaN
+                                val t = df[WheelLogColumns.TIME.csv_code][idx]?.toString()
+                                    ?: return@map Double.NaN
+                                try {
+                                    java.time.LocalDateTime.parse("${d}T${t}").let {
+                                        it.toEpochSecond(java.time.ZoneOffset.UTC).toDouble()
+                                    }
+                                } catch (e: Exception) {
+                                    Double.NaN
+                                }
                             }
-
-                            else -> null
-                        }
+                            val t0 = parsedTimes.filter { !it.isNaN() }.minOrNull() ?: return null
+                            parsedTimes.map { if (it.isNaN()) Double.NaN else it - t0 }
+                                .toDoubleArray()
+                        } else null
                     }
 
                     else -> null
                 }
-                logger.d(TAG, "Phase integration duration time : $rideDurationSeconds seconds")
-                // 2) Intégration I²dt
+
+// Intégration trapèzes si timestamps disponibles, sinon fallback dt=0.1s
                 val i2dtRaw: Double =
-                    if (rideDurationSeconds != null && rideDurationSeconds > 10.0) {
-                        // Si tu as un vrai temps, tu peux approximer dt = rideDuration / N
-                        val n = iPhaseAbs.size
-                        if (n > 1) {
-                            val dt = rideDurationSeconds / (n - 1)
-                            iPhaseAbs.sumOf { it * it * dt }
-                        } else {
-                            0.0
+                    if (tSecFiltered != null && tSecFiltered.count { !it.isNaN() } >= 2) {
+                        var sum = 0.0
+                        for (k in 0 until iPhaseAbs.size - 1) {
+                            val dt = (tSecFiltered[k + 1] - tSecFiltered[k]).coerceIn(0.01, 1.0)
+                            sum += 0.5 * (iPhaseAbs[k] * iPhaseAbs[k] + iPhaseAbs[k + 1] * iPhaseAbs[k + 1]) * dt
                         }
+                        sum
                     } else {
-                        // Fallback Python: dt ≈ 0.1 s
-                        val dtFallback = 0.1
-                        iPhaseAbs.sumOf { it * it * dtFallback }
+                        iPhaseAbs.sumOf { it * it * 0.1 }
                     }
-                iPhase2Int = if (rideDurationSeconds != null && rideDurationSeconds > 10.0) {
-                    i2dtRaw / rideDurationSeconds
-                } else {
-                    i2dtRaw
-                }
+
+                val tTotal = tSecFiltered?.filter { !it.isNaN() }?.maxOrNull()
+                iPhase2Int = if (tTotal != null && tTotal > 10.0) i2dtRaw / tTotal else i2dtRaw
+
 
                 iPhaseMax = iPhaseAbs.maxOrNull()
                 iPhase95p = iPhaseAbs.sorted()
