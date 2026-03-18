@@ -96,7 +96,8 @@ class SohAnalyzer(
                                 csvPath = path,
                                 csvSource = csvSource,
                                 mosfetParams = mosfetParams,
-                                eaJPerMol = null
+                                eaJPerMol = null,
+                                logger=logger
                             )
                             logger.d(TAG, "  [$idx] SUCCESS: ${result?.nPoints?:0.0} points, req=${result?.reqMedian?:0.0}")
                             result
@@ -115,7 +116,8 @@ class SohAnalyzer(
                             csvPath = path,
                             csvSource = csvSource,
                             mosfetParams = mosfetParams,
-                            eaJPerMol = null
+                            eaJPerMol = null,
+                            logger=logger
                         )
                         logger.d(TAG, "  [$idx] SUCCESS: ${result?.nPoints?:0.0} points, req=${result?.reqMedian?:0.0}")
                         result
@@ -164,7 +166,8 @@ class SohAnalyzer(
                             csvPath = path,
                             csvSource = csvSource,
                             mosfetParams = mosfetParams,
-                            eaJPerMol = ea
+                            eaJPerMol = ea,
+                            logger=logger
                         )
                     } catch (e: Exception) {
                         logger.e(TAG, "  Pass2 [$idx] FAILED: ${e.message}", e)
@@ -179,7 +182,8 @@ class SohAnalyzer(
                         csvPath = path,
                         csvSource = csvSource,
                         mosfetParams = mosfetParams,
-                        eaJPerMol = ea
+                        eaJPerMol = ea,
+                        logger = logger
                     )
                 } catch (e: Exception) {
                     logger.e(TAG, "  Pass2 [$idx] FAILED: ${e.message}", e)

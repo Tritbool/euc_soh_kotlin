@@ -1,20 +1,22 @@
 package io.github.eucsoh.analysis
 
-import com.google.common.base.Objects
 import io.github.eucsoh.Constants
 import io.github.eucsoh.Constants.CommonColumns
-import io.github.eucsoh.Constants.WheelLogColumns
 import io.github.eucsoh.Constants.EUCWorldColumns
 import io.github.eucsoh.Constants.EUC_WORLD
 import io.github.eucsoh.Constants.KNOWN_SERIES
 import io.github.eucsoh.Constants.MAXIIMAL_CELL_V
 import io.github.eucsoh.Constants.WHEELLOG
+import io.github.eucsoh.Constants.WheelLogColumns
 import io.github.eucsoh.CsvSource
+import io.github.eucsoh.Logger
+import io.github.eucsoh.NoOpLogger
 import io.github.eucsoh.model.MOSFETParams
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
 import org.jetbrains.kotlinx.dataframe.io.readCSV
 import java.io.InputStream
+import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.round
@@ -24,6 +26,7 @@ import kotlin.math.round
  * Port of compute_req_stats_for_file() from soh_core_en.py.
  */
 object ReqStatsComputer {
+    const val TAG = "ReqStatsComputer"
 
     data class FileStats(
         val file: String,
@@ -66,8 +69,11 @@ object ReqStatsComputer {
         speedThr: Double = 20.0,
         curThr: Double = 5.0,
         mosfetParams: MOSFETParams? = null,
-        eaJPerMol: Double? = null
+        eaJPerMol: Double? = null,
+        logger: Logger = NoOpLogger
     ): FileStats? {
+        logger.d(TAG, "Computing stats for $csvPath")
+
         var stream: InputStream? = null
         var df = try {
             if (csvSource != null) {
@@ -124,7 +130,7 @@ object ReqStatsComputer {
             WheelLogColumns.PWM.csv_code in df.columnNames() -> WheelLogColumns.PWM.csv_code
             else -> null
         }
-        
+
         val socCol = listOf(WheelLogColumns.SOC.csv_code, EUCWorldColumns.SOC.csv_code, "soc")
             .firstOrNull { it in df.columnNames() }
 
@@ -305,11 +311,12 @@ object ReqStatsComputer {
             } else {
                 DoubleArray(0)
             }
-            
+
         val pwmMax = pwms.maxOrNull() ?: 0.0
 
-        val pwm95p = if(pwms.isEmpty()) 0.0 else pwms.sorted().let { it[(it.size * 0.95).toInt().coerceIn(0, it.size - 1)] }
-        
+        val pwm95p = if (pwms.isEmpty()) 0.0 else pwms.sorted()
+            .let { it[(it.size * 0.95).toInt().coerceIn(0, it.size - 1)] }
+
 
 // Phase current metrics (I²dt dose, normalized by ride duration like Python)
         var iPhase2Int: Double? = null
@@ -328,14 +335,24 @@ object ReqStatsComputer {
                 val rideDurationSeconds: Double? = when (source) {
                     EUC_WORLD -> {
                         when {
+
                             // a) Colonne duration (en secondes ou ms selon ton CSV)
                             EUCWorldColumns.DURATION.csv_code in df.columnNames() -> {
+                                logger.d(
+                                    TAG,
+                                    "Phase integration dt : ${EUCWorldColumns.DURATION.csv_code}"
+                                )
                                 df[EUCWorldColumns.DURATION.csv_code].values()
                                     .filterIsInstance<Number>()
                                     .maxOfOrNull { it.toDouble() }
                             }
                             // b) datetime/gps_datetime : max - min
+
                             EUCWorldColumns.TIMESTAMP.csv_code in df.columnNames() -> {
+                                logger.d(
+                                    TAG,
+                                    "Phase integration dt : ${EUCWorldColumns.TIMESTAMP.csv_code}"
+                                )
                                 val times = df[EUCWorldColumns.TIMESTAMP.csv_code].values()
                                     .filterIsInstance<java.time.temporal.Temporal>()
                                 if (times.isNotEmpty()) {
@@ -344,6 +361,7 @@ object ReqStatsComputer {
                                     java.time.Duration.between(tMin, tMax).seconds.toDouble()
                                 } else null
                             }
+
 
                             else -> null
                         }
@@ -354,17 +372,25 @@ object ReqStatsComputer {
                             // d) date + time -> construire LocalDateTime si tu les as comme String
                             WheelLogColumns.DATE.csv_code in df.columnNames() &&
                                     WheelLogColumns.TIME.csv_code in df.columnNames() -> {
+                                logger.d(
+                                    TAG,
+                                    "Phase integration dt : ${WheelLogColumns.DATE.csv_code} and ${WheelLogColumns.TIME.csv_code}"
+                                )
                                 val datetimeDf =
                                     df.select { WheelLogColumns.DATE.csv_code and WheelLogColumns.TIME.csv_code }
                                         .merge { WheelLogColumns.DATE.csv_code and WheelLogColumns.TIME.csv_code }
                                         .by("T").into("datetime")
+                                        .sortBy("datetime")
+
 
                                 val first = java.time.LocalDateTime.parse(
                                     datetimeDf["datetime"].first().toString()
                                 )
+                                logger.d(TAG, "First datetime: $first")
                                 val last = java.time.LocalDateTime.parse(
                                     datetimeDf["datetime"].last().toString()
                                 )
+                                logger.d(TAG, "Last datetime: $last")
                                 java.time.Duration.between(first, last).seconds.toDouble()
 
                             }
@@ -375,7 +401,7 @@ object ReqStatsComputer {
 
                     else -> null
                 }
-
+                logger.d(TAG, "Phase integration duration time : $rideDurationSeconds seconds")
                 // 2) Intégration I²dt
                 val i2dtRaw: Double =
                     if (rideDurationSeconds != null && rideDurationSeconds > 10.0) {
@@ -392,7 +418,6 @@ object ReqStatsComputer {
                         val dtFallback = 0.1
                         iPhaseAbs.sumOf { it * it * dtFallback }
                     }
-
                 iPhase2Int = if (rideDurationSeconds != null && rideDurationSeconds > 10.0) {
                     i2dtRaw / rideDurationSeconds
                 } else {

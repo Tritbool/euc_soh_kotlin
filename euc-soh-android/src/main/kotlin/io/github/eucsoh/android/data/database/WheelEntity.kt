@@ -52,7 +52,7 @@ fun WheelEntity.toWheelIdentity(): WheelIdentity {
         manufacturer = manufacturer,
         model = model,
         serialNumber = serialNumber,
-        csvFiles = uris,
+        csvFiles =  uris.toSet(),
         source = WheelDataSource.valueOf(source)
     )
 }

@@ -8,7 +8,7 @@ import android.net.Uri
 data class WheelIdentity(
     val macAddress: String,              // "E9:A8:39:04:B4:8C"
     val displayName: String,             // "P6-50009559" or MAC if no name
-    val csvFiles: List<Uri>,             // List of CSV files for this wheel
+    val csvFiles: Set<Uri>,             // List of CSV files for this wheel
     val manufacturer: String? = null,     // "Inmotion"
     val model: String? = null,           // "P6"
     val serialNumber: String? = null,    // "A14219A150009559"
@@ -24,3 +24,5 @@ enum class WheelDataSource {
     MANUAL,        // User-selected folder
     UNKNOWN
 }
+
+

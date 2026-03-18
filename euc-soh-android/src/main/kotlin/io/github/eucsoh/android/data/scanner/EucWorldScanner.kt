@@ -57,7 +57,7 @@ class EucWorldScanner(private val context: Context) {
                 // Merge with existing entry (aggregate CSV files)
                 result.merge(mac, info) { existing, new ->
                     existing.copy(
-                        csvFiles = (existing.csvFiles + new.csvFiles).distinct(),
+                        csvFiles = existing.csvFiles + new.csvFiles,
                         manufacturer = new.manufacturer ?: existing.manufacturer,
                         model = new.model ?: existing.model,
                         serialNumber = new.serialNumber ?: existing.serialNumber,
@@ -105,7 +105,7 @@ class EucWorldScanner(private val context: Context) {
                 // Merge with existing entry (aggregate CSV files)
                 result.merge(mac, info) { existing, new ->
                     existing.copy(
-                        csvFiles = (existing.csvFiles + new.csvFiles).distinct(),
+                        csvFiles = existing.csvFiles + new.csvFiles,
                         manufacturer = new.manufacturer ?: existing.manufacturer,
                         model = new.model ?: existing.model,
                         serialNumber = new.serialNumber ?: existing.serialNumber,
@@ -238,7 +238,7 @@ class EucWorldScanner(private val context: Context) {
             displayName = metadata["euc.btName"] ?:
                 "${metadata["euc.make"] ?: ""} ${metadata["euc.model"] ?: ""}".trim()
                     .ifEmpty { mac },
-            csvFiles = listOf(uri),
+            csvFiles = setOf(uri),
             manufacturer = metadata["euc.make"],
             model = metadata["euc.model"],
             serialNumber = metadata["euc.serial"],

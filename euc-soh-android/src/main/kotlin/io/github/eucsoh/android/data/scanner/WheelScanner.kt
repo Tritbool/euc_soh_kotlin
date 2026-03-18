@@ -273,7 +273,7 @@ class WheelScanner(
                         new.displayName 
                     else 
                         existing.displayName,
-                    csvFiles = (existing.csvFiles + new.csvFiles).distinct(),
+                    csvFiles = existing.csvFiles + new.csvFiles,
                     manufacturer = new.manufacturer ?: existing.manufacturer,
                     model = new.model ?: existing.model,
                     serialNumber = new.serialNumber ?: existing.serialNumber,

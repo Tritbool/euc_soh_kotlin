@@ -60,7 +60,7 @@ class WheelLogScanner(private val context: Context) {
                     .filter { it.isFile && it.extension.equals("csv", ignoreCase = true) }
                     .filter { !it.name.startsWith("RAW_", ignoreCase = true) }
                     .map { Uri.fromFile(it) }
-                    .toList()
+                    .toSet()
 
                 if (csvFiles.isNotEmpty()) {
                     Log.d(TAG, "Found ${csvFiles.size} CSV files for $mac")
@@ -111,7 +111,7 @@ class WheelLogScanner(private val context: Context) {
                     result[mac] = WheelIdentity(
                         macAddress = mac,
                         displayName = mac,
-                        csvFiles = csvFiles,
+                        csvFiles = csvFiles.toSet(),
                         source = WheelDataSource.WHEELLOG
                     )
                 }
