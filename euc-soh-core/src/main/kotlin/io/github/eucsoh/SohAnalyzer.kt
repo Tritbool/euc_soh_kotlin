@@ -429,7 +429,10 @@ class SohAnalyzer(
             I_PHASE_95P.csv_code to stats.map { it.iPhase95p },
             R_MOSFET_HOT.csv_code to stats.map { it.rMosfetHot },
             R_BATT_MEDIAN.csv_code to stats.map { it.rBattMedian },
-            R_BATT_MEDIAN_25C.csv_code to stats.map { it.rBattMedian25C }
+            R_BATT_MEDIAN_25C.csv_code to stats.map { it.rBattMedian25C },
+            PWM_95P.csv_code to stats.map { it.pwm95p },
+            PWM_MAX.csv_code to stats.map { it.pwmMax }
+
         )
     }
 

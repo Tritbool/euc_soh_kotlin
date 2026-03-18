@@ -1,5 +1,7 @@
 package io.github.eucsoh.integration
 
+import io.github.eucsoh.Constants
+import io.github.eucsoh.Constants.Metrics
 import io.github.eucsoh.SohAnalyzer
 import kotlinx.coroutines.runBlocking
 import java.io.File
@@ -69,16 +71,16 @@ class RealLogsIntegrationTest {
 
         // Thresholds computed
         assertTrue(result.thresholds.isNotEmpty(), "Should compute thresholds")
-        assertTrue(result.thresholds.containsKey("Req_median"), "Should have Req_median threshold")
+        assertTrue(result.thresholds.containsKey(Metrics.REQ_MEDIAN.csv_code), "Should have Req_median threshold")
         
-        val reqThreshold = result.thresholds["Req_median"]!!
+        val reqThreshold = result.thresholds[Metrics.REQ_MEDIAN.csv_code]!!
         assertTrue(reqThreshold.mean > 0.0, "Req_median mean should be positive")
         assertTrue(reqThreshold.std >= 0.0, "Req_median std should be non-negative")
         
         println("  ✓ Req_median threshold: μ=${"%.4f".format(reqThreshold.mean)}Ω, σ=${"%.4f".format(reqThreshold.std)}Ω")
 
         // Check that critical metrics are present
-        val criticalMetrics = listOf("Req_median", "wheel_km", "datetime_first")
+        val criticalMetrics = listOf(Metrics.REQ_MEDIAN.csv_code, Constants.MetaColumns.WHEEL_KM.csv_code, Constants.MetaColumns.DATETIME_FIRST.csv_code)
         criticalMetrics.forEach { metric ->
             assertTrue(
                 result.stats.columnNames().contains(metric),
@@ -89,7 +91,7 @@ class RealLogsIntegrationTest {
         println("  ✓ All critical metrics present")
 
         // Verify km range is realistic
-        val kmValues = result.stats["wheel_km"].values()
+        val kmValues = result.stats[Constants.MetaColumns.WHEEL_KM.csv_code].values()
             .filterIsInstance<Number>()
             .map { it.toDouble() }
         
