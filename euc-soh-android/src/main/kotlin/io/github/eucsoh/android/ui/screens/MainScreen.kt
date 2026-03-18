@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.github.eucsoh.Constants.ANALYZING
+import io.github.eucsoh.Constants.CALIBRATING
 import io.github.eucsoh.android.data.model.WheelIdentity
 import io.github.eucsoh.android.ui.SohViewModel
 
@@ -70,19 +72,32 @@ fun MainScreen(
                     }
                 }
             }
-            
+
             when {
                 state.isScanning -> {
                     LoadingScreen("Recherche des roues...")
                 }
-                state.isAnalyzing -> {
+
+                state.progressState?.phase == ANALYZING -> {
                     AnalysisProgressScreen(
                         currentFile = state.currentFile,
                         totalFiles = state.totalFiles,
                         fileName = state.currentFileName,
-                        isParallel = state.useParallelProcessing
+                        isParallel = state.useParallelProcessing,
+                        phase = ANALYZING
                     )
                 }
+
+                state.progressState?.phase == CALIBRATING -> {
+                    AnalysisProgressScreen(
+                        currentFile = state.currentFile,
+                        totalFiles = state.totalFiles,
+                        fileName = state.currentFileName,
+                        isParallel = state.useParallelProcessing,
+                        phase = CALIBRATING
+                    )
+                }
+
                 state.analysisResult != null -> {
                     ResultsScreenEnhanced(
                         result = state.analysisResult!!,
@@ -90,6 +105,7 @@ fun MainScreen(
                         onBack = viewModel::clearResults
                     )
                 }
+
                 state.detectedWheels.isEmpty() -> {
                     EmptyStateScreen(
                         onRequestPermissions = onRequestPermissions,
@@ -98,6 +114,7 @@ fun MainScreen(
                         scanPath = state.scanRootPath
                     )
                 }
+
                 else -> {
                     WheelListContent(
                         wheels = state.detectedWheels.values.toList(),
@@ -113,12 +130,12 @@ fun MainScreen(
                     )
                 }
             }
-            
+
             // MOSFET config dialog
             if (state.showMosfetDialog && state.configDialogWheel != null) {
                 val wheel = state.configDialogWheel!!
                 val currentParams = state.wheelConfigs[wheel.macAddress]?.mosfetParams
-                
+
                 MosfetConfigDialog(
                     wheelName = wheel.displayName,
                     currentParams = currentParams,
@@ -150,6 +167,7 @@ fun AnalysisProgressScreen(
     currentFile: Int,
     totalFiles: Int,
     fileName: String,
+    phase: String,
     isParallel: Boolean
 ) {
     Box(
@@ -163,16 +181,16 @@ fun AnalysisProgressScreen(
             CircularProgressIndicator(
                 modifier = Modifier.size(64.dp)
             )
-            
+
             Spacer(Modifier.height(24.dp))
-            
+
             Text(
-                "Analyse en cours...",
+                phase,
                 style = MaterialTheme.typography.headlineSmall
             )
-            
+
             Spacer(Modifier.height(16.dp))
-            
+
             if (isParallel) {
                 Text(
                     "Traitement parallèle de $totalFiles fichiers",
@@ -186,18 +204,18 @@ fun AnalysisProgressScreen(
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
-                    
+
                     Spacer(Modifier.height(8.dp))
-                    
+
                     LinearProgressIndicator(
                         progress = { currentFile.toFloat() / totalFiles.toFloat() },
                         modifier = Modifier
                             .fillMaxWidth(0.8f)
                             .height(8.dp),
                     )
-                    
+
                     Spacer(Modifier.height(16.dp))
-                    
+
                     if (fileName.isNotEmpty()) {
                         Text(
                             fileName,
@@ -317,7 +335,7 @@ fun WheelListContent(
                 }
             }
         }
-        
+
         // Parallel processing toggle
         Surface(
             color = MaterialTheme.colorScheme.surfaceVariant,
@@ -419,7 +437,7 @@ fun WheelCard(
                     color = MaterialTheme.colorScheme.outline
                 )
             }
-            
+
             // Right: MOSFET badge + config button
             Column(
                 horizontalAlignment = Alignment.End,
@@ -451,7 +469,7 @@ fun WheelCard(
                         }
                     }
                 }
-                
+
                 // Config button
                 IconButton(
                     onClick = onConfigClick,

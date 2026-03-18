@@ -6,6 +6,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import io.github.eucsoh.ProgressState
 import io.github.eucsoh.SohAnalyzer
 import io.github.eucsoh.android.AndroidCsvSource
 import io.github.eucsoh.android.AndroidLogger
@@ -50,7 +51,8 @@ data class SohUiState(
     // MOSFET config support
     val wheelConfigs: Map<String, WheelConfig> = emptyMap(),
     val showMosfetDialog: Boolean = false,
-    val configDialogWheel: WheelIdentity? = null
+    val configDialogWheel: WheelIdentity? = null,
+    var progressState: ProgressState? = null
 )
 
 /**
@@ -67,7 +69,11 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
     val state: StateFlow<SohUiState> = _state.asStateFlow()
     
     private val prefs = application.getSharedPreferences("euc_soh_prefs", Context.MODE_PRIVATE)
-    
+
+    private val _progressState = MutableStateFlow<ProgressState?>(null)
+    val progressState: StateFlow<ProgressState?> = _progressState.asStateFlow()
+
+
     companion object {
         private const val TAG = "SohViewModel"
         private const val PREF_PARALLEL_PROCESSING = "parallel_processing"
@@ -361,7 +367,15 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
                 val result = analyzerWithConfig.analyzeFolderForReq(
                     csvPaths = csvPaths,
                     optimalFrac = 1.0,
-                    parallel = currentState.useParallelProcessing
+                    parallel = currentState.useParallelProcessing,
+                    onProgress = { current, total, phase ->
+                        // current et total sont tous deux sur N — la barre de progression ne bouge pas de 0 à 200%
+                        _state.value.progressState = ProgressState(
+                            current = current,
+                            total = total,
+                            phase = phase   // "calibration" ou "analyse"
+                        )
+                    }
                 )
                 
                 Log.d(TAG, "Analysis completed successfully")

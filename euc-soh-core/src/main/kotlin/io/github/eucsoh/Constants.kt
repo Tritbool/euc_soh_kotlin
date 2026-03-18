@@ -9,6 +9,10 @@ object Constants {
     const val EUC_WORLD="euc_world"
     const val WHEELLOG="wheellog"
 
+    // ANALYSIS PHASES
+    const val ANALYZING = "Analyzing"
+    const val CALIBRATING = "Calibrating"
+
     // Absolute limits
     const val ABS_REQ_LIMIT = 0.8  // Ω
     const val ABS_KM_LIMIT = 5000.0  // km

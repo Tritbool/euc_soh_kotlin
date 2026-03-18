@@ -1,5 +1,7 @@
 package io.github.eucsoh
 
+import io.github.eucsoh.Constants.ANALYZING
+import io.github.eucsoh.Constants.CALIBRATING
 import io.github.eucsoh.analysis.*
 import io.github.eucsoh.Constants.Metrics.*
 import io.github.eucsoh.Constants.MetaColumns.*
@@ -17,7 +19,7 @@ class SohAnalyzer(
     private val mosfetParams: MOSFETParams? = null,
     private val logger: Logger = NoOpLogger
 ) {
-    private val TAG:String = "SohAnalyzer"
+    private val TAG: String = "SohAnalyzer"
 
     data class AnalysisResult(
         val stats: DataFrame<*>,
@@ -40,7 +42,7 @@ class SohAnalyzer(
         val logs: List<Map<String, Any?>>
     ) {
         data class ReqBand(val low: Double, val high: Double)
-        
+
         data class GlobalStats(
             val kmMin: Double,
             val kmMax: Double,
@@ -51,13 +53,13 @@ class SohAnalyzer(
             val rMosfetHotMin: Double?,
             val rMosfetHotMax: Double?
         )
-        
+
         data class PackInfo(
             val ns: Int?,
             val vNominal: Double?,
             val rPackNominal: Double?
         )
-        
+
         data class ArrheniusInfo(
             val eaKjPerMol: Double,
             val autoCalibrated: Boolean
@@ -76,7 +78,8 @@ class SohAnalyzer(
         csvPaths: List<String>,
         optimalFrac: Double = 0.3,
         eaJPerMol: Double? = null,
-        parallel: Boolean = false
+        parallel: Boolean = false,
+        onProgress: ((current: Int, total: Int, phase: String) -> Unit)? = null
     ): AnalysisResult = coroutineScope {
 
         logger.d(TAG, "Starting analysis of ${csvPaths.size} files")
@@ -85,24 +88,32 @@ class SohAnalyzer(
         var ea = eaJPerMol
         if (ea == null) {
             logger.d(TAG, "Pass 1: Ea calibration")
-            
+
             val tempStats = if (parallel) {
                 csvPaths.mapIndexed { idx, path ->
                     async(Dispatchers.IO) {
                         val filename = path.substringAfterLast('/')
-                        logger.d(TAG, "  Processing [$idx/${ csvPaths.size}] $filename")
+                        logger.d(TAG, "  Processing [$idx/${csvPaths.size}] $filename")
+                        onProgress?.invoke(idx, csvPaths.size, CALIBRATING)
                         try {
                             val result = ReqStatsComputer.computeReqStatsForFile(
                                 csvPath = path,
                                 csvSource = csvSource,
                                 mosfetParams = mosfetParams,
                                 eaJPerMol = null,
-                                logger=logger
+                                logger = logger
                             )
-                            logger.d(TAG, "  [$idx] SUCCESS: ${result?.nPoints?:0.0} points, req=${result?.reqMedian?:0.0}")
+                            logger.d(
+                                TAG,
+                                "  [$idx] SUCCESS: ${result?.nPoints ?: 0.0} points, req=${result?.reqMedian ?: 0.0}"
+                            )
                             result
                         } catch (e: Exception) {
-                            logger.e(TAG, "  [$idx] FAILED: ${e.javaClass.simpleName}: ${e.message}", e)
+                            logger.e(
+                                TAG,
+                                "  [$idx] FAILED: ${e.javaClass.simpleName}: ${e.message}",
+                                e
+                            )
                             null
                         }
                     }
@@ -111,15 +122,19 @@ class SohAnalyzer(
                 csvPaths.mapIndexedNotNull { idx, path ->
                     val filename = path.substringAfterLast('/')
                     logger.d(TAG, "  Processing [$idx/${csvPaths.size}] $filename")
+                    onProgress?.invoke(idx, csvPaths.size, CALIBRATING)
                     try {
                         val result = ReqStatsComputer.computeReqStatsForFile(
                             csvPath = path,
                             csvSource = csvSource,
                             mosfetParams = mosfetParams,
                             eaJPerMol = null,
-                            logger=logger
+                            logger = logger
                         )
-                        logger.d(TAG, "  [$idx] SUCCESS: ${result?.nPoints?:0.0} points, req=${result?.reqMedian?:0.0}")
+                        logger.d(
+                            TAG,
+                            "  [$idx] SUCCESS: ${result?.nPoints ?: 0.0} points, req=${result?.reqMedian ?: 0.0}"
+                        )
                         result
                     } catch (e: Exception) {
                         logger.e(TAG, "  [$idx] FAILED: ${e.javaClass.simpleName}: ${e.message}", e)
@@ -139,7 +154,10 @@ class SohAnalyzer(
                 stat.reqMedian > 0.0 && stat.tempBoardMax != null && stat.nPoints >= 50
             }
 
-            logger.d(TAG, "Pass 1: ${validTempStats.size}/${tempStats.size} stats valid for calibration")
+            logger.d(
+                TAG,
+                "Pass 1: ${validTempStats.size}/${tempStats.size} stats valid for calibration"
+            )
 
             if (validTempStats.isEmpty()) {
                 throw RuntimeException("No valid logs for calibration: all logs missing temperature or have insufficient data points")
@@ -151,23 +169,24 @@ class SohAnalyzer(
                 metric = REQ_MEDIAN.csv_code,
                 tempCol = TEMP_BOARD_MAX.csv_code
             )
-            
+
             logger.d(TAG, "Calibrated Ea: ${ea / 1000.0} kJ/mol")
         }
 
         // Pass 2: Final analysis with calibrated Ea
         logger.d(TAG, "Pass 2: Final analysis with Ea=${ea / 1000.0} kJ/mol")
-        
+
         val finalStats = if (parallel) {
             csvPaths.mapIndexed { idx, path ->
                 async(Dispatchers.IO) {
+                    onProgress?.invoke(idx, csvPaths.size, ANALYZING)
                     try {
                         ReqStatsComputer.computeReqStatsForFile(
                             csvPath = path,
                             csvSource = csvSource,
                             mosfetParams = mosfetParams,
                             eaJPerMol = ea,
-                            logger=logger
+                            logger = logger
                         )
                     } catch (e: Exception) {
                         logger.e(TAG, "  Pass2 [$idx] FAILED: ${e.message}", e)
@@ -177,6 +196,7 @@ class SohAnalyzer(
             }.awaitAll().filterNotNull()
         } else {
             csvPaths.mapIndexedNotNull { idx, path ->
+                onProgress?.invoke(idx, csvPaths.size, ANALYZING)
                 try {
                     ReqStatsComputer.computeReqStatsForFile(
                         csvPath = path,
@@ -346,16 +366,16 @@ class SohAnalyzer(
         wheelName: String
     ): SummaryData {
         val df = result.stats
-        
+
         // Safe getters for DataFrame values
         fun getDoubleAt(col: String, row: Int): Double? {
             return (df[col][row] as? Number)?.toDouble()
         }
-        
+
         fun getBooleanAt(col: String, row: Int): Boolean {
             return (df[col][row] as? Boolean) ?: false
         }
-        
+
         return SummaryData(
             wheelName = wheelName,
             reqBand = SummaryData.ReqBand(
@@ -363,21 +383,29 @@ class SohAnalyzer(
                 high = getDoubleAt("Req_band_high", 0) ?: 0.0
             ),
             globalStats = SummaryData.GlobalStats(
-                kmMin = df[WHEEL_KM.csv_code].values().filterIsInstance<Number>().minOfOrNull { it.toDouble() } ?: 0.0,
-                kmMax = df[WHEEL_KM.csv_code].values().filterIsInstance<Number>().maxOfOrNull { it.toDouble() } ?: 0.0,
-                reqMedianMin = df[REQ_MEDIAN.csv_code].values().filterIsInstance<Number>().minOfOrNull { it.toDouble() } ?: 0.0,
-                reqMedianMax = df[REQ_MEDIAN.csv_code].values().filterIsInstance<Number>().maxOfOrNull { it.toDouble() } ?: 0.0,
+                kmMin = df[WHEEL_KM.csv_code].values().filterIsInstance<Number>()
+                    .minOfOrNull { it.toDouble() } ?: 0.0,
+                kmMax = df[WHEEL_KM.csv_code].values().filterIsInstance<Number>()
+                    .maxOfOrNull { it.toDouble() } ?: 0.0,
+                reqMedianMin = df[REQ_MEDIAN.csv_code].values().filterIsInstance<Number>()
+                    .minOfOrNull { it.toDouble() } ?: 0.0,
+                reqMedianMax = df[REQ_MEDIAN.csv_code].values().filterIsInstance<Number>()
+                    .maxOfOrNull { it.toDouble() } ?: 0.0,
                 rBattMedianMin = if (R_BATT_MEDIAN_25C.csv_code in df.columnNames()) {
-                    df[R_BATT_MEDIAN_25C.csv_code].values().filterIsInstance<Number>().minOfOrNull { it.toDouble() }
+                    df[R_BATT_MEDIAN_25C.csv_code].values().filterIsInstance<Number>()
+                        .minOfOrNull { it.toDouble() }
                 } else null,
                 rBattMedianMax = if (R_BATT_MEDIAN_25C.csv_code in df.columnNames()) {
-                    df[R_BATT_MEDIAN_25C.csv_code].values().filterIsInstance<Number>().maxOfOrNull { it.toDouble() }
+                    df[R_BATT_MEDIAN_25C.csv_code].values().filterIsInstance<Number>()
+                        .maxOfOrNull { it.toDouble() }
                 } else null,
                 rMosfetHotMin = if (R_MOSFET_HOT.csv_code in df.columnNames()) {
-                    df[R_MOSFET_HOT.csv_code].values().filterIsInstance<Number>().minOfOrNull { it.toDouble() }
+                    df[R_MOSFET_HOT.csv_code].values().filterIsInstance<Number>()
+                        .minOfOrNull { it.toDouble() }
                 } else null,
                 rMosfetHotMax = if (R_MOSFET_HOT.csv_code in df.columnNames()) {
-                    df[R_MOSFET_HOT.csv_code].values().filterIsInstance<Number>().maxOfOrNull { it.toDouble() }
+                    df[R_MOSFET_HOT.csv_code].values().filterIsInstance<Number>()
+                        .maxOfOrNull { it.toDouble() }
                 } else null
             ),
             pack = SummaryData.PackInfo(
