@@ -12,6 +12,7 @@ object Constants {
     // ANALYSIS PHASES
     const val ANALYZING = "Analyzing"
     const val CALIBRATING = "Calibrating"
+    const val DONE = "Done"
 
     // Absolute limits
     const val ABS_REQ_LIMIT = 0.8  // Ω

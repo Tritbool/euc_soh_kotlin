@@ -2,6 +2,7 @@ package io.github.eucsoh
 
 import io.github.eucsoh.Constants.ANALYZING
 import io.github.eucsoh.Constants.CALIBRATING
+import io.github.eucsoh.Constants.DONE
 import io.github.eucsoh.analysis.*
 import io.github.eucsoh.Constants.Metrics.*
 import io.github.eucsoh.Constants.MetaColumns.*
@@ -211,7 +212,7 @@ class SohAnalyzer(
                 }
             }
         }
-
+        onProgress?.invoke(csvPaths.size, csvPaths.size, DONE)
         logger.d(TAG, "Pass 2: ${finalStats.size}/${csvPaths.size} files processed")
 
         if (finalStats.isEmpty()) {

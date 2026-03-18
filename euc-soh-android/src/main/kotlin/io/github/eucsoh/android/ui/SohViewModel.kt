@@ -369,13 +369,15 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
                     optimalFrac = 1.0,
                     parallel = currentState.useParallelProcessing,
                     onProgress = { current, total, phase ->
-                        // current et total sont tous deux sur N — la barre de progression ne bouge pas de 0 à 200%
-                        _state.value.progressState = ProgressState(
-                            current = current,
-                            total = total,
-                            phase = phase   // "calibration" ou "analyse"
-                        )
+                        _state.update { it.copy(
+                            progressState = ProgressState(
+                                current = current,
+                                total = total,
+                                phase = phase
+                            )
+                        )}
                     }
+
                 )
                 
                 Log.d(TAG, "Analysis completed successfully")

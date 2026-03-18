@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.eucsoh.Constants.ANALYZING
 import io.github.eucsoh.Constants.CALIBRATING
+import io.github.eucsoh.Constants.DONE
 import io.github.eucsoh.android.data.model.WheelIdentity
 import io.github.eucsoh.android.ui.SohViewModel
 
@@ -80,9 +81,9 @@ fun MainScreen(
 
                 state.progressState?.phase == ANALYZING -> {
                     AnalysisProgressScreen(
-                        currentFile = state.currentFile,
-                        totalFiles = state.totalFiles,
-                        fileName = state.currentFileName,
+                        currentFile = state.progressState?.current!!,
+                        totalFiles = state.progressState?.total!!,
+                        fileName = "",//state.currentFileName,
                         isParallel = state.useParallelProcessing,
                         phase = ANALYZING
                     )
@@ -90,15 +91,15 @@ fun MainScreen(
 
                 state.progressState?.phase == CALIBRATING -> {
                     AnalysisProgressScreen(
-                        currentFile = state.currentFile,
-                        totalFiles = state.totalFiles,
-                        fileName = state.currentFileName,
+                        currentFile = state.progressState?.current!!,
+                        totalFiles = state.progressState?.total!!,
+                        fileName = "",//state.currentFileName,
                         isParallel = state.useParallelProcessing,
                         phase = CALIBRATING
                     )
                 }
 
-                state.analysisResult != null -> {
+                state.progressState?.phase == DONE && state.analysisResult != null -> {
                     ResultsScreenEnhanced(
                         result = state.analysisResult!!,
                         selectedWheel = state.selectedWheel,
