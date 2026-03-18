@@ -13,7 +13,9 @@ import io.github.eucsoh.Logger
 import io.github.eucsoh.NoOpLogger
 import io.github.eucsoh.model.MOSFETParams
 import org.jetbrains.kotlinx.dataframe.DataFrame
-import org.jetbrains.kotlinx.dataframe.api.*
+import org.jetbrains.kotlinx.dataframe.api.add
+import org.jetbrains.kotlinx.dataframe.api.filter
+import org.jetbrains.kotlinx.dataframe.api.rows
 import org.jetbrains.kotlinx.dataframe.io.readCSV
 import java.io.InputStream
 import java.time.format.DateTimeFormatter
@@ -334,18 +336,50 @@ object ReqStatsComputer {
                 // Extraire les timestamps réels des filteredIndices
                 val tSecFiltered: DoubleArray? = when (source) {
                     EUC_WORLD -> {
-                        if (EUCWorldColumns.TIMESTAMP.csv_code in df.columnNames()) {
-                            val t0 = df[EUCWorldColumns.TIMESTAMP.csv_code].values()
-                                .filterIsInstance<java.time.temporal.Temporal>()
-                                .minByOrNull { it.toString() } ?: return null
-                            filteredIndices.map { idx ->
-                                val t =
-                                    df[EUCWorldColumns.TIMESTAMP.csv_code][idx] as? java.time.temporal.Temporal
-                                if (t != null) java.time.Duration.between(t0, t).toMillis() / 1000.0
-                                else Double.NaN
-                            }.toDoubleArray()
-                        } else null
+                        try {
+                            if (EUCWorldColumns.TIMESTAMP.csv_code in df.columnNames()) {
+                                val fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+                                // Parse tous les timestamps en OffsetDateTime
+                                val times = df[EUCWorldColumns.TIMESTAMP.csv_code].values()
+                                    .mapNotNull { raw ->
+                                        val s = raw?.toString() ?: return@mapNotNull null
+                                        try {
+                                            java.time.OffsetDateTime.parse(s, fmt)
+                                        } catch (e: Exception) {
+                                            null
+                                        }
+                                    }
+
+                                if (times.isEmpty()) {
+                                    null
+                                } else {
+                                    val t0 = times.minByOrNull { it.toEpochSecond() }!!
+                                    // Temps relatif en secondes pour les points filtrés
+                                    filteredIndices.map { idx ->
+                                        val raw =
+                                            df[EUCWorldColumns.TIMESTAMP.csv_code][idx]?.toString()
+                                        if (raw == null) {
+                                            Double.NaN
+                                        } else {
+                                            try {
+                                                val t = java.time.OffsetDateTime.parse(raw, fmt)
+                                                java.time.Duration.between(t0, t)
+                                                    .toMillis() / 1000.0
+                                            } catch (e: Exception) {
+                                                Double.NaN
+                                            }
+                                        }
+                                    }.toDoubleArray()
+                                }
+                            } else {
+                                null
+                            }
+                        } catch (e: Exception) {
+                            logger.d(TAG, "Failed to parse EUC World timestamps: ${e.message}")
+                            null
+                        }
                     }
+
 
                     WHEELLOG -> {
                         if (WheelLogColumns.DATE.csv_code in df.columnNames() &&
