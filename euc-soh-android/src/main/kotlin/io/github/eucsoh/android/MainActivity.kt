@@ -1,7 +1,10 @@
 package io.github.eucsoh.android
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.provider.Settings
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,6 +23,13 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         private const val TAG = "MainActivity"
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (permissionManager.hasStoragePermissions()) {
+            viewModel.scanWheels(forceRefresh = false)
+        }
     }
 
     // Folder picker launcher
@@ -65,8 +75,8 @@ class MainActivity : ComponentActivity() {
                             }
                         },
                         onRequestFolderPicker = {
-                            Log.d(TAG, "Launching folder picker")
-                            launchFolderPicker()
+                            //Log.d(TAG, "Launching folder picker")
+                            //launchFolderPicker()
                         }
                     )
                 }
@@ -92,7 +102,7 @@ class MainActivity : ComponentActivity() {
     private fun handleSelectedFolder(uri: Uri) {
         try {
             Log.d(TAG, "Processing URI: $uri")
-            
+            intent
             // Take persistable permission
             try {
                 val flags = android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION

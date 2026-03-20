@@ -1,81 +1,37 @@
 package io.github.eucsoh.android.ui
 
-import android.Manifest
-import android.content.pm.PackageManager
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
+import android.os.Environment
+import android.provider.Settings
 import androidx.activity.ComponentActivity
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
 
-/**
- * Manages storage permissions across different Android versions.
- * 
- * - Android 13+ (API 33): READ_MEDIA_* permissions
- * - Android 10-12: READ_EXTERNAL_STORAGE
- * - Android 9-: READ_EXTERNAL_STORAGE + WRITE_EXTERNAL_STORAGE
- */
 class PermissionManager(private val activity: ComponentActivity) {
-    
-    private var onResultCallback: ((Boolean) -> Unit)? = null
-    
-    private val permissionLauncher = activity.registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val allGranted = permissions.values.all { it }
-        onResultCallback?.invoke(allGranted)
-        onResultCallback = null
-    }
-    
-    /**
-     * Checks if storage permissions are granted.
-     */
+
     fun hasStoragePermissions(): Boolean {
-        return when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
-                // Android 13+: Need READ_MEDIA_*
-                ContextCompat.checkSelfPermission(
-                    activity,
-                    Manifest.permission.READ_MEDIA_IMAGES
-                ) == PackageManager.PERMISSION_GRANTED
-            }
-            else -> {
-                // Android 12 and below: READ_EXTERNAL_STORAGE
-                ContextCompat.checkSelfPermission(
-                    activity,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ) == PackageManager.PERMISSION_GRANTED
-            }
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Environment.isExternalStorageManager()
+        } else {
+            // API 26-29 : pas de Scoped Storage, READ_EXTERNAL_STORAGE suffit
+            // et il est déjà accordé implicitement sur ces versions avec requestLegacyExternalStorage
+            true
         }
     }
-    
-    /**
-     * Requests storage permissions with callback.
-     */
+
     fun requestStoragePermissions(onResult: (Boolean) -> Unit) {
-        onResultCallback = onResult
-        
-        val permissions = when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
-                // Android 13+: Granular media permissions
-                arrayOf(
-                    Manifest.permission.READ_MEDIA_IMAGES,
-                    Manifest.permission.READ_MEDIA_VIDEO,
-                    Manifest.permission.READ_MEDIA_AUDIO
-                )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // API 30+ : ouvre les paramètres système, pas de callback possible
+            // L'utilisateur doit revenir dans l'app manuellement
+            val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
+                data = Uri.parse("package:${activity.packageName}")
             }
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
-                // Android 10-12: READ_EXTERNAL_STORAGE
-                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-            }
-            else -> {
-                // Android 9-: READ + WRITE
-                arrayOf(
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                )
-            }
+            activity.startActivity(intent)
+            // onResult ne sera jamais appelé ici automatiquement
+            // MainActivity doit re-checker dans onResume()
+        } else {
+            // API 26-29 : déjà OK grâce à requestLegacyExternalStorage dans le manifest
+            onResult(true)
         }
-        
-        permissionLauncher.launch(permissions)
     }
 }

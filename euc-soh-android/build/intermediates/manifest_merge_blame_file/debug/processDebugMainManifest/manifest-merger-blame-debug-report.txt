@@ -34,50 +34,51 @@
 23-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:14:22-78
 24        android:maxSdkVersion="28" />
 24-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:15:22-48
-25
-26    <permission
-26-->[androidx.core:core:1.13.1] /home/tritbool/.gradle/caches/9.3.0/transforms/f40a8326c5d0652a6b336ed17328037c/transformed/core-1.13.1/AndroidManifest.xml:22:5-24:47
-27        android:name="io.github.eucsoh.android.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
-27-->[androidx.core:core:1.13.1] /home/tritbool/.gradle/caches/9.3.0/transforms/f40a8326c5d0652a6b336ed17328037c/transformed/core-1.13.1/AndroidManifest.xml:23:9-81
-28        android:protectionLevel="signature" />
-28-->[androidx.core:core:1.13.1] /home/tritbool/.gradle/caches/9.3.0/transforms/f40a8326c5d0652a6b336ed17328037c/transformed/core-1.13.1/AndroidManifest.xml:24:9-44
-29
-30    <uses-permission android:name="io.github.eucsoh.android.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
-30-->[androidx.core:core:1.13.1] /home/tritbool/.gradle/caches/9.3.0/transforms/f40a8326c5d0652a6b336ed17328037c/transformed/core-1.13.1/AndroidManifest.xml:26:5-97
-30-->[androidx.core:core:1.13.1] /home/tritbool/.gradle/caches/9.3.0/transforms/f40a8326c5d0652a6b336ed17328037c/transformed/core-1.13.1/AndroidManifest.xml:26:22-94
-31
-32    <application
-32-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:17:5-31:19
-33        android:allowBackup="true"
-33-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:18:9-35
-34        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
-34-->[androidx.core:core:1.13.1] /home/tritbool/.gradle/caches/9.3.0/transforms/f40a8326c5d0652a6b336ed17328037c/transformed/core-1.13.1/AndroidManifest.xml:28:18-86
-35        android:debuggable="true"
-36        android:extractNativeLibs="false"
-37        android:label="@string/app_name"
-37-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:19:9-41
-38        android:requestLegacyExternalStorage="true"
-38-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:21:9-52
+25    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+25-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:17:5-82
+25-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:17:22-79
+26
+27    <permission
+27-->[androidx.core:core:1.13.1] /home/tritbool/.gradle/caches/9.3.0/transforms/f40a8326c5d0652a6b336ed17328037c/transformed/core-1.13.1/AndroidManifest.xml:22:5-24:47
+28        android:name="io.github.eucsoh.android.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+28-->[androidx.core:core:1.13.1] /home/tritbool/.gradle/caches/9.3.0/transforms/f40a8326c5d0652a6b336ed17328037c/transformed/core-1.13.1/AndroidManifest.xml:23:9-81
+29        android:protectionLevel="signature" />
+29-->[androidx.core:core:1.13.1] /home/tritbool/.gradle/caches/9.3.0/transforms/f40a8326c5d0652a6b336ed17328037c/transformed/core-1.13.1/AndroidManifest.xml:24:9-44
+30
+31    <uses-permission android:name="io.github.eucsoh.android.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+31-->[androidx.core:core:1.13.1] /home/tritbool/.gradle/caches/9.3.0/transforms/f40a8326c5d0652a6b336ed17328037c/transformed/core-1.13.1/AndroidManifest.xml:26:5-97
+31-->[androidx.core:core:1.13.1] /home/tritbool/.gradle/caches/9.3.0/transforms/f40a8326c5d0652a6b336ed17328037c/transformed/core-1.13.1/AndroidManifest.xml:26:22-94
+32
+33    <application
+33-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:19:5-32:19
+34        android:allowBackup="true"
+34-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:20:9-35
+35        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+35-->[androidx.core:core:1.13.1] /home/tritbool/.gradle/caches/9.3.0/transforms/f40a8326c5d0652a6b336ed17328037c/transformed/core-1.13.1/AndroidManifest.xml:28:18-86
+36        android:debuggable="true"
+37        android:extractNativeLibs="false"
+38        android:label="@string/app_name"
+38-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:21:9-41
 39        android:testOnly="true"
 40        android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
-40-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:20:9-67
+40-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:22:9-67
 41        <activity
-41-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:22:9-30:20
+41-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:23:9-31:20
 42            android:name="io.github.eucsoh.android.MainActivity"
-42-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:23:13-41
+42-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:24:13-41
 43            android:exported="true"
-43-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:24:13-36
+43-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:25:13-36
 44            android:windowSoftInputMode="adjustResize" >
-44-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:25:13-55
+44-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:26:13-55
 45            <intent-filter>
-45-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:26:13-29:29
+45-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:27:13-30:29
 46                <action android:name="android.intent.action.MAIN" />
-46-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:27:17-69
-46-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:27:25-66
+46-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:28:17-69
+46-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:28:25-66
 47
 48                <category android:name="android.intent.category.LAUNCHER" />
-48-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:28:17-77
-48-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:28:27-74
+48-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:29:17-77
+48-->/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:29:27-74
 49            </intent-filter>
 50        </activity>
 51        <activity

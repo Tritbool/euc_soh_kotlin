@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:2:1-33:12
-INJECTED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:2:1-33:12
-INJECTED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:2:1-33:12
-INJECTED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:2:1-33:12
+ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:2:1-34:12
+INJECTED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:2:1-34:12
+INJECTED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:2:1-34:12
+INJECTED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:2:1-34:12
 MERGED from [com.google.android.material:material:1.12.0] /home/tritbool/.gradle/caches/9.3.0/transforms/83189c3b36b804254b719d1a9b49c1ee/transformed/material-1.12.0/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.appcompat:appcompat-resources:1.7.0] /home/tritbool/.gradle/caches/9.3.0/transforms/8de351fed2be52e016d25f7fcdce5d5d/transformed/appcompat-resources-1.7.0/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.constraintlayout:constraintlayout:2.0.1] /home/tritbool/.gradle/caches/9.3.0/transforms/b5223786b4a191a515b799d76f378b24/transformed/constraintlayout-2.0.1/AndroidManifest.xml:2:1-11:12
@@ -116,9 +116,13 @@ ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/Andr
 		ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:15:22-48
 	android:name
 		ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:14:22-78
+uses-permission#android.permission.MANAGE_EXTERNAL_STORAGE
+ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:17:5-82
+	android:name
+		ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:17:22-79
 application
-ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:17:5-31:19
-INJECTED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:17:5-31:19
+ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:19:5-32:19
+INJECTED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:19:5-32:19
 MERGED from [com.google.android.material:material:1.12.0] /home/tritbool/.gradle/caches/9.3.0/transforms/83189c3b36b804254b719d1a9b49c1ee/transformed/material-1.12.0/AndroidManifest.xml:22:5-20
 MERGED from [com.google.android.material:material:1.12.0] /home/tritbool/.gradle/caches/9.3.0/transforms/83189c3b36b804254b719d1a9b49c1ee/transformed/material-1.12.0/AndroidManifest.xml:22:5-20
 MERGED from [androidx.constraintlayout:constraintlayout:2.0.1] /home/tritbool/.gradle/caches/9.3.0/transforms/b5223786b4a191a515b799d76f378b24/transformed/constraintlayout-2.0.1/AndroidManifest.xml:9:5-20
@@ -143,34 +147,32 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] /home/tritbool/.gradle/cach
 MERGED from [androidx.startup:startup-runtime:1.1.1] /home/tritbool/.gradle/caches/9.3.0/transforms/c27ec000cf225088ed976f4a5df9b582/transformed/startup-runtime-1.1.1/AndroidManifest.xml:25:5-31:19
 	android:extractNativeLibs
 		INJECTED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml
-	android:requestLegacyExternalStorage
-		ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:21:9-52
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.13.1] /home/tritbool/.gradle/caches/9.3.0/transforms/f40a8326c5d0652a6b336ed17328037c/transformed/core-1.13.1/AndroidManifest.xml:28:18-86
 	android:label
-		ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:19:9-41
+		ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:21:9-41
 	android:allowBackup
-		ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:18:9-35
+		ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:20:9-35
 	android:theme
-		ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:20:9-67
+		ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:22:9-67
 activity#io.github.eucsoh.android.MainActivity
-ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:22:9-30:20
+ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:23:9-31:20
 	android:windowSoftInputMode
-		ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:25:13-55
+		ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:26:13-55
 	android:exported
-		ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:24:13-36
+		ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:25:13-36
 	android:name
-		ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:23:13-41
+		ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:24:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:26:13-29:29
+ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:27:13-30:29
 action#android.intent.action.MAIN
-ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:27:17-69
+ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:28:17-69
 	android:name
-		ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:27:25-66
+		ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:28:25-66
 category#android.intent.category.LAUNCHER
-ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:28:17-77
+ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:29:17-77
 	android:name
-		ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:28:27-74
+		ADDED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:29:27-74
 uses-sdk
 INJECTED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml
