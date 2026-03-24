@@ -56,6 +56,8 @@ fun ResultsScreenEnhanced(
                     i95p = (row["i_95p"] as? Number)?.toDouble(),
                     iPhase95p = (row["i_phase_95p"] as? Number)?.toDouble(),
                     iPhase2Int = (row["I_phase2_int"] as? Number)?.toDouble(),
+                    pwm95p = (row["pwm_95p"] as? Number)?.toDouble(),
+                    pwmMax = (row["pwm_max"] as? Number)?.toDouble(),
                     rMosfetHot = (row["R_mosfet_hot"] as? Number)?.toDouble(),
                     tempBoardMax = (row["temp_board_max"] as? Number)?.toDouble(),
                     tempMotorMax = (row["temp_motor_max"] as? Number)?.toDouble()

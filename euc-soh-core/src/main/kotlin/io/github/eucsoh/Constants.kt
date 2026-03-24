@@ -104,7 +104,6 @@ object Constants {
         TEMP_BOARD_MAX("temp_board_max", true, "Max board temperature (°C)"),
         TEMP_MOTOR_MAX("temp_motor_max", true, "Max motor temperature (°C)"),
         PWM_95P("pwm_95p", true, "PWM 95th percentile (%)"),
-
         PWM_MAX("pwm_max", true, "PWM max (%)")
     }
 

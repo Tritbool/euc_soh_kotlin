@@ -13,12 +13,16 @@ import io.github.eucsoh.Logger
 import io.github.eucsoh.NoOpLogger
 import io.github.eucsoh.model.MOSFETParams
 import org.jetbrains.kotlinx.dataframe.DataFrame
+import org.jetbrains.kotlinx.dataframe.api.ParserOptions
 import org.jetbrains.kotlinx.dataframe.api.add
 import org.jetbrains.kotlinx.dataframe.api.filter
 import org.jetbrains.kotlinx.dataframe.api.rows
+import org.jetbrains.kotlinx.dataframe.impl.asList
 import org.jetbrains.kotlinx.dataframe.io.readCSV
 import java.io.InputStream
 import java.time.format.DateTimeFormatter
+import java.util.Locale
+import kotlin.collections.toDoubleArray
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.round
@@ -80,7 +84,11 @@ object ReqStatsComputer {
         var df = try {
             if (csvSource != null) {
                 stream = csvSource.openCsvStream(csvPath)
-                DataFrame.readCSV(stream)
+                DataFrame.readCSV(
+                    stream, parserOptions = ParserOptions(
+                        locale = Locale.US
+                    )
+                )
             } else {
                 DataFrame.readCSV(csvPath)
             }
@@ -298,7 +306,7 @@ object ReqStatsComputer {
         }
 
         val pwms: DoubleArray =
-            if (pwmCol != null && pwmCol == EUCWorldColumns.PWM.csv_code) {
+            if (pwmCol != null) {
                 df.rows()                                     // iterable of rows
                     .asSequence()
                     .mapNotNull { row ->
@@ -306,7 +314,11 @@ object ReqStatsComputer {
                         if (speed <= speedThr) return@mapNotNull null
 
                         val pwm = row[pwmCol] as? Number ?: return@mapNotNull null
-                        100.0 - pwm.toDouble()
+                        if (pwmCol == EUCWorldColumns.PWM.csv_code) {
+                            100.0 - pwm.toDouble()
+                        } else {
+                            pwm.toDouble()
+                        }
                     }
                     .toList()
                     .toDoubleArray()
@@ -382,26 +394,36 @@ object ReqStatsComputer {
 
 
                     WHEELLOG -> {
-                        if (WheelLogColumns.DATE.csv_code in df.columnNames() &&
-                            WheelLogColumns.TIME.csv_code in df.columnNames()
-                        ) {
-                            val parsedTimes = filteredIndices.map { idx ->
-                                val d = df[WheelLogColumns.DATE.csv_code][idx]?.toString()
-                                    ?: return@map Double.NaN
-                                val t = df[WheelLogColumns.TIME.csv_code][idx]?.toString()
-                                    ?: return@map Double.NaN
-                                try {
-                                    java.time.LocalDateTime.parse("${d}T${t}").let {
-                                        it.toEpochSecond(java.time.ZoneOffset.UTC).toDouble()
+                        try {
+                            if (WheelLogColumns.DATE.csv_code in df.columnNames() &&
+                                WheelLogColumns.TIME.csv_code in df.columnNames()
+                            ) {
+                                val parsedTimes = filteredIndices.map { idx ->
+                                    val d = df[WheelLogColumns.DATE.csv_code][idx]?.toString()
+                                        ?: return@map Double.NaN
+                                    val t = df[WheelLogColumns.TIME.csv_code][idx]?.toString()
+                                        ?: return@map Double.NaN
+                                    try {
+                                        java.time.LocalDateTime.parse("${d}T${t}").let {
+                                            it.toEpochSecond(java.time.ZoneOffset.UTC).toDouble()
+                                        }
+                                    } catch (e: Exception) {
+                                        logger.d(
+                                            TAG,
+                                            "Failed to parse Wheelog timestamps: ${e.message}"
+                                        )
+                                        Double.NaN
                                     }
-                                } catch (e: Exception) {
-                                    Double.NaN
                                 }
-                            }
-                            val t0 = parsedTimes.filter { !it.isNaN() }.minOrNull() ?: return null
-                            parsedTimes.map { if (it.isNaN()) Double.NaN else it - t0 }
-                                .toDoubleArray()
-                        } else null
+                                val t0 =
+                                    parsedTimes.filter { !it.isNaN() }.minOrNull() ?: return null
+                                parsedTimes.map { if (it.isNaN()) Double.NaN else it - t0 }
+                                    .toDoubleArray()
+                            } else null
+                        } catch (e: Exception) {
+                            logger.d(TAG, "Failed to parse Wheelog timestamps: ${e.message}")
+                            null
+                        }
                     }
 
                     else -> null

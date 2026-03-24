@@ -39,6 +39,10 @@ data class ReqStatsResult(
     val iPhase95p: Double? = null,
     val iPhase2Int: Double? = null,
 
+    val pwmMax: Double? = null,
+    val pwm95p: Double? = null,
+
+
     // Mosfet metrics
     val rMosfetHot: Double? = null,
 
@@ -69,7 +73,9 @@ data class ReqStatsResult(
             Metrics.SAG_95P         to { it.sag95p },
             Metrics.SAG_MAX         to { it.sagMax },
             Metrics.TEMP_BOARD_MAX  to { it.tempBoardMax },
-            Metrics.TEMP_MOTOR_MAX  to { it.tempMotorMax }
+            Metrics.TEMP_MOTOR_MAX  to { it.tempMotorMax },
+            Metrics.PWM_95P         to { it.pwm95p },
+            Metrics.PWM_MAX         to { it.pwmMax }
             // Metrics.REQ_MEAN intentionally absent — no field in ReqStatsResult
         )
     }
