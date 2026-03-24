@@ -6,8 +6,8 @@ package io.github.eucsoh
 object Constants {
     const val DEBUG = true  // Activé pour débogage Android
 
-    const val EUC_WORLD="euc_world"
-    const val WHEELLOG="wheellog"
+    const val EUC_WORLD = "euc_world"
+    const val WHEELLOG = "wheellog"
 
     // ANALYSIS PHASES
     const val ANALYZING = "Analyzing"
@@ -77,6 +77,7 @@ object Constants {
         R_PACK_NOMINAL("r_pack_nominal"),
         SOURCE("source"),
         N_POINTS("n_points"),
+        CSV_FILE("csv_file")
 
 
     }
@@ -101,6 +102,7 @@ object Constants {
         R_MOSFET_HOT("R_mosfet_hot", true, "R_MOSFET hot (Ω)"),
         SAG_95P("sag_95p", true, "Sag 95th percentile (V)"),
         SAG_MAX("sag_max", true, "Sag max (V)"),
+        SAG_MEDIAN("sag_median", true, "Sag median (V)"),
         TEMP_BOARD_MAX("temp_board_max", true, "Max board temperature (°C)"),
         TEMP_MOTOR_MAX("temp_motor_max", true, "Max motor temperature (°C)"),
         PWM_95P("pwm_95p", true, "PWM 95th percentile (%)"),

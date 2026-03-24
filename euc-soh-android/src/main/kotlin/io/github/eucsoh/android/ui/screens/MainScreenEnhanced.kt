@@ -14,6 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.github.eucsoh.Constants
+import io.github.eucsoh.Constants.MetaColumns.*
+import io.github.eucsoh.Constants.Metrics.*
 import io.github.eucsoh.SohAnalyzer
 import io.github.eucsoh.android.data.model.ReqStatsResult
 import io.github.eucsoh.android.data.model.WheelIdentity
@@ -31,43 +34,43 @@ fun ResultsScreenEnhanced(
     val summary = result.buildSummary(selectedWheel?.displayName ?: "Wheel")
     val columnNames = summary.logs.firstOrNull()?.keys?.toList() ?: emptyList()
     val rows = summary.logs
-    
+
     var showFiles by remember { mutableStateOf(false) }
     var showCharts by remember { mutableStateOf(false) }
-    
+
     // Convert analysis result to ReqStatsResult list for charts
     val stats = remember(rows) {
         rows.mapNotNull { row ->
             try {
                 ReqStatsResult(
-                    fileName = row["csv_file"] as? String ?: "",
-                    wheelKm = (row["wheel_km"] as? Number)?.toDouble(),
-                    reqMedian = (row["Req_median"] as? Number)?.toDouble(),
-                    reqMedian25C = (row["Req_median_25C"] as? Number)?.toDouble(),
-                    req95p = (row["Req_95p"] as? Number)?.toDouble(),
-                    rBattMedian = (row["R_batt_median"] as? Number)?.toDouble(),
-                    rBattMedian25C = (row["R_batt_median_25C"] as? Number)?.toDouble(),
-                    sagMedian = (row["sag_median"] as? Number)?.toDouble(),
-                    sag95p = (row["sag_95p"] as? Number)?.toDouble(),
-                    sagMax = (row["sag_max"] as? Number)?.toDouble(),
-                    vMinStrong = (row["v_min_strong"] as? Number)?.toDouble(),
-                    iMax = (row["i_max"] as? Number)?.toDouble(),
-                    iPhaseMax = (row["i_phase_max"] as? Number)?.toDouble(),
-                    i95p = (row["i_95p"] as? Number)?.toDouble(),
-                    iPhase95p = (row["i_phase_95p"] as? Number)?.toDouble(),
-                    iPhase2Int = (row["I_phase2_int"] as? Number)?.toDouble(),
-                    pwm95p = (row["pwm_95p"] as? Number)?.toDouble(),
-                    pwmMax = (row["pwm_max"] as? Number)?.toDouble(),
-                    rMosfetHot = (row["R_mosfet_hot"] as? Number)?.toDouble(),
-                    tempBoardMax = (row["temp_board_max"] as? Number)?.toDouble(),
-                    tempMotorMax = (row["temp_motor_max"] as? Number)?.toDouble()
+                    fileName = row[CSV_FILE.csv_code] as? String ?: "",
+                    wheelKm = (row[WHEEL_KM.csv_code] as? Number)?.toDouble(),
+                    reqMedian = (row[REQ_MEDIAN.csv_code] as? Number)?.toDouble(),
+                    reqMedian25C = (row[REQ_MEDIAN_25C.csv_code] as? Number)?.toDouble(),
+                    req95p = (row[REQ_95P.csv_code] as? Number)?.toDouble(),
+                    rBattMedian = (row[R_BATT_MEDIAN.csv_code] as? Number)?.toDouble(),
+                    rBattMedian25C = (row[R_BATT_MEDIAN_25C.csv_code] as? Number)?.toDouble(),
+                    sagMedian = (row[SAG_MEDIAN.csv_code] as? Number)?.toDouble(),
+                    sag95p = (row[SAG_95P.csv_code] as? Number)?.toDouble(),
+                    sagMax = (row[SAG_MAX.csv_code] as? Number)?.toDouble(),
+                    vMinStrong = (row[V_MIN_STRONG.csv_code] as? Number)?.toDouble(),
+                    iMax = (row[I_MAX.csv_code] as? Number)?.toDouble(),
+                    iPhaseMax = (row[I_PHASE_MAX.csv_code] as? Number)?.toDouble(),
+                    i95p = (row[I_95P.csv_code] as? Number)?.toDouble(),
+                    iPhase95p = (row[I_PHASE_95P.csv_code] as? Number)?.toDouble(),
+                    iPhase2Int = (row[I_PHASE2_INT.csv_code] as? Number)?.toDouble(),
+                    pwm95p = (row[PWM_95P.csv_code] as? Number)?.toDouble(),
+                    pwmMax = (row[PWM_MAX.csv_code] as? Number)?.toDouble(),
+                    rMosfetHot = (row[R_MOSFET_HOT.csv_code] as? Number)?.toDouble(),
+                    tempBoardMax = (row[TEMP_BOARD_MAX.csv_code] as? Number)?.toDouble(),
+                    tempMotorMax = (row[TEMP_MOTOR_MAX.csv_code] as? Number)?.toDouble()
                 )
             } catch (e: Exception) {
                 null
             }
         }
     }
-    
+
     when {
         showFiles && selectedWheel != null -> {
             FileListScreen(
@@ -81,6 +84,7 @@ fun ResultsScreenEnhanced(
                 onBack = { showFiles = false }
             )
         }
+
         showCharts -> {
             ChartGalleryScreen(
                 wheelName = selectedWheel?.displayName ?: "Wheel",
@@ -88,6 +92,7 @@ fun ResultsScreenEnhanced(
                 onBack = { showCharts = false }
             )
         }
+
         else -> {
             Column(modifier = Modifier.fillMaxSize()) {
                 // Header with summary
@@ -120,7 +125,7 @@ fun ResultsScreenEnhanced(
                         }
                     }
                 }
-                
+
                 // ACTION BUTTONS (NEW)
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant,
@@ -147,7 +152,7 @@ fun ResultsScreenEnhanced(
                                 Text("Files")
                             }
                         }
-                        
+
                         // Button: View Charts
                         Button(
                             onClick = { showCharts = true },
@@ -164,7 +169,7 @@ fun ResultsScreenEnhanced(
                         }
                     }
                 }
-                
+
                 // Data table
                 Box(
                     modifier = Modifier
@@ -189,15 +194,15 @@ fun ResultsScreenEnhanced(
                                 )
                             }
                         }
-                        
+
                         HorizontalDivider()
-                        
+
                         // Data rows
                         rows.forEachIndexed { rowIdx, row ->
                             Surface(
-                                color = if (rowIdx % 2 == 0) 
-                                    MaterialTheme.colorScheme.surface 
-                                else 
+                                color = if (rowIdx % 2 == 0)
+                                    MaterialTheme.colorScheme.surface
+                                else
                                     MaterialTheme.colorScheme.surfaceVariant,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
@@ -219,7 +224,7 @@ fun ResultsScreenEnhanced(
                         }
                     }
                 }
-                
+
                 // Back button
                 Button(
                     onClick = onBack,
@@ -239,7 +244,11 @@ fun ResultsScreenEnhanced(
 private fun formatValue(value: Any?): String {
     return when (value) {
         null -> ""
-        is Double -> if (value.isNaN() || value.isInfinite()) "N/A" else String.format("%.4f", value)
+        is Double -> if (value.isNaN() || value.isInfinite()) "N/A" else String.format(
+            "%.4f",
+            value
+        )
+
         is Float -> if (value.isNaN() || value.isInfinite()) "N/A" else String.format("%.4f", value)
         is Number -> value.toString()
         is Boolean -> if (value) "✓" else "✗"
