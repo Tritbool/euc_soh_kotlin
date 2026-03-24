@@ -1,0 +1,4 @@
+io.github.eucsoh.android.test.euc-soh-android-androidTest-0 /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/build/generated/res/resValues/androidTest/debug
+io.github.eucsoh.android.test.euc-soh-android-mergeDebugAndroidTestResources-1 /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/build/intermediates/incremental/debugAndroidTest/mergeDebugAndroidTestResources/merged.dir
+io.github.eucsoh.android.test.euc-soh-android-mergeDebugAndroidTestResources-2 /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/build/intermediates/incremental/debugAndroidTest/mergeDebugAndroidTestResources/stripped.dir
+io.github.eucsoh.android.test.euc-soh-android-debugAndroidTest-3 /home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/build/intermediates/merged_res/debugAndroidTest/mergeDebugAndroidTestResources

@@ -110,23 +110,23 @@ object Constants {
     }
 
     // Metrics for CUSUM and trend detection
-    val CUSUM_METRICS = listOf(
-        Metrics.R_BATT_MEDIAN_25C.csv_code,
-        Metrics.R_MOSFET_HOT.csv_code,
-        Metrics.REQ_MEDIAN.csv_code,
-        Metrics.REQ_MEDIAN_25C.csv_code,
-        Metrics.TEMP_MOTOR_MAX.csv_code,
-        Metrics.TEMP_BOARD_MAX.csv_code,
-        Metrics.SAG_95P.csv_code
+    val CUSUM_METRICS: Set<Metrics> = setOf(
+        Metrics.R_BATT_MEDIAN_25C,
+        Metrics.R_MOSFET_HOT,
+        Metrics.REQ_MEDIAN,
+        Metrics.REQ_MEDIAN_25C,
+        Metrics.TEMP_MOTOR_MAX,
+        Metrics.TEMP_BOARD_MAX,
+        Metrics.SAG_95P
     )
 
-    val TREND_METRICS = listOf(
-        Metrics.R_BATT_MEDIAN_25C.csv_code,
-        Metrics.R_MOSFET_HOT.csv_code,
-        Metrics.REQ_MEDIAN.csv_code,
-        Metrics.REQ_MEDIAN_25C.csv_code,
-        Metrics.TEMP_MOTOR_MAX.csv_code,
-        Metrics.TEMP_BOARD_MAX.csv_code,
-        Metrics.SAG_95P.csv_code
+    val TREND_METRICS: Set<Metrics> = setOf(
+        Metrics.R_BATT_MEDIAN_25C,
+        Metrics.R_MOSFET_HOT,
+        Metrics.REQ_MEDIAN,
+        Metrics.REQ_MEDIAN_25C,
+        Metrics.TEMP_MOTOR_MAX,
+        Metrics.TEMP_BOARD_MAX,
+        Metrics.SAG_95P
     )
 }

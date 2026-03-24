@@ -291,11 +291,11 @@ class SohAnalyzer(
         val testKmMin = refKmMax
 
         for (metric in Constants.CUSUM_METRICS) {
-            if (metric !in dfStats.columnNames()) continue
+            if (metric.csv_code !in dfStats.columnNames()) continue
 
             val cusumResult = CUSUMDetector.detectCUSUM(
                 df = dfStats,
-                metric = metric,
+                metric = metric.csv_code,
                 refKmMax = refKmMax,
                 testKmMin = testKmMin
             )
@@ -318,11 +318,11 @@ class SohAnalyzer(
         // Linear trend alarms
         val trendAlarms = mutableListOf<GaussianAlarmDetector.Alarm>()
         for (metric in Constants.TREND_METRICS) {
-            if (metric !in dfStats.columnNames()) continue
+            if (metric.csv_code !in dfStats.columnNames()) continue
 
             val trendResult = TrendDetector.detectTrendLinear(
                 df = dfStats,
-                metric = metric
+                metric = metric.csv_code
             )
 
             if (trendResult.isSignificant && trendResult.slope != null) {

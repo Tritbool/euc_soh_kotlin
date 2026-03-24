@@ -56,19 +56,19 @@ fun ChartGalleryScreen(
     val context = LocalContext.current
     val gaussGenerator = remember { SohChartGeneratorFixed(context) }
     val trendGenerator = remember { SohTrendCusumChartGenerator(context) }
-    val pdfExporter    = remember { PdfExportService(context) }
-    val scope          = rememberCoroutineScope()
+    val pdfExporter = remember { PdfExportService(context) }
+    val scope = rememberCoroutineScope()
 
-    var gaussCharts  by remember { mutableStateOf<List<Pair<String, Bitmap>>?>(null) }
-    var trendCharts  by remember { mutableStateOf<List<Pair<String, Bitmap>>?>(null) }
-    var cusumCharts  by remember { mutableStateOf<List<Pair<String, Bitmap>>?>(null) }
+    var gaussCharts by remember { mutableStateOf<List<Pair<String, Bitmap>>?>(null) }
+    var trendCharts by remember { mutableStateOf<List<Pair<String, Bitmap>>?>(null) }
+    var cusumCharts by remember { mutableStateOf<List<Pair<String, Bitmap>>?>(null) }
     var inflexCharts by remember { mutableStateOf<List<Pair<String, Bitmap>>?>(null) }
 
-    var isLoading      by remember { mutableStateOf(false) }
-    var selectedChart  by remember { mutableStateOf<Pair<String, Bitmap>?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
+    var selectedChart by remember { mutableStateOf<Pair<String, Bitmap>?>(null) }
     var isExportingPdf by remember { mutableStateOf(false) }
-    var exportMessage  by remember { mutableStateOf<String?>(null) }
-    var selectedTab    by remember { mutableStateOf(ChartTab.GAUSSIAN) }
+    var exportMessage by remember { mutableStateOf<String?>(null) }
+    var selectedTab by remember { mutableStateOf(ChartTab.GAUSSIAN) }
 
     /**
      * Résout le label d'une métrique à partir de son csv_code.
@@ -80,18 +80,25 @@ fun ChartGalleryScreen(
     LaunchedEffect(selectedTab, stats) {
         isLoading = true
         when (selectedTab) {
-            ChartTab.GAUSSIAN  -> if (gaussCharts  == null) gaussCharts  = gaussGenerator.generateOverviewCharts(stats)
-            ChartTab.TREND     -> if (trendCharts  == null) trendCharts  = trendGenerator.generateAllTrendCharts(stats, wheelName)
-            ChartTab.CUSUM     -> if (cusumCharts  == null) cusumCharts  = trendGenerator.generateAllCusumCharts(stats, wheelName)
-            ChartTab.INFLEXION -> if (inflexCharts == null) inflexCharts = trendGenerator.generateAllInflexionCharts(stats, wheelName)
+            ChartTab.GAUSSIAN -> if (gaussCharts == null) gaussCharts =
+                gaussGenerator.generateOverviewCharts(stats)
+
+            ChartTab.TREND -> if (trendCharts == null) trendCharts =
+                trendGenerator.generateAllTrendCharts(stats, wheelName)
+
+            ChartTab.CUSUM -> if (cusumCharts == null) cusumCharts =
+                trendGenerator.generateAllCusumCharts(stats, wheelName)
+
+            ChartTab.INFLEXION -> if (inflexCharts == null) inflexCharts =
+                trendGenerator.generateAllInflexionCharts(stats, wheelName)
         }
         isLoading = false
     }
 
     val currentCharts: List<Pair<String, Bitmap>>? = when (selectedTab) {
-        ChartTab.GAUSSIAN  -> gaussCharts
-        ChartTab.TREND     -> trendCharts
-        ChartTab.CUSUM     -> cusumCharts
+        ChartTab.GAUSSIAN -> gaussCharts
+        ChartTab.TREND -> trendCharts
+        ChartTab.CUSUM -> cusumCharts
         ChartTab.INFLEXION -> inflexCharts
     }
 
@@ -111,7 +118,13 @@ fun ChartGalleryScreen(
                                 scope.launch {
                                     isExportingPdf = true
                                     try {
-                                        val file = pdfExporter.exportToPdf(stats, wheelName)
+                                        val file = pdfExporter.exportToPdf(
+                                            gaussCharts!!,
+                                            inflexCharts!!,
+                                            cusumCharts!!,
+                                            trendCharts!!,
+                                            wheelName
+                                        )
                                         exportMessage = "PDF saved: ${file.absolutePath}"
                                     } catch (e: Exception) {
                                         exportMessage = "Export failed: ${e.message}"
@@ -122,7 +135,10 @@ fun ChartGalleryScreen(
                             }
                         ) {
                             if (isExportingPdf)
-                                CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    strokeWidth = 2.dp
+                                )
                             else
                                 Icon(Icons.Default.PictureAsPdf, "Export PDF")
                         }
@@ -147,8 +163,8 @@ fun ChartGalleryScreen(
                 ChartTab.entries.forEach { tab ->
                     Tab(
                         selected = selectedTab == tab,
-                        onClick  = { selectedTab = tab },
-                        text     = { Text(tab.label) }
+                        onClick = { selectedTab = tab },
+                        text = { Text(tab.label) }
                     )
                 }
             }
@@ -160,6 +176,7 @@ fun ChartGalleryScreen(
                         "No charts available (insufficient data)",
                         modifier = Modifier.align(Alignment.Center)
                     )
+
                     else -> LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(16.dp),
@@ -167,10 +184,10 @@ fun ChartGalleryScreen(
                     ) {
                         items(currentCharts) { (key, bitmap) ->
                             ChartCard(
-                                metricName  = key,
+                                metricName = key,
                                 metricLabel = resolveLabel(key),
-                                bitmap      = bitmap,
-                                onClick     = { selectedChart = key to bitmap }
+                                bitmap = bitmap,
+                                onClick = { selectedChart = key to bitmap }
                             )
                         }
                     }
@@ -185,7 +202,7 @@ fun ChartGalleryScreen(
             ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color    = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background
                 ) {
                     Column(modifier = Modifier.fillMaxSize()) {
                         TopAppBar(
@@ -197,9 +214,9 @@ fun ChartGalleryScreen(
                             }
                         )
                         Image(
-                            bitmap             = bitmap.asImageBitmap(),
+                            bitmap = bitmap.asImageBitmap(),
                             contentDescription = key,
-                            modifier           = Modifier
+                            modifier = Modifier
                                 .fillMaxSize()
                                 .padding(16.dp)
                         )
@@ -212,13 +229,13 @@ fun ChartGalleryScreen(
 
 @Composable
 fun ChartCard(
-    metricName  : String,
-    metricLabel : String,
-    bitmap      : Bitmap,
-    onClick     : () -> Unit
+    metricName: String,
+    metricLabel: String,
+    bitmap: Bitmap,
+    onClick: () -> Unit
 ) {
     Card(
-        modifier  = Modifier
+        modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -229,23 +246,25 @@ fun ChartCard(
                 .padding(12.dp)
         ) {
             Text(
-                text     = metricLabel,
-                style    = MaterialTheme.typography.titleMedium,
+                text = metricLabel,
+                style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             Image(
-                bitmap             = bitmap.asImageBitmap(),
+                bitmap = bitmap.asImageBitmap(),
                 contentDescription = metricName,
-                modifier           = Modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 200.dp, max = 400.dp)
             )
             Row(
-                modifier              = Modifier.fillMaxWidth().padding(top = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
                 horizontalArrangement = Arrangement.End
             ) {
                 Text(
-                    text  = "Tap to enlarge",
+                    text = "Tap to enlarge",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
