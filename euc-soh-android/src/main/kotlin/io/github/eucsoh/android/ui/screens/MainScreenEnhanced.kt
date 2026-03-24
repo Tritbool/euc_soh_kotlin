@@ -1,26 +1,64 @@
 package io.github.eucsoh.android.ui.screens
 
 import android.net.Uri
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material3.Button
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import io.github.eucsoh.Constants
-import io.github.eucsoh.Constants.MetaColumns.*
-import io.github.eucsoh.Constants.Metrics.*
+import io.github.eucsoh.Constants.MetaColumns.CSV_FILE
+import io.github.eucsoh.Constants.MetaColumns.WHEEL_KM
+import io.github.eucsoh.Constants.Metrics.I_95P
+import io.github.eucsoh.Constants.Metrics.I_MAX
+import io.github.eucsoh.Constants.Metrics.I_PHASE2_INT
+import io.github.eucsoh.Constants.Metrics.I_PHASE_95P
+import io.github.eucsoh.Constants.Metrics.I_PHASE_MAX
+import io.github.eucsoh.Constants.Metrics.PWM_95P
+import io.github.eucsoh.Constants.Metrics.PWM_MAX
+import io.github.eucsoh.Constants.Metrics.REQ_95P
+import io.github.eucsoh.Constants.Metrics.REQ_MEDIAN
+import io.github.eucsoh.Constants.Metrics.REQ_MEDIAN_25C
+import io.github.eucsoh.Constants.Metrics.R_BATT_MEDIAN
+import io.github.eucsoh.Constants.Metrics.R_BATT_MEDIAN_25C
+import io.github.eucsoh.Constants.Metrics.R_MOSFET_HOT
+import io.github.eucsoh.Constants.Metrics.SAG_95P
+import io.github.eucsoh.Constants.Metrics.SAG_MAX
+import io.github.eucsoh.Constants.Metrics.SAG_MEDIAN
+import io.github.eucsoh.Constants.Metrics.TEMP_BOARD_MAX
+import io.github.eucsoh.Constants.Metrics.TEMP_MOTOR_MAX
+import io.github.eucsoh.Constants.Metrics.V_MIN_STRONG
 import io.github.eucsoh.SohAnalyzer
 import io.github.eucsoh.android.data.model.ReqStatsResult
 import io.github.eucsoh.android.data.model.WheelIdentity
-import kotlinx.coroutines.launch
 
 /**
  * Enhanced ResultsScreen avec accès aux fichiers et graphiques.
@@ -89,6 +127,7 @@ fun ResultsScreenEnhanced(
             ChartGalleryScreen(
                 wheelName = selectedWheel?.displayName ?: "Wheel",
                 stats = stats,
+                alarms = result.alarms.size,
                 onBack = { showCharts = false }
             )
         }

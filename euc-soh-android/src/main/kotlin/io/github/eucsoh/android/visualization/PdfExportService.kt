@@ -36,11 +36,11 @@ class PdfExportService(private val context: Context) {
     private fun createChartsPages(
         document: PdfDocument,
         idx: Int,
-        charts: List<Pair<String, Bitmap>>,
+        charts: List<Pair<String, Bitmap>>?,
         title: String
     ): Int {
         var last_page = idx
-        charts.forEachIndexed { index, (metricName, bitmap) ->
+        charts?.forEachIndexed { index, (metricName, bitmap) ->
             Log.d(
                 TAG,
                 "Adding page $index, metric=$metricName, bmp=${bitmap.width}x${bitmap.height}, recycled=${bitmap.isRecycled}"
@@ -114,17 +114,17 @@ class PdfExportService(private val context: Context) {
      * @return File path of generated PDF
      */
     suspend fun exportToPdf(
-        gauss_charts: List<Pair<String, Bitmap>>,
-        inflexion_charts: List<Pair<String, Bitmap>>,
-        cusum_charts: List<Pair<String, Bitmap>>,
-        trend_charts: List<Pair<String, Bitmap>>,
+        gauss_charts: List<Pair<String, Bitmap>>?,
+        inflexion_charts: List<Pair<String, Bitmap>>?,
+        cusum_charts: List<Pair<String, Bitmap>>?,
+        trend_charts: List<Pair<String, Bitmap>>?,
         wheelName: String,
         outputFileName: String? = null
     ): File = withContext(Dispatchers.IO) {
         Log.d(TAG, "Exporting to PDF")
-        if (gauss_charts.isEmpty()) {
+        if (gauss_charts == null) {
             Log.e(TAG, "Cannot export empty charts")
-            throw IllegalArgumentException("Cannot export empty charts")
+            throw IllegalArgumentException("No chars to export (too few data)")
         }
 
         val document = PdfDocument()

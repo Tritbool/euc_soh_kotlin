@@ -51,6 +51,7 @@ private enum class ChartTab(val label: String) {
 fun ChartGalleryScreen(
     wheelName: String,
     stats: List<ReqStatsResult>,
+    alarms: Int = 0,
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
@@ -97,9 +98,9 @@ fun ChartGalleryScreen(
 
     val currentCharts: List<Pair<String, Bitmap>>? = when (selectedTab) {
         ChartTab.GAUSSIAN -> gaussCharts
-        ChartTab.TREND -> trendCharts
-        ChartTab.CUSUM -> cusumCharts
-        ChartTab.INFLEXION -> inflexCharts
+        ChartTab.TREND -> if(alarms > 0) trendCharts  else null
+        ChartTab.CUSUM ->if(alarms > 0)  cusumCharts else null
+        ChartTab.INFLEXION -> if(alarms > 0) inflexCharts else null
     }
 
     Scaffold(
@@ -118,11 +119,36 @@ fun ChartGalleryScreen(
                                 scope.launch {
                                     isExportingPdf = true
                                     try {
+                                        // Génère les charts manquants avant export
+                                        if (gaussCharts == null) {
+                                            gaussCharts =
+                                                gaussGenerator.generateOverviewCharts(stats)
+                                        }
+                                        if (inflexCharts == null && alarms > 0) {
+                                            inflexCharts =
+                                                trendGenerator.generateAllInflexionCharts(
+                                                    stats,
+                                                    wheelName
+                                                )
+                                        }
+                                        if (cusumCharts == null  && alarms > 0) {
+                                            cusumCharts = trendGenerator.generateAllCusumCharts(
+                                                stats,
+                                                wheelName
+                                            )
+                                        }
+                                        if (trendCharts == null && alarms > 0) {
+                                            trendCharts = trendGenerator.generateAllTrendCharts(
+                                                stats,
+                                                wheelName
+                                            )
+                                        }
+
                                         val file = pdfExporter.exportToPdf(
-                                            gaussCharts!!,
-                                            inflexCharts!!,
-                                            cusumCharts!!,
-                                            trendCharts!!,
+                                            gaussCharts,
+                                            inflexCharts,
+                                            cusumCharts,
+                                            trendCharts,
                                             wheelName
                                         )
                                         exportMessage = "PDF saved: ${file.absolutePath}"
