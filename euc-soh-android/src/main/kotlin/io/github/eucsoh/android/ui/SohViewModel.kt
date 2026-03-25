@@ -47,7 +47,6 @@ data class SohUiState(
     val currentFileName: String = "",
     val analysisResult: SohAnalyzer.AnalysisResult? = null,
     val error: String? = null,
-    val useParallelProcessing: Boolean = false,
     // MOSFET config support
     val wheelConfigs: Map<String, WheelConfig> = emptyMap(),
     val showMosfetDialog: Boolean = false,
@@ -76,31 +75,17 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
 
     companion object {
         private const val TAG = "SohViewModel"
-        private const val PREF_PARALLEL_PROCESSING = "parallel_processing"
     }
     
     init {
         Log.d(TAG, "ViewModel initialized")
-        
-        // Load parallel processing preference
-        val useParallel = prefs.getBoolean(PREF_PARALLEL_PROCESSING, false)
-        _state.update { it.copy(useParallelProcessing = useParallel) }
+
         
         updateScanPathDisplay()
         // Auto-scan on startup
         scanWheels(forceRefresh = false)
     }
-    
-    /**
-     * Toggles parallel processing on/off.
-     */
-    fun toggleParallelProcessing() {
-        val newValue = !_state.value.useParallelProcessing
-        Log.d(TAG, "Toggling parallel processing: $newValue")
-        
-        prefs.edit().putBoolean(PREF_PARALLEL_PROCESSING, newValue).apply()
-        _state.update { it.copy(useParallelProcessing = newValue) }
-    }
+
     
     /**
      * Updates the scan path display in UI state.
@@ -308,7 +293,6 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
         }
         
         Log.d(TAG, "Analyzing ${csvPaths.size} files:")
-        Log.d(TAG, "  Parallel processing: ${currentState.useParallelProcessing}")
         csvPaths.forEachIndexed { idx, path ->
             Log.d(TAG, "  [$idx] $path")
         }
@@ -367,7 +351,6 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
                 val result = analyzerWithConfig.analyzeFolderForReq(
                     csvPaths = csvPaths,
                     optimalFrac = 1.0,
-                    parallel = currentState.useParallelProcessing,
                     onProgress = { current, total, phase ->
                         _state.update { it.copy(
                             progressState = ProgressState(

@@ -84,7 +84,6 @@ fun MainScreen(
                         currentFile = state.progressState?.current!!,
                         totalFiles = state.progressState?.total!!,
                         fileName = "",//state.currentFileName,
-                        isParallel = state.useParallelProcessing,
                         phase = ANALYZING
                     )
                 }
@@ -94,7 +93,6 @@ fun MainScreen(
                         currentFile = state.progressState?.current!!,
                         totalFiles = state.progressState?.total!!,
                         fileName = "",//state.currentFileName,
-                        isParallel = state.useParallelProcessing,
                         phase = CALIBRATING
                     )
                 }
@@ -125,9 +123,7 @@ fun MainScreen(
                         onAnalyze = viewModel::startAnalysis,
                         onConfigMosfet = viewModel::showMosfetConfig,
                         error = state.error,
-                        onDismissError = viewModel::clearError,
-                        useParallelProcessing = state.useParallelProcessing,
-                        onToggleParallel = viewModel::toggleParallelProcessing
+                        onDismissError = viewModel::clearError
                     )
                 }
             }
@@ -169,7 +165,6 @@ fun AnalysisProgressScreen(
     totalFiles: Int,
     fileName: String,
     phase: String,
-    isParallel: Boolean
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -192,42 +187,35 @@ fun AnalysisProgressScreen(
 
             Spacer(Modifier.height(16.dp))
 
-            if (isParallel) {
+            if (totalFiles > 0) {
                 Text(
-                    "Traitement parallèle de $totalFiles fichiers",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    "Fichier $currentFile / $totalFiles",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
                 )
-            } else {
-                if (totalFiles > 0) {
+
+                Spacer(Modifier.height(8.dp))
+
+                LinearProgressIndicator(
+                    progress = { currentFile.toFloat() / totalFiles.toFloat() },
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .height(8.dp),
+                )
+
+                Spacer(Modifier.height(16.dp))
+
+                if (fileName.isNotEmpty()) {
                     Text(
-                        "Fichier $currentFile / $totalFiles",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fileName,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
-
-                    Spacer(Modifier.height(8.dp))
-
-                    LinearProgressIndicator(
-                        progress = { currentFile.toFloat() / totalFiles.toFloat() },
-                        modifier = Modifier
-                            .fillMaxWidth(0.8f)
-                            .height(8.dp),
-                    )
-
-                    Spacer(Modifier.height(16.dp))
-
-                    if (fileName.isNotEmpty()) {
-                        Text(
-                            fileName,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
                 }
             }
+
         }
     }
 }
@@ -285,9 +273,7 @@ fun WheelListContent(
     onAnalyze: () -> Unit,
     onConfigMosfet: (WheelIdentity) -> Unit,
     error: String?,
-    onDismissError: () -> Unit,
-    useParallelProcessing: Boolean,
-    onToggleParallel: () -> Unit
+    onDismissError: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
@@ -334,37 +320,6 @@ fun WheelListContent(
                         Text("OK")
                     }
                 }
-            }
-        }
-
-        // Parallel processing toggle
-        Surface(
-            color = MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        "Traitement parallèle",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Text(
-                        if (useParallelProcessing) "Plus rapide, pas de suivi détaillé" else "Suivi fichier par fichier",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Switch(
-                    checked = useParallelProcessing,
-                    onCheckedChange = { onToggleParallel() }
-                )
             }
         }
 

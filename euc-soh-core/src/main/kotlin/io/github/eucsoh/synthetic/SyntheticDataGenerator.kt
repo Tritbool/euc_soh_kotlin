@@ -15,6 +15,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.max
 import java.util.Random
+
 /**
  * Synthetic EUC data generator for testing SoH analysis.
  * Port of synth_en.py from EUC_SOH project.
@@ -87,7 +88,7 @@ object SyntheticDataGenerator {
 
         fun socFromPackVoltage(vPack: Double): Double {
             val vCell = vPack / nSeries
-            val clamped = vCell.coerceIn(ocvTable.first().first,ocvTable.last().first)
+            val clamped = vCell.coerceIn(ocvTable.first().first, ocvTable.last().first)
 
             val upperIndex = ocvTable.indexOfFirst { it.first <= clamped }.let {
                 if (it == -1) ocvTable.lastIndex else it
@@ -134,8 +135,7 @@ object SyntheticDataGenerator {
         val analyzer = SohAnalyzer()
         val result = analyzer.analyzeFolderForReq(
             csvPaths = csvPaths,
-            optimalFrac = optimalFrac,
-            parallel = false
+            optimalFrac = optimalFrac
         )
 
         val stats = result.stats
@@ -238,7 +238,7 @@ object SyntheticDataGenerator {
             synthesizeWheellogCsv(
                 outputFile = csvFile,
                 vIdle = vIdle,
-                bm=bm,
+                bm = bm,
                 kmEnd = kmEnd,
                 metrics = row
             )
@@ -375,13 +375,13 @@ object SyntheticDataGenerator {
     private fun getDriftScale(metric: String, mode: DegradationMode): Double {
         return when (mode) {
             DegradationMode.GLOBAL -> 1.0
-            
+
             DegradationMode.BATT_ONLY -> when {
                 metric in BATT_METRICS -> 5.0     // Clear battery drift
                 metric in MOSFET_METRICS -> 0.05  // Almost flat
                 else -> 0.3                        // Neutral
             }
-            
+
             DegradationMode.MOSFET_ONLY -> when {
                 metric in MOSFET_METRICS -> 2.0   // Clear MOSFET drift
                 metric in BATT_METRICS -> 0.05    // Almost flat
@@ -506,23 +506,23 @@ object SyntheticDataGenerator {
                 val soc = bm.socFromPackVoltage(voltage[i])
                 val batteryLevelPct = (soc * 100.0).coerceIn(0.0, 100.0)
                 var c = current[i]
-                var v=  voltage[i]
+                var v = voltage[i]
                 var p = phaseCurrent[i]
-                if(c < 3.0){
-                    v=vIdle
-                    p=10.0
+                if (c < 3.0) {
+                    v = vIdle
+                    p = 10.0
                 }
                 val line = listOf(
                     timestamp.toLocalDate().toString(),
                     timestamp.toLocalTime().toString(),
                     totalDistance,
-                    "%.2f".format(Locale.US,v),
-                    "%.2f".format(Locale.US,c),
-                    "%.2f".format(Locale.US,p),
-                    "%.2f".format(Locale.US,speed[i]),
-                    "%.2f".format(Locale.US,systemTemp[i]),
-                    "%.2f".format(Locale.US,tempMotor[i]),
-                    "%.1f".format(Locale.US,batteryLevelPct)
+                    "%.2f".format(Locale.US, v),
+                    "%.2f".format(Locale.US, c),
+                    "%.2f".format(Locale.US, p),
+                    "%.2f".format(Locale.US, speed[i]),
+                    "%.2f".format(Locale.US, systemTemp[i]),
+                    "%.2f".format(Locale.US, tempMotor[i]),
+                    "%.1f".format(Locale.US, batteryLevelPct)
                 ).joinToString(",")
                 writer.write(line)
                 writer.newLine()
@@ -546,7 +546,8 @@ object SyntheticDataGenerator {
         outputDir.mkdirs()
 
         val timeseries = generateSohTimeseries(thresholds, config)
-        val bm = BatteryModel(nSeries = (config.vIdle / MAXIIMAL_CELL_V).toInt().coerceAtLeast(NS_MIN))
+        val bm =
+            BatteryModel(nSeries = (config.vIdle / MAXIIMAL_CELL_V).toInt().coerceAtLeast(NS_MIN))
 
         timeseries.forEach { row ->
             val filename = row["file"] as String
@@ -556,7 +557,7 @@ object SyntheticDataGenerator {
             synthesizeWheellogCsv(
                 outputFile = csvFile,
                 vIdle = config.vIdle,
-                bm=bm,
+                bm = bm,
                 kmEnd = kmEnd,
                 metrics = row
             )

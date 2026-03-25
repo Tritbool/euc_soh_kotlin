@@ -73,13 +73,11 @@ class SohAnalyzer(
      * @param csvPaths List of CSV file paths
      * @param optimalFrac Fraction of best logs to use for baseline
      * @param eaJPerMol Arrhenius activation energy (null = auto-calibrate)
-     * @param parallel Enable parallel processing
      */
     suspend fun analyzeFolderForReq(
         csvPaths: List<String>,
         optimalFrac: Double = 0.3,
         eaJPerMol: Double? = null,
-        parallel: Boolean = false,
         onProgress: ((current: Int, total: Int, phase: String) -> Unit)? = null
     ): AnalysisResult = coroutineScope {
 
@@ -90,36 +88,7 @@ class SohAnalyzer(
         if (ea == null) {
             logger.d(TAG, "Pass 1: Ea calibration")
 
-            val tempStats = if (parallel) {
-                csvPaths.mapIndexed { idx, path ->
-                    async(Dispatchers.IO) {
-                        val filename = path.substringAfterLast('/')
-                        logger.d(TAG, "  Processing [$idx/${csvPaths.size}] $filename")
-                        onProgress?.invoke(idx, csvPaths.size, CALIBRATING)
-                        try {
-                            val result = ReqStatsComputer.computeReqStatsForFile(
-                                csvPath = path,
-                                csvSource = csvSource,
-                                mosfetParams = mosfetParams,
-                                eaJPerMol = null,
-                                logger = logger
-                            )
-                            logger.d(
-                                TAG,
-                                "  [$idx] SUCCESS: ${result?.nPoints ?: 0.0} points, req=${result?.reqMedian ?: 0.0}"
-                            )
-                            result
-                        } catch (e: Exception) {
-                            logger.e(
-                                TAG,
-                                "  [$idx] FAILED: ${e.javaClass.simpleName}: ${e.message}",
-                                e
-                            )
-                            null
-                        }
-                    }
-                }.awaitAll().filterNotNull()
-            } else {
+            val tempStats =
                 csvPaths.mapIndexedNotNull { idx, path ->
                     val filename = path.substringAfterLast('/')
                     logger.d(TAG, "  Processing [$idx/${csvPaths.size}] $filename")
@@ -142,7 +111,7 @@ class SohAnalyzer(
                         null
                     }
                 }
-            }
+
 
             logger.d(TAG, "Pass 1: ${tempStats.size}/${csvPaths.size} files exploitable")
 
@@ -177,25 +146,7 @@ class SohAnalyzer(
         // Pass 2: Final analysis with calibrated Ea
         logger.d(TAG, "Pass 2: Final analysis with Ea=${ea / 1000.0} kJ/mol")
 
-        val finalStats = if (parallel) {
-            csvPaths.mapIndexed { idx, path ->
-                async(Dispatchers.IO) {
-                    onProgress?.invoke(idx, csvPaths.size, ANALYZING)
-                    try {
-                        ReqStatsComputer.computeReqStatsForFile(
-                            csvPath = path,
-                            csvSource = csvSource,
-                            mosfetParams = mosfetParams,
-                            eaJPerMol = ea,
-                            logger = logger
-                        )
-                    } catch (e: Exception) {
-                        logger.e(TAG, "  Pass2 [$idx] FAILED: ${e.message}", e)
-                        null
-                    }
-                }
-            }.awaitAll().filterNotNull()
-        } else {
+        val finalStats =
             csvPaths.mapIndexedNotNull { idx, path ->
                 onProgress?.invoke(idx, csvPaths.size, ANALYZING)
                 try {
@@ -211,7 +162,7 @@ class SohAnalyzer(
                     null
                 }
             }
-        }
+
         onProgress?.invoke(csvPaths.size, csvPaths.size, DONE)
         logger.d(TAG, "Pass 2: ${finalStats.size}/${csvPaths.size} files processed")
 
