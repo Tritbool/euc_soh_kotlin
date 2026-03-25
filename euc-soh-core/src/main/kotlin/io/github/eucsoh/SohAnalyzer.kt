@@ -4,9 +4,12 @@ import io.github.eucsoh.Constants.ANALYZING
 import io.github.eucsoh.Constants.CALIBRATING
 import io.github.eucsoh.Constants.DONE
 import io.github.eucsoh.analysis.*
+import io.github.eucsoh.Constants.Metrics
 import io.github.eucsoh.Constants.Metrics.*
 import io.github.eucsoh.Constants.MetaColumns.*
 import io.github.eucsoh.model.MOSFETParams
+import io.github.eucsoh.model.PlotData
+import io.github.eucsoh.model.ThresholdInfo
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
 import kotlinx.coroutines.*
@@ -29,7 +32,8 @@ class SohAnalyzer(
         val eaJPerMol: Double,
         val nsGlobal: Int?,
         val vNominal: Double?,
-        val rPackNominal: Double?
+        val rPackNominal: Double?,
+        val plotData: PlotData
     )
 
     data class SummaryData(
@@ -294,6 +298,8 @@ class SohAnalyzer(
 
         logger.d(TAG, "Analysis complete: ${allAlarms.size} alarms detected")
 
+        val plotData = buildPlotData(dfStats, thresholds)
+
         AnalysisResult(
             stats = dfStats,
             alarms = allAlarms,
@@ -301,9 +307,106 @@ class SohAnalyzer(
             eaJPerMol = ea,
             nsGlobal = nsGlobal,
             vNominal = vNominal,
-            rPackNominal = rPackNominal
+            rPackNominal = rPackNominal,
+            plotData = plotData
         )
+
     }
+
+    private fun buildPlotData(
+        dfStats: DataFrame<*>,
+        thresholds: Map<String, ThresholdInfo>
+    ): PlotData {
+        val series = mutableMapOf<Constants.Metrics, List<Pair<Double, Double>>>()
+        val gaussianResults = mutableMapOf<Metrics, PlotData.GaussianPlotResult>()
+        val cusumResults = mutableMapOf<Metrics, PlotData.CusumPlotResult>()
+        val trendResults = mutableMapOf<Metrics, PlotData.TrendPlotResult>()
+        val inflexionResults = mutableMapOf<Metrics, PlotData.InflexionPlotResult>()
+
+        val kmMax = dfStats[WHEEL_KM.csv_code].values()
+            .filterIsInstance<Number>().maxOfOrNull { it.toDouble() } ?: 0.0
+        val refKmMax = kmMax * 0.3
+
+        for (metric in Metrics.entries) {
+            if (metric.csv_code !in dfStats.columnNames()) continue
+
+            // Série brute
+            val pts = (0 until dfStats.rowsCount()).mapNotNull { i ->
+                val km =
+                    (dfStats[WHEEL_KM.csv_code][i] as? Number)?.toDouble() ?: return@mapNotNull null
+                val v =
+                    (dfStats[metric.csv_code][i] as? Number)?.toDouble() ?: return@mapNotNull null
+                km to v
+            }.sortedBy { it.first }
+            if (pts.size < 5) continue
+            series[metric] = pts
+
+            val t = thresholds[metric.csv_code] ?: continue
+            gaussianResults[metric] = PlotData.GaussianPlotResult(
+                mu = t.mean,
+                sigma = t.std,
+                higherIsBad = metric.higher_is_bad
+            )
+
+            // CUSUM (métriques concernées uniquement)
+            if (metric in Constants.CUSUM_METRICS) {
+                val r = CUSUMDetector.detectCUSUM(
+                    df = dfStats,
+                    metric = metric.csv_code,
+                    refKmMax = refKmMax,
+                    testKmMin = refKmMax
+                )
+                if (r.muRef != null && r.sigmaRef != null) {
+                    cusumResults[metric] = PlotData.CusumPlotResult(
+                        alarmIndices = r.alarmIndices.toSet(),
+                        muRef = r.muRef,
+                        sigmaRef = r.sigmaRef,
+                        hSigma = 5.0
+                    )
+                }
+            }
+
+            // Trend
+            if (metric in Constants.TREND_METRICS) {
+                val r = TrendDetector.detectTrendLinear(dfStats, metric.csv_code)
+                if (r.slope != null) {
+                    val xVals = pts.map { it.first }
+                    val yVals = pts.map { it.second }
+                    val n = xVals.size
+                    val sx = xVals.sum();
+                    val sy = yVals.sum()
+                    val intercept = (sy - r.slope * sx) / n
+                    trendResults[metric] = PlotData.TrendPlotResult(
+                        slope = r.slope,
+                        intercept = intercept,
+                        isSignificant = r.isSignificant,
+                        pValue = r.pValue
+                    )
+                }
+
+                // Inflexion
+                val ri = TrendDetector.detectSlopeInflexions(
+                    df = dfStats,
+                    metric = metric.csv_code,
+                    thresholds = thresholds,       // déjà calculé plus haut
+                    highIsBad = metric.higher_is_bad
+                )
+                val limit = thresholds[metric.csv_code]?.limit
+                    ?: (pts.map { it.second }.average() + 1.25 * run {
+                        val m = pts.map { it.second }.average()
+                        kotlin.math.sqrt(pts.sumOf { (it.second - m) * (it.second - m) } / (pts.size - 1))
+                    })
+                inflexionResults[metric] = PlotData.InflexionPlotResult(
+                    slowIndices = ri.slowIndices,
+                    inflexionIndices = ri.inflexionIndices,
+                    dangerLimit = limit
+                )
+            }
+        }
+
+        return PlotData(series, gaussianResults, cusumResults, trendResults, inflexionResults)
+    }
+
 
     /**
      * Builds a platform-agnostic summary from analysis results.
@@ -379,6 +482,7 @@ class SohAnalyzer(
                 eaKjPerMol = result.eaJPerMol / 1000.0,
                 autoCalibrated = getBooleanAt("arrhenius_auto_calibrated", 0)
             ),
+
             logs = (0 until df.rowsCount()).map { i ->
                 df.columnNames().associateWith { col -> df[col][i] }
             }

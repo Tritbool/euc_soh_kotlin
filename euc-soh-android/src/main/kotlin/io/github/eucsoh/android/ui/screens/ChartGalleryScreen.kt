@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import io.github.eucsoh.Constants.Metrics
-import io.github.eucsoh.android.data.model.ReqStatsResult
 import io.github.eucsoh.android.visualization.PdfExportService
 import io.github.eucsoh.android.visualization.SohChartGeneratorFixed
 import io.github.eucsoh.android.visualization.SohTrendCusumChartGenerator
@@ -50,10 +50,10 @@ private enum class ChartTab(val label: String) {
 @Composable
 fun ChartGalleryScreen(
     wheelName: String,
-    stats: List<ReqStatsResult>,
+    plotData: io.github.eucsoh.model.PlotData,   // ← remplace stats: List<ReqStatsResult>
     alarms: Int = 0,
     onBack: () -> Unit
-) {
+){
     val context = LocalContext.current
     val gaussGenerator = remember { SohChartGeneratorFixed(context) }
     val trendGenerator = remember { SohTrendCusumChartGenerator(context) }
@@ -78,23 +78,24 @@ fun ChartGalleryScreen(
     fun resolveLabel(csvCode: String): String =
         Metrics.entries.find { it.csv_code == csvCode }?.label ?: csvCode
 
-    LaunchedEffect(selectedTab, stats) {
+    LaunchedEffect(selectedTab, plotData) {
         isLoading = true
         when (selectedTab) {
-            ChartTab.GAUSSIAN -> if (gaussCharts == null) gaussCharts =
-                gaussGenerator.generateOverviewCharts(stats)
+            ChartTab.GAUSSIAN  -> if (gaussCharts == null)
+                gaussCharts = gaussGenerator.generateOverviewCharts(plotData)
 
-            ChartTab.TREND -> if (trendCharts == null) trendCharts =
-                trendGenerator.generateAllTrendCharts(stats, wheelName)
+            ChartTab.TREND     -> if (trendCharts == null)
+                trendCharts = trendGenerator.generateAllTrendCharts(plotData, wheelName)
 
-            ChartTab.CUSUM -> if (cusumCharts == null) cusumCharts =
-                trendGenerator.generateAllCusumCharts(stats, wheelName)
+            ChartTab.CUSUM     -> if (cusumCharts == null)
+                cusumCharts = trendGenerator.generateAllCusumCharts(plotData, wheelName)
 
-            ChartTab.INFLEXION -> if (inflexCharts == null) inflexCharts =
-                trendGenerator.generateAllInflexionCharts(stats, wheelName)
+            ChartTab.INFLEXION -> if (inflexCharts == null)
+                inflexCharts = trendGenerator.generateAllInflexionCharts(plotData, wheelName)
         }
         isLoading = false
     }
+
 
     val currentCharts: List<Pair<String, Bitmap>>? = when (selectedTab) {
         ChartTab.GAUSSIAN -> gaussCharts
@@ -109,7 +110,7 @@ fun ChartGalleryScreen(
                 title = { Text("Charts — $wheelName") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
                     }
                 },
                 actions = {
@@ -122,24 +123,24 @@ fun ChartGalleryScreen(
                                         // Génère les charts manquants avant export
                                         if (gaussCharts == null) {
                                             gaussCharts =
-                                                gaussGenerator.generateOverviewCharts(stats)
+                                                gaussGenerator.generateOverviewCharts(plotData)
                                         }
                                         if (inflexCharts == null && alarms > 0) {
                                             inflexCharts =
                                                 trendGenerator.generateAllInflexionCharts(
-                                                    stats,
+                                                    plotData,
                                                     wheelName
                                                 )
                                         }
                                         if (cusumCharts == null  && alarms > 0) {
                                             cusumCharts = trendGenerator.generateAllCusumCharts(
-                                                stats,
+                                                plotData,
                                                 wheelName
                                             )
                                         }
                                         if (trendCharts == null && alarms > 0) {
                                             trendCharts = trendGenerator.generateAllTrendCharts(
-                                                stats,
+                                                plotData,
                                                 wheelName
                                             )
                                         }

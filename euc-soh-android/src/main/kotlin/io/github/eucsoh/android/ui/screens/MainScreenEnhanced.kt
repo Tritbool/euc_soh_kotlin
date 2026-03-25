@@ -76,39 +76,6 @@ fun ResultsScreenEnhanced(
     var showFiles by remember { mutableStateOf(false) }
     var showCharts by remember { mutableStateOf(false) }
 
-    // Convert analysis result to ReqStatsResult list for charts
-    val stats = remember(rows) {
-        rows.mapNotNull { row ->
-            try {
-                ReqStatsResult(
-                    fileName = row[CSV_FILE.csv_code] as? String ?: "",
-                    wheelKm = (row[WHEEL_KM.csv_code] as? Number)?.toDouble(),
-                    reqMedian = (row[REQ_MEDIAN.csv_code] as? Number)?.toDouble(),
-                    reqMedian25C = (row[REQ_MEDIAN_25C.csv_code] as? Number)?.toDouble(),
-                    req95p = (row[REQ_95P.csv_code] as? Number)?.toDouble(),
-                    rBattMedian = (row[R_BATT_MEDIAN.csv_code] as? Number)?.toDouble(),
-                    rBattMedian25C = (row[R_BATT_MEDIAN_25C.csv_code] as? Number)?.toDouble(),
-                    sagMedian = (row[SAG_MEDIAN.csv_code] as? Number)?.toDouble(),
-                    sag95p = (row[SAG_95P.csv_code] as? Number)?.toDouble(),
-                    sagMax = (row[SAG_MAX.csv_code] as? Number)?.toDouble(),
-                    vMinStrong = (row[V_MIN_STRONG.csv_code] as? Number)?.toDouble(),
-                    iMax = (row[I_MAX.csv_code] as? Number)?.toDouble(),
-                    iPhaseMax = (row[I_PHASE_MAX.csv_code] as? Number)?.toDouble(),
-                    i95p = (row[I_95P.csv_code] as? Number)?.toDouble(),
-                    iPhase95p = (row[I_PHASE_95P.csv_code] as? Number)?.toDouble(),
-                    iPhase2Int = (row[I_PHASE2_INT.csv_code] as? Number)?.toDouble(),
-                    pwm95p = (row[PWM_95P.csv_code] as? Number)?.toDouble(),
-                    pwmMax = (row[PWM_MAX.csv_code] as? Number)?.toDouble(),
-                    rMosfetHot = (row[R_MOSFET_HOT.csv_code] as? Number)?.toDouble(),
-                    tempBoardMax = (row[TEMP_BOARD_MAX.csv_code] as? Number)?.toDouble(),
-                    tempMotorMax = (row[TEMP_MOTOR_MAX.csv_code] as? Number)?.toDouble()
-                )
-            } catch (e: Exception) {
-                null
-            }
-        }
-    }
-
     when {
         showFiles && selectedWheel != null -> {
             FileListScreen(
@@ -126,7 +93,7 @@ fun ResultsScreenEnhanced(
         showCharts -> {
             ChartGalleryScreen(
                 wheelName = selectedWheel?.displayName ?: "Wheel",
-                stats = stats,
+                plotData = result.plotData,
                 alarms = result.alarms.size,
                 onBack = { showCharts = false }
             )
@@ -196,7 +163,7 @@ fun ResultsScreenEnhanced(
                         Button(
                             onClick = { showCharts = true },
                             modifier = Modifier.weight(1f),
-                            enabled = stats.size >= 3 // Need min 3 points
+                            enabled = result.plotData.gaussianResults.isNotEmpty()
                         ) {
                             Icon(
                                 Icons.Default.BarChart,
