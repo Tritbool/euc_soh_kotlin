@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="io.github.eucsoh.analysis.RealLogsParsingTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-03-25T10:09:45.923Z" hostname="IlPalazzo" time="11.598">
+  <properties/>
+  <testcase name="should correctly auto-detect source format()" classname="io.github.eucsoh.analysis.RealLogsParsingTest" time="3.057"/>
+  <testcase name="EUC World file should parse and compute positive Req()" classname="io.github.eucsoh.analysis.RealLogsParsingTest" time="0.828"/>
+  <testcase name="should NOT return negative Req for EUC World()" classname="io.github.eucsoh.analysis.RealLogsParsingTest" time="1.178"/>
+  <testcase name="should NOT return negative Req for WheelLog()" classname="io.github.eucsoh.analysis.RealLogsParsingTest" time="0.83"/>
+  <testcase name="WheelLog file should parse and compute positive Req()" classname="io.github.eucsoh.analysis.RealLogsParsingTest" time="0.785"/>
+  <testcase name="EUC World should have single datetime field()" classname="io.github.eucsoh.analysis.RealLogsParsingTest" time="1.0"/>
+  <testcase name="should NOT return zero Req for valid files()" classname="io.github.eucsoh.analysis.RealLogsParsingTest" time="1.07"/>
+  <testcase name="WheelLog should have reasonable datetime format()" classname="io.github.eucsoh.analysis.RealLogsParsingTest" time="0.415"/>
+  <testcase name="should analyze files in reasonable time()" classname="io.github.eucsoh.analysis.RealLogsParsingTest" time="1.119"/>
+  <testcase name="should extract reasonable battery pack parameters()" classname="io.github.eucsoh.analysis.RealLogsParsingTest" time="1.299"/>
+  <system-out><![CDATA[]]>&#x1f41e;<![CDATA[ [EUC World] File: euc_world.csv
+  Source detected: euc_world
+  Points analyzed: 2727
+  Req median: 0.2010936757013803 Ω
+  Req mean: 0.2292992775304634 Ω
+  V_idle: 131.52900000005198 V
+  Ns estimated: 32
+  Wheel km: 4059.875 km (distance_total_km_euc)
+]]>&#x1f41e;<![CDATA[ [WheelLog] File: wheellog.csv
+  Source detected: wheellog
+  Points analyzed: 4420
+  Req median: 0.05231219920485473 Ω
+  Req mean: 0.06460792044629315 Ω
+  V_idle: 126.91111111112131 V
+  Ns estimated: 32
+  Wheel km: 7928.852 km (totaldistance_m_wl)
+⏱️ wheellog.csv: 341ms for 4420 points
+⏱️ euc_world.csv: 770ms for 2727 points
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

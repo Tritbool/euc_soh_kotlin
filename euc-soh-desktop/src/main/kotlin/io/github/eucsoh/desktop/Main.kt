@@ -57,8 +57,7 @@ fun main() {
                         val result = runBlocking {
                             analyzer.analyzeFolderForReq(
                                 csvPaths = csvFiles,
-                                optimalFrac = 0.5,
-                                parallel = true
+                                optimalFrac = 0.5
                             )
                         }
 

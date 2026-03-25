@@ -95,7 +95,6 @@ class EndToEndSyntheticTest {
             csvPaths = csvPaths,
             optimalFrac = 0.3,
             eaJPerMol = 20000.0,
-            parallel = false
         )
 
         // Assertions: Should detect battery degradation
@@ -168,7 +167,6 @@ class EndToEndSyntheticTest {
         val result = analyzer.analyzeFolderForReq(
             csvPaths = csvPaths,
             optimalFrac = 0.3,
-            parallel = false
         )
 
         // Should detect MOSFET/thermal alarms
@@ -212,7 +210,7 @@ class EndToEndSyntheticTest {
             .sorted()
 
         val analyzer = SohAnalyzer()
-        val result = analyzer.analyzeFolderForReq(csvPaths, parallel = false)
+        val result = analyzer.analyzeFolderForReq(csvPaths)
 
         // Should detect CUSUM alarms
         val cusumAlarms = result.alarms.filter { alarm ->
@@ -285,7 +283,7 @@ class EndToEndSyntheticTest {
             .sorted()
 
         val analyzer = SohAnalyzer(mosfetParams = mosfets)
-        val result = analyzer.analyzeFolderForReq(csvPaths, parallel = false)
+        val result = analyzer.analyzeFolderForReq(csvPaths)
 
         // Should detect linear trend alarms
         val trendAlarms = result.alarms.filter { alarm ->
@@ -331,7 +329,7 @@ class EndToEndSyntheticTest {
             .sorted()
 
         val analyzer = SohAnalyzer()
-        val result = analyzer.analyzeFolderForReq(csvPaths, parallel = false)
+        val result = analyzer.analyzeFolderForReq(csvPaths)
 
         // Should produce minimal alarms (only noise-induced false positives)
         val gaussianAlarms = result.alarms.filter { alarm ->
@@ -378,7 +376,7 @@ class EndToEndSyntheticTest {
             .sorted()
 
         val analyzer = SohAnalyzer()
-        val result = analyzer.analyzeFolderForReq(csvPaths, parallel = false)
+        val result = analyzer.analyzeFolderForReq(csvPaths)
 
         // Should infer 24S configuration
         assertEquals(24, result.nsGlobal, "Should detect 24S pack from V_idle=100.8V")
@@ -413,7 +411,7 @@ class EndToEndSyntheticTest {
             .sorted()
 
         val analyzer = SohAnalyzer()
-        val result = analyzer.analyzeFolderForReq(csvPaths, parallel = false)
+        val result = analyzer.analyzeFolderForReq(csvPaths)
 
         // Build summary
         val summary = analyzer.buildSummary(result, "test_summary")

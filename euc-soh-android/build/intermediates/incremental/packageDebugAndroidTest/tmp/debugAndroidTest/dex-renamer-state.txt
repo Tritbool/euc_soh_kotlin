@@ -1,4 +1,0 @@
-#Tue Mar 24 16:42:29 CET 2026
-base.0=/home/tritbool/Workspace/euc_soh_kotlin/euc-soh-android/build/intermediates/dex/debugAndroidTest/mergeProjectDexDebugAndroidTest/0/classes.dex
-path.0=0/classes.dex
-renamed.0=classes.dex

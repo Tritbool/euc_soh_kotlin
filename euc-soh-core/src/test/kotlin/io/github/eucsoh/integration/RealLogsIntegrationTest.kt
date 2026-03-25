@@ -51,8 +51,7 @@ class RealLogsIntegrationTest {
         val result = runBlocking {
             analyzer.analyzeFolderForReq(
                 csvPaths = csvPaths,
-                optimalFrac = 0.3,
-                parallel = false
+                optimalFrac = 0.3
             )
         }
 
