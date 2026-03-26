@@ -19,7 +19,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import io.github.eucsoh.Constants.Metrics
+import io.github.eucsoh.SohAnalyzer
 import io.github.eucsoh.android.visualization.PdfExportService
+import io.github.eucsoh.android.visualization.SohArchiveExportService
 import io.github.eucsoh.android.visualization.SohChartGeneratorFixed
 import io.github.eucsoh.android.visualization.SohTrendCusumChartGenerator
 import kotlinx.coroutines.launch
@@ -50,6 +52,8 @@ private enum class ChartTab(val label: String) {
 @Composable
 fun ChartGalleryScreen(
     wheelName: String,
+    macAddress: String,
+    fileReports: List<SohAnalyzer.FileReport>,
     plotData: io.github.eucsoh.model.PlotData,   // ← remplace stats: List<ReqStatsResult>
     alarms: Int = 0,
     onBack: () -> Unit
@@ -150,7 +154,8 @@ fun ChartGalleryScreen(
                                             inflexCharts,
                                             cusumCharts,
                                             trendCharts,
-                                            wheelName
+                                            wheelName,
+                                            macAddress=macAddress
                                         )
                                         exportMessage = "PDF saved: ${file.absolutePath}"
                                     } catch (e: Exception) {
@@ -168,6 +173,36 @@ fun ChartGalleryScreen(
                                 )
                             else
                                 Icon(Icons.Default.PictureAsPdf, "Export PDF")
+                        }
+                        // Dans les actions de la TopAppBar, après le bouton PDF :
+                        IconButton(
+                            onClick = {
+                                scope.launch {
+                                    isExportingPdf = true
+                                    try {
+                                        // Génère le PDF d'abord si pas encore fait
+                                        val pdf = pdfExporter.exportToPdf(
+                                            gaussCharts ?: gaussGenerator.generateOverviewCharts(plotData),
+                                            inflexCharts, cusumCharts, trendCharts, wheelName, macAddress=macAddress
+                                        )
+                                        // Puis l'archive
+                                        val archiveService = SohArchiveExportService(context)
+                                        val zip = archiveService.exportArchive(
+                                            wheelName = wheelName,
+                                            macAddress = macAddress,    // ← à passer en paramètre de ChartGalleryScreen
+                                            fileReports = fileReports,  // ← idem
+                                            pdfFile = pdf
+                                        )
+                                        exportMessage = "Archive saved: ${zip.absolutePath}"
+                                    } catch (e: Exception) {
+                                        exportMessage = "Archive failed: ${e.message}"
+                                    } finally {
+                                        isExportingPdf = false
+                                    }
+                                }
+                            }
+                        ) {
+                            Icon(Icons.Default.FolderZip, "Export Archive")
                         }
                     }
                 }

@@ -80,12 +80,7 @@ fun ResultsScreenEnhanced(
         showFiles && selectedWheel != null -> {
             FileListScreen(
                 wheelName = selectedWheel.displayName,
-                wheelDirUri = Uri.parse(selectedWheel.csvFiles.first().toString()).let {
-                    // Extract parent directory
-                    val path = it.path ?: ""
-                    val parentPath = path.substringBeforeLast('/', "")
-                    Uri.parse("content://com.android.externalstorage.documents/tree/$parentPath")
-                },
+                fileReports = result.fileReports,
                 onBack = { showFiles = false }
             )
         }
@@ -93,6 +88,8 @@ fun ResultsScreenEnhanced(
         showCharts -> {
             ChartGalleryScreen(
                 wheelName = selectedWheel?.displayName ?: "Wheel",
+                macAddress = selectedWheel?.macAddress!!,
+                result.fileReports,
                 plotData = result.plotData,
                 alarms = result.alarms.size,
                 onBack = { showCharts = false }

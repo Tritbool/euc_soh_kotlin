@@ -25,6 +25,17 @@ class SohAnalyzer(
 ) {
     private val TAG: String = "SohAnalyzer"
 
+    data class FileReport(
+        val path: String,          // chemin complet original
+        val fileName: String,      // basename
+        val source: String?,       // "WheelLog" / "EUC World" / null
+        val accepted: Boolean,
+        val rejectionReason: String? = null,  // null si accepted
+        val nPoints: Int? = null,
+        val reqMedian: Double? = null,
+        val wheelKm: Double? = null
+    )
+
     data class AnalysisResult(
         val stats: DataFrame<*>,
         val alarms: List<GaussianAlarmDetector.Alarm>,
@@ -33,7 +44,8 @@ class SohAnalyzer(
         val nsGlobal: Int?,
         val vNominal: Double?,
         val rPackNominal: Double?,
-        val plotData: PlotData
+        val plotData: PlotData,
+        val fileReports: List<FileReport>
     )
 
     data class SummaryData(
@@ -71,6 +83,12 @@ class SohAnalyzer(
         )
     }
 
+    private fun detectSource(path: String): String? = when {
+        path.contains("WheelLog", ignoreCase = true) -> "WheelLog"
+        path.contains("EUC World", ignoreCase = true) -> "EUC World"
+        else -> null
+    }
+
     /**
      * Analyzes all CSV files in a folder/list.
      * 
@@ -86,7 +104,8 @@ class SohAnalyzer(
     ): AnalysisResult = coroutineScope {
 
         logger.d(TAG, "Starting analysis of ${csvPaths.size} files")
-
+        val validCsvPath = mutableListOf<String>()
+        val fileReports = mutableListOf<FileReport>()
         // Pass 1: Calibrate Ea if needed
         var ea = eaJPerMol
         if (ea == null) {
@@ -109,9 +128,56 @@ class SohAnalyzer(
                             TAG,
                             "  [$idx] SUCCESS: ${result?.nPoints ?: 0.0} points, req=${result?.reqMedian ?: 0.0}"
                         )
+                        if (result?.reqMedian!! > 0.0 && result.tempBoardMax != null && result.nPoints >= 50) {
+                            validCsvPath.add(path)
+
+                            val fileName = path.substringAfterLast('/')
+                            val source = detectSource(path)          // voir ci-dessous
+                            fileReports.add(
+                                FileReport(
+                                    path, fileName, source, true,
+                                    nPoints = result.nPoints,
+                                    reqMedian = result.reqMedian,
+                                    wheelKm = result.wheelKm
+                                )
+                            )
+                        } else {
+                            val fileName = path.substringAfterLast('/')
+                            val source = detectSource(path)          // voir ci-dessous
+                            val fileReport = when {
+                                result.nPoints!! < 50 ->
+                                    FileReport(
+                                        path, fileName, source, false,
+                                        rejectionReason = "Too few points (${result?.nPoints!!} < 50)",
+                                        nPoints = result.nPoints
+                                    )
+
+                                result.reqMedian <= 0.0 ->
+                                    FileReport(
+                                        path, fileName, source, false,
+                                        rejectionReason = "Req not computable (reqMedian = ${result.reqMedian})",
+                                        nPoints = result.nPoints
+                                    )
+
+                                else ->
+                                    throw Exception("Error when adding file report for file $path")
+                            }
+                            fileReports.add(fileReport)
+                        }
+
                         result
                     } catch (e: Exception) {
-                        logger.e(TAG, "  [$idx] FAILED: ${e.javaClass.simpleName}: ${e.message}", e)
+                        logger.e(
+                            TAG,
+                            "  [$idx] FAILED: ${e.javaClass.simpleName}: ${e.message}",
+                            e
+                        )
+                        fileReports.add(
+                            FileReport(
+                                path, path.substringAfterLast('/'), detectSource(path), false,
+                                rejectionReason = "File unreadable or parse error"
+                            )
+                        )
                         null
                     }
                 }
@@ -149,10 +215,15 @@ class SohAnalyzer(
 
         // Pass 2: Final analysis with calibrated Ea
         logger.d(TAG, "Pass 2: Final analysis with Ea=${ea / 1000.0} kJ/mol")
+        val finalPaths = when {
+            eaJPerMol == null -> validCsvPath.toList()
+            else -> csvPaths
+        }
+
 
         val finalStats =
-            csvPaths.mapIndexedNotNull { idx, path ->
-                onProgress?.invoke(idx, csvPaths.size, ANALYZING)
+            finalPaths.mapIndexedNotNull { idx, path ->
+                onProgress?.invoke(idx, finalPaths.size, ANALYZING)
                 try {
                     ReqStatsComputer.computeReqStatsForFile(
                         csvPath = path,
@@ -167,14 +238,15 @@ class SohAnalyzer(
                 }
             }
 
-        onProgress?.invoke(csvPaths.size, csvPaths.size, DONE)
-        logger.d(TAG, "Pass 2: ${finalStats.size}/${csvPaths.size} files processed")
+        onProgress?.invoke(finalPaths.size, finalPaths.size, DONE)
+        logger.d(TAG, "Pass 2: ${finalStats.size}/${finalPaths.size} files processed")
 
         if (finalStats.isEmpty()) {
-            throw RuntimeException("No exploitable logs in folder (0/${csvPaths.size} files readable)")
+            throw RuntimeException("No exploitable logs in folder (0/${finalPaths.size} files readable)")
         }
 
         // Filter stats with minimum required data
+        // Keep it as a safeguard even if prefiltering is applied at calibration
         val validStats = finalStats.filter { stat ->
             stat.reqMedian > 0.0 && stat.nPoints >= 50
         }
@@ -202,11 +274,13 @@ class SohAnalyzer(
         val dfOpt = dfSorted.take(nOpt)
 
         val reqBandLow = quantile(
-            dfOpt[REQ_MEDIAN.csv_code].values().filterIsInstance<Number>().map { it.toDouble() },
+            dfOpt[REQ_MEDIAN.csv_code].values().filterIsInstance<Number>()
+                .map { it.toDouble() },
             0.10
         )
         val reqBandHigh = quantile(
-            dfOpt[REQ_MEDIAN.csv_code].values().filterIsInstance<Number>().map { it.toDouble() },
+            dfOpt[REQ_MEDIAN.csv_code].values().filterIsInstance<Number>()
+                .map { it.toDouble() },
             0.90
         )
 
@@ -308,7 +382,8 @@ class SohAnalyzer(
             nsGlobal = nsGlobal,
             vNominal = vNominal,
             rPackNominal = rPackNominal,
-            plotData = plotData
+            plotData = plotData,
+            fileReports = fileReports.toList()
         )
 
     }
@@ -333,9 +408,11 @@ class SohAnalyzer(
             // Série brute
             val pts = (0 until dfStats.rowsCount()).mapNotNull { i ->
                 val km =
-                    (dfStats[WHEEL_KM.csv_code][i] as? Number)?.toDouble() ?: return@mapNotNull null
+                    (dfStats[WHEEL_KM.csv_code][i] as? Number)?.toDouble()
+                        ?: return@mapNotNull null
                 val v =
-                    (dfStats[metric.csv_code][i] as? Number)?.toDouble() ?: return@mapNotNull null
+                    (dfStats[metric.csv_code][i] as? Number)?.toDouble()
+                        ?: return@mapNotNull null
                 km to v
             }.sortedBy { it.first }
             if (pts.size < 5) continue
@@ -411,7 +488,7 @@ class SohAnalyzer(
     /**
      * Builds a platform-agnostic summary from analysis results.
      * Port of build_summary_dict() from soh_core_en.py.
-     * 
+     *
      * @param result Analysis results from analyzeFolderForReq()
      * @param wheelName Name/identifier of the wheel
      * @return Structured summary data ready for JSON export or UI display

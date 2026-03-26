@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -23,6 +24,101 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import androidx.core.net.toUri
+import io.github.eucsoh.SohAnalyzer
+
+@Composable
+fun FileReportItem(
+    report: SohAnalyzer.FileReport,
+    onClickPath: () -> Unit,
+    onPreview: (String) -> Unit
+) {
+    val containerColor = if (report.accepted)
+        MaterialTheme.colorScheme.surface
+    else
+        MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClickPath),
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    if (report.accepted) Icons.Default.CheckCircle else Icons.Default.Cancel,
+                    contentDescription = null,
+                    tint = if (report.accepted)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    report.fileName,
+                    style = MaterialTheme.typography.titleSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                // Badge source
+                report.source?.let { src ->
+                    SuggestionChip(
+                        onClick = {},
+                        label = { Text(src, style = MaterialTheme.typography.labelSmall) }
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(4.dp))
+
+            if (report.accepted) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    report.wheelKm?.let {
+                        Text("${it.toInt()} km",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    report.nPoints?.let {
+                        Text("$it pts",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    report.reqMedian?.let {
+                        Text("Req = ${"%.4f".format(it)} Ω",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            } else {
+                Text(
+                    "❌ ${report.rejectionReason}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+
+            // "Tap to see full path" hint
+            Text(
+                "Tap to see full path${if (report.accepted) " · Preview" else ""}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+    }
+}
+
 
 /**
  * File list screen for a wheel.
@@ -37,100 +133,138 @@ import androidx.core.net.toUri
 @Composable
 fun FileListScreen(
     wheelName: String,
-    wheelDirUri: Uri,
+    fileReports: List<SohAnalyzer.FileReport>,   // ← direct depuis AnalysisResult
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
     val fileManager = remember { FileManager(context) }
+
+    var showRejected by remember { mutableStateOf(true) }
+    var selectedReport by remember { mutableStateOf<SohAnalyzer.FileReport?>(null) }
+    var previewLines by remember { mutableStateOf<List<String>>(emptyList()) }
+    var isLoadingPreview by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    var files by remember { mutableStateOf<List<CsvFileInfo>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
-    var selectedFileForPreview by remember { mutableStateOf<CsvFileInfo?>(null) }
-
-    // Load files on composition
-    LaunchedEffect(wheelDirUri) {
-        isLoading = true
-        files = fileManager.listCsvFiles(wheelDirUri)
-        isLoading = false
-    }
+    val accepted = remember(fileReports) { fileReports.filter { it.accepted } }
+    val rejected = remember(fileReports) { fileReports.filter { !it.accepted } }
+    val displayed = if (showRejected) fileReports else accepted
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Files - $wheelName") },
+                title = { Text("Files — $wheelName") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, "Back")
                     }
+                },
+                actions = {
+                    // Toggle rejetés
+                    FilterChip(
+                        selected = showRejected,
+                        onClick = { showRejected = !showRejected },
+                        label = { Text("Show rejected (${rejected.size})") },
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
                 }
             )
         }
     ) { padding ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            when {
-                isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-                files.isEmpty() -> {
+            // Résumé header
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     Text(
-                        "No CSV files found",
-                        modifier = Modifier.align(Alignment.Center)
+                        "✅ ${accepted.size} accepted",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        "❌ ${rejected.size} rejected",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error
                     )
                 }
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(files) { fileInfo ->
-                            FileListItem(
-                                fileInfo = fileInfo,
-                                onPreview = { selectedFileForPreview = it },
-                                onOpenWith = { uri ->
-                                    val intent = Intent(Intent.ACTION_VIEW).apply {
-                                        setDataAndType(Uri.parse(uri), "text/csv")
-                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                    }
-                                    context.startActivity(Intent.createChooser(intent, "Open CSV"))
+            }
+
+            if (displayed.isEmpty()) {
+                Box(Modifier.fillMaxSize()) {
+                    Text("No files", modifier = Modifier.align(Alignment.Center))
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(displayed) { report ->
+                        FileReportItem(
+                            report = report,
+                            onClickPath = { selectedReport = report },
+                            onPreview = { path ->
+                                scope.launch {
+                                    isLoadingPreview = true
+                                    previewLines = fileManager.previewCsv(Uri.parse(path))
+                                    selectedReport = report
+                                    isLoadingPreview = false
                                 }
-                            )
-                        }
+                            }
+                        )
                     }
                 }
             }
         }
 
-        // Preview dialog
-        selectedFileForPreview?.let { fileInfo ->
-            var previewLines by remember { mutableStateOf<List<String>>(emptyList()) }
-            LaunchedEffect(fileInfo) {
-                previewLines = fileManager.previewCsv(fileInfo.uri.toString().toUri())
-            }
-
+        // Dialog : chemin complet + preview
+        selectedReport?.let { report ->
             AlertDialog(
-                onDismissRequest = { selectedFileForPreview = null },
-                title = { Text("Preview: ${fileInfo.fileName}") },
+                onDismissRequest = { selectedReport = null; previewLines = emptyList() },
+                title = { Text(report.fileName) },
                 text = {
-                    LazyColumn {
-                        items(previewLines) { line ->
+                    Column {
+                        // Chemin complet
+                        SelectionContainer {
                             Text(
-                                text = line,
+                                report.path,
                                 style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(vertical = 2.dp)
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+                        }
+                        if (report.accepted && previewLines.isEmpty() && !isLoadingPreview) {
+                            LaunchedEffect(report) {
+                                isLoadingPreview = true
+                                previewLines = fileManager.previewCsv(Uri.parse(report.path))
+                                isLoadingPreview = false
+                            }
+                        }
+                        if (isLoadingPreview) {
+                            CircularProgressIndicator(modifier = Modifier.padding(top = 8.dp))
+                        } else if (previewLines.isNotEmpty()) {
+                            Spacer(Modifier.height(8.dp))
+                            HorizontalDivider()
+                            Spacer(Modifier.height(4.dp))
+                            LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
+                                items(previewLines) { line ->
+                                    Text(line, style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
                         }
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = { selectedFileForPreview = null }) {
+                    TextButton(onClick = { selectedReport = null; previewLines = emptyList() }) {
                         Text("Close")
                     }
                 }
@@ -138,6 +272,7 @@ fun FileListScreen(
         }
     }
 }
+
 
 @Composable
 fun FileListItem(

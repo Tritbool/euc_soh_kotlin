@@ -29,16 +29,16 @@ class SohTrendCusumChartGenerator(private val context: Context) {
         const val CHART_WIDTH = 1200
         const val CHART_HEIGHT = 800
 
-        const val COLOR_DATA_BLUE       = 0xFF2196F3.toInt()
-        const val COLOR_ALARM_RED       = 0xFFE53935.toInt()
-        const val COLOR_BLACK           = 0xFF000000.toInt()
-        const val COLOR_SLOW_BLUE       = 0xFF1565C0.toInt()
+        const val COLOR_DATA_BLUE = 0xFF2196F3.toInt()
+        const val COLOR_ALARM_RED = 0xFFE53935.toInt()
+        const val COLOR_BLACK = 0xFF000000.toInt()
+        const val COLOR_SLOW_BLUE = 0xFF1565C0.toInt()
         const val COLOR_INFLEXION_ORANGE = 0xFFFF6F00.toInt()
-        const val COLOR_MU_REF          = 0xFF4CAF50.toInt()
-        const val COLOR_MU_SIGMA        = 0xFFFF9800.toInt()
-        const val COLOR_THRESHOLD_H     = 0xFFFF0000.toInt()
-        const val COLOR_DANGER          = 0xFFFF0000.toInt()
-        const val COLOR_REGRESSION      = 0xFFFF6F00.toInt()
+        const val COLOR_MU_REF = 0xFF4CAF50.toInt()
+        const val COLOR_MU_SIGMA = 0xFFFF9800.toInt()
+        const val COLOR_THRESHOLD_H = 0xFFFF0000.toInt()
+        const val COLOR_DANGER = 0xFFFF0000.toInt()
+        const val COLOR_REGRESSION = 0xFFFF6F00.toInt()
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -109,7 +109,7 @@ class SohTrendCusumChartGenerator(private val context: Context) {
         wheelName: String = ""
     ): List<Pair<String, Bitmap>> =
         TREND_METRICS.mapNotNull { metric ->
-            if (plotData.trendResults[metric] == null) return@mapNotNull null
+            if (plotData.trendResults[metric] == null || !plotData.trendResults[metric]?.isSignificant!!) return@mapNotNull null
             try {
                 metric.csv_code to generateTrendChart(plotData, metric, wheelName)
             } catch (_: Exception) {
@@ -137,7 +137,7 @@ class SohTrendCusumChartGenerator(private val context: Context) {
 
         // Scatter : uniquement les points d'alarme en rouge, tous les autres en bleu
         val normalEntries = mutableListOf<Entry>()
-        val alarmEntries  = mutableListOf<Entry>()
+        val alarmEntries = mutableListOf<Entry>()
         for (i in pts.indices) {
             val e = Entry(xVals[i], yVals[i])
             if (i in cusum.alarmIndices) alarmEntries.add(e) else normalEntries.add(e)
@@ -217,7 +217,7 @@ class SohTrendCusumChartGenerator(private val context: Context) {
         wheelName: String = ""
     ): List<Pair<String, Bitmap>> =
         CUSUM_METRICS.mapNotNull { metric ->
-            if (plotData.cusumResults[metric] == null) return@mapNotNull null
+            if (plotData.cusumResults[metric] == null || plotData.cusumResults[metric]?.alarmIndices!!.isEmpty()) return@mapNotNull null
             try {
                 metric.csv_code to generateCusumChart(plotData, metric, wheelName)
             } catch (_: Exception) {
@@ -243,7 +243,7 @@ class SohTrendCusumChartGenerator(private val context: Context) {
         val xVals = pts.map { it.first.toFloat() }
         val yVals = pts.map { it.second.toFloat() }
 
-        val slowEntries     = inflexion.slowIndices.map     { Entry(xVals[it], yVals[it]) }
+        val slowEntries = inflexion.slowIndices.map { Entry(xVals[it], yVals[it]) }
         val inflexionEntries = inflexion.inflexionIndices.map { Entry(xVals[it], yVals[it]) }
 
         val label = metric.label ?: metric.csv_code
@@ -312,7 +312,7 @@ class SohTrendCusumChartGenerator(private val context: Context) {
         wheelName: String = ""
     ): List<Pair<String, Bitmap>> =
         TREND_METRICS.mapNotNull { metric ->
-            if (plotData.inflexionResults[metric] == null) return@mapNotNull null
+            if (plotData.inflexionResults[metric] == null || plotData.inflexionResults[metric]?.inflexionIndices!!.isEmpty()) return@mapNotNull null
             try {
                 metric.csv_code to generateInflexionChart(plotData, metric, wheelName)
             } catch (_: Exception) {

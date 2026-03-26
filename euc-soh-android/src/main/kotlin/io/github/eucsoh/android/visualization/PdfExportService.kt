@@ -97,7 +97,7 @@ class PdfExportService(private val context: Context) {
         paint.color = android.graphics.Color.BLACK
         canvas.drawText(
             title,//${SohChartGeneratorFixed.METRIC_LABELS[metricName] ?: metricName}",
-            (PAGE_WIDTH / 2).toFloat(),
+            MARGIN.toFloat(),
             50f,
             paint
         )
@@ -119,6 +119,7 @@ class PdfExportService(private val context: Context) {
         cusum_charts: List<Pair<String, Bitmap>>?,
         trend_charts: List<Pair<String, Bitmap>>?,
         wheelName: String,
+        macAddress: String,
         outputFileName: String? = null
     ): File = withContext(Dispatchers.IO) {
         Log.d(TAG, "Exporting to PDF")
@@ -133,25 +134,25 @@ class PdfExportService(private val context: Context) {
             Log.d(TAG, "Number of charts : ${gauss_charts.size}")
             // Add each chart as a page
 
-            idx = titlePage(document, idx, "${wheelName} Gaussian charts")
+            idx = titlePage(document, idx, "${wheelName} - $macAddress Gaussian charts")
 
             idx = createChartsPages(document, idx, gauss_charts, "Gaussian charts")
 
-            idx = titlePage(document, idx, "${wheelName} Inflexion charts")
+            idx = titlePage(document, idx, "${wheelName} - $macAddress Inflexion charts")
 
             idx = createChartsPages(document, idx, inflexion_charts, "Inflexion charts")
 
-            idx = titlePage(document, idx, "${wheelName} CUSUM charts")
+            idx = titlePage(document, idx, "${wheelName} - $macAddress CUSUM charts")
 
             idx = createChartsPages(document, idx, cusum_charts, "CUSUM charts")
 
-            idx = titlePage(document, idx, "${wheelName} Trend charts")
+            idx = titlePage(document, idx, "${wheelName} - $macAddress Trend charts")
 
             idx = createChartsPages(document, idx, trend_charts, "Trend charts")
 
             // Save PDF
             val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-            val fileName = outputFileName ?: "${wheelName}_SoH_${timestamp}.pdf"
+            val fileName = outputFileName ?: "${wheelName}-${macAddress}_SoH_${timestamp}.pdf"
             val outputDir = File(
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
                 "EUC_SoH"
