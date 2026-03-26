@@ -47,6 +47,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.eucsoh.SohAnalyzer
 import io.github.eucsoh.android.data.model.WheelIdentity
+import io.github.eucsoh.android.util.ShareUtils
 import io.github.eucsoh.android.visualization.CsvExportService
 import io.github.eucsoh.android.visualization.PdfExportService
 import io.github.eucsoh.android.visualization.SohArchiveExportService
@@ -78,6 +79,8 @@ fun ResultsScreenEnhanced(
     var pdfFile by remember { mutableStateOf<File?>(null) }
     var csvFile by remember { mutableStateOf<File?>(null) }
     var zipFile by remember { mutableStateOf<File?>(null) }
+    var lastSavedType by remember { mutableStateOf<String?>(null) } // "pdf" | "csv" | "zip"
+
     var isExporting by remember { mutableStateOf(false) }
     var exportMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
@@ -97,11 +100,12 @@ fun ResultsScreenEnhanced(
     ) { uri ->
         uri ?: return@rememberLauncherForActivityResult
         scope.launch {
-            context.contentResolver.openOutputStream(uri)
-                ?.use { pdfFile!!.inputStream().copyTo(it) }
-            exportMessage = "PDF saved"
+            context.contentResolver.openOutputStream(uri)?.use { pdfFile!!.inputStream().copyTo(it) }
+            lastSavedType = "pdf"
+            exportMessage = "PDF saved — tap SHARE to send it"
         }
     }
+
     val createCsvLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("text/csv")
     ) { uri ->
@@ -109,7 +113,8 @@ fun ResultsScreenEnhanced(
         scope.launch {
             context.contentResolver.openOutputStream(uri)
                 ?.use { csvFile!!.inputStream().copyTo(it) }
-            exportMessage = "CSV saved"
+            lastSavedType = "csv"
+            exportMessage = "CSV saved — tap SHARE to send it"
         }
     }
     val createZipLauncher = rememberLauncherForActivityResult(
@@ -119,7 +124,8 @@ fun ResultsScreenEnhanced(
         scope.launch {
             context.contentResolver.openOutputStream(uri)
                 ?.use { zipFile!!.inputStream().copyTo(it) }
-            exportMessage = "Archive saved"
+            lastSavedType = "zip"
+            exportMessage = "Archive saved — tap SHARE to send it"
         }
     }
 
@@ -377,10 +383,38 @@ fun ResultsScreenEnhanced(
                 }
                 exportMessage?.let { msg ->
                     Snackbar(
-                        action = { TextButton(onClick = { exportMessage = null }) { Text("Dismiss") } },
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        action = {
+                            if (lastSavedType != null) {
+                                TextButton(onClick = {
+                                    val fileToShare = when (lastSavedType) {
+                                        "pdf" -> pdfFile
+                                        "csv" -> csvFile
+                                        "zip" -> zipFile
+                                        else  -> null
+                                    }
+                                    if (fileToShare != null) {
+                                        val mime = when (lastSavedType) {
+                                            "pdf" -> "application/pdf"
+                                            "csv" -> "text/csv"
+                                            "zip" -> "application/zip"
+                                            else  -> "*/*"
+                                        }
+                                        ShareUtils.shareFile(
+                                            context = context,
+                                            file = fileToShare,
+                                            mimeType = mime,
+                                            chooserTitle = "Share SoH export"
+                                        )
+                                    }
+                                    exportMessage = null
+                                }) { Text("SHARE") }
+                            } else {
+                                TextButton(onClick = { exportMessage = null }) { Text("Dismiss") }
+                            }
+                        }
                     ) { Text(msg) }
                 }
+
 
                 // Back button
                 Button(
@@ -391,7 +425,7 @@ fun ResultsScreenEnhanced(
                 ) {
                     Icon(Icons.Default.ArrowBack, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Retour")
+                    Text("Back")
                 }
             }
         }
@@ -402,11 +436,11 @@ private fun formatValue(value: Any?): String {
     return when (value) {
         null -> ""
         is Double -> if (value.isNaN() || value.isInfinite()) "N/A" else String.format(
-            "%.4f",
+            "%.2f",
             value
         )
 
-        is Float -> if (value.isNaN() || value.isInfinite()) "N/A" else String.format("%.4f", value)
+        is Float -> if (value.isNaN() || value.isInfinite()) "N/A" else String.format("%.2f", value)
         is Number -> value.toString()
         is Boolean -> if (value) "✓" else "✗"
         else -> value.toString()

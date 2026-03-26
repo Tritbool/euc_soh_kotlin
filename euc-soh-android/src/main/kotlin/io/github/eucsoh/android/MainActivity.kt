@@ -15,6 +15,7 @@ import androidx.compose.material3.Surface
 import io.github.eucsoh.android.ui.PermissionManager
 import io.github.eucsoh.android.ui.SohViewModel
 import io.github.eucsoh.android.ui.screens.MainScreen
+import io.github.eucsoh.android.ui.theme.EucSohTheme
 
 class MainActivity : ComponentActivity() {
 
@@ -63,7 +64,7 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            MaterialTheme {
+            EucSohTheme {
                 Surface {
                     MainScreen(
                         viewModel = viewModel,

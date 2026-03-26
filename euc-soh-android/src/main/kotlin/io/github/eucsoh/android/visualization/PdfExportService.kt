@@ -107,6 +107,9 @@ class PdfExportService(private val context: Context) {
         )
         addStatsTable(document, result, wheelName)
 
+        // Page alarmes (toujours présente, même si vide — ça rassure l'utilisateur)
+        addAlarmsPage(document, result)
+
         // ── Pages charts ─────────────────────────────────────────────────
         addChartSection(document, pdfDoc, gaussCharts, "Gaussian Bands (±1σ / ±2σ)", pageSize)
 
@@ -136,55 +139,146 @@ class PdfExportService(private val context: Context) {
         val logs = summary.logs
         if (logs.isEmpty()) return
 
-        val headers = logs.first().keys.toList()
-        val colCount = headers.size
+        val allHeaders = logs.first().keys.toList()
 
-        // Tableau full-width avec colonnes équilibrées
-        val table = Table(UnitValue.createPercentArray(FloatArray(colCount) { 1f }))
-            .useAllAvailableWidth()
+        // Colonnes meta : tout ce qui n'est pas purement numérique
+        // On considère "meta" : file, source, datetime_first, wheel_km, wheel_km_source, Ns, soc_ref_ok, soc_ref_v_full
+        val META_COLS = setOf(
+            "file", "source", "datetime_first", "wheel_km", "wheel_km_source",
+            "Ns", "soc_ref_ok", "soc_ref_v_full", "n_points"
+        )
+        val metaHeaders   = allHeaders.filter { it in META_COLS }
+        val metricHeaders = allHeaders.filter { it !in META_COLS }
+
+        // ── Tableau 1 : colonnes meta ───────────────────────────────────────
+        document.add(
+            Paragraph("File metadata")
+                .setFontSize(11f).setBold().setMarginBottom(6f)
+        )
+        document.add(buildTable(logs, metaHeaders, colWidthPt = 80f))
+
+        document.add(
+            Paragraph("Arrhenius activation energy: ${"%.2f".format(summary.arrhenius.eaKjPerMol)} kJ/mol")
+                .setFontSize(9f).setItalic().setMarginTop(6f).setMarginBottom(12f)
+        )
+
+        // ── Tableau 2 : métriques numériques (nouvelle page) ─────────────────
+        document.add(AreaBreak(AreaBreakType.NEXT_PAGE))
+        document.add(
+            Paragraph("Metrics per file")
+                .setFontSize(11f).setBold().setMarginBottom(6f)
+        )
+        // Ajoute wheel_km en première colonne pour référence
+        val metricHeadersWithRef = (listOf("file", "wheel_km") + metricHeaders).distinct()
+        document.add(buildTable(logs, metricHeadersWithRef, colWidthPt = 55f))
+    }
+
+    private fun addAlarmsPage(
+        document: Document,
+        result: SohAnalyzer.AnalysisResult
+    ) {
+        document.add(AreaBreak(AreaBreakType.NEXT_PAGE))
+        document.add(
+            Paragraph("Alarms (${result.alarms.size})")
+                .setFontSize(16f).setBold().setMarginBottom(16f)
+        )
+
+        if (result.alarms.isEmpty()) {
+            document.add(
+                Paragraph("No alarms detected.")
+                    .setFontSize(11f)
+                    .setFontColor(DeviceRgb(0x2E, 0x7D, 0x32))
+            )
+            return
+        }
+
+        document.add(
+            Paragraph(
+                "The following anomalies were detected during analysis. " +
+                        "This report is a decision-support tool — interpretation requires domain expertise."
+            )
+                .setFontSize(9f).setItalic()
+                .setFontColor(ColorConstants.GRAY)
+                .setMarginBottom(12f)
+        )
+
+        result.alarms.forEachIndexed { idx, alarm ->
+            // Ligne de titre : index + fichier + km
+            val kmStr = alarm.wheelKm?.let { " — ${"%.1f".format(it)} km" } ?: ""
+            val dateStr = alarm.datetimeFirst?.let { " ($it)" } ?: ""
+
+            val wrapper = Table(floatArrayOf(510f))  // largeur fixe, pleine page A4 landscape - marges
+                .setMarginBottom(8f)
+
+            val cell = Cell()
+                .setBackgroundColor(DeviceRgb(0xFF, 0xF3, 0xE0))  // orange très pâle
+                .setPadding(8f)
+
+            cell.add(
+                Paragraph("#${idx + 1}  ${alarm.file}$kmStr$dateStr")
+                    .setFontSize(10f).setBold()
+                    .setFontColor(DeviceRgb(0xE6, 0x51, 0x00))   // orange foncé
+            )
+            cell.add(
+                Paragraph(alarm.reasons)
+                    .setFontSize(9f)
+                    .setFontColor(ColorConstants.BLACK)
+                    .setMarginTop(4f)
+            )
+
+            wrapper.addCell(cell)
+            document.add(wrapper)
+        }
+    }
+
+
+    /**
+     * Construit un tableau iText7 à partir d'une liste de colonnes.
+     * Largeur fixe par colonne en points (pas de % — plus prévisible sur pages larges).
+     */
+    private fun buildTable(
+        logs: List<Map<String, Any?>>,
+        headers: List<String>,
+        colWidthPt: Float
+    ): Table {
+        val colCount = headers.size
+        val table = Table(FloatArray(colCount) { colWidthPt })
             .setFontSize(7f)
 
         // En-têtes
         headers.forEach { header ->
             table.addHeaderCell(
                 Cell().add(
-                    Paragraph(header)
-                        .setBold()
-                        .setFontSize(7f)
+                    Paragraph(header).setBold().setFontSize(7f)
                         .setTextAlignment(TextAlignment.CENTER)
-                ).setBackgroundColor(DeviceRgb(0x42, 0x42, 0x42))
+                )
+                    .setBackgroundColor(DeviceRgb(0x42, 0x42, 0x42))
                     .setFontColor(ColorConstants.WHITE)
                     .setPadding(3f)
             )
         }
 
-        // Lignes de données
+        // Lignes
         logs.forEachIndexed { rowIdx, row ->
             val bg = if (rowIdx % 2 == 0) DeviceRgb(0xFF, 0xFF, 0xFF)
             else DeviceRgb(0xF5, 0xF5, 0xF5)
             headers.forEach { col ->
-                val value = formatValue(row[col])
-                // Colorise les valeurs numériques extrêmes si souhaité
+                val raw = row[col]
+                val text = formatValue(raw)
+                // Aligne à gauche les textes, à droite les nombres
+                val align = if (raw is Number || raw is Double || raw is Float)
+                    TextAlignment.RIGHT else TextAlignment.LEFT
                 table.addCell(
                     Cell().add(
-                        Paragraph(value)
-                            .setFontSize(7f)
-                            .setTextAlignment(TextAlignment.RIGHT)
-                    ).setBackgroundColor(bg)
+                        Paragraph(text).setFontSize(7f).setTextAlignment(align)
+                    )
+                        .setBackgroundColor(bg)
                         .setPadding(2f)
                 )
             }
         }
 
-        document.add(table)
-
-        // Ligne Ea en dessous du tableau
-        document.add(
-            Paragraph("Arrhenius activation energy: ${"%.2f".format(summary.arrhenius.eaKjPerMol)} kJ/mol")
-                .setFontSize(9f)
-                .setItalic()
-                .setMarginTop(6f)
-        )
+        return table
     }
 
     // ────────────────────────────────────────────────────────────────────
@@ -250,10 +344,10 @@ class PdfExportService(private val context: Context) {
 
     private fun formatValue(value: Any?): String = when (value) {
         null -> ""
-        is Double -> if (value.isNaN() || value.isInfinite()) "N/A" else "%.4f".format(value)
-        is Float  -> if (value.isNaN() || value.isInfinite()) "N/A" else "%.4f".format(value)
+        is Double -> if (value.isNaN() || value.isInfinite()) "N/A" else "%.2f".format(value)
+        is Float  -> if (value.isNaN() || value.isInfinite()) "N/A" else "%.2f".format(value)
         is Number -> value.toString()
-        is Boolean -> if (value) "✓" else "✗"
+        is Boolean -> if (value) "OK" else "KO"
         else -> value.toString()
     }
 
