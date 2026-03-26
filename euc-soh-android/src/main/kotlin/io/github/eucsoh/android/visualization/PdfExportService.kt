@@ -32,6 +32,7 @@ class PdfExportService(private val context: Context) {
 
     companion object {
         private const val TAG = "PdfExportService"
+
         // Police embarquée dans Android, toujours disponible
         private const val FONT = "fonts/NotoSans-Regular.ttf"
     }
@@ -81,7 +82,14 @@ class PdfExportService(private val context: Context) {
                 .setTextAlignment(TextAlignment.CENTER)
         )
         document.add(
-            Paragraph("Generated: ${SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US).format(Date())}")
+            Paragraph(
+                "Generated: ${
+                    SimpleDateFormat(
+                        "yyyy-MM-dd HH:mm",
+                        Locale.US
+                    ).format(Date())
+                }"
+            )
                 .setFontSize(12f)
                 .setFontColor(ColorConstants.GRAY)
                 .setTextAlignment(TextAlignment.CENTER)
@@ -120,7 +128,13 @@ class PdfExportService(private val context: Context) {
             addChartSection(document, pdfDoc, cusumCharts, "CUSUM (change detection)", pageSize)
         }
         if (!inflexionCharts.isNullOrEmpty()) {
-            addChartSection(document, pdfDoc, inflexionCharts, "Inflexion (regime change)", pageSize)
+            addChartSection(
+                document,
+                pdfDoc,
+                inflexionCharts,
+                "Inflexion (regime change)",
+                pageSize
+            )
         }
 
         document.close()
@@ -141,37 +155,61 @@ class PdfExportService(private val context: Context) {
 
         val allHeaders = logs.first().keys.toList()
 
-        // Colonnes meta : tout ce qui n'est pas purement numérique
-        // On considère "meta" : file, source, datetime_first, wheel_km, wheel_km_source, Ns, soc_ref_ok, soc_ref_v_full
-        val META_COLS = setOf(
-            "file", "source", "datetime_first", "wheel_km", "wheel_km_source",
-            "Ns", "soc_ref_ok", "soc_ref_v_full", "n_points"
-        )
-        val metaHeaders   = allHeaders.filter { it in META_COLS }
-        val metricHeaders = allHeaders.filter { it !in META_COLS }
+        // On force "file" en première colonne de CHAQUE sous-table si elle existe
+        val baseHeaders = if ("file" in allHeaders) {
+            listOf("file") + allHeaders.filterNot { it == "file" }
+        } else {
+            allHeaders
+        }
 
-        // ── Tableau 1 : colonnes meta ───────────────────────────────────────
-        document.add(
-            Paragraph("File metadata")
-                .setFontSize(11f).setBold().setMarginBottom(6f)
-        )
-        document.add(buildTable(logs, metaHeaders, colWidthPt = 80f))
+        // Taille max d'un bloc
+        val chunkSize = 16
 
-        document.add(
-            Paragraph("Arrhenius activation energy: ${"%.2f".format(summary.arrhenius.eaKjPerMol)} kJ/mol")
-                .setFontSize(9f).setItalic().setMarginTop(6f).setMarginBottom(12f)
-        )
+        // Découpe en tranches
+        val chunks: List<List<String>> = baseHeaders
+            .chunked(chunkSize)
+            .mapIndexed { index, chunk ->
+                // Sauf pour le premier chunk, garantis que "file" est présent et en tête
+                if (index == 0) chunk
+                else {
+                    val withoutFile = chunk.filterNot { it == "file" }
+                    if ("file" in baseHeaders) listOf("file") + withoutFile
+                    else chunk
+                }
+            }
 
-        // ── Tableau 2 : métriques numériques (nouvelle page) ─────────────────
-        document.add(AreaBreak(AreaBreakType.NEXT_PAGE))
+        chunks.forEachIndexed { idx, headers ->
+            if (idx == 0) {
+                // Première page : titre stats
+                document.add(
+                    Paragraph("Analysis Statistics (${idx + 1}/${chunks.size})")
+                        .setFontSize(14f).setBold().setMarginBottom(8f)
+                )
+            } else {
+                // Nouvelle page pour chaque sous-table suivante
+                document.add(AreaBreak(AreaBreakType.NEXT_PAGE))
+                document.add(
+                    Paragraph("Analysis Statistics (${idx + 1}/${chunks.size})")
+                        .setFontSize(14f).setBold().setMarginBottom(8f)
+                )
+            }
+
+            val table = buildTable(logs, headers)
+            document.add(table)
+        }
+
+        // Ligne Ea en bas de la dernière page
         document.add(
-            Paragraph("Metrics per file")
-                .setFontSize(11f).setBold().setMarginBottom(6f)
+            Paragraph(
+                "Arrhenius activation energy: " +
+                        "${"%.2f".format(summary.arrhenius.eaKjPerMol)} kJ/mol"
+            )
+                .setFontSize(9f)
+                .setItalic()
+                .setMarginTop(6f)
         )
-        // Ajoute wheel_km en première colonne pour référence
-        val metricHeadersWithRef = (listOf("file", "wheel_km") + metricHeaders).distinct()
-        document.add(buildTable(logs, metricHeadersWithRef, colWidthPt = 55f))
     }
+
 
     private fun addAlarmsPage(
         document: Document,
@@ -207,8 +245,9 @@ class PdfExportService(private val context: Context) {
             val kmStr = alarm.wheelKm?.let { " — ${"%.1f".format(it)} km" } ?: ""
             val dateStr = alarm.datetimeFirst?.let { " ($it)" } ?: ""
 
-            val wrapper = Table(floatArrayOf(510f))  // largeur fixe, pleine page A4 landscape - marges
-                .setMarginBottom(8f)
+            val wrapper =
+                Table(floatArrayOf(510f))  // largeur fixe, pleine page A4 landscape - marges
+                    .setMarginBottom(8f)
 
             val cell = Cell()
                 .setBackgroundColor(DeviceRgb(0xFF, 0xF3, 0xE0))  // orange très pâle
@@ -238,18 +277,27 @@ class PdfExportService(private val context: Context) {
      */
     private fun buildTable(
         logs: List<Map<String, Any?>>,
-        headers: List<String>,
-        colWidthPt: Float
+        headers: List<String>
     ): Table {
         val colCount = headers.size
-        val table = Table(FloatArray(colCount) { colWidthPt })
-            .setFontSize(7f)
+
+        // Largeur fixe par colonne, ajustée : plus de colonnes → colonnes plus étroites
+        val baseWidth = when {
+            colCount <= 6 -> 90f
+            colCount <= 10 -> 70f
+            else -> 55f
+        }
+        val widths = FloatArray(colCount) { baseWidth }
+
+        val table = Table(widths).setFontSize(7f)
 
         // En-têtes
         headers.forEach { header ->
             table.addHeaderCell(
                 Cell().add(
-                    Paragraph(header).setBold().setFontSize(7f)
+                    Paragraph(header)
+                        .setBold()
+                        .setFontSize(7f)
                         .setTextAlignment(TextAlignment.CENTER)
                 )
                     .setBackgroundColor(DeviceRgb(0x42, 0x42, 0x42))
@@ -260,17 +308,24 @@ class PdfExportService(private val context: Context) {
 
         // Lignes
         logs.forEachIndexed { rowIdx, row ->
-            val bg = if (rowIdx % 2 == 0) DeviceRgb(0xFF, 0xFF, 0xFF)
-            else DeviceRgb(0xF5, 0xF5, 0xF5)
+            val bg = if (rowIdx % 2 == 0)
+                DeviceRgb(0xFF, 0xFF, 0xFF)
+            else
+                DeviceRgb(0xF5, 0xF5, 0xF5)
+
             headers.forEach { col ->
                 val raw = row[col]
                 val text = formatValue(raw)
-                // Aligne à gauche les textes, à droite les nombres
                 val align = if (raw is Number || raw is Double || raw is Float)
-                    TextAlignment.RIGHT else TextAlignment.LEFT
+                    TextAlignment.RIGHT
+                else
+                    TextAlignment.LEFT
+
                 table.addCell(
                     Cell().add(
-                        Paragraph(text).setFontSize(7f).setTextAlignment(align)
+                        Paragraph(text)
+                            .setFontSize(7f)
+                            .setTextAlignment(align)
                     )
                         .setBackgroundColor(bg)
                         .setPadding(2f)
@@ -280,6 +335,7 @@ class PdfExportService(private val context: Context) {
 
         return table
     }
+
 
     // ────────────────────────────────────────────────────────────────────
     // Section de charts : page de titre de section + 1 chart par page
@@ -345,7 +401,7 @@ class PdfExportService(private val context: Context) {
     private fun formatValue(value: Any?): String = when (value) {
         null -> ""
         is Double -> if (value.isNaN() || value.isInfinite()) "N/A" else "%.2f".format(value)
-        is Float  -> if (value.isNaN() || value.isInfinite()) "N/A" else "%.2f".format(value)
+        is Float -> if (value.isNaN() || value.isInfinite()) "N/A" else "%.2f".format(value)
         is Number -> value.toString()
         is Boolean -> if (value) "OK" else "KO"
         else -> value.toString()

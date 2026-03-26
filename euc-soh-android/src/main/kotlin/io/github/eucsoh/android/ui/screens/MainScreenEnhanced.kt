@@ -58,6 +58,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.activity.compose.BackHandler
 
 /**
  * Enhanced ResultsScreen avec accès aux fichiers et graphiques.
@@ -100,7 +101,8 @@ fun ResultsScreenEnhanced(
     ) { uri ->
         uri ?: return@rememberLauncherForActivityResult
         scope.launch {
-            context.contentResolver.openOutputStream(uri)?.use { pdfFile!!.inputStream().copyTo(it) }
+            context.contentResolver.openOutputStream(uri)
+                ?.use { pdfFile!!.inputStream().copyTo(it) }
             lastSavedType = "pdf"
             exportMessage = "PDF saved — tap SHARE to send it"
         }
@@ -129,6 +131,9 @@ fun ResultsScreenEnhanced(
         }
     }
 
+    BackHandler(enabled = !showFiles && !showCharts) {
+        onBack()
+    }
 
     when {
         showFiles && selectedWheel != null -> {
@@ -145,7 +150,7 @@ fun ResultsScreenEnhanced(
                 macAddress = selectedWheel?.macAddress!!,
                 result.fileReports,
                 plotData = result.plotData,
-                result=result,
+                result = result,
                 alarms = result.alarms.size,
                 onBack = { showCharts = false }
             )
@@ -207,7 +212,7 @@ fun ResultsScreenEnhanced(
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(Modifier.width(4.dp))
-                               // Text("Files")
+                                // Text("Files")
                             }
                         }
 
@@ -223,7 +228,7 @@ fun ResultsScreenEnhanced(
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(Modifier.width(4.dp))
-                           // Text("Charts")
+                            // Text("Charts")
                         }
                         // Bouton PDF
                         IconButton(
@@ -390,14 +395,14 @@ fun ResultsScreenEnhanced(
                                         "pdf" -> pdfFile
                                         "csv" -> csvFile
                                         "zip" -> zipFile
-                                        else  -> null
+                                        else -> null
                                     }
                                     if (fileToShare != null) {
                                         val mime = when (lastSavedType) {
                                             "pdf" -> "application/pdf"
                                             "csv" -> "text/csv"
                                             "zip" -> "application/zip"
-                                            else  -> "*/*"
+                                            else -> "*/*"
                                         }
                                         ShareUtils.shareFile(
                                             context = context,

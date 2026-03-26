@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -22,6 +21,8 @@ import io.github.eucsoh.Constants.CALIBRATING
 import io.github.eucsoh.Constants.DONE
 import io.github.eucsoh.android.data.model.WheelIdentity
 import io.github.eucsoh.android.ui.SohViewModel
+import androidx.compose.ui.res.stringResource
+import io.github.eucsoh.android.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,7 +36,7 @@ fun MainScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("EUC SoH Analyzer") },
+                title = { Text(stringResource(R.string.app_name)) },
                 actions = {
                     IconButton(onClick = { viewModel.scanWheels(forceRefresh = true) }) {
                         Icon(Icons.Default.Refresh, "Actualize")
@@ -62,7 +63,8 @@ fun MainScreen(
                             color = MaterialTheme.colorScheme.onSecondaryContainer
                         )
                         Text(
-                            state.selectedWheel?.displayName ?: state.selectedWheel?.macAddress?: "",
+                            state.selectedWheel?.displayName ?: state.selectedWheel?.macAddress
+                            ?: "",
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSecondaryContainer
@@ -94,11 +96,11 @@ fun MainScreen(
                     )
                 }
 
-                state.progressState?.phase == DONE && state.analysisResult != null -> {
+                state.progressState?.phase == DONE && state.analysisResult != null && state.showResults -> {
                     ResultsScreenEnhanced(
                         result = state.analysisResult!!,
                         selectedWheel = state.selectedWheel,
-                        onBack = viewModel::clearResults
+                        onBack = viewModel::hideResults
                     )
                 }
 
@@ -120,7 +122,10 @@ fun MainScreen(
                         onAnalyze = viewModel::startAnalysis,
                         onConfigMosfet = viewModel::showMosfetConfig,
                         error = state.error,
-                        onDismissError = viewModel::clearError
+                        onDismissError = viewModel::clearError,
+                        hasResults = state.analysisResult != null &&
+                                state.analysisResult!!.macAddress == state.selectedWheel?.macAddress,
+                        onShowResults = viewModel::showResults
                     )
                 }
             }
@@ -270,7 +275,9 @@ fun WheelListContent(
     onAnalyze: () -> Unit,
     onConfigMosfet: (WheelIdentity) -> Unit,
     error: String?,
-    onDismissError: () -> Unit
+    onDismissError: () -> Unit,
+    hasResults: Boolean,
+    onShowResults: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
@@ -319,7 +326,17 @@ fun WheelListContent(
                 }
             }
         }
-
+        if (hasResults && selectedWheel != null) {
+            OutlinedButton(
+                onClick = onShowResults,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 4.dp)
+            ) {
+                Text("View last results")
+            }
+        }
         // Analyze button
         if (selectedWheel != null) {
             Button(

@@ -15,6 +15,8 @@ object Constants {
     const val DONE = "Done"
 
     // Absolute limits
+    const val LOWER_REQ = 0.0 // Ω
+    const val MIN_POINTS = 50 // count
     const val ABS_REQ_LIMIT = 0.8  // Ω
     const val ABS_KM_LIMIT = 5000.0  // km
     const val ABS_REQ_FACTOR = 1.8

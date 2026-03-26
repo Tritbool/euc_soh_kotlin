@@ -32,6 +32,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.activity.compose.BackHandler
 
 /** Onglets disponibles dans la galerie. */
 private enum class ChartTab(val label: String) {
@@ -87,7 +88,7 @@ fun ChartGalleryScreen(
     var pdfFile by remember { mutableStateOf<File?>(null) }
     var csvFile by remember { mutableStateOf<File?>(null) }
     var zipFile by remember { mutableStateOf<File?>(null) }
-
+    BackHandler { onBack() }
 
     /**
      * Résout le label d'une métrique à partir de son csv_code.

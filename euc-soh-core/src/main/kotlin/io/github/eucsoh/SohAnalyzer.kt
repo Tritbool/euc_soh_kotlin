@@ -4,6 +4,8 @@ import io.github.eucsoh.Constants.ANALYZING
 import io.github.eucsoh.Constants.CALIBRATING
 import io.github.eucsoh.Constants.DONE
 import io.github.eucsoh.Constants.EUC_WORLD
+import io.github.eucsoh.Constants.LOWER_REQ
+import io.github.eucsoh.Constants.MIN_POINTS
 import io.github.eucsoh.analysis.*
 import io.github.eucsoh.Constants.Metrics
 import io.github.eucsoh.Constants.Metrics.*
@@ -47,7 +49,8 @@ class SohAnalyzer(
         val vNominal: Double?,
         val rPackNominal: Double?,
         val plotData: PlotData,
-        val fileReports: List<FileReport>
+        val fileReports: List<FileReport>,
+        val macAddress:String?=null
     )
 
     data class SummaryData(
@@ -97,7 +100,8 @@ class SohAnalyzer(
         csvPaths: List<String>,
         optimalFrac: Double = 0.3,
         eaJPerMol: Double? = null,
-        onProgress: ((current: Int, total: Int, phase: String) -> Unit)? = null
+        onProgress: ((current: Int, total: Int, phase: String) -> Unit)? = null,
+        macAddress:String? = null
     ): AnalysisResult = coroutineScope {
 
         logger.d(TAG, "Starting analysis of ${csvPaths.size} files")
@@ -123,9 +127,9 @@ class SohAnalyzer(
                         )
                         logger.d(
                             TAG,
-                            "  [$idx] SUCCESS: ${result?.nPoints ?: 0.0} points, req=${result?.reqMedian ?: 0.0}"
+                            "  [$idx] SUCCESS: ${result?.nPoints ?: LOWER_REQ} points, req=${result?.reqMedian ?: LOWER_REQ}"
                         )
-                        if (result?.reqMedian!! > 0.0 && result.tempBoardMax != null && result.nPoints >= 50) {
+                        if (result?.reqMedian!! > LOWER_REQ && result.tempBoardMax != null && result.nPoints >= MIN_POINTS) {
                             validCsvPath.add(path)
 
                             val fileName = path.substringAfterLast('/')
@@ -142,14 +146,14 @@ class SohAnalyzer(
                             val fileName = path.substringAfterLast('/')
                             val source = result.source       // voir ci-dessous
                             val fileReport = when {
-                                result.nPoints!! < 50 ->
+                                result.nPoints!! < MIN_POINTS ->
                                     FileReport(
                                         path, fileName, source, false,
                                         rejectionReason = "Too few points (${result?.nPoints!!} < 50)",
                                         nPoints = result.nPoints
                                     )
 
-                                result.reqMedian <= 0.0 ->
+                                result.reqMedian <= LOWER_REQ ->
                                     FileReport(
                                         path, fileName, source, false,
                                         rejectionReason = "Req not computable (reqMedian = ${result.reqMedian})",
@@ -188,7 +192,7 @@ class SohAnalyzer(
 
             // Filter stats with critical null values for calibration
             val validTempStats = tempStats.filter { stat ->
-                stat.reqMedian > 0.0 && stat.tempBoardMax != null && stat.nPoints >= 50
+                stat.reqMedian > LOWER_REQ && stat.tempBoardMax != null && stat.nPoints >= MIN_POINTS
             }
 
             logger.d(
@@ -245,7 +249,7 @@ class SohAnalyzer(
         // Filter stats with minimum required data
         // Keep it as a safeguard even if prefiltering is applied at calibration
         val validStats = finalStats.filter { stat ->
-            stat.reqMedian > 0.0 && stat.nPoints >= 50
+            stat.reqMedian > LOWER_REQ && stat.nPoints >= MIN_POINTS
         }
 
         logger.d(TAG, "Final: ${validStats.size}/${finalStats.size} stats valid")
@@ -380,7 +384,8 @@ class SohAnalyzer(
             vNominal = vNominal,
             rPackNominal = rPackNominal,
             plotData = plotData,
-            fileReports = fileReports.toList()
+            fileReports = fileReports.toList(),
+            macAddress=macAddress
         )
 
     }

@@ -51,7 +51,8 @@ data class SohUiState(
     val wheelConfigs: Map<String, WheelConfig> = emptyMap(),
     val showMosfetDialog: Boolean = false,
     val configDialogWheel: WheelIdentity? = null,
-    var progressState: ProgressState? = null
+    var progressState: ProgressState? = null,
+    val showResults: Boolean = false
 )
 
 /**
@@ -359,7 +360,8 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
                                 phase = phase
                             )
                         )}
-                    }
+                    },
+                    macAddress = selectedWheel?.macAddress
 
                 )
                 
@@ -389,7 +391,8 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
                 withContext(Dispatchers.Main) {
                     _state.update { it.copy(
                         analysisResult = result,
-                        isAnalyzing = false
+                        isAnalyzing = false,
+                        showResults = true
                     )}
                 }
             } catch (e: Exception) {
@@ -405,7 +408,17 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
-    
+    // Cache l'écran résultats SANS effacer les données → appelé par onBack
+    fun hideResults() {
+        Log.d(TAG, "Hiding results (data preserved)")
+        _state.update { it.copy(showResults = false) }
+    }
+
+    // Réaffiche les résultats existants → appelé par "View last results"
+    fun showResults() {
+        Log.d(TAG, "Showing existing results")
+        _state.update { it.copy(showResults = true) }
+    }
     /**
      * Clears analysis results.
      */
@@ -413,6 +426,7 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
         Log.d(TAG, "Clearing results")
         _state.update { it.copy(
             analysisResult = null,
+            showResults = false,
             error = null
         )}
     }
