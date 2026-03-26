@@ -154,9 +154,9 @@ class PdfExportService(private val context: Context) {
             val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
             val fileName = outputFileName ?: "${wheelName}-${macAddress}_SoH_${timestamp}.pdf"
             val outputDir = File(
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+                context.getExternalFilesDir(null),  // /storage/.../Android/data/<pkg>/files
                 "EUC_SoH"
-            )
+            ).also { it.mkdirs() }
             val created = outputDir.mkdirs()
             Log.d(
                 TAG,

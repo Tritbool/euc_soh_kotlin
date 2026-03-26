@@ -3,6 +3,8 @@ package io.github.eucsoh.android.visualization
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import io.github.eucsoh.Constants.EUC_WORLD
+import io.github.eucsoh.Constants.WHEELLOG
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -53,8 +55,8 @@ class SohArchiveExportService(private val context: Context) {
                 .filter { it.accepted }
                 .forEach { report ->
                     val entryPath = when {
-                        report.source == "EUC World" -> "EUC World/${report.fileName}"
-                        report.source == "WheelLog"  -> "WheelLog/$macFolder/${report.fileName}"
+                        report.source == EUC_WORLD -> "EUC World/${report.fileName}"
+                        report.source == WHEELLOG  -> "WheelLog/$macFolder/${report.fileName}"
                         else                         -> "Other/${report.fileName}"
                     }
                     try {
@@ -69,11 +71,21 @@ class SohArchiveExportService(private val context: Context) {
                                 null
                         }
 
-                        val inputStream = if (uri != null) {
-                            context.contentResolver.openInputStream(uri)
-                        } else {
-                            java.io.File(report.path).inputStream()
+                        val inputStream = when {
+                            report.path.startsWith("content://") -> {
+                                try {
+                                    context.contentResolver.openInputStream(Uri.parse(report.path))
+                                } catch (e: SecurityException) {
+                                    Log.w(TAG, "No permission for ${report.path}: ${e.message}")
+                                    null
+                                }
+                            }
+                            report.path.startsWith("file://") ->
+                                java.io.File(Uri.parse(report.path).path!!).inputStream()
+                            else ->
+                                java.io.File(report.path).takeIf { it.canRead() }?.inputStream()
                         }
+
 
                         inputStream?.use { input ->
                             zos.putNextEntry(ZipEntry(entryPath))

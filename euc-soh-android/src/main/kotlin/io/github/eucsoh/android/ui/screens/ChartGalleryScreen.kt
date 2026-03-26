@@ -1,6 +1,8 @@
 package io.github.eucsoh.android.ui.screens
 
 import android.graphics.Bitmap
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -25,6 +27,10 @@ import io.github.eucsoh.android.visualization.SohArchiveExportService
 import io.github.eucsoh.android.visualization.SohChartGeneratorFixed
 import io.github.eucsoh.android.visualization.SohTrendCusumChartGenerator
 import kotlinx.coroutines.launch
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /** Onglets disponibles dans la galerie. */
 private enum class ChartTab(val label: String) {
@@ -75,6 +81,10 @@ fun ChartGalleryScreen(
     var exportMessage by remember { mutableStateOf<String?>(null) }
     var selectedTab by remember { mutableStateOf(ChartTab.GAUSSIAN) }
 
+    var pdfFile by remember { mutableStateOf<File?>(null) }
+    var zipFile by remember { mutableStateOf<File?>(null) }
+
+
     /**
      * Résout le label d'une métrique à partir de son csv_code.
      * Source unique : [Metrics] (core). Fallback : csv_code brut.
@@ -108,6 +118,45 @@ fun ChartGalleryScreen(
         ChartTab.INFLEXION -> if(alarms > 0) inflexCharts else null
     }
 
+    val timestamp = remember {
+        SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+    }
+
+    val createPdfLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/pdf")
+    ) { destUri ->
+        // destUri = l'URI choisi par l'user dans le picker
+        // null si l'user a annulé
+        if (destUri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            try {
+                context.contentResolver.openOutputStream(destUri)?.use { out ->
+                    pdfFile!!.inputStream().copyTo(out)
+                }
+                exportMessage = "PDF saved"
+            } catch (e: Exception) {
+                exportMessage = "PDF copy failed: ${e.message}"
+            }
+        }
+    }
+
+    val createZipLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/zip")
+    ) { destUri ->
+        if (destUri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            try {
+                context.contentResolver.openOutputStream(destUri)?.use { out ->
+                    zipFile!!.inputStream().copyTo(out)
+                }
+                exportMessage = "Archive saved"
+            } catch (e: Exception) {
+                exportMessage = "Archive copy failed: ${e.message}"
+            }
+        }
+    }
+
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -124,40 +173,28 @@ fun ChartGalleryScreen(
                                 scope.launch {
                                     isExportingPdf = true
                                     try {
-                                        // Génère les charts manquants avant export
-                                        if (gaussCharts == null) {
-                                            gaussCharts =
-                                                gaussGenerator.generateOverviewCharts(plotData)
-                                        }
-                                        if (inflexCharts == null && alarms > 0) {
-                                            inflexCharts =
-                                                trendGenerator.generateAllInflexionCharts(
-                                                    plotData,
-                                                    wheelName
-                                                )
-                                        }
-                                        if (cusumCharts == null  && alarms > 0) {
-                                            cusumCharts = trendGenerator.generateAllCusumCharts(
-                                                plotData,
-                                                wheelName
-                                            )
-                                        }
-                                        if (trendCharts == null && alarms > 0) {
-                                            trendCharts = trendGenerator.generateAllTrendCharts(
-                                                plotData,
-                                                wheelName
-                                            )
-                                        }
+                                        // Génère les charts manquants
+                                        val gauss = gaussCharts ?: gaussGenerator.generateOverviewCharts(plotData)
+                                            .also { gaussCharts = it }
+                                        val inflex = if (alarms > 0) inflexCharts
+                                            ?: trendGenerator.generateAllInflexionCharts(plotData, wheelName)
+                                                .also { inflexCharts = it }
+                                        else null
+                                        val cusum = if (alarms > 0) cusumCharts
+                                            ?: trendGenerator.generateAllCusumCharts(plotData, wheelName)
+                                                .also { cusumCharts = it }
+                                        else null
+                                        val trend = if (alarms > 0) trendCharts
+                                            ?: trendGenerator.generateAllTrendCharts(plotData, wheelName)
+                                                .also { trendCharts = it }
+                                        else null
 
-                                        val file = pdfExporter.exportToPdf(
-                                            gaussCharts,
-                                            inflexCharts,
-                                            cusumCharts,
-                                            trendCharts,
-                                            wheelName,
-                                            macAddress=macAddress
-                                        )
-                                        exportMessage = "PDF saved: ${file.absolutePath}"
+                                        // Étape 1 : génère dans le dossier privé (toujours permis)
+                                        pdfFile = pdfExporter.exportToPdf(gauss, inflex, cusum, trend, wheelName, macAddress)
+
+                                        // Étape 2 : ouvre le picker — le lambda createPdfLauncher s'occupe de la copie
+                                        createPdfLauncher.launch("${wheelName}_SoH_${timestamp}.pdf")
+
                                     } catch (e: Exception) {
                                         exportMessage = "Export failed: ${e.message}"
                                     } finally {
@@ -174,26 +211,32 @@ fun ChartGalleryScreen(
                             else
                                 Icon(Icons.Default.PictureAsPdf, "Export PDF")
                         }
-                        // Dans les actions de la TopAppBar, après le bouton PDF :
                         IconButton(
                             onClick = {
                                 scope.launch {
                                     isExportingPdf = true
                                     try {
-                                        // Génère le PDF d'abord si pas encore fait
-                                        val pdf = pdfExporter.exportToPdf(
-                                            gaussCharts ?: gaussGenerator.generateOverviewCharts(plotData),
-                                            inflexCharts, cusumCharts, trendCharts, wheelName, macAddress=macAddress
-                                        )
-                                        // Puis l'archive
+                                        // Génère le PDF temp si pas déjà fait
+                                        if (pdfFile == null) {
+                                            val gauss = gaussCharts ?: gaussGenerator.generateOverviewCharts(plotData)
+                                                .also { gaussCharts = it }
+                                            pdfFile = pdfExporter.exportToPdf(
+                                                gauss, inflexCharts, cusumCharts, trendCharts, wheelName, macAddress
+                                            )
+                                        }
+
+                                        // Génère le ZIP dans le dossier privé
                                         val archiveService = SohArchiveExportService(context)
-                                        val zip = archiveService.exportArchive(
+                                        zipFile = archiveService.exportArchive(
                                             wheelName = wheelName,
-                                            macAddress = macAddress,    // ← à passer en paramètre de ChartGalleryScreen
-                                            fileReports = fileReports,  // ← idem
-                                            pdfFile = pdf
+                                            macAddress = macAddress,
+                                            fileReports = fileReports,
+                                            pdfFile = pdfFile!!
                                         )
-                                        exportMessage = "Archive saved: ${zip.absolutePath}"
+
+                                        // Ouvre le picker
+                                        createZipLauncher.launch("${wheelName}_SoH_${timestamp}.zip")
+
                                     } catch (e: Exception) {
                                         exportMessage = "Archive failed: ${e.message}"
                                     } finally {
@@ -201,6 +244,7 @@ fun ChartGalleryScreen(
                                     }
                                 }
                             }
+
                         ) {
                             Icon(Icons.Default.FolderZip, "Export Archive")
                         }

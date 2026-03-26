@@ -3,10 +3,12 @@ package io.github.eucsoh
 import io.github.eucsoh.Constants.ANALYZING
 import io.github.eucsoh.Constants.CALIBRATING
 import io.github.eucsoh.Constants.DONE
+import io.github.eucsoh.Constants.EUC_WORLD
 import io.github.eucsoh.analysis.*
 import io.github.eucsoh.Constants.Metrics
 import io.github.eucsoh.Constants.Metrics.*
 import io.github.eucsoh.Constants.MetaColumns.*
+import io.github.eucsoh.Constants.WHEELLOG
 import io.github.eucsoh.model.MOSFETParams
 import io.github.eucsoh.model.PlotData
 import io.github.eucsoh.model.ThresholdInfo
@@ -83,11 +85,6 @@ class SohAnalyzer(
         )
     }
 
-    private fun detectSource(path: String): String? = when {
-        path.contains("WheelLog", ignoreCase = true) -> "WheelLog"
-        path.contains("EUC World", ignoreCase = true) -> "EUC World"
-        else -> null
-    }
 
     /**
      * Analyzes all CSV files in a folder/list.
@@ -132,7 +129,7 @@ class SohAnalyzer(
                             validCsvPath.add(path)
 
                             val fileName = path.substringAfterLast('/')
-                            val source = detectSource(path)          // voir ci-dessous
+                            val source = result.source          // voir ci-dessous
                             fileReports.add(
                                 FileReport(
                                     path, fileName, source, true,
@@ -143,7 +140,7 @@ class SohAnalyzer(
                             )
                         } else {
                             val fileName = path.substringAfterLast('/')
-                            val source = detectSource(path)          // voir ci-dessous
+                            val source = result.source       // voir ci-dessous
                             val fileReport = when {
                                 result.nPoints!! < 50 ->
                                     FileReport(
@@ -174,7 +171,7 @@ class SohAnalyzer(
                         )
                         fileReports.add(
                             FileReport(
-                                path, path.substringAfterLast('/'), detectSource(path), false,
+                                path, path.substringAfterLast('/'), "Unknown", false,
                                 rejectionReason = "File unreadable or parse error"
                             )
                         )
