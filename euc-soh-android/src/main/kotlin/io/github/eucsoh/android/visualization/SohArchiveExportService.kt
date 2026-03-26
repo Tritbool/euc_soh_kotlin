@@ -33,7 +33,8 @@ class SohArchiveExportService(private val context: Context) {
         wheelName: String,
         macAddress: String,
         fileReports: List<SohAnalyzer.FileReport>,
-        pdfFile: File
+        pdfFile: File,
+        csvFile: File?
     ): File = withContext(Dispatchers.IO) {
 
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
@@ -48,7 +49,10 @@ class SohArchiveExportService(private val context: Context) {
         ZipOutputStream(FileOutputStream(zipFile)).use { zos ->
 
             // 1. soh.pdf
-            zos.addFile(pdfFile, "soh.pdf")
+            zos.addFile(pdfFile, "soh-${wheelName}-${macAddress}.pdf")
+            // soh.csv si fourni
+            csvFile?.let { zos.addFile(it, "soh_stats-${wheelName}-${macAddress}.csv") }
+
 
             // 2. CSV files groupés par source
             fileReports

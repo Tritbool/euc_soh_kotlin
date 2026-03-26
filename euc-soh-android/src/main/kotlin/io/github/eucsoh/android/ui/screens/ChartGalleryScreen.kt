@@ -22,6 +22,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import io.github.eucsoh.Constants.Metrics
 import io.github.eucsoh.SohAnalyzer
+import io.github.eucsoh.android.visualization.CsvExportService
 import io.github.eucsoh.android.visualization.PdfExportService
 import io.github.eucsoh.android.visualization.SohArchiveExportService
 import io.github.eucsoh.android.visualization.SohChartGeneratorFixed
@@ -61,6 +62,7 @@ fun ChartGalleryScreen(
     macAddress: String,
     fileReports: List<SohAnalyzer.FileReport>,
     plotData: io.github.eucsoh.model.PlotData,   // ← remplace stats: List<ReqStatsResult>
+    result: SohAnalyzer.AnalysisResult,
     alarms: Int = 0,
     onBack: () -> Unit
 ){
@@ -68,6 +70,7 @@ fun ChartGalleryScreen(
     val gaussGenerator = remember { SohChartGeneratorFixed(context) }
     val trendGenerator = remember { SohTrendCusumChartGenerator(context) }
     val pdfExporter = remember { PdfExportService(context) }
+    val csvExporter = remember { CsvExportService(context) }
     val scope = rememberCoroutineScope()
 
     var gaussCharts by remember { mutableStateOf<List<Pair<String, Bitmap>>?>(null) }
@@ -82,6 +85,7 @@ fun ChartGalleryScreen(
     var selectedTab by remember { mutableStateOf(ChartTab.GAUSSIAN) }
 
     var pdfFile by remember { mutableStateOf<File?>(null) }
+    var csvFile by remember { mutableStateOf<File?>(null) }
     var zipFile by remember { mutableStateOf<File?>(null) }
 
 
@@ -190,7 +194,7 @@ fun ChartGalleryScreen(
                                         else null
 
                                         // Étape 1 : génère dans le dossier privé (toujours permis)
-                                        pdfFile = pdfExporter.exportToPdf(gauss, inflex, cusum, trend, wheelName, macAddress)
+                                        pdfFile = pdfExporter.exportToPdf(gauss, inflex, cusum, trend, result,wheelName, macAddress)
 
                                         // Étape 2 : ouvre le picker — le lambda createPdfLauncher s'occupe de la copie
                                         createPdfLauncher.launch("${wheelName}_SoH_${timestamp}.pdf")
@@ -221,17 +225,21 @@ fun ChartGalleryScreen(
                                             val gauss = gaussCharts ?: gaussGenerator.generateOverviewCharts(plotData)
                                                 .also { gaussCharts = it }
                                             pdfFile = pdfExporter.exportToPdf(
-                                                gauss, inflexCharts, cusumCharts, trendCharts, wheelName, macAddress
+                                                gauss, inflexCharts, cusumCharts, trendCharts, result,wheelName, macAddress
                                             )
                                         }
-
+                                        if (csvFile == null){
+                                            csvFile = csvExporter.exportToCsv(result,wheelName,macAddress)
+                                        }
                                         // Génère le ZIP dans le dossier privé
                                         val archiveService = SohArchiveExportService(context)
                                         zipFile = archiveService.exportArchive(
                                             wheelName = wheelName,
                                             macAddress = macAddress,
                                             fileReports = fileReports,
-                                            pdfFile = pdfFile!!
+                                            pdfFile = pdfFile!!,
+                                            csvFile = csvFile!!
+
                                         )
 
                                         // Ouvre le picker

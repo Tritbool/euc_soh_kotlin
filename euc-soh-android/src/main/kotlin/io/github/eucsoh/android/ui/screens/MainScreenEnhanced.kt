@@ -1,6 +1,7 @@
 package io.github.eucsoh.android.ui.screens
 
-import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,46 +20,43 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.FolderZip
+import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import io.github.eucsoh.Constants.MetaColumns.CSV_FILE
-import io.github.eucsoh.Constants.MetaColumns.WHEEL_KM
-import io.github.eucsoh.Constants.Metrics.I_95P
-import io.github.eucsoh.Constants.Metrics.I_MAX
-import io.github.eucsoh.Constants.Metrics.I_PHASE2_INT
-import io.github.eucsoh.Constants.Metrics.I_PHASE_95P
-import io.github.eucsoh.Constants.Metrics.I_PHASE_MAX
-import io.github.eucsoh.Constants.Metrics.PWM_95P
-import io.github.eucsoh.Constants.Metrics.PWM_MAX
-import io.github.eucsoh.Constants.Metrics.REQ_95P
-import io.github.eucsoh.Constants.Metrics.REQ_MEDIAN
-import io.github.eucsoh.Constants.Metrics.REQ_MEDIAN_25C
-import io.github.eucsoh.Constants.Metrics.R_BATT_MEDIAN
-import io.github.eucsoh.Constants.Metrics.R_BATT_MEDIAN_25C
-import io.github.eucsoh.Constants.Metrics.R_MOSFET_HOT
-import io.github.eucsoh.Constants.Metrics.SAG_95P
-import io.github.eucsoh.Constants.Metrics.SAG_MAX
-import io.github.eucsoh.Constants.Metrics.SAG_MEDIAN
-import io.github.eucsoh.Constants.Metrics.TEMP_BOARD_MAX
-import io.github.eucsoh.Constants.Metrics.TEMP_MOTOR_MAX
-import io.github.eucsoh.Constants.Metrics.V_MIN_STRONG
 import io.github.eucsoh.SohAnalyzer
-import io.github.eucsoh.android.data.model.ReqStatsResult
 import io.github.eucsoh.android.data.model.WheelIdentity
+import io.github.eucsoh.android.visualization.CsvExportService
+import io.github.eucsoh.android.visualization.PdfExportService
+import io.github.eucsoh.android.visualization.SohArchiveExportService
+import io.github.eucsoh.android.visualization.SohChartGeneratorFixed
+import io.github.eucsoh.android.visualization.SohTrendCusumChartGenerator
+import kotlinx.coroutines.launch
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
  * Enhanced ResultsScreen avec accès aux fichiers et graphiques.
@@ -76,6 +74,56 @@ fun ResultsScreenEnhanced(
     var showFiles by remember { mutableStateOf(false) }
     var showCharts by remember { mutableStateOf(false) }
 
+    // En haut du composable, avec les autres remember :
+    var pdfFile by remember { mutableStateOf<File?>(null) }
+    var csvFile by remember { mutableStateOf<File?>(null) }
+    var zipFile by remember { mutableStateOf<File?>(null) }
+    var isExporting by remember { mutableStateOf(false) }
+    var exportMessage by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val pdfExporter = remember { PdfExportService(context) }
+    val csvExporter = remember { CsvExportService(context) }
+    val archiveService = remember { SohArchiveExportService(context) }
+    val gaussGenerator = remember { SohChartGeneratorFixed(context) }
+    val trendGenerator = remember { SohTrendCusumChartGenerator(context) }
+
+    val timestamp = remember { SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date()) }
+    val wheelDisplayName = selectedWheel?.displayName ?: "Wheel"
+    val mac = selectedWheel?.macAddress ?: "unknown"
+
+    val createPdfLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/pdf")
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        scope.launch {
+            context.contentResolver.openOutputStream(uri)
+                ?.use { pdfFile!!.inputStream().copyTo(it) }
+            exportMessage = "PDF saved"
+        }
+    }
+    val createCsvLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        scope.launch {
+            context.contentResolver.openOutputStream(uri)
+                ?.use { csvFile!!.inputStream().copyTo(it) }
+            exportMessage = "CSV saved"
+        }
+    }
+    val createZipLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/zip")
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        scope.launch {
+            context.contentResolver.openOutputStream(uri)
+                ?.use { zipFile!!.inputStream().copyTo(it) }
+            exportMessage = "Archive saved"
+        }
+    }
+
+
     when {
         showFiles && selectedWheel != null -> {
             FileListScreen(
@@ -91,6 +139,7 @@ fun ResultsScreenEnhanced(
                 macAddress = selectedWheel?.macAddress!!,
                 result.fileReports,
                 plotData = result.plotData,
+                result=result,
                 alarms = result.alarms.size,
                 onBack = { showCharts = false }
             )
@@ -152,7 +201,7 @@ fun ResultsScreenEnhanced(
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(Modifier.width(4.dp))
-                                Text("Files")
+                               // Text("Files")
                             }
                         }
 
@@ -168,8 +217,107 @@ fun ResultsScreenEnhanced(
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(Modifier.width(4.dp))
-                            Text("Charts")
+                           // Text("Charts")
                         }
+                        // Bouton PDF
+                        IconButton(
+                            onClick = {
+                                scope.launch {
+                                    isExporting = true
+                                    try {
+                                        val gauss =
+                                            gaussGenerator.generateOverviewCharts(result.plotData)
+                                        val trend = if (result.alarms.isNotEmpty())
+                                            trendGenerator.generateAllTrendCharts(
+                                                result.plotData,
+                                                wheelDisplayName
+                                            ) else null
+                                        val cusum = if (result.alarms.isNotEmpty())
+                                            trendGenerator.generateAllCusumCharts(
+                                                result.plotData,
+                                                wheelDisplayName
+                                            ) else null
+                                        val inflex = if (result.alarms.isNotEmpty())
+                                            trendGenerator.generateAllInflexionCharts(
+                                                result.plotData,
+                                                wheelDisplayName
+                                            ) else null
+                                        pdfFile = pdfExporter.exportToPdf(
+                                            gauss, inflex, cusum, trend,
+                                            result, wheelDisplayName, mac
+                                        )
+                                        createPdfLauncher.launch("${wheelDisplayName}_SoH_${timestamp}.pdf")
+                                    } catch (e: Exception) {
+                                        exportMessage = "PDF failed: ${e.message}"
+                                    } finally {
+                                        isExporting = false
+                                    }
+                                }
+                            },
+                            enabled = !isExporting && result.plotData.gaussianResults.isNotEmpty()
+                        ) {
+                            if (isExporting) CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp
+                            )
+                            else Icon(Icons.Default.PictureAsPdf, "Export PDF")
+                        }
+
+// Bouton CSV
+                        IconButton(
+                            onClick = {
+                                scope.launch {
+                                    isExporting = true
+                                    try {
+                                        csvFile =
+                                            csvExporter.exportToCsv(result, wheelDisplayName, mac)
+                                        createCsvLauncher.launch("${wheelDisplayName}_SoH_${timestamp}.csv")
+                                    } catch (e: Exception) {
+                                        exportMessage = "CSV failed: ${e.message}"
+                                    } finally {
+                                        isExporting = false
+                                    }
+                                }
+                            },
+                            enabled = !isExporting
+                        ) {
+                            Icon(Icons.Default.TableChart, "Export CSV")
+                        }
+
+// Bouton Archive
+                        IconButton(
+                            onClick = {
+                                scope.launch {
+                                    isExporting = true
+                                    try {
+                                        if (pdfFile == null) {
+                                            val gauss =
+                                                gaussGenerator.generateOverviewCharts(result.plotData)
+                                            pdfFile = pdfExporter.exportToPdf(
+                                                gauss, null, null, null,
+                                                result, wheelDisplayName, mac
+                                            )
+                                        }
+                                        zipFile = archiveService.exportArchive(
+                                            wheelName = wheelDisplayName,
+                                            macAddress = mac,
+                                            fileReports = result.fileReports,
+                                            pdfFile = pdfFile!!,
+                                            csvFile = csvFile  // null si pas encore exporté = pas inclus
+                                        )
+                                        createZipLauncher.launch("${wheelDisplayName}_SoH_${timestamp}.zip")
+                                    } catch (e: Exception) {
+                                        exportMessage = "Archive failed: ${e.message}"
+                                    } finally {
+                                        isExporting = false
+                                    }
+                                }
+                            },
+                            enabled = !isExporting
+                        ) {
+                            Icon(Icons.Default.FolderZip, "Export Archive")
+                        }
+
                     }
                 }
 
@@ -226,6 +374,12 @@ fun ResultsScreenEnhanced(
                             }
                         }
                     }
+                }
+                exportMessage?.let { msg ->
+                    Snackbar(
+                        action = { TextButton(onClick = { exportMessage = null }) { Text("Dismiss") } },
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    ) { Text(msg) }
                 }
 
                 // Back button
