@@ -105,13 +105,13 @@ fun ResultsScreenEnhanced(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            "Résultats d'analyse",
+                            "Analysis results",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            "${rows.size} fichiers analysés, ${columnNames.size} métriques",
+                            "${rows.size} Analyzed files, ${columnNames.size} metrics",
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Text(
@@ -120,7 +120,7 @@ fun ResultsScreenEnhanced(
                         )
                         if (result.alarms.isNotEmpty()) {
                             Text(
-                                "⚠️ ${result.alarms.size} alarme(s)",
+                                "⚠️ ${result.alarms.size} alarm(s)",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.error,
                                 fontWeight = FontWeight.Bold

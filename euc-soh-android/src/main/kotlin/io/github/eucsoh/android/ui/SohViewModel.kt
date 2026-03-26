@@ -274,7 +274,7 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
         }
         
         if (csvPaths.isNullOrEmpty()) {
-            val error = "Aucun fichier valide à analyser"
+            val error = "No valid file to analyze"
             Log.w(TAG, error)
             _state.update { it.copy(error = error) }
             return

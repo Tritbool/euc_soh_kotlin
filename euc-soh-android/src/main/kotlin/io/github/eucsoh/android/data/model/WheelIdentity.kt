@@ -22,6 +22,7 @@ enum class WheelDataSource {
     WHEELLOG,      // From Download/WheelLog/MAC_ADDRESS/ folders
     EUC_WORLD,     // From Download/EUC World/EUC Data Logs/
     MANUAL,        // User-selected folder
+    MIX,
     UNKNOWN
 }
 

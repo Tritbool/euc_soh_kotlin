@@ -168,16 +168,40 @@ class WheelRepository(private val context: Context) {
     private suspend fun scanAndCache(): Map<String, WheelIdentity> {
         val rootUri = getRootUri()
 
-        val wheels = if (rootUri != null) {
+        val wheels: Map<String, WheelIdentity> = if (rootUri != null) {
             Log.d(TAG, "Scanning from URI: $rootUri")
             scanner.scanFromUri(rootUri)
         } else {
             val roots = getStorageRoots()
             Log.d(TAG, "Scanning from ${roots.size} storage root(s)")
-            roots.fold(mutableMapOf<String, WheelIdentity>()) { acc, root ->
-                acc.putAll(scanner.scanFromFile(root))
-                acc
+
+            // Collecte les résultats de chaque root SANS écraser les MACs communs
+            val allResults = roots.map { root ->
+                scanner.scanFromFile(root)
             }
+
+            // Merge explicite : pour chaque MAC, fusionne les csvFiles de toutes les roots
+            val merged = mutableMapOf<String, WheelIdentity>()
+            for (result in allResults) {
+                for ((mac, wheel) in result) {
+                    merged.merge(mac, wheel) { existing, new ->
+                        existing.copy(
+                            csvFiles = existing.csvFiles + new.csvFiles,
+                            displayName = if (new.displayName != new.macAddress)
+                                new.displayName else existing.displayName,
+                            manufacturer = new.manufacturer ?: existing.manufacturer,
+                            model = new.model ?: existing.model,
+                            serialNumber = new.serialNumber ?: existing.serialNumber,
+                            source = when {
+                                existing.source != new.source ->
+                                    io.github.eucsoh.android.data.model.WheelDataSource.UNKNOWN
+                                else -> existing.source
+                            }
+                        )
+                    }
+                }
+            }
+            merged
         }
 
         Log.d(TAG, "Scan returned ${wheels.size} wheels")
@@ -186,6 +210,7 @@ class WheelRepository(private val context: Context) {
         Log.d(TAG, "Cache updated")
         return wheels
     }
+
 
 
     /**

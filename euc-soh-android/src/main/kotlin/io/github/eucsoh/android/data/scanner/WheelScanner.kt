@@ -278,7 +278,7 @@ class WheelScanner(
                     model = new.model ?: existing.model,
                     serialNumber = new.serialNumber ?: existing.serialNumber,
                     source = if (existing.csvFiles.isNotEmpty() && new.csvFiles.isNotEmpty()) 
-                        io.github.eucsoh.android.data.model.WheelDataSource.WHEELLOG
+                        io.github.eucsoh.android.data.model.WheelDataSource.MIX
                     else 
                         new.source
                 )

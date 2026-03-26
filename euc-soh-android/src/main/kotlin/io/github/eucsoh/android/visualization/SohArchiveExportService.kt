@@ -2,6 +2,7 @@ package io.github.eucsoh.android.visualization
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -25,7 +26,7 @@ import io.github.eucsoh.android.data.model.WheelDataSource
  *           └── file.csv
  */
 class SohArchiveExportService(private val context: Context) {
-
+    private val TAG = "SohArchiveExportService"
     suspend fun exportArchive(
         wheelName: String,
         macAddress: String,
@@ -52,22 +53,38 @@ class SohArchiveExportService(private val context: Context) {
                 .filter { it.accepted }
                 .forEach { report ->
                     val entryPath = when {
-                        report.source == "EUC World" ->
-                            "EUC World/${report.fileName}"
-                        report.source == "WheelLog" ->
-                            "WheelLog/$macFolder/${report.fileName}"
-                        else ->
-                            "Other/${report.fileName}"
+                        report.source == "EUC World" -> "EUC World/${report.fileName}"
+                        report.source == "WheelLog"  -> "WheelLog/$macFolder/${report.fileName}"
+                        else                         -> "Other/${report.fileName}"
                     }
                     try {
-                        val uri = Uri.parse(report.path)
-                        context.contentResolver.openInputStream(uri)?.use { input ->
+                        // Normalise le path en URI lisible par ContentResolver
+                        val uri = when {
+                            report.path.startsWith("content://") ->
+                                Uri.parse(report.path)
+                            report.path.startsWith("file://") ->
+                                Uri.parse(report.path)
+                            else ->
+                                // Chemin brut File → on lit directement avec java.io.File
+                                null
+                        }
+
+                        val inputStream = if (uri != null) {
+                            context.contentResolver.openInputStream(uri)
+                        } else {
+                            java.io.File(report.path).inputStream()
+                        }
+
+                        inputStream?.use { input ->
                             zos.putNextEntry(ZipEntry(entryPath))
                             input.copyTo(zos)
                             zos.closeEntry()
                         }
-                    } catch (_: Exception) { /* skip unreadable */ }
+                    } catch (e: Exception) {
+                        Log.w("SohArchiveExport", "Skipping ${report.fileName}: ${e.message}")
+                    }
                 }
+
         }
 
         zipFile

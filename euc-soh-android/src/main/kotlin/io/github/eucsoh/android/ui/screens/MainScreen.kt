@@ -37,11 +37,8 @@ fun MainScreen(
             TopAppBar(
                 title = { Text("EUC SoH Analyzer") },
                 actions = {
-                    IconButton(onClick = onRequestFolderPicker) {
-                        Icon(Icons.Default.Folder, "Choisir un dossier")
-                    }
                     IconButton(onClick = { viewModel.scanWheels(forceRefresh = true) }) {
-                        Icon(Icons.Default.Refresh, "Rafraîchir")
+                        Icon(Icons.Default.Refresh, "Actualize")
                     }
                 }
             )
@@ -60,12 +57,12 @@ fun MainScreen(
                 ) {
                     Column(modifier = Modifier.padding(8.dp)) {
                         Text(
-                            "Dossier de scan:",
+                            "Selected EUC: ",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSecondaryContainer
                         )
                         Text(
-                            state.scanRootPath,
+                            state.selectedWheel?.displayName ?: state.selectedWheel?.macAddress?: "",
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSecondaryContainer
@@ -76,7 +73,7 @@ fun MainScreen(
 
             when {
                 state.isScanning -> {
-                    LoadingScreen("Recherche des roues...")
+                    LoadingScreen("Scanning for EUCs")
                 }
 
                 state.progressState?.phase == ANALYZING -> {
@@ -189,7 +186,7 @@ fun AnalysisProgressScreen(
 
             if (totalFiles > 0) {
                 Text(
-                    "Fichier $currentFile / $totalFiles",
+                    "Log $currentFile / $totalFiles",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -277,7 +274,7 @@ fun WheelListContent(
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
-            "Roues détectées (${wheels.size})",
+            "Detected EUCs (${wheels.size})",
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(16.dp)
         )
@@ -331,7 +328,7 @@ fun WheelListContent(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                Text("Analyser ${selectedWheel.displayName}")
+                Text("Analyze ${selectedWheel.displayName}")
             }
         }
     }
@@ -382,7 +379,7 @@ fun WheelCard(
                 Spacer(Modifier.height(4.dp))
 
                 Text(
-                    "${wheel.csvFiles.size} fichiers CSV",
+                    "${wheel.csvFiles.size} CSV Logs",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -433,7 +430,7 @@ fun WheelCard(
                 ) {
                     Icon(
                         Icons.Default.Settings,
-                        contentDescription = "Config MOSFET",
+                        contentDescription = "MOSFET Config",
                         tint = if (hasMosfetConfig)
                             MaterialTheme.colorScheme.primary
                         else

@@ -38,7 +38,7 @@ fun MosfetConfigDialog(
         onDismissRequest = onDismiss,
         title = {
             Column {
-                Text("Config MOSFET")
+                Text("MOSFET Config")
                 Text(
                     wheelName,
                     style = MaterialTheme.typography.bodyMedium,
@@ -60,7 +60,7 @@ fun MosfetConfigDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        "Paramètres du pont MOSFET",
+                        "MOSFET bridge parameters",
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -80,20 +80,20 @@ fun MosfetConfigDialog(
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text(
-                                "Ces paramètres permettent de séparer R_batt de R_mosfet dans l'analyse.",
+                                "These parameters are used to segregate R_batt from R_mosfet during analysis.",
                                 style = MaterialTheme.typography.bodySmall
                             )
                             Spacer(Modifier.height(4.dp))
                             Text(
-                                "• R_ds(on) : Résistance totale du pont à 25°C (datasheet)",
+                                "• R_ds(on) : Total bridge resistance at 25°C (datasheet)",
                                 style = MaterialTheme.typography.bodySmall
                             )
                             Text(
-                                "• Coeff temp : +1%/°C typique pour MOSFET",
+                                "• Coeff temp : +1%/°C is usual for MOSFETs",
                                 style = MaterialTheme.typography.bodySmall
                             )
                             Text(
-                                "• R_wiring : Résistance fixe des câbles (optionnel)",
+                                "• R_wiring : Constant wiring resistance (optional)",
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
@@ -111,7 +111,7 @@ fun MosfetConfigDialog(
                     singleLine = true,
                     supportingText = {
                         Text(
-                            "Résistance du pont MOSFET à 25°C",
+                            "Bridge resistance at 25°C",
                             style = MaterialTheme.typography.labelSmall
                         )
                     }
@@ -128,7 +128,7 @@ fun MosfetConfigDialog(
                     singleLine = true,
                     supportingText = {
                         Text(
-                            "Variation relative par °C (typ. 0.01 = +1%/°C)",
+                            "relative Variation per °C (typ. 0.01 = +1%/°C)",
                             style = MaterialTheme.typography.labelSmall
                         )
                     }
@@ -145,7 +145,7 @@ fun MosfetConfigDialog(
                     singleLine = true,
                     supportingText = {
                         Text(
-                            "Résistance fixe du câblage (optionnel)",
+                            "Constant wiring resistance (optional)",
                             style = MaterialTheme.typography.labelSmall
                         )
                     }
@@ -159,7 +159,7 @@ fun MosfetConfigDialog(
                     ) {
                         Column(modifier = Modifier.padding(8.dp)) {
                             Text(
-                                "Config actuelle",
+                                "Current configuration",
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold
                             )
@@ -195,18 +195,18 @@ fun MosfetConfigDialog(
                 },
                 enabled = rDsOn.toDoubleOrNull()?.let { it > 0 } == true
             ) {
-                Text("Enregistrer")
+                Text("Save")
             }
         },
         dismissButton = {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (currentParams != null) {
                     TextButton(onClick = onClear) {
-                        Text("Effacer")
+                        Text("Reset")
                     }
                 }
                 TextButton(onClick = onDismiss) {
-                    Text("Annuler")
+                    Text("Cancel")
                 }
             }
         }
