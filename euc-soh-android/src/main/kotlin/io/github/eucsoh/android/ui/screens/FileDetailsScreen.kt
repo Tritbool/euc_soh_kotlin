@@ -1,21 +1,41 @@
 package io.github.eucsoh.android.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.eucsoh.android.data.model.CsvFileInfo
+import androidx.compose.ui.res.stringResource
+import io.github.eucsoh.android.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,10 +51,10 @@ fun FileDetailsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Détails des fichiers (${files.size})") },
+                title = { Text(stringResource(R.string.file_details_title, files.size)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, "Retour")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
                     }
                 }
             )
@@ -51,12 +71,12 @@ fun FileDetailsScreen(
                     ) {
                         Column {
                             Text(
-                                "Fichiers valides",
+                                stringResource(R.string.file_details_valid_label),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
-                                "$validCount/${files.size}",
+                                stringResource(R.string.file_details_valid_count, validCount, files.size),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -65,7 +85,7 @@ fun FileDetailsScreen(
                         if (excludedCount > 0) {
                             Column {
                                 Text(
-                                    "Exclus",
+                                    stringResource(R.string.file_details_excluded_label),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -86,7 +106,7 @@ fun FileDetailsScreen(
                         enabled = validCount > 0,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Analyser $validCount fichiers")
+                        Text(stringResource(R.string.file_details_analyze_button, validCount))
                     }
                 }
             }
@@ -189,7 +209,7 @@ fun FileInfoCard(
                 if (file.isExcluded) {
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        "❌ EXCLU (cliquer pour réactiver)",
+                        stringResource(R.string.file_details_excluded_hint),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.error

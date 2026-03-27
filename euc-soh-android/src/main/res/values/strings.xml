@@ -76,5 +76,38 @@
     <string name="files_tap_hint">Tap to see full path</string>
     <string name="files_tap_hint_preview">Tap to see full path · Preview</string>
 
+    <!-- MosfetConfigDialog -->
+    <string name="mosfet_dialog_title">MOSFET Config</string>
+    <string name="mosfet_dialog_section_title">MOSFET bridge parameters</string>
+    <string name="mosfet_help_cd">Help</string>
+    <string name="mosfet_help_intro">These parameters are used to segregate R_batt from R_mosfet during analysis.</string>
+    <string name="mosfet_help_rds">• R_ds(on) : Total bridge resistance at 25°C (datasheet)</string>
+    <string name="mosfet_help_coeff">• Coeff temp : +1%%/°C is usual for MOSFETs</string>
+    <string name="mosfet_help_wiring">• R_wiring : Constant wiring resistance (optional)</string>
+    <string name="mosfet_field_rds_label">R_ds(on) @ 25°C total (Ω)</string>
+    <string name="mosfet_field_rds_placeholder">Ex: 0.002</string>
+    <string name="mosfet_field_rds_support">Bridge resistance at 25°C</string>
+    <string name="mosfet_field_coeff_label">Coefficient temp (ΔR/°C)</string>
+    <string name="mosfet_field_coeff_placeholder">Ex: 0.01</string>
+    <string name="mosfet_field_coeff_support">Relative variation per °C (typ. 0.01 = +1%%/°C)</string>
+    <string name="mosfet_field_wiring_label">R_wiring (Ω)</string>
+    <string name="mosfet_field_wiring_placeholder">Ex: 0.0005</string>
+    <string name="mosfet_field_wiring_support">Constant wiring resistance (optional)</string>
+    <string name="mosfet_current_config_title">Current configuration</string>
+    <string name="mosfet_current_rds">R_ds: %1$s Ω</string>
+    <string name="mosfet_current_coeff">Coeff: %1$s</string>
+    <string name="mosfet_current_wiring">Wiring: %1$s Ω</string>
+    <string name="mosfet_save">Save</string>
+    <string name="mosfet_reset">Reset</string>
+    <string name="mosfet_cancel">Cancel</string>
+
+    <!-- FileDetailsScreen -->
+    <string name="file_details_title">File details (%1$d)</string>
+    <string name="file_details_valid_label">Valid files</string>
+    <string name="file_details_valid_count">%1$d/%2$d</string>
+    <string name="file_details_excluded_label">Excluded</string>
+    <string name="file_details_analyze_button">Analyze %1$d files</string>
+    <string name="file_details_excluded_hint">❌ EXCLUDED (tap to re-enable)</string>
+
     <!-- MosfetConfigDialog — lire le fichier si besoin plus tard -->
 </resources>

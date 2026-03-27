@@ -13,6 +13,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import io.github.eucsoh.model.MOSFETParams
 import java.util.Locale
+import androidx.compose.ui.res.stringResource
+import io.github.eucsoh.android.R
 
 /**
  * Dialog de configuration des paramètres MOSFET pour une roue.
@@ -34,12 +36,12 @@ fun MosfetConfigDialog(
     var tempCoeff by remember { mutableStateOf(currentParams?.tempCoeffRel?.toString() ?: "0.01") }
     var rWiring by remember { mutableStateOf(currentParams?.rWiring?.toString() ?: "0.0") }
     var showHelp by remember { mutableStateOf(false) }
-    
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Column {
-                Text("MOSFET Config")
+                Text(stringResource(R.string.mosfet_dialog_section_title))
                 Text(
                     wheelName,
                     style = MaterialTheme.typography.bodyMedium,
@@ -68,12 +70,12 @@ fun MosfetConfigDialog(
                     IconButton(onClick = { showHelp = !showHelp }) {
                         Icon(
                             Icons.Default.Info,
-                            contentDescription = "Aide",
+                            contentDescription = stringResource(R.string.mosfet_help_cd),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
-                
+
                 if (showHelp) {
                     Surface(
                         color = MaterialTheme.colorScheme.primaryContainer,
@@ -81,49 +83,49 @@ fun MosfetConfigDialog(
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text(
-                                "These parameters are used to segregate R_batt from R_mosfet during analysis.",
+                                stringResource(R.string.mosfet_help_intro),
                                 style = MaterialTheme.typography.bodySmall
                             )
                             Spacer(Modifier.height(4.dp))
                             Text(
-                                "• R_ds(on) : Total bridge resistance at 25°C (datasheet)",
+                                stringResource(R.string.mosfet_help_rds),
                                 style = MaterialTheme.typography.bodySmall
                             )
                             Text(
-                                "• Coeff temp : +1%/°C is usual for MOSFETs",
+                                stringResource(R.string.mosfet_help_coeff),
                                 style = MaterialTheme.typography.bodySmall
                             )
                             Text(
-                                "• R_wiring : Constant wiring resistance (optional)",
+                                stringResource(R.string.mosfet_help_wiring),
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
                     }
                 }
-                
+
                 // R_ds(on) field
                 OutlinedTextField(
                     value = rDsOn,
                     onValueChange = { rDsOn = it },
-                    label = { Text("R_ds(on) @ 25°C total (Ω)") },
-                    placeholder = { Text("Ex: 0.002") },
+                    label = { Text(stringResource(R.string.mosfet_field_rds_label)) },
+                    placeholder = { Text(stringResource(R.string.mosfet_field_rds_placeholder)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     supportingText = {
                         Text(
-                            "Bridge resistance at 25°C",
+                            stringResource(R.string.mosfet_field_rds_support),
                             style = MaterialTheme.typography.labelSmall
                         )
                     }
                 )
-                
+
                 // Temp coefficient field
                 OutlinedTextField(
                     value = tempCoeff,
                     onValueChange = { tempCoeff = it },
-                    label = { Text("Coefficient temp (ΔR/°C)") },
-                    placeholder = { Text("0.01") },
+                    label = { Text(stringResource(R.string.mosfet_field_coeff_label)) },
+                    placeholder = { Text(stringResource(R.string.mosfet_field_coeff_placeholder)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
@@ -134,24 +136,24 @@ fun MosfetConfigDialog(
                         )
                     }
                 )
-                
+
                 // Wiring resistance field
                 OutlinedTextField(
                     value = rWiring,
                     onValueChange = { rWiring = it },
-                    label = { Text("R_wiring (Ω)") },
-                    placeholder = { Text("0.0") },
+                    label = { Text(stringResource(R.string.mosfet_field_wiring_label)) },
+                    placeholder = { Text(stringResource(R.string.mosfet_field_wiring_placeholder)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     supportingText = {
                         Text(
-                            "Constant wiring resistance (optional)",
+                            stringResource(R.string.mosfet_field_wiring_support),
                             style = MaterialTheme.typography.labelSmall
                         )
                     }
                 )
-                
+
                 // Current config indicator
                 if (currentParams != null) {
                     Surface(
@@ -160,21 +162,42 @@ fun MosfetConfigDialog(
                     ) {
                         Column(modifier = Modifier.padding(8.dp)) {
                             Text(
-                                "Current configuration",
+                                stringResource(R.string.mosfet_current_config_title),
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                "R_ds: ${String.format(Locale.getDefault(),"%.6f", currentParams.rDsOn25cTotal)} Ω",
+                                stringResource(
+                                    R.string.mosfet_current_rds,
+                                    String.format(
+                                        Locale.getDefault(),
+                                        "%.6f",
+                                        currentParams.rDsOn25cTotal
+                                    )
+                                ),
                                 style = MaterialTheme.typography.bodySmall
                             )
                             Text(
-                                "Coeff: ${String.format(Locale.getDefault(),"%.4f", currentParams.tempCoeffRel)}",
+                                stringResource(
+                                    R.string.mosfet_current_coeff,
+                                    String.format(
+                                        Locale.getDefault(),
+                                        "%.4f",
+                                        currentParams.tempCoeffRel
+                                    )
+                                ),
                                 style = MaterialTheme.typography.bodySmall
                             )
                             if (currentParams.rWiring > 0) {
                                 Text(
-                                    "Wiring: ${String.format(Locale.getDefault(),"%.6f", currentParams.rWiring)} Ω",
+                                    stringResource(
+                                        R.string.mosfet_current_wiring,
+                                        String.format(
+                                            Locale.getDefault(),
+                                            "%.6f",
+                                            currentParams.rWiring
+                                        )
+                                    ),
                                     style = MaterialTheme.typography.bodySmall
                                 )
                             }
@@ -189,25 +212,25 @@ fun MosfetConfigDialog(
                     val rds = rDsOn.toDoubleOrNull()
                     val tc = tempCoeff.toDoubleOrNull() ?: 0.01
                     val rw = rWiring.toDoubleOrNull() ?: 0.0
-                    
+
                     if (rds != null && rds > 0) {
                         onSave(MOSFETParams(rds, tc, rw))
                     }
                 },
                 enabled = rDsOn.toDoubleOrNull()?.let { it > 0 } == true
             ) {
-                Text("Save")
+                Text(stringResource(R.string.mosfet_save))
             }
         },
         dismissButton = {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (currentParams != null) {
                     TextButton(onClick = onClear) {
-                        Text("Reset")
+                        Text(stringResource(R.string.mosfet_reset))
                     }
                 }
                 TextButton(onClick = onDismiss) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.mosfet_cancel))
                 }
             }
         }
