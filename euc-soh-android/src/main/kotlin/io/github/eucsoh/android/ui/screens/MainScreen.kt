@@ -1,5 +1,6 @@
 package io.github.eucsoh.android.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,6 +14,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -23,6 +25,16 @@ import io.github.eucsoh.android.data.model.WheelIdentity
 import io.github.eucsoh.android.ui.SohViewModel
 import androidx.compose.ui.res.stringResource
 import io.github.eucsoh.android.R
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,14 +47,64 @@ fun MainScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.app_name)) },
-                actions = {
-                    IconButton(onClick = { viewModel.scanWheels(forceRefresh = true) }) {
-                        Icon(Icons.Default.Refresh, stringResource(R.string.topbar_refresh))
+            val tileBitmap = ImageBitmap.imageResource(R.drawable.topbar_bg)
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp)
+                    .clip(RectangleShape)
+                    .drawBehind {
+                        // Calcule la largeur de la tuile en gardant le ratio original
+                        val originalW = tileBitmap.width.toFloat()
+                        val originalH = tileBitmap.height.toFloat()
+                        val tileH = size.height                      // on fit à la hauteur du bandeau
+                        val tileW = originalW * (tileH / originalH) // largeur proportionnelle
+
+                        var x = 0f
+                        while (x < size.width) {
+                            drawImage(
+                                image = tileBitmap,
+                                dstOffset = IntOffset(x.toInt(), 0),
+                                dstSize = IntSize(tileW.toInt(), tileH.toInt())
+                            )
+                            x += tileW-1f
+                        }
                     }
+            ) {
+                // Foreground : personnage à gauche
+                Image(
+                    painter = painterResource(R.drawable.topbar_fg),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(start = 8.dp)
+                        .fillMaxHeight()
+                        .aspectRatio(1.75f),
+                    contentScale = ContentScale.Fit
+                )
+
+                // Titre centré
+                Text(
+                    stringResource(R.string.topbar_title),
+                    modifier = Modifier.align(Alignment.Center),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFF1A1C1E)
+                )
+
+                // Refresh à droite
+                IconButton(
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                    onClick = { viewModel.scanWheels(forceRefresh = true) }
+                ) {
+                    Icon(
+                        Icons.Default.Refresh,
+                        contentDescription = stringResource(R.string.topbar_refresh),
+                        tint = Color(0xFF1A1C1E)
+                    )
                 }
-            )
+            }
         }
     ) { padding ->
         Column(
