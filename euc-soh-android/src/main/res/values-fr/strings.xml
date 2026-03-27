@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">EUC SoH Analyzer</string>
+
+    <!-- Common -->
+    <string name="back">Retour</string>
+    <string name="close">Fermer</string>
+    <string name="dismiss">Ignorer</string>
+    <string name="share">PARTAGER</string>
+    <string name="ok">OK</string>
+    <string name="retry">Réessayer</string>
+
+    <!-- MainScreen / TopBar -->
+    <string name="topbar_title">EUC SoH Analyzer</string>
+    <string name="topbar_refresh">Actualiser</string>
+    <string name="selected_euc_label">EUC sélectionné :</string>
+
+    <!-- WheelListContent -->
+    <string name="detected_eucs">EUC détectés (%1$d)</string>
+    <string name="analyze_button">Analyser %1$s</string>
+    <string name="view_last_results">Voir les derniers résultats</string>
+    <string name="csv_logs_count">%1$d logs CSV</string>
+    <string name="mac_label">MAC : %1$s</string>
+    <string name="mosfet_badge">MOSFET</string>
+    <string name="mosfet_config_cd">Config MOSFET</string>
+
+    <!-- EmptyStateScreen -->
+    <string name="no_wheel_detected">Aucun EUC trouvé</string>
+    <string name="no_wheel_hint">Le scanner cherche récursivement les dossiers :\n- WheelLog/\n- EUC World/\n\ndans : %1$s\n\nAssurez-vous que vos logs sont bien dans ce dossier.</string>
+    <string name="choose_folder">📁 Choisir un autre dossier</string>
+    <string name="check_permissions">Vérifier les permissions</string>
+
+    <!-- Loading / Progress -->
+    <string name="scanning_eucs">Recherche des EUC en cours</string>
+
+    <!-- ResultsScreenEnhanced -->
+    <string name="results_title">Résultats de l\'analyse</string>
+    <string name="results_subtitle">%1$d fichiers analysés, %2$d métriques</string>
+    <string name="results_ea">Ea = %1$s kJ/mol</string>
+    <string name="results_alarms">⚠️ %1$d alarme(s)</string>
+    <string name="export_pdf_cd">Exporter en PDF</string>
+    <string name="export_csv_cd">Exporter en CSV</string>
+    <string name="export_archive_cd">Exporter l\'archive</string>
+    <string name="files_button_cd">Fichiers</string>
+    <string name="charts_button_cd">Graphiques</string>
+    <string name="pdf_saved">PDF enregistré — appuyez sur PARTAGER pour l\'envoyer</string>
+    <string name="csv_saved">CSV enregistré — appuyez sur PARTAGER pour l\'envoyer</string>
+    <string name="zip_saved">Archive enregistrée — appuyez sur PARTAGER pour l\'envoyer</string>
+    <string name="export_failed">Échec de l\'export %1$s : %2$s</string>
+    <string name="share_failed">Échec du partage : %1$s</string>
+    <string name="share_chooser_title">Partager l\'export SoH</string>
+
+    <!-- ChartGalleryScreen -->
+    <string name="charts_title">Graphiques — %1$s</string>
+    <string name="charts_tab_gaussian">Gaussienne</string>
+    <string name="charts_tab_trend">Tendance</string>
+    <string name="charts_tab_cusum">CUSUM</string>
+    <string name="charts_tab_inflexion">Inflexion</string>
+    <string name="charts_no_data">Aucun graphique disponible (données insuffisantes)</string>
+    <string name="charts_tap_to_enlarge">Appuyer pour agrandir</string>
+    <string name="charts_export_pdf_cd">Exporter en PDF</string>
+    <string name="charts_export_archive_cd">Exporter l\'archive</string>
+    <string name="chart_pdf_saved">PDF enregistré</string>
+    <string name="chart_archive_saved">Archive enregistrée</string>
+    <string name="chart_export_failed">Échec de l\'export : %1$s</string>
+    <string name="chart_archive_failed">Échec de l\'archive : %1$s</string>
+    <string name="chart_pdf_copy_failed">Échec de la copie du PDF : %1$s</string>
+    <string name="chart_archive_copy_failed">Échec de la copie de l\'archive : %1$s</string>
+
+    <!-- FileListScreen -->
+    <string name="files_title">Fichiers — %1$s</string>
+    <string name="files_show_rejected">Afficher les rejets (%1$d)</string>
+    <string name="files_accepted">✅ %1$d accepté(s)</string>
+    <string name="files_rejected">❌ %1$d rejeté(s)</string>
+    <string name="files_none">Aucun fichier</string>
+    <string name="files_tap_hint">Appuyer pour voir le chemin complet</string>
+    <string name="files_tap_hint_preview">Appuyer pour voir le chemin complet · Aperçu</string>
+
+    <!-- MosfetConfigDialog -->
+    <string name="mosfet_dialog_title">Config MOSFET</string>
+    <string name="mosfet_dialog_section_title">Paramètres du pont MOSFET</string>
+    <string name="mosfet_help_cd">Aide</string>
+    <string name="mosfet_help_intro">Ces paramètres permettent de séparer R_batt de R_mosfet lors de l\'analyse.</string>
+    <string name="mosfet_help_rds">• R_ds(on) : Résistance totale du pont à 25°C (datasheet)</string>
+    <string name="mosfet_help_coeff">• Coeff temp : +1%%/°C est typique pour les MOSFETs</string>
+    <string name="mosfet_help_wiring">• R_wiring : Résistance fixe du câblage (optionnel)</string>
+    <string name="mosfet_field_rds_label">R_ds(on) @ 25°C total (Ω)</string>
+    <string name="mosfet_field_rds_placeholder">Ex : 0.002</string>
+    <string name="mosfet_field_rds_support">Résistance du pont à 25°C</string>
+    <string name="mosfet_field_coeff_label">Coefficient temp (ΔR/°C)</string>
+    <string name="mosfet_field_coeff_placeholder">Ex : 0.01</string>
+    <string name="mosfet_field_coeff_support">Variation relative par °C (typ. 0.01 = +1%%/°C)</string>
+    <string name="mosfet_field_wiring_label">R_wiring (Ω)</string>
+    <string name="mosfet_field_wiring_placeholder">Ex : 0.0005</string>
+    <string name="mosfet_field_wiring_support">Résistance fixe du câblage (optionnel)</string>
+    <string name="mosfet_current_config_title">Configuration actuelle</string>
+    <string name="mosfet_current_rds">R_ds : %1$s Ω</string>
+    <string name="mosfet_current_coeff">Coeff : %1$s</string>
+    <string name="mosfet_current_wiring">Câblage : %1$s Ω</string>
+    <string name="mosfet_save">Enregistrer</string>
+    <string name="mosfet_reset">Réinitialiser</string>
+    <string name="mosfet_cancel">Annuler</string>
+
+    <!-- FileDetailsScreen -->
+    <string name="file_details_title">Détails des fichiers (%1$d)</string>
+    <string name="file_details_valid_label">Fichiers valides</string>
+    <string name="file_details_valid_count">%1$d/%2$d</string>
+    <string name="file_details_excluded_label">Exclus</string>
+    <string name="file_details_analyze_button">Analyser %1$d fichier(s)</string>
+    <string name="file_details_excluded_hint">❌ EXCLUS (appuyer pour réactiver)</string>
+</resources>
