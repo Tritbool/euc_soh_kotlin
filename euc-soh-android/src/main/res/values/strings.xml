@@ -110,4 +110,7 @@
     <string name="file_details_excluded_hint">❌ EXCLUDED (tap to re-enable)</string>
 
     <!-- MosfetConfigDialog — lire le fichier si besoin plus tard -->
+    <string name="wheel_name_blocked">Name from logs — cannot be overridden</string>
+    <string name="wheel_name_save">Save wheel name</string>
+    <string name="wheel_name_title">Wheel name</string>
 </resources>

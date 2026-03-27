@@ -64,11 +64,11 @@ fun MosfetConfigDialog(
                 OutlinedTextField(
                     value = if (hasDataName) wheelName else aliasInput,
                     onValueChange = { if (!hasDataName) onAliasChange(it) },
-                    label = { Text("Wheel name") },
+                    label = { Text(stringResource(R.string.wheel_name_title)) },
                     enabled = !hasDataName,
                     supportingText = {
                         if (hasDataName)
-                            Text("Name from logs — cannot be overridden",
+                            Text(stringResource(R.string.wheel_name_blocked),
                                 color = MaterialTheme.colorScheme.outline)
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -79,7 +79,7 @@ fun MosfetConfigDialog(
                         onClick = onSaveAlias,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Save name")
+                        Text(stringResource(R.string.wheel_name_save))
                     }
                 }
 
@@ -90,7 +90,7 @@ fun MosfetConfigDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        "MOSFET bridge parameters",
+                        stringResource(R.string.mosfet_dialog_section_title),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold
                     )
