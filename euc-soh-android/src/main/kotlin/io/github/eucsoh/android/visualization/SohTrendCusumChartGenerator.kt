@@ -144,7 +144,7 @@ class SohTrendCusumChartGenerator(private val context: Context) {
         )
 
         // Un seul dataset avec une couleur par point
-        val allEntries = pts.mapIndexed { i, (x, y) -> Entry(x.toFloat(), y.toFloat()) }
+        val allEntries = pts.mapIndexed { _, (x, y) -> Entry(x.toFloat(), y.toFloat()) }
         val circleColors = pts.indices.map { i ->
             if (i in cusum.alarmIndices) COLOR_ALARM_RED else COLOR_DATA_BLUE
         }

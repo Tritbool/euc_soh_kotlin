@@ -69,9 +69,11 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
     private val _state = MutableStateFlow(SohUiState())
     val state: StateFlow<SohUiState> = _state.asStateFlow()
 
+    @Suppress("unused so far")
     private val prefs = application.getSharedPreferences("euc_soh_prefs", Context.MODE_PRIVATE)
 
     private val _progressState = MutableStateFlow<ProgressState?>(null)
+    @Suppress("unused so far")
     val progressState: StateFlow<ProgressState?> = _progressState.asStateFlow()
 
 
@@ -478,6 +480,7 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
     /**
      * Clears analysis results.
      */
+    @Suppress("unused so far")
     fun clearResults() {
         Log.d(TAG, "Clearing results")
         _state.update {

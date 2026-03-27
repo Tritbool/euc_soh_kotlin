@@ -2,6 +2,7 @@ package io.github.eucsoh.android.visualization
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.util.Log
 import com.itextpdf.io.image.ImageDataFactory
 import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.colors.DeviceRgb
@@ -32,6 +33,7 @@ class PdfExportService(private val context: Context) {
         private const val TAG = "PdfExportService"
 
         // Police embarquée dans Android, toujours disponible
+        @Suppress("unused so far")
         private const val FONT = "fonts/NotoSans-Regular.ttf"
     }
 
@@ -45,9 +47,11 @@ class PdfExportService(private val context: Context) {
         macAddress: String,
         outputFileName: String? = null
     ): File = withContext(Dispatchers.IO) {
-
-        if (gaussCharts.isNullOrEmpty())
+        Log.d(TAG,"Exporting pdf")
+        if (gaussCharts.isNullOrEmpty()) {
+            Log.d(TAG, "NO PDF")
             throw IllegalArgumentException("No charts to export")
+        }
 
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
         val fileName = outputFileName ?: "${wheelName}-${macAddress}_SoH_${timestamp}.pdf"
@@ -117,18 +121,17 @@ class PdfExportService(private val context: Context) {
         addAlarmsPage(document, result)
 
         // ── Pages charts ─────────────────────────────────────────────────
-        addChartSection(document, pdfDoc, gaussCharts, "Gaussian Bands (±1σ / ±2σ)", pageSize)
+        addChartSection(document, gaussCharts, "Gaussian Bands (±1σ / ±2σ)", pageSize)
 
         if (!trendCharts.isNullOrEmpty()) {
-            addChartSection(document, pdfDoc, trendCharts, "Trend (linear regression)", pageSize)
+            addChartSection(document,  trendCharts, "Trend (linear regression)", pageSize)
         }
         if (!cusumCharts.isNullOrEmpty()) {
-            addChartSection(document, pdfDoc, cusumCharts, "CUSUM (change detection)", pageSize)
+            addChartSection(document, cusumCharts, "CUSUM (change detection)", pageSize)
         }
         if (!inflexionCharts.isNullOrEmpty()) {
             addChartSection(
                 document,
-                pdfDoc,
                 inflexionCharts,
                 "Inflexion (regime change)",
                 pageSize
@@ -314,7 +317,7 @@ class PdfExportService(private val context: Context) {
             headers.forEach { col ->
                 val raw = row[col]
                 val text = formatValue(raw)
-                val align = if (raw is Number || raw is Double || raw is Float)
+                val align = if (raw is Number)
                     TextAlignment.RIGHT
                 else
                     TextAlignment.LEFT
@@ -340,7 +343,6 @@ class PdfExportService(private val context: Context) {
     // ────────────────────────────────────────────────────────────────────
     private fun addChartSection(
         document: Document,
-        pdfDoc: PdfDocument,
         charts: List<Pair<String, Bitmap>>,
         sectionTitle: String,
         pageSize: PageSize

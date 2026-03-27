@@ -233,6 +233,7 @@ class WheelRepository(private val context: Context) {
     /**
      * Gets a specific wheel by MAC address.
      */
+    @Suppress("unused so far")
     suspend fun getWheelByMac(mac: String): WheelIdentity? = withContext(Dispatchers.IO) {
         wheelDao.getWheelByMac(mac)?.toWheelIdentity()
     }
@@ -240,6 +241,7 @@ class WheelRepository(private val context: Context) {
     /**
      * Clears all cached data.
      */
+    @Suppress("unused so far")
     suspend fun clearCache() = withContext(Dispatchers.IO) {
         Log.d(TAG, "Clearing cache")
         wheelDao.clearAll()
