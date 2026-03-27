@@ -135,14 +135,6 @@ class SohTrendCusumChartGenerator(private val context: Context) {
         val xVals = pts.map { it.first.toFloat() }
         val yVals = pts.map { it.second.toFloat() }
 
-        // Scatter : uniquement les points d'alarme en rouge, tous les autres en bleu
-        val normalEntries = mutableListOf<Entry>()
-        val alarmEntries = mutableListOf<Entry>()
-        for (i in pts.indices) {
-            val e = Entry(xVals[i], yVals[i])
-            if (i in cusum.alarmIndices) alarmEntries.add(e) else normalEntries.add(e)
-        }
-
         val label = metric.label ?: metric.csv_code
         val chart = LineChart(context)
         configureChart(
@@ -150,31 +142,38 @@ class SohTrendCusumChartGenerator(private val context: Context) {
             title = if (wheelName.isNotEmpty()) "$wheelName - CUSUM $label" else "CUSUM $label"
         )
 
-        val datasets = mutableListOf<LineDataSet>()
-        if (normalEntries.isNotEmpty()) {
-            datasets.add(LineDataSet(normalEntries, "Normal").apply {
-                color = COLOR_DATA_BLUE
-                setCircleColor(COLOR_DATA_BLUE)
-                circleRadius = 4f
-                lineWidth = 0f          // scatter : pas de ligne
-                setDrawValues(false)
-                mode = LineDataSet.Mode.LINEAR
-            })
+        // Un seul dataset avec une couleur par point
+        val allEntries = pts.mapIndexed { i, (x, y) -> Entry(x.toFloat(), y.toFloat()) }
+        val circleColors = pts.indices.map { i ->
+            if (i in cusum.alarmIndices) COLOR_ALARM_RED else COLOR_DATA_BLUE
         }
-        if (alarmEntries.isNotEmpty()) {
-            datasets.add(LineDataSet(alarmEntries, "Change detected (CUSUM)").apply {
-                color = COLOR_ALARM_RED
-                setCircleColor(COLOR_ALARM_RED)
-                setCircleHoleColor(COLOR_BLACK)
-                circleRadius = 5f
-                lineWidth = 0f          // scatter : pas de ligne
-                setDrawValues(false)
-                mode = LineDataSet.Mode.LINEAR
-            })
+
+        val scatterSet = LineDataSet(allEntries, label).apply {
+            lineWidth = 0f
+            setDrawCircles(true)
+            circleRadius = 4f
+            setCircleColors(circleColors)
+            setCircleHoleColor(Color.WHITE)
+            circleHoleRadius = 2f
+            setDrawValues(false)
+            mode = LineDataSet.Mode.LINEAR
+        }
+
+        // Dataset fantôme uniquement pour afficher "Change detected" dans la légende
+        val legendAlarmEntry = listOf(Entry(xVals.first(), yVals.first()))
+        val legendAlarm = LineDataSet(legendAlarmEntry, "Change detected (CUSUM)").apply {
+            lineWidth = 0f
+            setDrawCircles(true)
+            circleRadius = 4f
+            setCircleColor(COLOR_ALARM_RED)
+            setCircleHoleColor(Color.WHITE)
+            circleHoleRadius = 2f
+            setDrawValues(false)
         }
 
         chart.data = LineData(
-            datasets as List<com.github.mikephil.charting.interfaces.datasets.ILineDataSet>
+            listOf(scatterSet, legendAlarm)
+                    as List<com.github.mikephil.charting.interfaces.datasets.ILineDataSet>
         )
 
         val yAxis = chart.axisLeft
@@ -340,7 +339,9 @@ class SohTrendCusumChartGenerator(private val context: Context) {
         xAxis.textSize = 12f
         xAxis.setDrawGridLines(true)
         xAxis.gridColor = 0xFFE0E0E0.toInt()
-        xAxis.granularity = 1000f
+        xAxis.isGranularityEnabled = false
+        xAxis.setLabelCount(6, false)
+        //xAxis.granularity = 1000f
         xAxis.valueFormatter = object : ValueFormatter() {
             override fun getFormattedValue(value: Float) = "${value.toInt()} km"
         }

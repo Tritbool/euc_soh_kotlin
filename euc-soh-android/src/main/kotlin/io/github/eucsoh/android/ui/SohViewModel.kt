@@ -52,7 +52,8 @@ data class SohUiState(
     val showMosfetDialog: Boolean = false,
     val configDialogWheel: WheelIdentity? = null,
     var progressState: ProgressState? = null,
-    val showResults: Boolean = false
+    val showResults: Boolean = false,
+    val aliasInput: String = ""
 )
 
 /**
@@ -193,7 +194,8 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
         _state.update {
             it.copy(
                 showMosfetDialog = true,
-                configDialogWheel = wheel
+                configDialogWheel = wheel,
+                aliasInput = wheel.userAlias ?: ""
             )
         }
     }
@@ -265,6 +267,26 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
     fun dismissMosfetDialog() {
         Log.d(TAG, "Dismissing MOSFET config dialog")
         _state.update { it.copy(showMosfetDialog = false) }
+    }
+
+    fun updateAliasInput(value: String) {
+        _state.update { it.copy(aliasInput = value) }
+    }
+
+    fun renameWheel(macAddress: String, alias: String) {
+        viewModelScope.launch {
+            val wheel = _state.value.detectedWheels[macAddress] ?: return@launch
+            val updated = wheel.copy(userAlias = alias.trim().takeIf { it.isNotEmpty() })
+            repository.saveWheel(updated)
+            _state.update { state ->
+                state.copy(
+                    detectedWheels = state.detectedWheels + (macAddress to updated),
+                    configDialogWheel = if (state.configDialogWheel?.macAddress == macAddress) updated else state.configDialogWheel,
+                    showMosfetDialog = false
+                )
+            }
+            Log.d(TAG, "Renamed wheel $macAddress → alias='${updated.userAlias}'")
+        }
     }
 
     /**

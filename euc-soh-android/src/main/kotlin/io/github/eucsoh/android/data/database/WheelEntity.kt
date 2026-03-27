@@ -16,6 +16,7 @@ import kotlinx.serialization.json.Json
 data class WheelEntity(
     @PrimaryKey val macAddress: String,
     val displayName: String,
+    val userAlias: String? = null,
     val manufacturer: String?,
     val model: String?,
     val serialNumber: String?,
@@ -33,6 +34,7 @@ fun WheelIdentity.toEntity(timestamp: Long = System.currentTimeMillis()): WheelE
     return WheelEntity(
         macAddress = macAddress,
         displayName = displayName,
+        userAlias = userAlias,
         manufacturer = manufacturer,
         model = model,
         serialNumber = serialNumber,
@@ -49,6 +51,7 @@ fun WheelEntity.toWheelIdentity(): WheelIdentity {
     return WheelIdentity(
         macAddress = macAddress,
         displayName = displayName,
+        userAlias = userAlias,
         manufacturer = manufacturer,
         model = model,
         serialNumber = serialNumber,

@@ -125,8 +125,7 @@ fun MainScreen(
                             color = MaterialTheme.colorScheme.onSecondaryContainer
                         )
                         Text(
-                            state.selectedWheel?.displayName ?: state.selectedWheel?.macAddress
-                            ?: "",
+                            state.selectedWheel?.effectiveName ?: "",
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSecondaryContainer
@@ -200,6 +199,10 @@ fun MainScreen(
                 MosfetConfigDialog(
                     wheelName = wheel.displayName,
                     currentParams = currentParams,
+                    aliasInput = state.aliasInput,
+                    hasDataName = wheel.displayName != wheel.macAddress,
+                    onAliasChange = viewModel::updateAliasInput,
+                    onSaveAlias = { viewModel.renameWheel(wheel.macAddress, state.aliasInput) },
                     onSave = viewModel::saveMosfetConfig,
                     onClear = viewModel::clearMosfetConfig,
                     onDismiss = viewModel::dismissMosfetDialog
@@ -403,7 +406,7 @@ fun WheelListContent(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                Text(stringResource(R.string.analyze_button, selectedWheel.displayName))
+                Text(stringResource(R.string.analyze_button, selectedWheel.effectiveName))
             }
         }
     }
@@ -438,7 +441,7 @@ fun WheelCard(
             // Left: wheel info
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    wheel.displayName,
+                    wheel.effectiveName,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )

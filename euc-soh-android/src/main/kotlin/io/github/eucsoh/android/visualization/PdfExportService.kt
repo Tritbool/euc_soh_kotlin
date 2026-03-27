@@ -5,18 +5,18 @@ import android.graphics.Bitmap
 import com.itextpdf.io.image.ImageDataFactory
 import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.colors.DeviceRgb
-import com.itextpdf.kernel.font.PdfFontFactory
 import com.itextpdf.kernel.geom.PageSize
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
+import com.itextpdf.layout.element.AreaBreak
 import com.itextpdf.layout.element.Cell
 import com.itextpdf.layout.element.Image
 import com.itextpdf.layout.element.Paragraph
 import com.itextpdf.layout.element.Table
+import com.itextpdf.layout.properties.AreaBreakType
 import com.itextpdf.layout.properties.HorizontalAlignment
 import com.itextpdf.layout.properties.TextAlignment
-import com.itextpdf.layout.properties.UnitValue
 import io.github.eucsoh.SohAnalyzer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -25,8 +25,6 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import com.itextpdf.layout.element.AreaBreak
-import com.itextpdf.layout.properties.AreaBreakType
 
 class PdfExportService(private val context: Context) {
 
@@ -163,7 +161,7 @@ class PdfExportService(private val context: Context) {
         }
 
         // Taille max d'un bloc
-        val chunkSize = 16
+        val chunkSize = 10
 
         // Découpe en tranches
         val chunks: List<List<String>> = baseHeaders

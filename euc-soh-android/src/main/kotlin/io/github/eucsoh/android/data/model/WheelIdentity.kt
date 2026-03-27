@@ -12,8 +12,15 @@ data class WheelIdentity(
     val manufacturer: String? = null,     // "Inmotion"
     val model: String? = null,           // "P6"
     val serialNumber: String? = null,    // "A14219A150009559"
-    val source: WheelDataSource = WheelDataSource.UNKNOWN
-)
+    val source: WheelDataSource = WheelDataSource.UNKNOWN,
+    val userAlias: String? = null,
+){
+    // Nom à afficher dans l'UI et les graphiques
+    val effectiveName: String
+        get() = displayName.takeIf { it != macAddress }   // vrai nom dans les données
+            ?: userAlias                                    // alias utilisateur
+            ?: macAddress                                   // fallback brut
+}
 
 /**
  * Source from which wheel data was detected.

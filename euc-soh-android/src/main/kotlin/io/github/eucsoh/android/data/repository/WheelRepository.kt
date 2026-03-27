@@ -6,6 +6,7 @@ import android.os.Environment
 import android.util.Log
 import io.github.eucsoh.android.data.database.WheelDatabase
 import io.github.eucsoh.android.data.database.toEntities
+import io.github.eucsoh.android.data.database.toEntity
 import io.github.eucsoh.android.data.database.toWheelIdentities
 import io.github.eucsoh.android.data.database.toWheelIdentity
 import io.github.eucsoh.android.data.model.WheelIdentity
@@ -240,5 +241,12 @@ class WheelRepository(private val context: Context) {
     suspend fun clearCache() = withContext(Dispatchers.IO) {
         Log.d(TAG, "Clearing cache")
         wheelDao.clearAll()
+    }
+
+    suspend fun saveWheel(wheel: WheelIdentity) = withContext(Dispatchers.IO) {
+        val existing = wheelDao.getWheelByMac(wheel.macAddress)
+        val timestamp = existing?.lastScanTimestamp ?: System.currentTimeMillis()
+        wheelDao.insertWheels(listOf(wheel.toEntity(timestamp)))
+        Log.d(TAG, "Saved wheel ${wheel.macAddress} (alias=${wheel.userAlias})")
     }
 }

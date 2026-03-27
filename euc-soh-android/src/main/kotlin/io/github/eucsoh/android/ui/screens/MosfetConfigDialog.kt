@@ -28,6 +28,10 @@ import io.github.eucsoh.android.R
 fun MosfetConfigDialog(
     wheelName: String,
     currentParams: MOSFETParams?,
+    aliasInput: String,
+    hasDataName: Boolean,
+    onAliasChange: (String) -> Unit,
+    onSaveAlias: () -> Unit,
     onSave: (MOSFETParams) -> Unit,
     onClear: () -> Unit,
     onDismiss: () -> Unit
@@ -56,6 +60,29 @@ fun MosfetConfigDialog(
                     .padding(vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                // Wheel name field
+                OutlinedTextField(
+                    value = if (hasDataName) wheelName else aliasInput,
+                    onValueChange = { if (!hasDataName) onAliasChange(it) },
+                    label = { Text("Wheel name") },
+                    enabled = !hasDataName,
+                    supportingText = {
+                        if (hasDataName)
+                            Text("Name from logs — cannot be overridden",
+                                color = MaterialTheme.colorScheme.outline)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                if (!hasDataName) {
+                    Button(
+                        onClick = onSaveAlias,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Save name")
+                    }
+                }
+
                 // Help button
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -160,6 +187,8 @@ fun MosfetConfigDialog(
                         color = MaterialTheme.colorScheme.secondaryContainer,
                         shape = MaterialTheme.shapes.small
                     ) {
+
+
                         Column(modifier = Modifier.padding(8.dp)) {
                             Text(
                                 stringResource(R.string.mosfet_current_config_title),

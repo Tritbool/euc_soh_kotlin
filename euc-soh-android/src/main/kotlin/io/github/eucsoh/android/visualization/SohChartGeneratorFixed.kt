@@ -136,7 +136,9 @@ class SohChartGeneratorFixed(private val context: Context) {
         xAxis.textSize = 12f
         xAxis.setDrawGridLines(true)
         xAxis.gridColor = 0xFFE0E0E0.toInt()
-        xAxis.granularity = 100f
+        //xAxis.granularity = 100f
+        xAxis.isGranularityEnabled = false
+        xAxis.setLabelCount(6, false)
         xAxis.valueFormatter = object : ValueFormatter() {
             override fun getFormattedValue(value: Float) = "${value.toInt()} km"
         }
