@@ -8,7 +8,7 @@
     <string name="dismiss">Dismiss</string>
     <string name="share">SHARE</string>
     <string name="ok">OK</string>
-    <string name="retry">Réessayer</string>
+    <string name="retry">Retry</string>
 
     <!-- MainScreen / TopBar -->
     <string name="topbar_title">EUC SoH Analyzer</string>
@@ -25,10 +25,10 @@
     <string name="mosfet_config_cd">MOSFET Config</string>
 
     <!-- EmptyStateScreen -->
-    <string name="no_wheel_detected">Aucune roue détectée</string>
-    <string name="no_wheel_hint">Le scanner cherche récursivement les dossiers:\n- WheelLog/\n- EUC World/\n\ndans: %1$s\n\nAssurez-vous que vos logs sont bien dans ce dossier.</string>
-    <string name="choose_folder">📁 Choisir un autre dossier</string>
-    <string name="check_permissions">Vérifier les permissions</string>
+    <string name="no_wheel_detected">No EUC found</string>
+    <string name="no_wheel_hint">Recusrively scanning in:\n- WheelLog/\n- EUC World/\n\nfrom: %1$s\n\nEnsure your logs are in those folders.</string>
+    <string name="choose_folder">📁 Choose another folder</string>
+    <string name="check_permissions">Check permissions</string>
 
     <!-- Loading / Progress -->
     <string name="scanning_eucs">Scanning for EUCs</string>
