@@ -145,40 +145,48 @@ class PackInferenceTest {
     fun `chooseBatteryCurrentWindow for 16S pack`() {
         val (iMin, iMax) = PackInference.chooseBatteryCurrentWindow(16)
 
-        assertEquals(8.0, iMin, "16S should use 8A min current")
-        assertEquals(60.0, iMax, "16S should use 60A max current")
+        assertEquals(6.0, iMin, "16S should use 6A min current")
+        assertEquals(90.0, iMax, "16S should use 90A max current")
     }
 
     @Test
     fun `chooseBatteryCurrentWindow for 20S pack`() {
         val (iMin, iMax) = PackInference.chooseBatteryCurrentWindow(20)
 
-        assertEquals(15.0, iMin, "20S should use 15A min current")
-        assertEquals(100.0, iMax, "20S should use 100A max current")
+        assertEquals(12.0, iMin, "20S should use 12A min current")
+        assertEquals(150.0, iMax, "20S should use 150A max current")
     }
 
     @Test
     fun `chooseBatteryCurrentWindow for 24S pack`() {
         val (iMin, iMax) = PackInference.chooseBatteryCurrentWindow(24)
 
-        assertEquals(15.0, iMin, "24S should use 15A min current")
-        assertEquals(100.0, iMax, "24S should use 100A max current")
+        assertEquals(12.0, iMin, "24S should use 12A min current")
+        assertEquals(150.0, iMax, "24S should use 150A max current")
     }
 
     @Test
     fun `chooseBatteryCurrentWindow for 30S pack`() {
         val (iMin, iMax) = PackInference.chooseBatteryCurrentWindow(30)
 
-        assertEquals(20.0, iMin, "30S should use 20A min current")
-        assertEquals(150.0, iMax, "30S should use 150A max current")
+        assertEquals(10.0, iMin, "30S should use 10A min current")
+        assertEquals(180.0, iMax, "30S should use 180A max current")
     }
 
     @Test
-    fun `chooseBatteryCurrentWindow for 40S+ high-power pack`() {
-        val (iMin, iMax) = PackInference.chooseBatteryCurrentWindow(40)
+    fun `chooseBatteryCurrentWindow for 50S high-power pack`() {
+        val (iMin, iMax) = PackInference.chooseBatteryCurrentWindow(50)
 
-        assertEquals(30.0, iMin, "40S+ should use 30A min current")
-        assertEquals(200.0, iMax, "40S+ should use 200A max current")
+        assertEquals(11.0, iMin, "50+ should use 11A min current")
+        assertEquals(200.0, iMax, "50S should use 200A max current")
+    }
+
+    @Test
+    fun `chooseBatteryCurrentWindow for 57S+ high-power pack`() {
+        val (iMin, iMax) = PackInference.chooseBatteryCurrentWindow(57)
+
+        assertEquals(3.0, iMin, "57S+ should use 3A min current")
+        assertEquals(200.0, iMax, "57S+ should use 200A max current")
     }
 
     @Test

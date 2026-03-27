@@ -67,10 +67,10 @@ object PackInference {
     fun chooseBatteryCurrentWindow(ns: Int?): Pair<Double, Double> {
         if (ns == null) return 10.0 to 80.0
         return when {
-            ns <= 16 -> 6.0 to 60.0       // ~400W  when 67.2V
-            ns <= 24 -> 12.0 to 100.0     // ~1200W when 100.8V
-            ns <= 36 -> 10.0 to 150.0     // ~1500W when 151.2V
-            ns <= 56 -> 11.0 to 150.0     // ~2600W when 235.2V
+            ns <= 16 -> 6.0 to 90.0       // ~400W  when 67.2V
+            ns <= 24 -> 12.0 to 150.0     // ~1200W when 100.8V
+            ns <= 36 -> 10.0 to 180.0     // ~1500W when 151.2V
+            ns <= 56 -> 11.0 to 200.0     // ~2600W when 235.2V
             else -> 3.0 to 200.0
         }
     }
