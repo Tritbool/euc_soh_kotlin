@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">EUC SoH Analyzer</string>
+
+    <!-- Common -->
+    <string name="back">رجوع</string>
+    <string name="close">إغلاق</string>
+    <string name="dismiss">تجاهل</string>
+    <string name="share">مشاركة</string>
+    <string name="ok">موافق</string>
+    <string name="retry">إعادة المحاولة</string>
+
+    <!-- MainScreen / TopBar -->
+    <string name="topbar_title">EUC SoH Analyzer</string>
+    <string name="topbar_refresh">تحديث</string>
+    <string name="selected_euc_label">EUC المحدد:</string>
+
+    <!-- WheelListContent -->
+    <string name="detected_eucs">EUC مكتشفة (%1$d)</string>
+    <string name="analyze_button">تحليل %1$s</string>
+    <string name="view_last_results">عرض آخر النتائج</string>
+    <string name="csv_logs_count">%1$d سجلات CSV</string>
+    <string name="mac_label">MAC: %1$s</string>
+    <string name="mosfet_badge">MOSFET</string>
+    <string name="mosfet_config_cd">إعداد MOSFET</string>
+
+    <!-- EmptyStateScreen -->
+    <string name="no_wheel_detected">لم يُعثر على أي EUC</string>
+    <string name="no_wheel_hint">يبحث الماسح بشكل متكرر في المجلدات:\n- WheelLog/\n- EUC World/\n\nفي: %1$s\n\nتأكد من وجود سجلاتك في هذا المجلد.</string>
+    <string name="choose_folder">📁 اختيار مجلد آخر</string>
+    <string name="check_permissions">التحقق من الأذونات</string>
+
+    <!-- Loading / Progress -->
+    <string name="scanning_eucs">جارٍ البحث عن EUC</string>
+
+    <!-- ResultsScreenEnhanced -->
+    <string name="results_title">نتائج التحليل</string>
+    <string name="results_subtitle">%1$d ملف محلَّل، %2$d مقاييس</string>
+    <string name="results_ea">Ea = %1$s kJ/mol</string>
+    <string name="results_alarms">⚠️ %1$d تنبيه(ات)</string>
+    <string name="export_pdf_cd">تصدير PDF</string>
+    <string name="export_csv_cd">تصدير CSV</string>
+    <string name="export_archive_cd">تصدير الأرشيف</string>
+    <string name="files_button_cd">الملفات</string>
+    <string name="charts_button_cd">الرسوم البيانية</string>
+    <string name="pdf_saved">تم حفظ PDF — اضغط مشاركة لإرساله</string>
+    <string name="csv_saved">تم حفظ CSV — اضغط مشاركة لإرساله</string>
+    <string name="zip_saved">تم حفظ الأرشيف — اضغط مشاركة لإرساله</string>
+    <string name="export_failed">فشل تصدير %1$s: %2$s</string>
+    <string name="share_failed">فشلت المشاركة: %1$s</string>
+    <string name="share_chooser_title">مشاركة تصدير SoH</string>
+
+    <!-- ChartGalleryScreen -->
+    <string name="charts_title">الرسوم البيانية — %1$s</string>
+    <string name="charts_tab_gaussian">غاوسية</string>
+    <string name="charts_tab_trend">الاتجاه</string>
+    <string name="charts_tab_cusum">CUSUM</string>
+    <string name="charts_tab_inflexion">نقطة التحول</string>
+    <string name="charts_no_data">لا توجد رسوم بيانية (بيانات غير كافية)</string>
+    <string name="charts_tap_to_enlarge">اضغط للتكبير</string>
+    <string name="charts_export_pdf_cd">تصدير PDF</string>
+    <string name="charts_export_archive_cd">تصدير الأرشيف</string>
+    <string name="chart_pdf_saved">تم حفظ PDF</string>
+    <string name="chart_archive_saved">تم حفظ الأرشيف</string>
+    <string name="chart_export_failed">فشل التصدير: %1$s</string>
+    <string name="chart_archive_failed">فشل الأرشيف: %1$s</string>
+    <string name="chart_pdf_copy_failed">فشل نسخ PDF: %1$s</string>
+    <string name="chart_archive_copy_failed">فشل نسخ الأرشيف: %1$s</string>
+
+    <!-- FileListScreen -->
+    <string name="files_title">الملفات — %1$s</string>
+    <string name="files_show_rejected">عرض المرفوضة (%1$d)</string>
+    <string name="files_accepted">✅ %1$d مقبول(ة)</string>
+    <string name="files_rejected">❌ %1$d مرفوض(ة)</string>
+    <string name="files_none">لا توجد ملفات</string>
+    <string name="files_tap_hint">اضغط لعرض المسار الكامل</string>
+    <string name="files_tap_hint_preview">اضغط لعرض المسار الكامل · معاينة</string>
+
+    <!-- MosfetConfigDialog -->
+    <string name="mosfet_dialog_title">إعداد MOSFET</string>
+    <string name="mosfet_dialog_section_title">معاملات جسر MOSFET</string>
+    <string name="mosfet_help_cd">مساعدة</string>
+    <string name="mosfet_help_intro">تُستخدم هذه المعاملات لفصل R_batt عن R_mosfet أثناء التحليل.</string>
+    <string name="mosfet_help_rds">• R_ds(on): إجمالي مقاومة الجسر عند 25°C (datasheet)</string>
+    <string name="mosfet_help_coeff">• معامل الحرارة: +1%%/°C هو المعتاد لـ MOSFETs</string>
+    <string name="mosfet_help_wiring">• R_wiring: مقاومة الأسلاك الثابتة (اختياري)</string>
+    <string name="mosfet_field_rds_label">R_ds(on) @ 25°C إجمالي (Ω)</string>
+    <string name="mosfet_field_rds_placeholder">مثال: 0.002</string>
+    <string name="mosfet_field_rds_support">مقاومة الجسر عند 25°C</string>
+    <string name="mosfet_field_coeff_label">معامل الحرارة (ΔR/°C)</string>
+    <string name="mosfet_field_coeff_placeholder">مثال: 0.01</string>
+    <string name="mosfet_field_coeff_support">التغير النسبي لكل °C (نموذجي: 0.01 = +1%%/°C)</string>
+    <string name="mosfet_field_wiring_label">R_wiring (Ω)</string>
+    <string name="mosfet_field_wiring_placeholder">مثال: 0.0005</string>
+    <string name="mosfet_field_wiring_support">مقاومة الأسلاك الثابتة (اختياري)</string>
+    <string name="mosfet_current_config_title">الإعداد الحالي</string>
+    <string name="mosfet_current_rds">R_ds: %1$s Ω</string>
+    <string name="mosfet_current_coeff">المعامل: %1$s</string>
+    <string name="mosfet_current_wiring">الأسلاك: %1$s Ω</string>
+    <string name="mosfet_save">حفظ</string>
+    <string name="mosfet_reset">إعادة ضبط</string>
+    <string name="mosfet_cancel">إلغاء</string>
+
+    <!-- FileDetailsScreen -->
+    <string name="file_details_title">تفاصيل الملفات (%1$d)</string>
+    <string name="file_details_valid_label">الملفات الصالحة</string>
+    <string name="file_details_valid_count">%1$d/%2$d</string>
+    <string name="file_details_excluded_label">مستثنى</string>
+    <string name="file_details_analyze_button">تحليل %1$d ملف(ات)</string>
+    <string name="file_details_excluded_hint">❌ مستثنى (اضغط لإعادة التفعيل)</string>
+</resources>

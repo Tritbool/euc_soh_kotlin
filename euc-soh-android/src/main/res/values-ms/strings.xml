@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">EUC SoH Analyzer</string>
+
+    <!-- Common -->
+    <string name="back">Kembali</string>
+    <string name="close">Tutup</string>
+    <string name="dismiss">Abaikan</string>
+    <string name="share">KONGSI</string>
+    <string name="ok">OK</string>
+    <string name="retry">Cuba semula</string>
+
+    <!-- MainScreen / TopBar -->
+    <string name="topbar_title">EUC SoH Analyzer</string>
+    <string name="topbar_refresh">Muat semula</string>
+    <string name="selected_euc_label">EUC dipilih:</string>
+
+    <!-- WheelListContent -->
+    <string name="detected_eucs">EUC dikesan (%1$d)</string>
+    <string name="analyze_button">Analisis %1$s</string>
+    <string name="view_last_results">Lihat keputusan terkini</string>
+    <string name="csv_logs_count">%1$d Log CSV</string>
+    <string name="mac_label">MAC: %1$s</string>
+    <string name="mosfet_badge">MOSFET</string>
+    <string name="mosfet_config_cd">Konfigurasi MOSFET</string>
+
+    <!-- EmptyStateScreen -->
+    <string name="no_wheel_detected">Tiada EUC dijumpai</string>
+    <string name="no_wheel_hint">Pengimbas mencari folder secara rekursif:\n- WheelLog/\n- EUC World/\n\ndalam: %1$s\n\nPastikan log anda berada dalam folder ini.</string>
+    <string name="choose_folder">📁 Pilih folder lain</string>
+    <string name="check_permissions">Semak kebenaran</string>
+
+    <!-- Loading / Progress -->
+    <string name="scanning_eucs">Mengimbas EUC</string>
+
+    <!-- ResultsScreenEnhanced -->
+    <string name="results_title">Keputusan analisis</string>
+    <string name="results_subtitle">%1$d fail dianalisis, %2$d metrik</string>
+    <string name="results_ea">Ea = %1$s kJ/mol</string>
+    <string name="results_alarms">⚠️ %1$d amaran</string>
+    <string name="export_pdf_cd">Eksport PDF</string>
+    <string name="export_csv_cd">Eksport CSV</string>
+    <string name="export_archive_cd">Eksport arkib</string>
+    <string name="files_button_cd">Fail</string>
+    <string name="charts_button_cd">Graf</string>
+    <string name="pdf_saved">PDF disimpan — ketik KONGSI untuk menghantar</string>
+    <string name="csv_saved">CSV disimpan — ketik KONGSI untuk menghantar</string>
+    <string name="zip_saved">Arkib disimpan — ketik KONGSI untuk menghantar</string>
+    <string name="export_failed">Eksport %1$s gagal: %2$s</string>
+    <string name="share_failed">Perkongsian gagal: %1$s</string>
+    <string name="share_chooser_title">Kongsi eksport SoH</string>
+
+    <!-- ChartGalleryScreen -->
+    <string name="charts_title">Graf — %1$s</string>
+    <string name="charts_tab_gaussian">Gaussian</string>
+    <string name="charts_tab_trend">Trend</string>
+    <string name="charts_tab_cusum">CUSUM</string>
+    <string name="charts_tab_inflexion">Infleksi</string>
+    <string name="charts_no_data">Tiada graf tersedia (data tidak mencukupi)</string>
+    <string name="charts_tap_to_enlarge">Ketik untuk besarkan</string>
+    <string name="charts_export_pdf_cd">Eksport PDF</string>
+    <string name="charts_export_archive_cd">Eksport arkib</string>
+    <string name="chart_pdf_saved">PDF disimpan</string>
+    <string name="chart_archive_saved">Arkib disimpan</string>
+    <string name="chart_export_failed">Eksport gagal: %1$s</string>
+    <string name="chart_archive_failed">Arkib gagal: %1$s</string>
+    <string name="chart_pdf_copy_failed">Salinan PDF gagal: %1$s</string>
+    <string name="chart_archive_copy_failed">Salinan arkib gagal: %1$s</string>
+
+    <!-- FileListScreen -->
+    <string name="files_title">Fail — %1$s</string>
+    <string name="files_show_rejected">Tunjuk yang ditolak (%1$d)</string>
+    <string name="files_accepted">✅ %1$d diterima</string>
+    <string name="files_rejected">❌ %1$d ditolak</string>
+    <string name="files_none">Tiada fail</string>
+    <string name="files_tap_hint">Ketik untuk lihat laluan penuh</string>
+    <string name="files_tap_hint_preview">Ketik untuk lihat laluan penuh · Pratonton</string>
+
+    <!-- MosfetConfigDialog -->
+    <string name="mosfet_dialog_title">Konfigurasi MOSFET</string>
+    <string name="mosfet_dialog_section_title">Parameter jambatan MOSFET</string>
+    <string name="mosfet_help_cd">Bantuan</string>
+    <string name="mosfet_help_intro">Parameter ini digunakan untuk mengasingkan R_batt daripada R_mosfet semasa analisis.</string>
+    <string name="mosfet_help_rds">• R_ds(on): Jumlah rintangan jambatan pada 25°C (datasheet)</string>
+    <string name="mosfet_help_coeff">• Pekali suhu: +1%%/°C adalah biasa untuk MOSFET</string>
+    <string name="mosfet_help_wiring">• R_wiring: Rintangan pendawaian tetap (pilihan)</string>
+    <string name="mosfet_field_rds_label">R_ds(on) @ 25°C jumlah (Ω)</string>
+    <string name="mosfet_field_rds_placeholder">Cth: 0.002</string>
+    <string name="mosfet_field_rds_support">Rintangan jambatan pada 25°C</string>
+    <string name="mosfet_field_coeff_label">Pekali suhu (ΔR/°C)</string>
+    <string name="mosfet_field_coeff_placeholder">Cth: 0.01</string>
+    <string name="mosfet_field_coeff_support">Variasi relatif per °C (tipikal 0.01 = +1%%/°C)</string>
+    <string name="mosfet_field_wiring_label">R_wiring (Ω)</string>
+    <string name="mosfet_field_wiring_placeholder">Cth: 0.0005</string>
+    <string name="mosfet_field_wiring_support">Rintangan pendawaian tetap (pilihan)</string>
+    <string name="mosfet_current_config_title">Konfigurasi semasa</string>
+    <string name="mosfet_current_rds">R_ds: %1$s Ω</string>
+    <string name="mosfet_current_coeff">Pekali: %1$s</string>
+    <string name="mosfet_current_wiring">Pendawaian: %1$s Ω</string>
+    <string name="mosfet_save">Simpan</string>
+    <string name="mosfet_reset">Set semula</string>
+    <string name="mosfet_cancel">Batal</string>
+
+    <!-- FileDetailsScreen -->
+    <string name="file_details_title">Butiran fail (%1$d)</string>
+    <string name="file_details_valid_label">Fail sah</string>
+    <string name="file_details_valid_count">%1$d/%2$d</string>
+    <string name="file_details_excluded_label">Dikecualikan</string>
+    <string name="file_details_analyze_button">Analisis %1$d fail</string>
+    <string name="file_details_excluded_hint">❌ DIKECUALIKAN (ketik untuk aktifkan semula)</string>
+</resources>

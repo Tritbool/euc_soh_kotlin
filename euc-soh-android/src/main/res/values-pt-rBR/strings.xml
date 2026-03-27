@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share">COMPARTILHAR</string>
+    <string name="detected_eucs">EUC detectados (%1$d)</string>
+    <string name="csv_logs_count">%1$d registros CSV</string>
+    <string name="results_subtitle">%1$d arquivos analisados, %2$d métricas</string>
+    <string name="export_archive_cd">Exportar arquivo</string>
+    <string name="files_button_cd">Arquivos</string>
+    <string name="pdf_saved">PDF salvo — toque em COMPARTILHAR para enviar</string>
+    <string name="csv_saved">CSV salvo — toque em COMPARTILHAR para enviar</string>
+    <string name="zip_saved">Arquivo salvo — toque em COMPARTILHAR para enviar</string>
+    <string name="share_failed">Falha ao compartilhar: %1$s</string>
+    <string name="share_chooser_title">Compartilhar exportação SoH</string>
+    <string name="files_title">Arquivos — %1$s</string>
+    <string name="files_accepted">✅ %1$d aceito(s)</string>
+    <string name="files_rejected">❌ %1$d rejeitado(s)</string>
+    <string name="files_none">Sem arquivos</string>
+    <string name="files_tap_hint">Toque para ver o caminho completo</string>
+    <string name="files_tap_hint_preview">Toque para ver o caminho completo · Pré-visualização</string>
+    <string name="mosfet_save">Salvar</string>
+    <string name="file_details_title">Detalhes dos arquivos (%1$d)</string>
+    <string name="file_details_valid_label">Arquivos válidos</string>
+    <string name="file_details_analyze_button">Analisar %1$d arquivo(s)</string>
+    <string name="file_details_excluded_hint">❌ EXCLUÍDO (toque para reativar)</string>
+</resources>
