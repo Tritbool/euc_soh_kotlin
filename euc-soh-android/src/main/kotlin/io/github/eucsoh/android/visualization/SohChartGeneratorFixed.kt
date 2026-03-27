@@ -14,8 +14,10 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
 import io.github.eucsoh.Constants.Metrics
 import io.github.eucsoh.model.PlotData
+import java.util.Locale
 import kotlin.math.max
 import kotlin.math.min
+import androidx.core.graphics.createBitmap
 
 /**
  * Génère les graphiques gaussiens SoH.
@@ -92,7 +94,7 @@ class SohChartGeneratorFixed(private val context: Context) {
             textColor = COLOR_ORANGE; textSize = 10f
         })
         yAxis.addLimitLine(
-            LimitLine(dangerThreshold, "Danger: ${String.format("%.3f", dangerThreshold)}").apply {
+            LimitLine(dangerThreshold, "Danger: ${String.format(Locale.getDefault(),"%.3f", dangerThreshold)}").apply {
                 lineColor = COLOR_RED; lineWidth = 3f
                 enableDashedLine(12f, 8f, 0f)
                 textColor = COLOR_RED; textSize = 11f
@@ -158,7 +160,7 @@ class SohChartGeneratorFixed(private val context: Context) {
             View.MeasureSpec.makeMeasureSpec(CHART_HEIGHT, View.MeasureSpec.EXACTLY)
         )
         chart.layout(0, 0, CHART_WIDTH, CHART_HEIGHT)
-        val bitmap = Bitmap.createBitmap(CHART_WIDTH, CHART_HEIGHT, Bitmap.Config.ARGB_8888)
+        val bitmap = createBitmap(CHART_WIDTH, CHART_HEIGHT)
         val canvas = Canvas(bitmap)
         canvas.drawColor(Color.WHITE)
         chart.draw(canvas)

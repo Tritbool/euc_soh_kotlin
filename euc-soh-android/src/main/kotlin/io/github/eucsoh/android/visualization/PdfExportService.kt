@@ -409,7 +409,7 @@ class PdfExportService(private val context: Context) {
         result: SohAnalyzer.AnalysisResult,
         wheelName: String
     ): SohAnalyzer.SummaryData {
-        val analyzer = io.github.eucsoh.SohAnalyzer(
+        val analyzer = SohAnalyzer(
             csvSource = null, mosfetParams = null,
             logger = object : io.github.eucsoh.Logger {
                 override fun d(tag: String, message: String) {}

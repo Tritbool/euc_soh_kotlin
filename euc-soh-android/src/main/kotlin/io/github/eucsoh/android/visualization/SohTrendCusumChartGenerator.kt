@@ -16,8 +16,10 @@ import io.github.eucsoh.Constants.Metrics
 import io.github.eucsoh.Constants.CUSUM_METRICS
 import io.github.eucsoh.Constants.TREND_METRICS
 import io.github.eucsoh.model.PlotData
+import java.util.Locale
 import kotlin.math.max
 import kotlin.math.min
+import androidx.core.graphics.createBitmap
 
 /**
  * Génère les graphiques Trend, CUSUM et Slope Inflexion pour le rapport SoH.
@@ -31,7 +33,6 @@ class SohTrendCusumChartGenerator(private val context: Context) {
 
         const val COLOR_DATA_BLUE = 0xFF2196F3.toInt()
         const val COLOR_ALARM_RED = 0xFFE53935.toInt()
-        const val COLOR_BLACK = 0xFF000000.toInt()
         const val COLOR_SLOW_BLUE = 0xFF1565C0.toInt()
         const val COLOR_INFLEXION_ORANGE = 0xFFFF6F00.toInt()
         const val COLOR_MU_REF = 0xFF4CAF50.toInt()
@@ -85,7 +86,7 @@ class SohTrendCusumChartGenerator(private val context: Context) {
                 Entry(xMin, (trend.slope * xMin + trend.intercept).toFloat()),
                 Entry(xMax, (trend.slope * xMax + trend.intercept).toFloat())
             ),
-            "Trend: $sign${String.format("%.4f", slopePerThousand)} /1000 km"
+            "Trend: $sign${String.format(Locale.getDefault(),"%.4f", slopePerThousand)} /1000 km"
         ).apply {
             color = COLOR_REGRESSION
             lineWidth = 2.5f
@@ -181,7 +182,7 @@ class SohTrendCusumChartGenerator(private val context: Context) {
         yAxis.addLimitLine(
             LimitLine(
                 cusum.muRef.toFloat(),
-                "µ_ref = ${String.format("%.4f", cusum.muRef)}"
+                "µ_ref = ${String.format(Locale.getDefault(),"%.4f", cusum.muRef)}"
             ).apply {
                 lineColor = COLOR_MU_REF; lineWidth = 2f
                 textColor = COLOR_MU_REF; textSize = 10f
@@ -283,7 +284,7 @@ class SohTrendCusumChartGenerator(private val context: Context) {
         yAxis.addLimitLine(
             LimitLine(
                 inflexion.dangerLimit.toFloat(),
-                "danger threshold ≈ ${String.format("%.2f", inflexion.dangerLimit)}"
+                "danger threshold ≈ ${String.format(Locale.getDefault(),"%.2f", inflexion.dangerLimit)}"
             ).apply {
                 lineColor = COLOR_DANGER; lineWidth = 2f
                 textColor = COLOR_DANGER; textSize = 11f
@@ -361,7 +362,7 @@ class SohTrendCusumChartGenerator(private val context: Context) {
             View.MeasureSpec.makeMeasureSpec(CHART_HEIGHT, View.MeasureSpec.EXACTLY)
         )
         chart.layout(0, 0, CHART_WIDTH, CHART_HEIGHT)
-        val bitmap = Bitmap.createBitmap(CHART_WIDTH, CHART_HEIGHT, Bitmap.Config.ARGB_8888)
+        val bitmap = createBitmap(CHART_WIDTH, CHART_HEIGHT)
         val canvas = Canvas(bitmap)
         canvas.drawColor(Color.WHITE)
         chart.draw(canvas)

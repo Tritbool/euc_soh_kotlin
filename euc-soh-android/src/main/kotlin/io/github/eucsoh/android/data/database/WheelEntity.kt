@@ -6,8 +6,8 @@ import androidx.room.PrimaryKey
 import io.github.eucsoh.android.data.model.WheelDataSource
 import io.github.eucsoh.android.data.model.WheelIdentity
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import androidx.core.net.toUri
 
 /**
  * Room entity for persisting detected wheels.
@@ -46,7 +46,7 @@ fun WheelIdentity.toEntity(timestamp: Long = System.currentTimeMillis()): WheelE
 
 fun WheelEntity.toWheelIdentity(): WheelIdentity {
     val uris = Json.decodeFromString<List<String>>(csvFileUris)
-        .map { Uri.parse(it) }
+        .map { it.toUri() }
     
     return WheelIdentity(
         macAddress = macAddress,

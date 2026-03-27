@@ -14,6 +14,8 @@ import io.github.eucsoh.android.data.scanner.WheelScanner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import androidx.core.content.edit
+import androidx.core.net.toUri
 
 /**
  * Repository for wheel detection with caching.
@@ -88,10 +90,10 @@ class WheelRepository(private val context: Context) {
      */
     fun setRootPath(path: File) {
         Log.d(TAG, "Setting root path: ${path.absolutePath}")
-        prefs.edit()
-            .putString(PREF_ROOT_PATH, path.absolutePath)
-            .remove(PREF_ROOT_URI)  // Clear URI if switching to File mode
-            .apply()
+        prefs.edit {
+            putString(PREF_ROOT_PATH, path.absolutePath)
+                .remove(PREF_ROOT_URI)  // Clear URI if switching to File mode
+        }
     }
 
     /**
@@ -99,10 +101,10 @@ class WheelRepository(private val context: Context) {
      */
     fun setRootUri(uri: Uri) {
         Log.d(TAG, "Setting root URI: $uri")
-        prefs.edit()
-            .putString(PREF_ROOT_URI, uri.toString())
-            .remove(PREF_ROOT_PATH)  // Clear path if switching to URI mode
-            .apply()
+        prefs.edit {
+            putString(PREF_ROOT_URI, uri.toString())
+                .remove(PREF_ROOT_PATH)  // Clear path if switching to URI mode
+        }
     }
 
     /**
@@ -110,7 +112,7 @@ class WheelRepository(private val context: Context) {
      */
     fun getRootUri(): Uri? {
         val storedUri = prefs.getString(PREF_ROOT_URI, null) ?: return null
-        return Uri.parse(storedUri)
+        return storedUri.toUri()
     }
 
     /**
