@@ -21,7 +21,8 @@ private val LightColors = lightColorScheme(
     error = Color(0xFFD32F2F.toInt()),
     onError = Color(0xFFFFFFFF.toInt()),
 
-    background = Color(0xFFF5F5F5.toInt()),
+    //background = Color(0xFFF5F5F5.toInt()),
+    background = Color(0xFF3D85DC.toInt()),
     onBackground = Color(0xFF212121.toInt()),
 
     surface = Color(0xFFFFFFFF.toInt()),
