@@ -37,6 +37,7 @@ import io.github.eucsoh.android.data.model.CsvFileInfo
 import androidx.compose.ui.res.stringResource
 import io.github.eucsoh.android.R
 
+@Suppress("unused so far")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FileDetailsScreen(
