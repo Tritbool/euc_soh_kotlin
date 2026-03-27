@@ -33,14 +33,11 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import androidx.activity.compose.BackHandler
+import androidx.compose.ui.res.stringResource
+import io.github.eucsoh.android.R
 
 /** Onglets disponibles dans la galerie. */
-private enum class ChartTab(val label: String) {
-    GAUSSIAN("Gaussian"),
-    TREND("Trend"),
-    CUSUM("CUSUM"),
-    INFLEXION("Inflexion")
-}
+private enum class ChartTab { GAUSSIAN, TREND, CUSUM, INFLEXION }
 
 /**
  * Chart gallery screen showing all SoH metrics visualizations.
@@ -138,9 +135,9 @@ fun ChartGalleryScreen(
                 context.contentResolver.openOutputStream(destUri)?.use { out ->
                     pdfFile!!.inputStream().copyTo(out)
                 }
-                exportMessage = "PDF saved"
+                exportMessage = context.getString(R.string.chart_pdf_saved)
             } catch (e: Exception) {
-                exportMessage = "PDF copy failed: ${e.message}"
+                exportMessage = context.getString(R.string.chart_pdf_copy_failed, e.message ?: "")
             }
         }
     }
@@ -154,9 +151,9 @@ fun ChartGalleryScreen(
                 context.contentResolver.openOutputStream(destUri)?.use { out ->
                     zipFile!!.inputStream().copyTo(out)
                 }
-                exportMessage = "Archive saved"
+                exportMessage = context.getString(R.string.chart_archive_saved)
             } catch (e: Exception) {
-                exportMessage = "Archive copy failed: ${e.message}"
+                exportMessage = context.getString(R.string.chart_archive_copy_failed, e.message ?: "")
             }
         }
     }
@@ -165,10 +162,10 @@ fun ChartGalleryScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Charts — $wheelName") },
+                title = { Text(stringResource(R.string.charts_title, wheelName)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
                     }
                 },
                 actions = {
@@ -201,7 +198,7 @@ fun ChartGalleryScreen(
                                         createPdfLauncher.launch("${wheelName}_SoH_${timestamp}.pdf")
 
                                     } catch (e: Exception) {
-                                        exportMessage = "Export failed: ${e.message}"
+                                        exportMessage = context.getString(R.string.chart_export_failed, e.message ?: "")
                                     } finally {
                                         isExportingPdf = false
                                     }
@@ -214,7 +211,7 @@ fun ChartGalleryScreen(
                                     strokeWidth = 2.dp
                                 )
                             else
-                                Icon(Icons.Default.PictureAsPdf, "Export PDF")
+                                Icon(Icons.Default.PictureAsPdf, stringResource(R.string.charts_export_pdf_cd))
                         }
                         IconButton(
                             onClick = {
@@ -247,7 +244,7 @@ fun ChartGalleryScreen(
                                         createZipLauncher.launch("${wheelName}_SoH_${timestamp}.zip")
 
                                     } catch (e: Exception) {
-                                        exportMessage = "Archive failed: ${e.message}"
+                                        exportMessage = context.getString(R.string.chart_archive_failed, e.message ?: "")
                                     } finally {
                                         isExportingPdf = false
                                     }
@@ -255,7 +252,7 @@ fun ChartGalleryScreen(
                             }
 
                         ) {
-                            Icon(Icons.Default.FolderZip, "Export Archive")
+                            Icon(Icons.Default.FolderZip, stringResource(R.string.charts_export_archive_cd))
                         }
                     }
                 }
@@ -264,7 +261,7 @@ fun ChartGalleryScreen(
         snackbarHost = {
             exportMessage?.let { msg ->
                 Snackbar(
-                    action = { TextButton(onClick = { exportMessage = null }) { Text("Dismiss") } }
+                    action = { TextButton(onClick = { exportMessage = null }) { Text(stringResource(R.string.dismiss)) } }
                 ) { Text(msg) }
             }
         }
@@ -279,7 +276,12 @@ fun ChartGalleryScreen(
                     Tab(
                         selected = selectedTab == tab,
                         onClick = { selectedTab = tab },
-                        text = { Text(tab.label) }
+                        text = { Text(stringResource(when (tab) {
+                            ChartTab.GAUSSIAN  -> R.string.charts_tab_gaussian
+                            ChartTab.TREND     -> R.string.charts_tab_trend
+                            ChartTab.CUSUM     -> R.string.charts_tab_cusum
+                            ChartTab.INFLEXION -> R.string.charts_tab_inflexion
+                        })) }
                     )
                 }
             }
@@ -288,7 +290,7 @@ fun ChartGalleryScreen(
                 when {
                     isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                     currentCharts.isNullOrEmpty() -> Text(
-                        "No charts available (insufficient data)",
+                        stringResource(R.string.charts_no_data),
                         modifier = Modifier.align(Alignment.Center)
                     )
 
@@ -324,7 +326,7 @@ fun ChartGalleryScreen(
                             title = { Text(resolveLabel(key)) },
                             navigationIcon = {
                                 IconButton(onClick = { selectedChart = null }) {
-                                    Icon(Icons.Default.Close, "Close")
+                                    Icon(Icons.Default.Close, stringResource(R.string.close))
                                 }
                             }
                         )
@@ -379,7 +381,7 @@ fun ChartCard(
                 horizontalArrangement = Arrangement.End
             ) {
                 Text(
-                    text = "Tap to enlarge",
+                    text = stringResource(R.string.charts_tap_to_enlarge),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

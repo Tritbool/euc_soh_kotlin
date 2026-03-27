@@ -59,7 +59,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import androidx.activity.compose.BackHandler
-
+import androidx.compose.ui.res.stringResource
+import io.github.eucsoh.android.R
 /**
  * Enhanced ResultsScreen avec accès aux fichiers et graphiques.
  */
@@ -104,7 +105,7 @@ fun ResultsScreenEnhanced(
             context.contentResolver.openOutputStream(uri)
                 ?.use { pdfFile!!.inputStream().copyTo(it) }
             lastSavedType = "pdf"
-            exportMessage = "PDF saved — tap SHARE to send it"
+            exportMessage = context.getString(R.string.pdf_saved)
         }
     }
 
@@ -116,7 +117,7 @@ fun ResultsScreenEnhanced(
             context.contentResolver.openOutputStream(uri)
                 ?.use { csvFile!!.inputStream().copyTo(it) }
             lastSavedType = "csv"
-            exportMessage = "CSV saved — tap SHARE to send it"
+            exportMessage = context.getString(R.string.csv_saved)
         }
     }
     val createZipLauncher = rememberLauncherForActivityResult(
@@ -127,7 +128,8 @@ fun ResultsScreenEnhanced(
             context.contentResolver.openOutputStream(uri)
                 ?.use { zipFile!!.inputStream().copyTo(it) }
             lastSavedType = "zip"
-            exportMessage = "Archive saved — tap SHARE to send it"
+            exportMessage = context.getString(R.string.zip_saved)
+
         }
     }
 
@@ -165,22 +167,22 @@ fun ResultsScreenEnhanced(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            "Analysis results",
+                            stringResource(R.string.results_title),
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            "${rows.size} Analyzed files, ${columnNames.size} metrics",
+                            stringResource(R.string.results_subtitle, rows.size, columnNames.size),
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Text(
-                            "Ea = ${String.format("%.1f", summary.arrhenius.eaKjPerMol)} kJ/mol",
+                            stringResource(R.string.results_ea, String.format("%.1f", summary.arrhenius.eaKjPerMol)),
                             style = MaterialTheme.typography.bodyMedium
                         )
                         if (result.alarms.isNotEmpty()) {
                             Text(
-                                "⚠️ ${result.alarms.size} alarm(s)",
+                                stringResource(R.string.results_alarms, result.alarms.size),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.error,
                                 fontWeight = FontWeight.Bold
@@ -208,7 +210,7 @@ fun ResultsScreenEnhanced(
                             ) {
                                 Icon(
                                     Icons.Default.Folder,
-                                    contentDescription = "Files",
+                                    contentDescription = stringResource(R.string.files_button_cd),
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(Modifier.width(4.dp))
@@ -224,7 +226,7 @@ fun ResultsScreenEnhanced(
                         ) {
                             Icon(
                                 Icons.Default.BarChart,
-                                contentDescription = "Charts",
+                                contentDescription = stringResource(R.string.charts_button_cd),
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(Modifier.width(4.dp))
@@ -259,7 +261,7 @@ fun ResultsScreenEnhanced(
                                         )
                                         createPdfLauncher.launch("${wheelDisplayName}_SoH_${timestamp}.pdf")
                                     } catch (e: Exception) {
-                                        exportMessage = "PDF failed: ${e.message}"
+                                        exportMessage = context.getString(R.string.export_failed, "PDF", e.message ?: "")
                                     } finally {
                                         isExporting = false
                                     }
@@ -271,7 +273,7 @@ fun ResultsScreenEnhanced(
                                 modifier = Modifier.size(24.dp),
                                 strokeWidth = 2.dp
                             )
-                            else Icon(Icons.Default.PictureAsPdf, "Export PDF")
+                            else Icon(Icons.Default.PictureAsPdf, stringResource(R.string.export_pdf_cd))
                         }
 
 // Bouton CSV
@@ -284,7 +286,7 @@ fun ResultsScreenEnhanced(
                                             csvExporter.exportToCsv(result, wheelDisplayName, mac)
                                         createCsvLauncher.launch("${wheelDisplayName}_SoH_${timestamp}.csv")
                                     } catch (e: Exception) {
-                                        exportMessage = "CSV failed: ${e.message}"
+                                        exportMessage = context.getString(R.string.export_failed, "CSV", e.message ?: "")
                                     } finally {
                                         isExporting = false
                                     }
@@ -292,7 +294,7 @@ fun ResultsScreenEnhanced(
                             },
                             enabled = !isExporting
                         ) {
-                            Icon(Icons.Default.TableChart, "Export CSV")
+                            Icon(Icons.Default.TableChart, stringResource(R.string.export_csv_cd))
                         }
 
 // Bouton Archive
@@ -318,7 +320,8 @@ fun ResultsScreenEnhanced(
                                         )
                                         createZipLauncher.launch("${wheelDisplayName}_SoH_${timestamp}.zip")
                                     } catch (e: Exception) {
-                                        exportMessage = "Archive failed: ${e.message}"
+                                        exportMessage = context.getString(R.string.export_failed, "Archive", e.message ?: "")
+
                                     } finally {
                                         isExporting = false
                                     }
@@ -326,7 +329,7 @@ fun ResultsScreenEnhanced(
                             },
                             enabled = !isExporting
                         ) {
-                            Icon(Icons.Default.FolderZip, "Export Archive")
+                            Icon(Icons.Default.FolderZip, stringResource(R.string.export_archive_cd))
                         }
 
                     }
@@ -408,13 +411,13 @@ fun ResultsScreenEnhanced(
                                             context = context,
                                             file = fileToShare,
                                             mimeType = mime,
-                                            chooserTitle = "Share SoH export"
+                                            chooserTitle = context.getString(R.string.share_chooser_title)
                                         )
                                     }
                                     exportMessage = null
-                                }) { Text("SHARE") }
+                                }) {  Text(stringResource(R.string.share)) }
                             } else {
-                                TextButton(onClick = { exportMessage = null }) { Text("Dismiss") }
+                                TextButton(onClick = { exportMessage = null }) {  Text(stringResource(R.string.dismiss)) }
                             }
                         }
                     ) { Text(msg) }
@@ -430,7 +433,7 @@ fun ResultsScreenEnhanced(
                 ) {
                     Icon(Icons.Default.ArrowBack, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Back")
+                    Text(stringResource(R.string.back))
                 }
             }
         }

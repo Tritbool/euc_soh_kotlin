@@ -1,3 +1,80 @@
 <resources>
+    <!-- App -->
     <string name="app_name">EUC SoH Analyzer</string>
+
+    <!-- Common -->
+    <string name="back">Back</string>
+    <string name="close">Close</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="share">SHARE</string>
+    <string name="ok">OK</string>
+    <string name="retry">Réessayer</string>
+
+    <!-- MainScreen / TopBar -->
+    <string name="topbar_title">EUC SoH Analyzer</string>
+    <string name="topbar_refresh">Actualize</string>
+    <string name="selected_euc_label">Selected EUC:</string>
+
+    <!-- WheelListContent -->
+    <string name="detected_eucs">Detected EUCs (%1$d)</string>
+    <string name="analyze_button">Analyze %1$s</string>
+    <string name="view_last_results">View last results</string>
+    <string name="csv_logs_count">%1$d CSV Logs</string>
+    <string name="mac_label">MAC: %1$s</string>
+    <string name="mosfet_badge">MOSFET</string>
+    <string name="mosfet_config_cd">MOSFET Config</string>
+
+    <!-- EmptyStateScreen -->
+    <string name="no_wheel_detected">Aucune roue détectée</string>
+    <string name="no_wheel_hint">Le scanner cherche récursivement les dossiers:\n- WheelLog/\n- EUC World/\n\ndans: %1$s\n\nAssurez-vous que vos logs sont bien dans ce dossier.</string>
+    <string name="choose_folder">📁 Choisir un autre dossier</string>
+    <string name="check_permissions">Vérifier les permissions</string>
+
+    <!-- Loading / Progress -->
+    <string name="scanning_eucs">Scanning for EUCs</string>
+
+    <!-- ResultsScreenEnhanced -->
+    <string name="results_title">Analysis results</string>
+    <string name="results_subtitle">%1$d analyzed files, %2$d metrics</string>
+    <string name="results_ea">Ea = %1$s kJ/mol</string>
+    <string name="results_alarms">⚠️ %1$d alarm(s)</string>
+    <string name="export_pdf_cd">Export PDF</string>
+    <string name="export_csv_cd">Export CSV</string>
+    <string name="export_archive_cd">Export Archive</string>
+    <string name="files_button_cd">Files</string>
+    <string name="charts_button_cd">Charts</string>
+    <string name="pdf_saved">PDF saved — tap SHARE to send it</string>
+    <string name="csv_saved">CSV saved — tap SHARE to send it</string>
+    <string name="zip_saved">Archive saved — tap SHARE to send it</string>
+    <string name="export_failed">%1$s failed: %2$s</string>
+    <string name="share_failed">Share failed: %1$s</string>
+    <string name="share_chooser_title">Share SoH export</string>
+
+    <!-- ChartGalleryScreen -->
+    <string name="charts_title">Charts — %1$s</string>
+    <string name="charts_tab_gaussian">Gaussian</string>
+    <string name="charts_tab_trend">Trend</string>
+    <string name="charts_tab_cusum">CUSUM</string>
+    <string name="charts_tab_inflexion">Inflexion</string>
+    <string name="charts_no_data">No charts available (insufficient data)</string>
+    <string name="charts_tap_to_enlarge">Tap to enlarge</string>
+    <string name="charts_export_pdf_cd">Export PDF</string>
+    <string name="charts_export_archive_cd">Export Archive</string>
+    <string name="chart_pdf_saved">PDF saved</string>
+    <string name="chart_archive_saved">Archive saved</string>
+    <string name="chart_export_failed">Export failed: %1$s</string>
+    <string name="chart_archive_failed">Archive failed: %1$s</string>
+    <string name="chart_pdf_copy_failed">PDF copy failed: %1$s</string>
+    <string name="chart_archive_copy_failed">Archive copy failed: %1$s</string>
+
+    <!-- FileListScreen -->
+    <string name="files_title">Files — %1$s</string>
+    <string name="files_show_rejected">Show rejected (%1$d)</string>
+    <string name="files_accepted">✅ %1$d accepted</string>
+    <string name="files_rejected">❌ %1$d rejected</string>
+    <string name="files_none">No files</string>
+    <string name="files_tap_hint">Tap to see full path</string>
+    <string name="files_tap_hint_preview">Tap to see full path · Preview</string>
+
+    <!-- MosfetConfigDialog — lire le fichier si besoin plus tard -->
 </resources>

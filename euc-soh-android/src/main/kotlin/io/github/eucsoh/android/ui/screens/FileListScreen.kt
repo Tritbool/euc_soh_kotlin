@@ -59,6 +59,8 @@ import kotlinx.coroutines.launch
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
+import androidx.compose.ui.res.stringResource
+import io.github.eucsoh.android.R
 
 @Composable
 fun FileReportItem(
@@ -144,7 +146,7 @@ fun FileReportItem(
 
             // "Tap to see full path" hint
             Text(
-                "Tap to see full path${if (report.accepted) " · Preview" else ""}",
+                stringResource(if (report.accepted) R.string.files_tap_hint_preview else R.string.files_tap_hint),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp)
@@ -186,7 +188,7 @@ fun FileListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Files — $wheelName") },
+                title = { Text(stringResource(R.string.files_title, wheelName)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, "Back")
@@ -197,7 +199,7 @@ fun FileListScreen(
                     FilterChip(
                         selected = showRejected,
                         onClick = { showRejected = !showRejected },
-                        label = { Text("Show rejected (${rejected.size})") },
+                        label = { Text(stringResource(R.string.files_show_rejected, rejected.size)) },
                         modifier = Modifier.padding(end = 8.dp)
                     )
                 }
@@ -221,12 +223,12 @@ fun FileListScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        "✅ ${accepted.size} accepted",
+                        stringResource(R.string.files_accepted, accepted.size),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
-                        "❌ ${rejected.size} rejected",
+                        stringResource(R.string.files_rejected, rejected.size),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error
                     )
@@ -235,7 +237,7 @@ fun FileListScreen(
 
             if (displayed.isEmpty()) {
                 Box(Modifier.fillMaxSize()) {
-                    Text("No files", modifier = Modifier.align(Alignment.Center))
+                    Text(stringResource(R.string.files_none), modifier = Modifier.align(Alignment.Center))
                 }
             } else {
                 LazyColumn(
@@ -299,7 +301,7 @@ fun FileListScreen(
                 },
                 confirmButton = {
                     TextButton(onClick = { selectedReport = null; previewLines = emptyList() }) {
-                        Text("Close")
+                        Text(stringResource(R.string.close))
                     }
                 }
             )

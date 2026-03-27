@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val LightColors = lightColorScheme(
-    primary = Color(0xFF3949AB.toInt()),       // Indigo 600
+    primary = Color(0xFF3D85DC),       // Indigo 600
     onPrimary = Color(0xFFFFFFFF.toInt()),
     primaryContainer = Color(0xFFC5CAE9.toInt()),
     onPrimaryContainer = Color(0xFF1A237E.toInt()),
@@ -31,7 +31,7 @@ private val LightColors = lightColorScheme(
 )
 
 private val DarkColors = darkColorScheme(
-    primary = Color(0xFF9FA8DA.toInt()),
+    primary = Color(0xEB3D85DC),
     onPrimary = Color(0xFF1A237E.toInt()),
     primaryContainer = Color(0xFF303F9F.toInt()),
     onPrimaryContainer = Color(0xFFC5CAE9.toInt()),

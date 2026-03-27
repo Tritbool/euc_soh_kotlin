@@ -1,6 +1,5 @@
 package io.github.eucsoh.android.ui.screens
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -40,7 +39,7 @@ fun MainScreen(
                 title = { Text(stringResource(R.string.app_name)) },
                 actions = {
                     IconButton(onClick = { viewModel.scanWheels(forceRefresh = true) }) {
-                        Icon(Icons.Default.Refresh, "Actualize")
+                        Icon(Icons.Default.Refresh, stringResource(R.string.topbar_refresh))
                     }
                 }
             )
@@ -59,7 +58,7 @@ fun MainScreen(
                 ) {
                     Column(modifier = Modifier.padding(8.dp)) {
                         Text(
-                            "Selected EUC: ",
+                            stringResource(R.string.selected_euc_label),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSecondaryContainer
                         )
@@ -76,7 +75,7 @@ fun MainScreen(
 
             when {
                 state.isScanning -> {
-                    LoadingScreen("Scanning for EUCs")
+                    LoadingScreen(stringResource(R.string.scanning_eucs))
                 }
 
                 state.progressState?.phase == ANALYZING -> {
@@ -239,29 +238,25 @@ fun EmptyStateScreen(
             modifier = Modifier.padding(32.dp)
         ) {
             Text(
-                "Aucune roue détectée",
+                stringResource(R.string.no_wheel_detected),
                 style = MaterialTheme.typography.headlineSmall
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                "Le scanner cherche récursivement les dossiers:\n" +
-                        "- WheelLog/\n" +
-                        "- EUC World/\n\n" +
-                        "dans: $scanPath\n\n" +
-                        "Assurez-vous que vos logs sont bien dans ce dossier.",
+                stringResource(R.string.no_wheel_hint, scanPath),
                 style = MaterialTheme.typography.bodyMedium
             )
             Spacer(Modifier.height(24.dp))
             Button(onClick = onRequestFolderPicker) {
-                Text("📁 Choisir un autre dossier")
+                Text(stringResource(R.string.choose_folder))
             }
             Spacer(Modifier.height(8.dp))
             Button(onClick = onRequestPermissions) {
-                Text("Vérifier les permissions")
+                Text(stringResource(R.string.check_permissions))
             }
             Spacer(Modifier.height(8.dp))
             TextButton(onClick = onRetry) {
-                Text("Réessayer")
+                Text(stringResource(R.string.retry))
             }
         }
     }
@@ -282,7 +277,7 @@ fun WheelListContent(
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
-            "Detected EUCs (${wheels.size})",
+            stringResource(R.string.detected_eucs, wheels.size),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(16.dp)
         )
@@ -335,7 +330,7 @@ fun WheelListContent(
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 4.dp)
             ) {
-                Text("View last results")
+                Text(stringResource(R.string.view_last_results))
             }
         }
         // Analyze button
@@ -346,7 +341,7 @@ fun WheelListContent(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                Text("Analyze ${selectedWheel.displayName}")
+                Text(stringResource(R.string.analyze_button, selectedWheel.displayName))
             }
         }
     }
@@ -397,13 +392,13 @@ fun WheelCard(
                 Spacer(Modifier.height(4.dp))
 
                 Text(
-                    "${wheel.csvFiles.size} CSV Logs",
+                    stringResource(R.string.csv_logs_count, wheel.csvFiles.size),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Text(
-                    "MAC: ${wheel.macAddress}",
+                    stringResource(R.string.mac_label, wheel.macAddress),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline
                 )
@@ -432,7 +427,7 @@ fun WheelCard(
                                 tint = MaterialTheme.colorScheme.primary
                             )
                             Text(
-                                "MOSFET",
+                                stringResource(R.string.mosfet_badge),
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -448,7 +443,7 @@ fun WheelCard(
                 ) {
                     Icon(
                         Icons.Default.Settings,
-                        contentDescription = "MOSFET Config",
+                        contentDescription = stringResource(R.string.mosfet_config_cd),
                         tint = if (hasMosfetConfig)
                             MaterialTheme.colorScheme.primary
                         else
