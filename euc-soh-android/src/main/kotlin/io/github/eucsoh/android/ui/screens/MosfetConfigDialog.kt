@@ -12,6 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import io.github.eucsoh.model.MOSFETParams
+import java.util.Locale
 
 /**
  * Dialog de configuration des paramètres MOSFET pour une roue.
@@ -164,16 +165,16 @@ fun MosfetConfigDialog(
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                "R_ds: ${String.format("%.6f", currentParams.rDsOn25cTotal)} Ω",
+                                "R_ds: ${String.format(Locale.getDefault(),"%.6f", currentParams.rDsOn25cTotal)} Ω",
                                 style = MaterialTheme.typography.bodySmall
                             )
                             Text(
-                                "Coeff: ${String.format("%.4f", currentParams.tempCoeffRel)}",
+                                "Coeff: ${String.format(Locale.getDefault(),"%.4f", currentParams.tempCoeffRel)}",
                                 style = MaterialTheme.typography.bodySmall
                             )
                             if (currentParams.rWiring > 0) {
                                 Text(
-                                    "Wiring: ${String.format("%.6f", currentParams.rWiring)} Ω",
+                                    "Wiring: ${String.format(Locale.getDefault(),"%.6f", currentParams.rWiring)} Ω",
                                     style = MaterialTheme.typography.bodySmall
                                 )
                             }
