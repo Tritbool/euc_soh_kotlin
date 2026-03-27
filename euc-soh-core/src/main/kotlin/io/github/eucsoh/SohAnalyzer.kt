@@ -127,9 +127,12 @@ class SohAnalyzer(
                         )
                         logger.d(
                             TAG,
-                            "  [$idx] SUCCESS: ${result?.nPoints ?: LOWER_REQ} points, req=${result?.reqMedian ?: LOWER_REQ}"
+                            "  [$idx] SUCCESS: ${result?.nPoints ?: MIN_POINTS} points, req=${result?.reqMedian ?: LOWER_REQ}"
                         )
-                        if (result?.reqMedian!! > LOWER_REQ && result.tempBoardMax != null && result.nPoints >= MIN_POINTS) {
+                        if ((result?.reqMedian?: LOWER_REQ) > LOWER_REQ &&
+                            (result?.tempBoardMax) != null &&
+                            (result?.nPoints ?: MIN_POINTS) >= MIN_POINTS
+                        ){
                             validCsvPath.add(path)
 
                             val fileName = path.substringAfterLast('/')
@@ -144,20 +147,20 @@ class SohAnalyzer(
                             )
                         } else {
                             val fileName = path.substringAfterLast('/')
-                            val source = result.source       // voir ci-dessous
+                            val source = result?.source       // voir ci-dessous
                             val fileReport = when {
-                                result.nPoints!! < MIN_POINTS ->
+                                (result?.nPoints ?: MIN_POINTS) < MIN_POINTS ->
                                     FileReport(
                                         path, fileName, source, false,
                                         rejectionReason = "Too few points (${result?.nPoints!!} < 50)",
-                                        nPoints = result.nPoints
+                                        nPoints = result?.nPoints ?: 0
                                     )
 
-                                result.reqMedian <= LOWER_REQ ->
+                                (result?.reqMedian?: LOWER_REQ) <= LOWER_REQ ->
                                     FileReport(
                                         path, fileName, source, false,
-                                        rejectionReason = "Req not computable (reqMedian = ${result.reqMedian})",
-                                        nPoints = result.nPoints
+                                        rejectionReason = "Req not computable (reqMedian = ${result?.reqMedian ?: LOWER_REQ})",
+                                        nPoints = result?.nPoints ?: 0
                                     )
 
                                 else ->
