@@ -88,4 +88,7 @@
     <string name="file_details_excluded_label">Ausgeschlossen</string>
     <string name="file_details_analyze_button">%1$d Datei(en) analysieren</string>
     <string name="file_details_excluded_hint">❌ AUSGESCHLOSSEN (tippen zum Reaktivieren)</string>
+    <string name="wheel_name_blocked">Name aus Logs — kann nicht überschrieben werden</string>
+    <string name="wheel_name_save">Radnamen speichern</string>
+    <string name="wheel_name_title">Radname</string>
 </resources>

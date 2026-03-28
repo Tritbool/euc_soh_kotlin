@@ -22,4 +22,7 @@
     <string name="file_details_valid_label">Arquivos válidos</string>
     <string name="file_details_analyze_button">Analisar %1$d arquivo(s)</string>
     <string name="file_details_excluded_hint">❌ EXCLUÍDO (toque para reativar)</string>
+    <string name="wheel_name_blocked">Nome dos registros — não pode ser alterado</string>
+    <string name="wheel_name_save">Salvar nome da roda</string>
+    <string name="wheel_name_title">Nome da roda</string>
 </resources>

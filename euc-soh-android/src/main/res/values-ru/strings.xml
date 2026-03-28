@@ -88,4 +88,7 @@
     <string name="file_details_excluded_label">Исключено</string>
     <string name="file_details_analyze_button">Анализировать %1$d файл(ов)</string>
     <string name="file_details_excluded_hint">❌ ИСКЛЮЧЕНО (нажмите для восстановления)</string>
+    <string name="wheel_name_blocked">Имя из логов — нельзя изменить</string>
+    <string name="wheel_name_save">Сохранить имя колеса</string>
+    <string name="wheel_name_title">Имя колеса</string>
 </resources>

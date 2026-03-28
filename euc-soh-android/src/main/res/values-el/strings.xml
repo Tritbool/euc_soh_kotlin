@@ -88,4 +88,7 @@
     <string name="file_details_excluded_label">Εξαιρεμένο</string>
     <string name="file_details_analyze_button">Ανάλυση %1$d αρχείου(-ων)</string>
     <string name="file_details_excluded_hint">❌ ΕΞΑΙΡΕΜΕΝΟ (πατήστε για επανενεργοποίηση)</string>
+    <string name="wheel_name_blocked">Όνομα από logs — δεν μπορεί να αλλαχθεί</string>
+    <string name="wheel_name_save">Αποθήκευση ονόματος τροχού</string>
+    <string name="wheel_name_title">Όνομα τροχού</string>
 </resources>

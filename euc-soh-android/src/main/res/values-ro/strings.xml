@@ -88,4 +88,7 @@
     <string name="file_details_excluded_label">Excluse</string>
     <string name="file_details_analyze_button">Analizează %1$d fișier(e)</string>
     <string name="file_details_excluded_hint">❌ EXCLUS (atinge pentru a reactiva)</string>
+    <string name="wheel_name_blocked">Nume din jurnale — nu poate fi suprascris</string>
+    <string name="wheel_name_save">Salvează numele roții</string>
+    <string name="wheel_name_title">Numele roții</string>
 </resources>

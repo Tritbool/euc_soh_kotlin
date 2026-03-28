@@ -88,4 +88,7 @@
     <string name="file_details_excluded_label">除外済み</string>
     <string name="file_details_analyze_button">%1$d 件のファイルを解析</string>
     <string name="file_details_excluded_hint">❌ 除外済み（タップして再有効化）</string>
+    <string name="wheel_name_blocked">ログからの名前 — 上書き不可</string>
+    <string name="wheel_name_save">ホイール名を保存</string>
+    <string name="wheel_name_title">ホイール名</string>
 </resources>

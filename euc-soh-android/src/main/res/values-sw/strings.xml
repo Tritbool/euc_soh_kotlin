@@ -88,4 +88,7 @@
     <string name="file_details_excluded_label">Imetengwa</string>
     <string name="file_details_analyze_button">Changanua faili %1$d</string>
     <string name="file_details_excluded_hint">❌ IMETENGWA (gusa kuwezesha tena)</string>
+    <string name="wheel_name_blocked">Jina kutoka kwa rekodi — haliwezi kubadilishwa</string>
+    <string name="wheel_name_save">Hifadhi jina la gurudumu</string>
+    <string name="wheel_name_title">Jina la gurudumu</string>
 </resources>

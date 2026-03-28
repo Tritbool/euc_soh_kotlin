@@ -88,4 +88,7 @@
     <string name="file_details_excluded_label">已排除</string>
     <string name="file_details_analyze_button">分析 %1$d 个文件</string>
     <string name="file_details_excluded_hint">❌ 已排除（点击重新启用）</string>
+    <string name="wheel_name_blocked">来自日志的名称 — 无法覆盖</string>
+    <string name="wheel_name_save">保存车轮名称</string>
+    <string name="wheel_name_title">车轮名称</string>
 </resources>

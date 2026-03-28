@@ -88,4 +88,7 @@
     <string name="file_details_excluded_label">Eisiata</string>
     <string name="file_details_analyze_button">Anailísigh %1$d comhad</string>
     <string name="file_details_excluded_hint">❌ EISIATA (brúigh chun athchumasú)</string>
+    <string name="wheel_name_blocked">Ainm ó na logaí — ní féidir é a athrú</string>
+    <string name="wheel_name_save">Sábháil ainm an rotha</string>
+    <string name="wheel_name_title">Ainm an rotha</string>
 </resources>

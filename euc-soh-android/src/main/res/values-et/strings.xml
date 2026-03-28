@@ -88,4 +88,7 @@
     <string name="file_details_excluded_label">Välistatud</string>
     <string name="file_details_analyze_button">Analüüsi %1$d faili</string>
     <string name="file_details_excluded_hint">❌ VÄLISTATUD (puuduta taasaktiveerimiseks)</string>
+    <string name="wheel_name_blocked">Nimi logidest — ei saa muuta</string>
+    <string name="wheel_name_save">Salvesta ratta nimi</string>
+    <string name="wheel_name_title">Ratta nimi</string>
 </resources>

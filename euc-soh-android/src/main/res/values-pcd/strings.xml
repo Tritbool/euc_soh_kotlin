@@ -88,4 +88,7 @@
     <string name="file_details_excluded_label">Ecsclu</string>
     <string name="file_details_analyze_button">Analiser %1$d fichier(s)</string>
     <string name="file_details_excluded_hint">❌ ECSCLU (apuiyez po réactiver)</string>
+    <string name="wheel_name_blocked">Nom d\'eul journal — peut point ête changé</string>
+    <string name="wheel_name_save">Sauver eul nom del roue</string>
+    <string name="wheel_name_title">Nom del roue</string>
 </resources>

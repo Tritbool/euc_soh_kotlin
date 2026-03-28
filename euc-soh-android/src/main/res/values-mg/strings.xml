@@ -109,4 +109,7 @@
     <string name="file_details_excluded_label">Novoahina</string>
     <string name="file_details_analyze_button">Mamakafaka %1$d rakitra</string>
     <string name="file_details_excluded_hint">❌ NOVOAHINA (tsindrio hanakarana indray)</string>
+    <string name="wheel_name_blocked">Anarana avy amin\'ny logs — tsy azo ovaina</string>
+    <string name="wheel_name_save">Tehirizo ny anaran\'ny kodiarana</string>
+    <string name="wheel_name_title">Anaran\'ny kodiarana</string>
 </resources>

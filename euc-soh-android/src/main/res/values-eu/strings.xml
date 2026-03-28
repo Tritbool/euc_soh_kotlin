@@ -88,4 +88,7 @@
     <string name="file_details_excluded_label">Baztertuak</string>
     <string name="file_details_analyze_button">Aztertu %1$d fitxategi</string>
     <string name="file_details_excluded_hint">❌ BAZTERTUA (sakatu berriro aktibatzeko)</string>
+    <string name="wheel_name_blocked">Izena erregistroetatik — ezin da gainidatzi</string>
+    <string name="wheel_name_save">Gorde gurpilaren izena</string>
+    <string name="wheel_name_title">Gurpilaren izena</string>
 </resources>

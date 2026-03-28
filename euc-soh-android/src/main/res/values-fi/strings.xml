@@ -88,4 +88,7 @@
     <string name="file_details_excluded_label">Suljettu pois</string>
     <string name="file_details_analyze_button">Analysoi %1$d tiedosto(a)</string>
     <string name="file_details_excluded_hint">❌ SULJETTU POIS (napauta uudelleenaktivoimiseksi)</string>
+    <string name="wheel_name_blocked">Nimi lokeista — ei voi korvata</string>
+    <string name="wheel_name_save">Tallenna pyörän nimi</string>
+    <string name="wheel_name_title">Pyörän nimi</string>
 </resources>

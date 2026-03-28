@@ -109,4 +109,7 @@
     <string name="file_details_excluded_label">ถูกยกเว้น</string>
     <string name="file_details_analyze_button">วิเคราะห์ %1$d ไฟล์</string>
     <string name="file_details_excluded_hint">❌ ถูกยกเว้น (แตะเพื่อเปิดใช้งานอีกครั้ง)</string>
+    <string name="wheel_name_blocked">ชื่อจากบันทึก — ไม่สามารถแก้ไขได้</string>
+    <string name="wheel_name_save">บันทึกชื่อล้อ</string>
+    <string name="wheel_name_title">ชื่อล้อ</string>
 </resources>

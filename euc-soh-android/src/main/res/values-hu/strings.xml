@@ -88,4 +88,7 @@
     <string name="file_details_excluded_label">Kizártak</string>
     <string name="file_details_analyze_button">%1$d fájl elemzése</string>
     <string name="file_details_excluded_hint">❌ KIZÁRVA (érintse meg az újraengedélyezéshez)</string>
+    <string name="wheel_name_blocked">Név a naplókból — nem felülírható</string>
+    <string name="wheel_name_save">Kerék nevének mentése</string>
+    <string name="wheel_name_title">Kerék neve</string>
 </resources>

@@ -88,4 +88,7 @@
     <string name="file_details_excluded_label">An cire</string>
     <string name="file_details_analyze_button">Nazarci fayiloli %1$d</string>
     <string name="file_details_excluded_hint">❌ AN CIRE (taɓa don sake kunna)</string>
+    <string name="wheel_name_blocked">Suna daga rajista — ba za a iya maye gurbinsa ba</string>
+    <string name="wheel_name_save">Ajiye sunan ƙafafun</string>
+    <string name="wheel_name_title">Sunan ƙafafun</string>
 </resources>

@@ -88,4 +88,7 @@
     <string name="file_details_excluded_label">Excluidos</string>
     <string name="file_details_analyze_button">Analizar %1$d archivo(s)</string>
     <string name="file_details_excluded_hint">❌ EXCLUIDO (pulse para reactivar)</string>
+    <string name="wheel_name_blocked">Nombre de los registros — no se puede cambiar</string>
+    <string name="wheel_name_save">Guardar nombre de la rueda</string>
+    <string name="wheel_name_title">Nombre de la rueda</string>
 </resources>

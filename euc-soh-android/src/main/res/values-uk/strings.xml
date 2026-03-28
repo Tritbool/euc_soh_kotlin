@@ -88,4 +88,7 @@
     <string name="file_details_excluded_label">Виключено</string>
     <string name="file_details_analyze_button">Аналізувати %1$d файл(ів)</string>
     <string name="file_details_excluded_hint">❌ ВИКЛЮЧЕНО (натисніть для повторної активації)</string>
+    <string name="wheel_name_blocked">Ім\'я з журналів — не можна змінити</string>
+    <string name="wheel_name_save">Зберегти ім\'я колеса</string>
+    <string name="wheel_name_title">Ім\'я колеса</string>
 </resources>

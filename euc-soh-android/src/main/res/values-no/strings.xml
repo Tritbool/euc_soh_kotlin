@@ -88,4 +88,7 @@
     <string name="file_details_excluded_label">Utelukket</string>
     <string name="file_details_analyze_button">Analyser %1$d fil(er)</string>
     <string name="file_details_excluded_hint">❌ UTELUKKET (trykk for å aktivere igjen)</string>
+    <string name="wheel_name_blocked">Navn fra logfiler — kan ikke tilsidesættes</string>
+    <string name="wheel_name_save">Gem hjulnavn</string>
+    <string name="wheel_name_title">Hjulnavn</string>
 </resources>

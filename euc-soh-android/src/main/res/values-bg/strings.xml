@@ -88,4 +88,7 @@
     <string name="file_details_excluded_label">Изключен</string>
     <string name="file_details_analyze_button">Анализирай %1$d файл(а)</string>
     <string name="file_details_excluded_hint">❌ ИЗКЛЮЧЕН (натисни за повторно активиране)</string>
+    <string name="wheel_name_blocked">Име от логовете — не може да се промени</string>
+    <string name="wheel_name_save">Запази името на колелото</string>
+    <string name="wheel_name_title">Име на колелото</string>
 </resources>

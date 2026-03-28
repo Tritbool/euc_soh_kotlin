@@ -88,4 +88,7 @@
     <string name="file_details_excluded_label">Utesluten</string>
     <string name="file_details_analyze_button">Analysera %1$d fil(er)</string>
     <string name="file_details_excluded_hint">❌ UTESLUTEN (tryck för att återaktivera)</string>
+    <string name="wheel_name_blocked">Namn från loggar — kan inte åsidosättas</string>
+    <string name="wheel_name_save">Spara hjulnamn</string>
+    <string name="wheel_name_title">Hjulnamn</string>
 </resources>

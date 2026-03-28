@@ -109,4 +109,7 @@
     <string name="file_details_excluded_label">Dikecualikan</string>
     <string name="file_details_analyze_button">Analisis %1$d fail</string>
     <string name="file_details_excluded_hint">❌ DIKECUALIKAN (ketik untuk aktifkan semula)</string>
+    <string name="wheel_name_blocked">Nama dari log — tidak boleh ditukar ganti</string>
+    <string name="wheel_name_save">Simpan nama roda</string>
+    <string name="wheel_name_title">Nama roda</string>
 </resources>

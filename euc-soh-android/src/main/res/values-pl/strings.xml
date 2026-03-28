@@ -88,4 +88,7 @@
     <string name="file_details_excluded_label">Wykluczone</string>
     <string name="file_details_analyze_button">Analizuj %1$d plik(ów)</string>
     <string name="file_details_excluded_hint">❌ WYKLUCZONE (dotknij, aby przywrócić)</string>
+    <string name="wheel_name_blocked">Nazwa z logów — nie można zmienić</string>
+    <string name="wheel_name_save">Zapisz nazwę koła</string>
+    <string name="wheel_name_title">Nazwa koła</string>
 </resources>

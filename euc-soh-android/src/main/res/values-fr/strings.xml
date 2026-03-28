@@ -109,4 +109,8 @@
     <string name="file_details_excluded_label">Exclus</string>
     <string name="file_details_analyze_button">Analyser %1$d fichier(s)</string>
     <string name="file_details_excluded_hint">❌ EXCLUS (appuyer pour réactiver)</string>
+
+    <string name="wheel_name_blocked">Nom issu des logs — non modifiable</string>
+    <string name="wheel_name_save">Enregistrer le nom de la roue</string>
+    <string name="wheel_name_title">Nom de la roue</string>
 </resources>

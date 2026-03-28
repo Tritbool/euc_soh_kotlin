@@ -109,4 +109,7 @@
     <string name="file_details_excluded_label">مستثنى</string>
     <string name="file_details_analyze_button">تحليل %1$d ملف(ات)</string>
     <string name="file_details_excluded_hint">❌ مستثنى (اضغط لإعادة التفعيل)</string>
+    <string name="wheel_name_blocked">الاسم من السجلات — لا يمكن تجاوزه</string>
+    <string name="wheel_name_save">حفظ اسم العجلة</string>
+    <string name="wheel_name_title">اسم العجلة</string>
 </resources>

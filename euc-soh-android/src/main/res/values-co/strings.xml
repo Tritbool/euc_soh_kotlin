@@ -88,4 +88,7 @@
     <string name="file_details_excluded_label">Esclusu</string>
     <string name="file_details_analyze_button">Analizà %1$d schedaghju(i)</string>
     <string name="file_details_excluded_hint">❌ ESCLUSU (tuccate per riattivà)</string>
+    <string name="wheel_name_blocked">Nome da i registri — ùn pò esse cambiatu</string>
+    <string name="wheel_name_save">Sgrà u nome di a rota</string>
+    <string name="wheel_name_title">Nome di a rota</string>
 </resources>
