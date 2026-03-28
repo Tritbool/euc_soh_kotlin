@@ -91,4 +91,9 @@
     <string name="wheel_name_blocked">Nome da i registri — ùn pò esse cambiatu</string>
     <string name="wheel_name_save">Sgrà u nome di a rota</string>
     <string name="wheel_name_title">Nome di a rota</string>
+    <string name="mosfet_field_nparallel_label">N cellule in parallelu (P)</string>
+    <string name="mosfet_field_nparallel_support">Cellule in parallelu per gruppu (1P, 2P, 3P…) — per difettu 1</string>
+    <string name="mosfet_current_nparallel">Parallelu: %1$dP</string>
+    <string name="analyzing_phase">Analisi in corsu</string>
+    <string name="calibrating_phase">Calibrazione in corsa</string>
 </resources>

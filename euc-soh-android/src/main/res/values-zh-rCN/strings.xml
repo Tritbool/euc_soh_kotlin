@@ -91,4 +91,9 @@
     <string name="wheel_name_blocked">来自日志的名称 — 无法覆盖</string>
     <string name="wheel_name_save">保存车轮名称</string>
     <string name="wheel_name_title">车轮名称</string>
+    <string name="mosfet_field_nparallel_label">N 个并联电芯 (P)</string>
+    <string name="mosfet_field_nparallel_support">每组并联电芯数量 (1P、2P、3P…) — 默认 1</string>
+    <string name="mosfet_current_nparallel">并联：%1$dP</string>
+    <string name="analyzing_phase">分析中</string>
+    <string name="calibrating_phase">校准中</string>
 </resources>

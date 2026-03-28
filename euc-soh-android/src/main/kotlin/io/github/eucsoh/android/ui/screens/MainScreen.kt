@@ -145,7 +145,7 @@ fun MainScreen(
                         currentFile = state.progressState?.current!!,
                         totalFiles = state.progressState?.total!!,
                         fileName = "",//state.currentFileName,
-                        phase = ANALYZING
+                        phase = stringResource(R.string.analyze_button, R.string.analyzing_phase)
                     )
                 }
 
@@ -154,7 +154,7 @@ fun MainScreen(
                         currentFile = state.progressState?.current!!,
                         totalFiles = state.progressState?.total!!,
                         fileName = "",//state.currentFileName,
-                        phase = CALIBRATING
+                        phase = stringResource(R.string.analyze_button, R.string.calibrating_phase)
                     )
                 }
 

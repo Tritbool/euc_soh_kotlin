@@ -91,4 +91,9 @@
     <string name="wheel_name_blocked">Nume din jurnale — nu poate fi suprascris</string>
     <string name="wheel_name_save">Salvează numele roții</string>
     <string name="wheel_name_title">Numele roții</string>
+    <string name="mosfet_field_nparallel_label">N celule în paralel (P)</string>
+    <string name="mosfet_field_nparallel_support">Celule în paralel pe grup (1P, 2P, 3P…) — implicit 1</string>
+    <string name="mosfet_current_nparallel">Paralel: %1$dP</string>
+    <string name="analyzing_phase">Analiză</string>
+    <string name="calibrating_phase">Calibrare</string>
 </resources>

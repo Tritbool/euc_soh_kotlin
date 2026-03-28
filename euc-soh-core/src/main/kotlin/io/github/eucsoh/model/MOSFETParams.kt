@@ -10,19 +10,20 @@ import kotlin.math.max
  * @param rWiring Fixed wiring resistance (Ω)
  */
 data class MOSFETParams(
-    val rDsOn25cTotal: Double,
+    val rDsOn25cTotal: Double?=null,
     val tempCoeffRel: Double = 0.01,
-    val rWiring: Double = 0.0
+    val rWiring: Double = 0.0005,
+    val nParallel: Int = 1
 ) {
     /**
      * R(T) = R_25C * (1 + tempCoeffRel * (T - 25)) + R_wiring
      */
     fun rMosfetAtTemp(tempC: Double?): Double {
         if (tempC == null || tempC.isNaN()) {
-            return rDsOn25cTotal + rWiring
+            return rDsOn25cTotal!! + rWiring
         }
         val deltaT = tempC - 25.0
-        val rHot = rDsOn25cTotal * (1.0 + tempCoeffRel * deltaT)
+        val rHot = rDsOn25cTotal!! * (1.0 + tempCoeffRel * deltaT)
         return max(0.0, rHot + rWiring)
     }
 }

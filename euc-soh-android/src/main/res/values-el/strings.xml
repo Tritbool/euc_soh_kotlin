@@ -91,4 +91,9 @@
     <string name="wheel_name_blocked">Όνομα από logs — δεν μπορεί να αλλαχθεί</string>
     <string name="wheel_name_save">Αποθήκευση ονόματος τροχού</string>
     <string name="wheel_name_title">Όνομα τροχού</string>
+    <string name="mosfet_field_nparallel_label">N παράλληλα στοιχεία (P)</string>
+    <string name="mosfet_field_nparallel_support">Στοιχεία σε παράλληλη σύνδεση ανά ομάδα (1P, 2P, 3P…) — προεπιλογή 1</string>
+    <string name="mosfet_current_nparallel">Παράλληλα: %1$dP</string>
+    <string name="analyzing_phase">Ανάλυση</string>
+    <string name="calibrating_phase">Βαθμονόμηση</string>
 </resources>

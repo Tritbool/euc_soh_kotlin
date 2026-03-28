@@ -113,4 +113,11 @@
     <string name="wheel_name_blocked">Nom issu des logs — non modifiable</string>
     <string name="wheel_name_save">Enregistrer le nom de la roue</string>
     <string name="wheel_name_title">Nom de la roue</string>
+
+    <string name="mosfet_field_nparallel_label">N cellules en parallèle (P)</string>
+    <string name="mosfet_field_nparallel_support">Cellules en parallèle par groupe (1P, 2P, 3P…) — valeur par défaut : 1</string>
+    <string name="mosfet_current_nparallel">Parallèle : %1$dP</string>
+    <string name="analyzing_phase">Analyse en cours</string>
+    <string name="calibrating_phase">Étalonnage en cours</string>
+
 </resources>

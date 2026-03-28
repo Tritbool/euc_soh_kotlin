@@ -91,4 +91,9 @@
     <string name="wheel_name_blocked">Nimi logidest — ei saa muuta</string>
     <string name="wheel_name_save">Salvesta ratta nimi</string>
     <string name="wheel_name_title">Ratta nimi</string>
+    <string name="mosfet_field_nparallel_label">N paralleelset elementi (P)</string>
+    <string name="mosfet_field_nparallel_support">Elemendid paralleelselt grupi kohta (1P, 2P, 3P…) — vaikimisi 1</string>
+    <string name="mosfet_current_nparallel">Paralleelselt: %1$dP</string>
+    <string name="analyzing_phase">Analüüsimine</string>
+    <string name="calibrating_phase">Kalibreerimine</string>
 </resources>

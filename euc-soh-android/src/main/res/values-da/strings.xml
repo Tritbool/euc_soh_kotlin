@@ -91,4 +91,9 @@
     <string name="wheel_name_blocked">Navn fra logfiler — kan ikke tilsidesættes</string>
     <string name="wheel_name_save">Gem hjulnavn</string>
     <string name="wheel_name_title">Hjulnavn</string>
+    <string name="mosfet_field_nparallel_label">N parallelle celler (P)</string>
+    <string name="mosfet_field_nparallel_support">Celler parallelt pr. gruppe (1P, 2P, 3P…) — standard 1</string>
+    <string name="mosfet_current_nparallel">Parallelt: %1$dP</string>
+    <string name="analyzing_phase">Analyserer</string>
+    <string name="calibrating_phase">Kalibrerer</string>
 </resources>

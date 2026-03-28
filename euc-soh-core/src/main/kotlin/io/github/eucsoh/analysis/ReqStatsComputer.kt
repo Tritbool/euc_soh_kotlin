@@ -465,7 +465,7 @@ object ReqStatsComputer {
         var rBattMedian: Double? = null
         var rBattMedian25C: Double? = null
 
-        if (mosfetParams != null && tempBoardMax != null) {
+        if (mosfetParams != null && tempBoardMax != null && (mosfetParams.rDsOn25cTotal != null)) {
             rMosfetHot = mosfetParams.rMosfetAtTemp(tempBoardMax)
             rBattMedian = maxOf(0.0, reqMedian - rMosfetHot)
             rBattMedian25C = ArrheniusNormalizer.normalizeRBattTo25C(

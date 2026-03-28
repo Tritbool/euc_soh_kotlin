@@ -91,4 +91,9 @@
     <string name="wheel_name_blocked">Izena erregistroetatik — ezin da gainidatzi</string>
     <string name="wheel_name_save">Gorde gurpilaren izena</string>
     <string name="wheel_name_title">Gurpilaren izena</string>
+    <string name="mosfet_field_nparallel_label">N zelula paraleloan (P)</string>
+    <string name="mosfet_field_nparallel_support">Taldeko zelula paraleloak (1P, 2P, 3P…) — lehenetsia 1</string>
+    <string name="mosfet_current_nparallel">Paraleloan: %1$dP</string>
+    <string name="analyzing_phase">Analizatzen</string>
+    <string name="calibrating_phase">Kalibratzen</string>
 </resources>

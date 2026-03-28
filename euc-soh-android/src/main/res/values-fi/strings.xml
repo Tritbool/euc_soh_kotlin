@@ -91,4 +91,9 @@
     <string name="wheel_name_blocked">Nimi lokeista — ei voi korvata</string>
     <string name="wheel_name_save">Tallenna pyörän nimi</string>
     <string name="wheel_name_title">Pyörän nimi</string>
+    <string name="mosfet_field_nparallel_label">N rinnakkaista kennoa (P)</string>
+    <string name="mosfet_field_nparallel_support">Rinnakkaisia kennoja per ryhmä (1P, 2P, 3P…) — oletus 1</string>
+    <string name="mosfet_current_nparallel">Rinnakkain: %1$dP</string>
+    <string name="analyzing_phase">Analysoidaan</string>
+    <string name="calibrating_phase">Kalibroidaan</string>
 </resources>

@@ -91,4 +91,9 @@
     <string name="wheel_name_blocked">Ainm ó na logaí — ní féidir é a athrú</string>
     <string name="wheel_name_save">Sábháil ainm an rotha</string>
     <string name="wheel_name_title">Ainm an rotha</string>
+    <string name="mosfet_field_nparallel_label">N cill comhthreomhar (P)</string>
+    <string name="mosfet_field_nparallel_support">Cealla comhthreomhara in aghaidh grúpa (1P, 2P, 3P…) — réamhshocrú 1</string>
+    <string name="mosfet_current_nparallel">Comhthreomhar: %1$dP</string>
+    <string name="analyzing_phase">Ag anailísiú</string>
+    <string name="calibrating_phase">Ag calabrú</string>
 </resources>

@@ -22,6 +22,8 @@ class WheelConfigRepository(context: Context) {
         private const val PREFIX_MOSFET_RDS = "mosfet_rds_"
         private const val PREFIX_MOSFET_TEMP_COEFF = "mosfet_temp_coeff_"
         private const val PREFIX_MOSFET_WIRING = "mosfet_wiring_"
+
+        private const val PREFIX_N_PARALLEL = "n_parallel"
         private const val PREFIX_LAST_MODIFIED = "last_modified_"
     }
     
@@ -32,13 +34,15 @@ class WheelConfigRepository(context: Context) {
         val rdsOn = prefs.getFloat(PREFIX_MOSFET_RDS + macAddress, -1f)
         val tempCoeff = prefs.getFloat(PREFIX_MOSFET_TEMP_COEFF + macAddress, 0.01f)
         val wiring = prefs.getFloat(PREFIX_MOSFET_WIRING + macAddress, 0f)
+        val nparallel = prefs.getInt(PREFIX_N_PARALLEL + macAddress,1)
         val lastModified = prefs.getLong(PREFIX_LAST_MODIFIED + macAddress, 0L)
         
         val mosfetParams = if (rdsOn > 0) {
             MOSFETParams(
                 rDsOn25cTotal = rdsOn.toDouble(),
                 tempCoeffRel = tempCoeff.toDouble(),
-                rWiring = wiring.toDouble()
+                rWiring = wiring.toDouble(),
+                nParallel = nparallel
             )
         } else {
             null
@@ -57,10 +61,12 @@ class WheelConfigRepository(context: Context) {
     suspend fun saveConfig(config: WheelConfig): Unit = withContext(Dispatchers.IO) {
         prefs.edit().apply {
             if (config.mosfetParams != null) {
-                putFloat(
-                    PREFIX_MOSFET_RDS + config.macAddress,
-                    config.mosfetParams.rDsOn25cTotal.toFloat()
-                )
+                if(config.mosfetParams.rDsOn25cTotal != null){
+                    putFloat(
+                        PREFIX_MOSFET_RDS + config.macAddress,
+                        config.mosfetParams.rDsOn25cTotal!!.toFloat()
+                    )
+                }
                 putFloat(
                     PREFIX_MOSFET_TEMP_COEFF + config.macAddress,
                     config.mosfetParams.tempCoeffRel.toFloat()
@@ -69,11 +75,16 @@ class WheelConfigRepository(context: Context) {
                     PREFIX_MOSFET_WIRING + config.macAddress,
                     config.mosfetParams.rWiring.toFloat()
                 )
+                putInt(
+                    PREFIX_N_PARALLEL + config.macAddress,
+                config.mosfetParams.nParallel
+                )
             } else {
                 // Effacer si null
                 remove(PREFIX_MOSFET_RDS + config.macAddress)
                 remove(PREFIX_MOSFET_TEMP_COEFF + config.macAddress)
                 remove(PREFIX_MOSFET_WIRING + config.macAddress)
+                remove(PREFIX_N_PARALLEL + config.macAddress)
             }
             putLong(PREFIX_LAST_MODIFIED + config.macAddress, config.lastModified)
             apply()
@@ -85,11 +96,12 @@ class WheelConfigRepository(context: Context) {
      */
     suspend fun saveMosfetParams(
         macAddress: String,
-        rDsOn25cTotal: Double,
+        rDsOn25cTotal: Double?,
         tempCoeffRel: Double = 0.01,
-        rWiring: Double = 0.0
+        rWiring: Double = 0.0005,
+        nParallel:Int =1
     ) {
-        val params = MOSFETParams(rDsOn25cTotal, tempCoeffRel, rWiring)
+        val params = MOSFETParams(rDsOn25cTotal, tempCoeffRel, rWiring,nParallel)
         val config = WheelConfig(macAddress, params)
         saveConfig(config)
     }

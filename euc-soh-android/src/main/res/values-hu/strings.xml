@@ -91,4 +91,9 @@
     <string name="wheel_name_blocked">Név a naplókból — nem felülírható</string>
     <string name="wheel_name_save">Kerék nevének mentése</string>
     <string name="wheel_name_title">Kerék neve</string>
+    <string name="mosfet_field_nparallel_label">N párhuzamos cella (P)</string>
+    <string name="mosfet_field_nparallel_support">Cellák párhuzamosan csoportonként (1P, 2P, 3P…) — alapértelmezés 1</string>
+    <string name="mosfet_current_nparallel">Párhuzamos: %1$dP</string>
+    <string name="analyzing_phase">Elemzés</string>
+    <string name="calibrating_phase">Kalibrálás</string>
 </resources>

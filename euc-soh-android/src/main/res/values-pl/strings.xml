@@ -91,4 +91,9 @@
     <string name="wheel_name_blocked">Nazwa z logów — nie można zmienić</string>
     <string name="wheel_name_save">Zapisz nazwę koła</string>
     <string name="wheel_name_title">Nazwa koła</string>
+    <string name="mosfet_field_nparallel_label">N równoległych ogniw (P)</string>
+    <string name="mosfet_field_nparallel_support">Ogniwa równolegle w grupie (1P, 2P, 3P…) — domyślnie 1</string>
+    <string name="mosfet_current_nparallel">Równolegle: %1$dP</string>
+    <string name="analyzing_phase">Analiza</string>
+    <string name="calibrating_phase">Kalibracja</string>
 </resources>

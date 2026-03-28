@@ -91,4 +91,9 @@
     <string name="wheel_name_blocked">Název z logů — nelze přepsat</string>
     <string name="wheel_name_save">Uložit název kola</string>
     <string name="wheel_name_title">Název kola</string>
+    <string name="mosfet_field_nparallel_label">N paralelních článků (P)</string>
+    <string name="mosfet_field_nparallel_support">Články paralelně na skupinu (1P, 2P, 3P…) — výchozí 1</string>
+    <string name="mosfet_current_nparallel">Paralelně: %1$dP</string>
+    <string name="analyzing_phase">Analýza</string>
+    <string name="calibrating_phase">Kalibrace</string>
 </resources>

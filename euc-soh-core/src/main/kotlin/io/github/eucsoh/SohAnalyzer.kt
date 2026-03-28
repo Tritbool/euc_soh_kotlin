@@ -301,7 +301,11 @@ class SohAnalyzer(
 
         // Pack inference
         val (nsGlobal, vNominal) = PackInference.inferPackConfig(dfStats)
-        val rPackNominal = PackInference.computePackNominalResistance(nsGlobal, vNominal)
+        val rPackNominal = PackInference.computePackNominalResistance(
+            nsGlobal,
+            vNominal,
+            mosfetParams?.nParallel ?: 1
+        )
 
         logger.d(TAG, "Pack config: Ns=$nsGlobal, Vnom=$vNominal, Rpack=$rPackNominal")
 

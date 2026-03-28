@@ -91,4 +91,9 @@
     <string name="wheel_name_blocked">Anv eus ar marilhoù — n\'haller ket e cheñch</string>
     <string name="wheel_name_save">Enrollañ anv ar rod</string>
     <string name="wheel_name_title">Anv ar rod</string>
+    <string name="mosfet_field_nparallel_label">N rummad-sell kevret (P)</string>
+    <string name="mosfet_field_nparallel_support">Sell kevret dre strollad (1P, 2P, 3P…) — dre ziouer 1</string>
+    <string name="mosfet_current_nparallel">Kevret: %1$dP</string>
+    <string name="analyzing_phase">O vont d\'ober un enklask</string>
+    <string name="calibrating_phase">O vont d\'ober ur c\'halib</string>
 </resources>

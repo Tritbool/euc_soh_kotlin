@@ -91,4 +91,9 @@
     <string name="wheel_name_blocked">Nom dels jorns — pòt pas èsser remplaçat</string>
     <string name="wheel_name_save">Enregistrar lo nom de la roda</string>
     <string name="wheel_name_title">Nom de la roda</string>
+    <string name="mosfet_field_nparallel_label">N cellulas en paralèl (P)</string>
+    <string name="mosfet_field_nparallel_support">Cellulas en paralèl per grop (1P, 2P, 3P…) — per defaut 1</string>
+    <string name="mosfet_current_nparallel">Paralèl: %1$dP</string>
+    <string name="analyzing_phase">Analisi en cors</string>
+    <string name="calibrating_phase">Calibratge en cors</string>
 </resources>

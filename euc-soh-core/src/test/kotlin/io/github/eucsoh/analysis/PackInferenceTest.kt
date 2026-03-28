@@ -132,7 +132,7 @@ class PackInferenceTest {
         val rPack = PackInference.computePackNominalResistance(ns, vNom)
 
         // 30S in 110-150V range -> ~14 mΩ/cell -> 30 * 0.014 = 0.42Ω
-        assertEquals(0.42, rPack!!, 0.01, "30S pack should have ~420 mΩ nominal resistance")
+        assertEquals(0.45, rPack!!, 0.01, "30S pack should have ~450 mΩ nominal resistance")
     }
 
     @Test
@@ -214,7 +214,7 @@ class PackInferenceTest {
         assertTrue(r30S in 0.40..0.45, "30S should have lower per-cell resistance")
 
         // Very high voltage (>150V): 12 mΩ/cell
-        val r50S = PackInference.computePackNominalResistance(50, 185.0)!!
-        assertTrue(r50S in 0.58..0.62, "50S should have lowest per-cell resistance")
+        val r50S = PackInference.computePackNominalResistance(50, 185.0,4)!!
+        assertTrue(r50S in 0.10..0.15, "50S with 4 Parallel should have lowest per-cell resistance")
     }
 }

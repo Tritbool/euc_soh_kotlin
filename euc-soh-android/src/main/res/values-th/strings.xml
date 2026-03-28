@@ -112,4 +112,9 @@
     <string name="wheel_name_blocked">ชื่อจากบันทึก — ไม่สามารถแก้ไขได้</string>
     <string name="wheel_name_save">บันทึกชื่อล้อ</string>
     <string name="wheel_name_title">ชื่อล้อ</string>
+    <string name="mosfet_field_nparallel_label">N เซลล์ขนาน (P)</string>
+    <string name="mosfet_field_nparallel_support">เซลล์ขนานต่อกลุ่ม (1P, 2P, 3P…) — ค่าเริ่มต้น 1</string>
+    <string name="mosfet_current_nparallel">ขนาน: %1$dP</string>
+    <string name="analyzing_phase">กำลังวิเคราะห์</string>
+    <string name="calibrating_phase">กำลังปรับเทียบ</string>
 </resources>

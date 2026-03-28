@@ -91,4 +91,9 @@
     <string name="wheel_name_blocked">Ім\'я з журналів — не можна змінити</string>
     <string name="wheel_name_save">Зберегти ім\'я колеса</string>
     <string name="wheel_name_title">Ім\'я колеса</string>
+    <string name="mosfet_field_nparallel_label">N паралельних комірок (P)</string>
+    <string name="mosfet_field_nparallel_support">Комірок паралельно в групі (1P, 2P, 3P…) — типово 1</string>
+    <string name="mosfet_current_nparallel">Паралельно: %1$dP</string>
+    <string name="analyzing_phase">Аналіз</string>
+    <string name="calibrating_phase">Калібрування</string>
 </resources>

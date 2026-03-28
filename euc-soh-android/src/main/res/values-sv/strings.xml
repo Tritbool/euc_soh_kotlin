@@ -91,4 +91,9 @@
     <string name="wheel_name_blocked">Namn från loggar — kan inte åsidosättas</string>
     <string name="wheel_name_save">Spara hjulnamn</string>
     <string name="wheel_name_title">Hjulnamn</string>
+    <string name="mosfet_field_nparallel_label">N parallella celler (P)</string>
+    <string name="mosfet_field_nparallel_support">Celler parallellt per grupp (1P, 2P, 3P…) — standard 1</string>
+    <string name="mosfet_current_nparallel">Parallellt: %1$dP</string>
+    <string name="analyzing_phase">Analyserar</string>
+    <string name="calibrating_phase">Kalibrerar</string>
 </resources>

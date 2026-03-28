@@ -91,4 +91,9 @@
     <string name="wheel_name_blocked">Nafn úr skrám — ekki hægt að skrifa yfir</string>
     <string name="wheel_name_save">Vista hjólnafn</string>
     <string name="wheel_name_title">Hjólnafn</string>
+    <string name="mosfet_field_nparallel_label">N samsíða frumur (P)</string>
+    <string name="mosfet_field_nparallel_support">Frumur samsíða í hverjum hópi (1P, 2P, 3P…) — sjálfgefið 1</string>
+    <string name="mosfet_current_nparallel">Samsíða: %1$dP</string>
+    <string name="analyzing_phase">Greining</string>
+    <string name="calibrating_phase">Kvörðun</string>
 </resources>

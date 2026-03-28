@@ -91,4 +91,9 @@
     <string name="wheel_name_blocked">Jina kutoka kwa rekodi — haliwezi kubadilishwa</string>
     <string name="wheel_name_save">Hifadhi jina la gurudumu</string>
     <string name="wheel_name_title">Jina la gurudumu</string>
+    <string name="mosfet_field_nparallel_label">Sela N sambamba (P)</string>
+    <string name="mosfet_field_nparallel_support">Sela sambamba kwa kila kikundi (1P, 2P, 3P…) — chaguo msingi 1</string>
+    <string name="mosfet_current_nparallel">Sambamba: %1$dP</string>
+    <string name="analyzing_phase">Inachambua</string>
+    <string name="calibrating_phase">Inakalibisha</string>
 </resources>

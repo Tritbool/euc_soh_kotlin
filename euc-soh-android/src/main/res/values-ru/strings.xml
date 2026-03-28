@@ -91,4 +91,9 @@
     <string name="wheel_name_blocked">Имя из логов — нельзя изменить</string>
     <string name="wheel_name_save">Сохранить имя колеса</string>
     <string name="wheel_name_title">Имя колеса</string>
+    <string name="mosfet_field_nparallel_label">N параллельных ячеек (P)</string>
+    <string name="mosfet_field_nparallel_support">Ячеек параллельно в группе (1P, 2P, 3P…) — по умолчанию 1</string>
+    <string name="mosfet_current_nparallel">Параллельно: %1$dP</string>
+    <string name="analyzing_phase">Анализ</string>
+    <string name="calibrating_phase">Калибровка</string>
 </resources>

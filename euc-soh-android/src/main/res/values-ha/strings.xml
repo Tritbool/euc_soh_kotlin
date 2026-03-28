@@ -91,4 +91,9 @@
     <string name="wheel_name_blocked">Suna daga rajista — ba za a iya maye gurbinsa ba</string>
     <string name="wheel_name_save">Ajiye sunan ƙafafun</string>
     <string name="wheel_name_title">Sunan ƙafafun</string>
+    <string name="mosfet_field_nparallel_label">N parallel cells (P)</string>
+    <string name="mosfet_field_nparallel_support">Cells in parallel per group (1P, 2P, 3P…) — default 1</string>
+    <string name="mosfet_current_nparallel">Parallel: %1$dP</string>
+    <string name="analyzing_phase">Analyzing</string>
+    <string name="calibrating_phase">Calibrating</string>
 </resources>

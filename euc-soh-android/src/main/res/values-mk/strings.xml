@@ -91,4 +91,9 @@
     <string name="wheel_name_blocked">Име од логовите — не може да се промени</string>
     <string name="wheel_name_save">Зачувај го името на тркалото</string>
     <string name="wheel_name_title">Име на тркалото</string>
+    <string name="mosfet_field_nparallel_label">N паралелни ќелии (P)</string>
+    <string name="mosfet_field_nparallel_support">Ќелии паралелно по група (1P, 2P, 3P…) — стандардно 1</string>
+    <string name="mosfet_current_nparallel">Паралелно: %1$dP</string>
+    <string name="analyzing_phase">Анализа</string>
+    <string name="calibrating_phase">Калибрација</string>
 </resources>

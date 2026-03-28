@@ -38,8 +38,9 @@ fun MosfetConfigDialog(
 ) {
     var rDsOn by remember { mutableStateOf(currentParams?.rDsOn25cTotal?.toString() ?: "") }
     var tempCoeff by remember { mutableStateOf(currentParams?.tempCoeffRel?.toString() ?: "0.01") }
-    var rWiring by remember { mutableStateOf(currentParams?.rWiring?.toString() ?: "0.0") }
+    var rWiring by remember { mutableStateOf(currentParams?.rWiring?.toString() ?: "0.0005") }
     var showHelp by remember { mutableStateOf(false) }
+    var nParallel by remember { mutableStateOf(currentParams?.nParallel?.toString() ?: "1") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -180,6 +181,21 @@ fun MosfetConfigDialog(
                         )
                     }
                 )
+                OutlinedTextField(
+                    value = nParallel,
+                    onValueChange = { nParallel = it },
+                    label = { Text(stringResource(R.string.mosfet_field_nparallel_label)) },
+                    placeholder = { Text("1") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    supportingText = {
+                        Text(
+                            stringResource(R.string.mosfet_field_nparallel_support),
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+                )
 
                 // Current config indicator
                 if (currentParams != null) {
@@ -230,6 +246,12 @@ fun MosfetConfigDialog(
                                     style = MaterialTheme.typography.bodySmall
                                 )
                             }
+                            if (currentParams.nParallel > 1) {
+                                Text(
+                                    stringResource(R.string.mosfet_current_nparallel, currentParams.nParallel),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
                         }
                     }
                 }
@@ -241,9 +263,12 @@ fun MosfetConfigDialog(
                     val rds = rDsOn.toDoubleOrNull()
                     val tc = tempCoeff.toDoubleOrNull() ?: 0.01
                     val rw = rWiring.toDoubleOrNull() ?: 0.0
-
+                    val np = nParallel.toIntOrNull()?.coerceAtLeast(1) ?: 1
                     if (rds != null && rds > 0) {
-                        onSave(MOSFETParams(rds, tc, rw))
+                        onSave(MOSFETParams(rds, tc, rw, np))   // ← ajouter np
+                    }
+                    else if(np != null && np > 1){
+                        onSave(MOSFETParams(null, tc, rw, np))
                     }
                 },
                 enabled = rDsOn.toDoubleOrNull()?.let { it > 0 } == true

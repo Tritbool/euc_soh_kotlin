@@ -112,4 +112,9 @@
     <string name="wheel_name_blocked">Nama dari log — tidak boleh ditukar ganti</string>
     <string name="wheel_name_save">Simpan nama roda</string>
     <string name="wheel_name_title">Nama roda</string>
+    <string name="mosfet_field_nparallel_label">N sel selari (P)</string>
+    <string name="mosfet_field_nparallel_support">Sel selari setiap kumpulan (1P, 2P, 3P…) — lalai 1</string>
+    <string name="mosfet_current_nparallel">Selari: %1$dP</string>
+    <string name="analyzing_phase">Menganalisis</string>
+    <string name="calibrating_phase">Menentukur</string>
 </resources>

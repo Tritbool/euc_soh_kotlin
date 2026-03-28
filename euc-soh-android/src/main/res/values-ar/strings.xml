@@ -112,4 +112,9 @@
     <string name="wheel_name_blocked">الاسم من السجلات — لا يمكن تجاوزه</string>
     <string name="wheel_name_save">حفظ اسم العجلة</string>
     <string name="wheel_name_title">اسم العجلة</string>
+    <string name="mosfet_field_nparallel_label">عدد N من الخلايا المتوازية (P)</string>
+    <string name="mosfet_field_nparallel_support">خلايا متوازية لكل مجموعة (1P، 2P، 3P…) — القيمة الافتراضية 1</string>
+    <string name="mosfet_current_nparallel">متوازي: %1$dP</string>
+    <string name="analyzing_phase">جاري التحليل</string>
+    <string name="calibrating_phase">جاري المعايرة</string>
 </resources>

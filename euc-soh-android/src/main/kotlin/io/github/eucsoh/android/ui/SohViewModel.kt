@@ -212,14 +212,15 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
 
-        Log.d(TAG, "Saving MOSFET config for ${wheel.displayName}: R_ds=${params.rDsOn25cTotal}")
+        Log.d(TAG, "Saving MOSFET config for ${wheel.displayName}: R_ds=${params.rDsOn25cTotal?:-1}")
         viewModelScope.launch {
             try {
                 configRepository.saveMosfetParams(
                     macAddress = wheel.macAddress,
                     rDsOn25cTotal = params.rDsOn25cTotal,
                     tempCoeffRel = params.tempCoeffRel,
-                    rWiring = params.rWiring
+                    rWiring = params.rWiring,
+                    nParallel=params.nParallel
                 )
                 Log.d(TAG, "MOSFET config saved successfully")
 
