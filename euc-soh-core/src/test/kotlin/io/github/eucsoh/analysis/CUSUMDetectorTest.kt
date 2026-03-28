@@ -26,7 +26,7 @@ class CUSUMDetectorTest {
             testKmMin = 300.0
         )
 
-        assertTrue(result.alarmIndices.isEmpty(), "Stable data should trigger no alarms")
+        assertTrue(result.alarmKm.isEmpty(), "Stable data should trigger no alarms")
         assertEquals(0.050, result.muRef?: Double.MAX_VALUE, 0.005, "Reference mean should be ~50 mΩ")
     }
 
@@ -49,7 +49,7 @@ class CUSUMDetectorTest {
             testKmMin = 300.0
         )
 
-        assertTrue(result.alarmIndices.isNotEmpty(), "Should detect regime change")
+        assertTrue(result.alarmKm.isNotEmpty(), "Should detect regime change")
         assertEquals(0.050, result.muRef?: Double.MAX_VALUE, 0.005, "Reference should be stable baseline")
     }
 
@@ -70,7 +70,7 @@ class CUSUMDetectorTest {
             hSigma = 5.0
         )
 
-        assertTrue(result.alarmIndices.isEmpty(), "Small fluctuations should not trigger alarm")
+        assertTrue(result.alarmKm.isEmpty(), "Small fluctuations should not trigger alarm")
     }
 
     @Test
@@ -91,11 +91,11 @@ class CUSUMDetectorTest {
             refKmMax = 300.0,
             testKmMin = 100.0,
             cooldownKm = 800.0,
-            //relativeJumpMin = 0.5
+            relativeJumpMin = 0.3
         )
 
         // Should detect the jump, but not re-trigger during cooldown
-        assertTrue(result.alarmIndices.size <= 2, "Should not spam alarms during cooldown")
+        assertTrue(result.alarmKm.size <= 2, "Should not spam alarms during cooldown")
     }
 
     @Test
@@ -112,7 +112,7 @@ class CUSUMDetectorTest {
             testKmMin = 300.0
         )
 
-        assertTrue(result.alarmIndices.isEmpty(), "Insufficient data should not trigger alarms")
+        assertTrue(result.alarmKm.isEmpty(), "Insufficient data should not trigger alarms")
     }
 
     @Test
@@ -134,7 +134,7 @@ class CUSUMDetectorTest {
         )
 
         assertEquals(0.050, result.muRef?: Double.MAX_VALUE, 0.005, "Reference should only use early stable data")
-        assertTrue(result.alarmIndices.isNotEmpty(), "Should detect late degradation")
+        assertTrue(result.alarmKm.isNotEmpty(), "Should detect late degradation")
     }
 
     @Test
@@ -166,7 +166,7 @@ class CUSUMDetectorTest {
 
         // Sensitive should detect more easily
         assertTrue(
-            resultSensitive.alarmIndices.size >= resultStrict.alarmIndices.size,
+            resultSensitive.alarmKm.size >= resultStrict.alarmKm.size,
             "Lower kSigma should be more sensitive"
         )
     }
@@ -233,6 +233,6 @@ class CUSUMDetectorTest {
             testKmMin = 300.0
         )
 
-        assertTrue(result.alarmIndices.isEmpty(), "Missing metric should return empty result")
+        assertTrue(result.alarmKm.isEmpty(), "Missing metric should return empty result")
     }
 }

@@ -3,20 +3,53 @@ package io.github.eucsoh
 import io.github.eucsoh.Constants.ANALYZING
 import io.github.eucsoh.Constants.CALIBRATING
 import io.github.eucsoh.Constants.DONE
-import io.github.eucsoh.Constants.EUC_WORLD
 import io.github.eucsoh.Constants.LOWER_REQ
 import io.github.eucsoh.Constants.MIN_POINTS
-import io.github.eucsoh.analysis.*
+import io.github.eucsoh.Constants.MetaColumns.DATETIME_FIRST
+import io.github.eucsoh.Constants.MetaColumns.FILE
+import io.github.eucsoh.Constants.MetaColumns.NS
+import io.github.eucsoh.Constants.MetaColumns.N_POINTS
+import io.github.eucsoh.Constants.MetaColumns.SOC_REF_OK
+import io.github.eucsoh.Constants.MetaColumns.SOC_REF_V_FULL
+import io.github.eucsoh.Constants.MetaColumns.SOURCE
+import io.github.eucsoh.Constants.MetaColumns.V_IDLE
+import io.github.eucsoh.Constants.MetaColumns.WHEEL_KM
+import io.github.eucsoh.Constants.MetaColumns.WHEEL_KM_SOURCE
 import io.github.eucsoh.Constants.Metrics
-import io.github.eucsoh.Constants.Metrics.*
-import io.github.eucsoh.Constants.MetaColumns.*
-import io.github.eucsoh.Constants.WHEELLOG
+import io.github.eucsoh.Constants.Metrics.I_95P
+import io.github.eucsoh.Constants.Metrics.I_MAX
+import io.github.eucsoh.Constants.Metrics.I_PHASE2_INT
+import io.github.eucsoh.Constants.Metrics.I_PHASE_95P
+import io.github.eucsoh.Constants.Metrics.I_PHASE_MAX
+import io.github.eucsoh.Constants.Metrics.PWM_95P
+import io.github.eucsoh.Constants.Metrics.PWM_MAX
+import io.github.eucsoh.Constants.Metrics.REQ_95P
+import io.github.eucsoh.Constants.Metrics.REQ_MEAN
+import io.github.eucsoh.Constants.Metrics.REQ_MEDIAN
+import io.github.eucsoh.Constants.Metrics.REQ_MEDIAN_25C
+import io.github.eucsoh.Constants.Metrics.R_BATT_MEDIAN
+import io.github.eucsoh.Constants.Metrics.R_BATT_MEDIAN_25C
+import io.github.eucsoh.Constants.Metrics.R_MOSFET_HOT
+import io.github.eucsoh.Constants.Metrics.SAG_95P
+import io.github.eucsoh.Constants.Metrics.SAG_MAX
+import io.github.eucsoh.Constants.Metrics.TEMP_BOARD_MAX
+import io.github.eucsoh.Constants.Metrics.TEMP_MOTOR_MAX
+import io.github.eucsoh.Constants.Metrics.V_MIN_STRONG
+import io.github.eucsoh.analysis.ArrheniusNormalizer
+import io.github.eucsoh.analysis.CUSUMDetector
+import io.github.eucsoh.analysis.GaussianAlarmDetector
+import io.github.eucsoh.analysis.PackInference
+import io.github.eucsoh.analysis.ReqStatsComputer
+import io.github.eucsoh.analysis.TrendDetector
 import io.github.eucsoh.model.MOSFETParams
 import io.github.eucsoh.model.PlotData
 import io.github.eucsoh.model.ThresholdInfo
+import kotlinx.coroutines.coroutineScope
 import org.jetbrains.kotlinx.dataframe.DataFrame
-import org.jetbrains.kotlinx.dataframe.api.*
-import kotlinx.coroutines.*
+import org.jetbrains.kotlinx.dataframe.api.add
+import org.jetbrains.kotlinx.dataframe.api.dataFrameOf
+import org.jetbrains.kotlinx.dataframe.api.sortBy
+import org.jetbrains.kotlinx.dataframe.api.take
 
 /**
  * Main orchestrator for SoH analysis.
@@ -43,7 +76,7 @@ class SohAnalyzer(
     data class AnalysisResult(
         val stats: DataFrame<*>,
         val alarms: List<GaussianAlarmDetector.Alarm>,
-        val thresholds: Map<String, io.github.eucsoh.model.ThresholdInfo>,
+        val thresholds: Map<String, ThresholdInfo>,
         val eaJPerMol: Double,
         val nsGlobal: Int?,
         val vNominal: Double?,
@@ -333,18 +366,26 @@ class SohAnalyzer(
                 testKmMin = testKmMin
             )
 
-            if (cusumResult.alarmIndices.isNotEmpty()) {
-                val firstIdx = cusumResult.alarmIndices.first()
-                cusumAlarms.add(
-                    GaussianAlarmDetector.Alarm(
-                        file = (dfStats[FILE.csv_code][firstIdx] as? String) ?: "unknown",
-                        wheelKm = (dfStats[WHEEL_KM.csv_code][firstIdx] as? Number)?.toDouble(),
-                        datetimeFirst = dfStats[DATETIME_FIRST.csv_code][firstIdx] as? String,
-                        reasons = "Regime change detected on $metric (CUSUM): " +
-                                "µ_ref=${cusumResult.muRef?.let { "%.4f".format(it) }}, " +
-                                "σ_ref=${cusumResult.sigmaRef?.let { "%.4f".format(it) }}"
+            if (cusumResult.alarmKm.isNotEmpty()) {
+                val firstAlarmKm = cusumResult.alarmKm.first()
+
+                // Retrouver l'index de ligne dans dfStats dont wheel_km == firstAlarmKm
+                val firstIdx = (0 until dfStats.rowsCount()).firstOrNull { i ->
+                    (dfStats[WHEEL_KM.csv_code][i] as? Number)?.toDouble() == firstAlarmKm
+                }
+
+                if (firstIdx != null) {
+                    cusumAlarms.add(
+                        GaussianAlarmDetector.Alarm(
+                            file = (dfStats[FILE.csv_code][firstIdx] as? String) ?: "unknown",
+                            wheelKm = (dfStats[WHEEL_KM.csv_code][firstIdx] as? Number)?.toDouble(),
+                            datetimeFirst = dfStats[DATETIME_FIRST.csv_code][firstIdx] as? String,
+                            reasons = "Regime change detected on $metric (CUSUM): " +
+                                    "µ_ref=${cusumResult.muRef?.let { "%.4f".format(it) }}, " +
+                                    "σ_ref=${cusumResult.sigmaRef?.let { "%.4f".format(it) }}"
+                        )
                     )
-                )
+                }
             }
         }
 
@@ -397,7 +438,7 @@ class SohAnalyzer(
         dfStats: DataFrame<*>,
         thresholds: Map<String, ThresholdInfo>
     ): PlotData {
-        val series = mutableMapOf<Constants.Metrics, List<Pair<Double, Double>>>()
+        val series = mutableMapOf<Metrics, List<Pair<Double, Double>>>()
         val gaussianResults = mutableMapOf<Metrics, PlotData.GaussianPlotResult>()
         val cusumResults = mutableMapOf<Metrics, PlotData.CusumPlotResult>()
         val trendResults = mutableMapOf<Metrics, PlotData.TrendPlotResult>()
@@ -440,7 +481,7 @@ class SohAnalyzer(
                 )
                 if (r.muRef != null && r.sigmaRef != null) {
                     cusumResults[metric] = PlotData.CusumPlotResult(
-                        alarmIndices = r.alarmIndices.toSet(),
+                        alarmKm = r.alarmKm.toSet(),
                         muRef = r.muRef,
                         sigmaRef = r.sigmaRef,
                         hSigma = 5.0

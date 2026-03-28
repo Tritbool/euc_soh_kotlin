@@ -30,7 +30,7 @@ data class PlotData(
     )
 
     data class CusumPlotResult(
-        val alarmIndices: Set<Int>,   // indices dans series[metric]
+        val alarmKm: Set<Double>,   // indices dans series[metric]
         val muRef: Double,
         val sigmaRef: Double,
         val hSigma: Double            // pour tracer la threshold line

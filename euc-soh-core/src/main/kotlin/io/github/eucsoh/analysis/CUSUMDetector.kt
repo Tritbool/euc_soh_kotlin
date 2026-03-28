@@ -12,7 +12,7 @@ import kotlin.math.max
 object CUSUMDetector {
 
     data class CUSUMResult(
-        val alarmIndices: List<Int>,
+        val alarmKm: List<Double>,
         val muRef: Double?,
         val sigmaRef: Double?
     )
@@ -36,7 +36,7 @@ object CUSUMDetector {
         kSigma: Double = 1.0,
         hSigma: Double = 5.0,
         cooldownKm: Double = 500.0,
-        relativeJumpMin: Double = 0.3,
+        relativeJumpMin: Double = 0.05,
         hSigmaCooldown: Double = 6.0
     ): CUSUMResult {
         if (metric !in df.columnNames() || WHEEL_KM.csv_code !in df.columnNames()) {
@@ -99,7 +99,7 @@ object CUSUMDetector {
         val hCooldown = hSigmaCooldown * sigmaRef
 
         var s = 0.0
-        val alarmIndices = mutableListOf<Int>()
+        val alarmKm = mutableListOf<Double>()
         var inCooldown = false
         var cooldownEndKm: Double? = null
         var regimeMu = muRef
@@ -131,7 +131,7 @@ object CUSUMDetector {
             }
 
             if (triggered) {
-                alarmIndices.add(i)
+                alarmKm.add(km)
 
                 // Update regime
                 val j0 = maxOf(0, i - 4)
@@ -144,6 +144,6 @@ object CUSUMDetector {
             }
         }
 
-        return CUSUMResult(alarmIndices, muRef, sigmaRef)
+        return CUSUMResult(alarmKm , muRef, sigmaRef)
     }
 }

@@ -20,6 +20,8 @@ import java.util.Locale
 import kotlin.math.max
 import kotlin.math.min
 import androidx.core.graphics.createBitmap
+import com.github.mikephil.charting.components.Legend
+import com.github.mikephil.charting.components.LegendEntry
 
 /**
  * Génère les graphiques Trend, CUSUM et Slope Inflexion pour le rapport SoH.
@@ -145,8 +147,10 @@ class SohTrendCusumChartGenerator(private val context: Context) {
 
         // Un seul dataset avec une couleur par point
         val allEntries = pts.mapIndexed { _, (x, y) -> Entry(x.toFloat(), y.toFloat()) }
-        val circleColors = pts.indices.map { i ->
-            if (i in cusum.alarmIndices) COLOR_ALARM_RED else COLOR_DATA_BLUE
+        // Après (correct — lookup par km)
+        val alarmKmSet = cusum.alarmKm.toHashSet()
+        val circleColors = pts.map { (x, _) ->
+            if (x in alarmKmSet) COLOR_ALARM_RED else COLOR_DATA_BLUE
         }
 
         val scatterSet = LineDataSet(allEntries, label).apply {
@@ -161,7 +165,7 @@ class SohTrendCusumChartGenerator(private val context: Context) {
         }
 
         // Dataset fantôme uniquement pour afficher "Change detected" dans la légende
-        val legendAlarmEntry = listOf(Entry(Float.MIN_VALUE, Float.MAX_VALUE))
+        val legendAlarmEntry = listOf(Entry(xVals.first(), yVals.first()))
         val legendAlarm = LineDataSet(legendAlarmEntry, "Change detected (CUSUM)").apply {
             lineWidth = 0f
             setDrawCircles(true)
@@ -170,13 +174,20 @@ class SohTrendCusumChartGenerator(private val context: Context) {
             setCircleHoleColor(Color.WHITE)
             circleHoleRadius = 2f
             setDrawValues(false)
-            isVisible = false
         }
 
         chart.data = LineData(
             listOf(scatterSet, legendAlarm)
                     as List<com.github.mikephil.charting.interfaces.datasets.ILineDataSet>
         )
+
+        val legend = chart.legend
+        legend.isEnabled = true
+        val customEntries = arrayOf(
+            LegendEntry(label, Legend.LegendForm.CIRCLE, 8f, 2f, null, COLOR_DATA_BLUE),
+            LegendEntry("Change detected (CUSUM)", Legend.LegendForm.CIRCLE, 8f, 2f, null, COLOR_ALARM_RED)
+        )
+        legend.setCustom(customEntries)
 
         val yAxis = chart.axisLeft
         yAxis.removeAllLimitLines()
@@ -218,7 +229,7 @@ class SohTrendCusumChartGenerator(private val context: Context) {
         wheelName: String = ""
     ): List<Pair<String, Bitmap>> =
         CUSUM_METRICS.mapNotNull { metric ->
-            if (plotData.cusumResults[metric] == null || plotData.cusumResults[metric]?.alarmIndices!!.isEmpty()) return@mapNotNull null
+            if (plotData.cusumResults[metric] == null || plotData.cusumResults[metric]?.alarmKm!!.isEmpty()) return@mapNotNull null
             try {
                 metric.csv_code to generateCusumChart(plotData, metric, wheelName)
             } catch (_: Exception) {
