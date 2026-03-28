@@ -18,6 +18,9 @@ import java.util.Locale
 import kotlin.math.max
 import kotlin.math.min
 import androidx.core.graphics.createBitmap
+import io.github.eucsoh.android.visualization.SohTrendCusumChartGenerator.Companion.addMosfetRefLine
+import io.github.eucsoh.android.visualization.SohTrendCusumChartGenerator.Companion.addPackRefLine
+import io.github.eucsoh.android.visualization.SohTrendCusumChartGenerator.Companion.expandAxisForRefLine
 
 /**
  * Génère les graphiques gaussiens SoH.
@@ -106,6 +109,18 @@ class SohChartGeneratorFixed(private val context: Context) {
         } else {
             yAxis.axisMinimum = min(globalMin, dangerThreshold) - sigma * 0.5f
             yAxis.axisMaximum = max(globalMax, greenHigh)       + sigma * 0.5f
+        }
+
+        when (metric) {
+            Metrics.R_MOSFET_HOT -> plotData.mosfetRdsOn25cRef?.let {
+                expandAxisForRefLine(chart.axisLeft, it.toFloat())
+                addMosfetRefLine(chart.axisLeft, it)
+            }
+            Metrics.R_BATT_MEDIAN_25C, Metrics.R_BATT_MEDIAN -> plotData.battPackRNominal?.let {
+                expandAxisForRefLine(chart.axisLeft, it.toFloat())
+                addPackRefLine(chart.axisLeft, it)
+            }
+            else -> {}
         }
 
         return renderToBitmap(chart)

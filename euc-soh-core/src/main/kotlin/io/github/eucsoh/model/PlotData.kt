@@ -20,7 +20,13 @@ data class PlotData(
     val trendResults: Map<Metrics, TrendPlotResult>,
 
     /** Résultats Inflexion par métrique */
-    val inflexionResults: Map<Metrics, InflexionPlotResult>
+    val inflexionResults: Map<Metrics, InflexionPlotResult>,
+
+    /** Factory resistance RDS_on 25C */
+    val mosfetRdsOn25cRef: Double? = null,
+
+    /** Estimated Nominal Battery Pack Resistance */
+    val battPackRNominal: Double? = null
 ) {
 
     data class GaussianPlotResult(

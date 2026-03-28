@@ -16,20 +16,21 @@ object PackInference {
     fun estimateCellResistanceMohm(vNom: Double?): Double {
         if (vNom == null) return 18.0
         return when {
-            vNom < 80.0 -> 22.0
-            vNom < 110.0 -> 18.0
-            vNom < 150.0 -> 14.0
-            else -> 12.0
+            vNom < 80.0  -> 22.0   // 18650 petits packs (16S)
+            vNom < 100.0 -> 18.0   // 18650 packs moyens (20-24S)
+            vNom < 130.0 -> 15.0   // transition 18650/21700
+            vNom < 150.0 -> 12.0   // 21700 standard (32-36S)
+            else         -> 10.0   // 21700 haute perf (40S+)
         }
     }
 
     /**
      * Computes pack nominal resistance (Ω) from series count and nominal voltage.
      */
-    fun computePackNominalResistance(nsGlobal: Int?, vNom: Double?): Double? {
+    fun computePackNominalResistance(nsGlobal: Int?, vNom: Double?, nParallel:Int=1): Double? {
         if (nsGlobal == null) return null
         val rCellMohm = estimateCellResistanceMohm(vNom)
-        return nsGlobal * rCellMohm / 1000.0
+        return nsGlobal * rCellMohm / 1000.0 / nParallel
     }
 
     /**

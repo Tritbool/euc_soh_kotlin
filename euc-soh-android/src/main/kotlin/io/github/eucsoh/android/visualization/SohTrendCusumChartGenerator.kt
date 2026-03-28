@@ -42,6 +42,41 @@ class SohTrendCusumChartGenerator(private val context: Context) {
         const val COLOR_THRESHOLD_H = 0xFFFF0000.toInt()
         const val COLOR_DANGER = 0xFFFF0000.toInt()
         const val COLOR_REGRESSION = 0xFFFF6F00.toInt()
+        const val COLOR_FACTORY_REF = 0xFF6A0DAD.toInt()  // violet
+
+        fun addMosfetRefLine(yAxis: com.github.mikephil.charting.components.YAxis, rdsRef: Double) {
+            yAxis.addLimitLine(
+                LimitLine(rdsRef.toFloat(), "R_DS(on)@25°C = ${"%.4f".format(rdsRef)} Ω").apply {
+                    lineColor = COLOR_FACTORY_REF
+                    lineWidth = 2f
+                    textColor = COLOR_FACTORY_REF
+                    textSize = 10f
+                    enableDashedLine(6f, 4f, 0f)
+                }
+            )
+        }
+
+        fun addPackRefLine(yAxis: com.github.mikephil.charting.components.YAxis, rNomRef: Double) {
+            yAxis.addLimitLine(
+                LimitLine(
+                    rNomRef.toFloat(),
+                    "Est. nom. batt. pack R = ${"%.4f".format(rNomRef)} Ω"
+                ).apply {
+                    lineColor = COLOR_FACTORY_REF
+                    lineWidth = 2f
+                    textColor = COLOR_FACTORY_REF
+                    textSize = 10f
+                    enableDashedLine(6f, 4f, 0f)
+                }
+            )
+        }
+
+        fun expandAxisForRefLine(yAxis: com.github.mikephil.charting.components.YAxis, value: Float) {
+            val margin = (yAxis.axisMaximum - yAxis.axisMinimum) * 0.05f
+            if (value < yAxis.axisMinimum) yAxis.axisMinimum = value - margin
+            if (value > yAxis.axisMaximum) yAxis.axisMaximum = value + margin
+        }
+
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -88,7 +123,7 @@ class SohTrendCusumChartGenerator(private val context: Context) {
                 Entry(xMin, (trend.slope * xMin + trend.intercept).toFloat()),
                 Entry(xMax, (trend.slope * xMax + trend.intercept).toFloat())
             ),
-            "Trend: $sign${String.format(Locale.getDefault(),"%.4f", slopePerThousand)} /1000 km"
+            "Trend: $sign${String.format(Locale.getDefault(), "%.4f", slopePerThousand)} /1000 km"
         ).apply {
             color = COLOR_REGRESSION
             lineWidth = 2.5f
@@ -104,6 +139,17 @@ class SohTrendCusumChartGenerator(private val context: Context) {
         chart.axisLeft.axisMinimum = yVals.minOrNull()!! - range
         chart.axisLeft.axisMaximum = yVals.maxOrNull()!! + range
 
+        when (metric) {
+            Metrics.R_MOSFET_HOT -> plotData.mosfetRdsOn25cRef?.let {
+                expandAxisForRefLine(chart.axisLeft, it.toFloat())
+                addMosfetRefLine(chart.axisLeft, it)
+            }
+            Metrics.R_BATT_MEDIAN_25C, Metrics.R_BATT_MEDIAN -> plotData.battPackRNominal?.let {
+                expandAxisForRefLine(chart.axisLeft, it.toFloat())
+                addPackRefLine(chart.axisLeft, it)
+            }
+            else -> {}
+        }
         return renderToBitmap(chart)
     }
 
@@ -185,7 +231,14 @@ class SohTrendCusumChartGenerator(private val context: Context) {
         legend.isEnabled = true
         val customEntries = arrayOf(
             LegendEntry(label, Legend.LegendForm.CIRCLE, 8f, 2f, null, COLOR_DATA_BLUE),
-            LegendEntry("Change detected (CUSUM)", Legend.LegendForm.CIRCLE, 8f, 2f, null, COLOR_ALARM_RED)
+            LegendEntry(
+                "Change detected (CUSUM)",
+                Legend.LegendForm.CIRCLE,
+                8f,
+                2f,
+                null,
+                COLOR_ALARM_RED
+            )
         )
         legend.setCustom(customEntries)
 
@@ -194,7 +247,7 @@ class SohTrendCusumChartGenerator(private val context: Context) {
         yAxis.addLimitLine(
             LimitLine(
                 cusum.muRef.toFloat(),
-                "µ_ref = ${String.format(Locale.getDefault(),"%.4f", cusum.muRef)}"
+                "µ_ref = ${String.format(Locale.getDefault(), "%.4f", cusum.muRef)}"
             ).apply {
                 lineColor = COLOR_MU_REF; lineWidth = 2f
                 textColor = COLOR_MU_REF; textSize = 10f
@@ -220,6 +273,18 @@ class SohTrendCusumChartGenerator(private val context: Context) {
             min(yVals.minOrNull()!!, cusum.muRef.toFloat()) - cusum.sigmaRef.toFloat() * 0.3f
         yAxis.axisMaximum =
             max(yVals.maxOrNull()!!, hLine) + cusum.sigmaRef.toFloat() * 0.3f
+
+        when (metric) {
+            Metrics.R_MOSFET_HOT -> plotData.mosfetRdsOn25cRef?.let {
+                expandAxisForRefLine(chart.axisLeft, it.toFloat())
+                addMosfetRefLine(chart.axisLeft, it)
+            }
+            Metrics.R_BATT_MEDIAN_25C, Metrics.R_BATT_MEDIAN -> plotData.battPackRNominal?.let {
+                expandAxisForRefLine(chart.axisLeft, it.toFloat())
+                addPackRefLine(chart.axisLeft, it)
+            }
+            else -> {}
+        }
 
         return renderToBitmap(chart)
     }
@@ -296,7 +361,13 @@ class SohTrendCusumChartGenerator(private val context: Context) {
         yAxis.addLimitLine(
             LimitLine(
                 inflexion.dangerLimit.toFloat(),
-                "danger threshold ≈ ${String.format(Locale.getDefault(),"%.2f", inflexion.dangerLimit)}"
+                "danger threshold ≈ ${
+                    String.format(
+                        Locale.getDefault(),
+                        "%.2f",
+                        inflexion.dangerLimit
+                    )
+                }"
             ).apply {
                 lineColor = COLOR_DANGER; lineWidth = 2f
                 textColor = COLOR_DANGER; textSize = 11f
@@ -314,6 +385,18 @@ class SohTrendCusumChartGenerator(private val context: Context) {
         } else {
             yAxis.axisMinimum = min(yVals.minOrNull()!!, inflexion.dangerLimit.toFloat()) - margin
             yAxis.axisMaximum = yVals.maxOrNull()!! + margin
+        }
+
+        when (metric) {
+            Metrics.R_MOSFET_HOT -> plotData.mosfetRdsOn25cRef?.let {
+                expandAxisForRefLine(chart.axisLeft, it.toFloat())
+                addMosfetRefLine(chart.axisLeft, it)
+            }
+            Metrics.R_BATT_MEDIAN_25C, Metrics.R_BATT_MEDIAN -> plotData.battPackRNominal?.let {
+                expandAxisForRefLine(chart.axisLeft, it.toFloat())
+                addPackRefLine(chart.axisLeft, it)
+            }
+            else -> {}
         }
 
         return renderToBitmap(chart)
@@ -380,4 +463,6 @@ class SohTrendCusumChartGenerator(private val context: Context) {
         chart.draw(canvas)
         return bitmap
     }
+
+
 }

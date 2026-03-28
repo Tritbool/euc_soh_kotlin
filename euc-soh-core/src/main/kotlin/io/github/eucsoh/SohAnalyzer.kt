@@ -83,7 +83,7 @@ class SohAnalyzer(
         val rPackNominal: Double?,
         val plotData: PlotData,
         val fileReports: List<FileReport>,
-        val macAddress:String?=null
+        val macAddress: String? = null
     )
 
     data class SummaryData(
@@ -134,7 +134,7 @@ class SohAnalyzer(
         optimalFrac: Double = 0.3,
         eaJPerMol: Double? = null,
         onProgress: ((current: Int, total: Int, phase: String) -> Unit)? = null,
-        macAddress:String? = null
+        macAddress: String? = null
     ): AnalysisResult = coroutineScope {
 
         logger.d(TAG, "Starting analysis of ${csvPaths.size} files")
@@ -162,10 +162,10 @@ class SohAnalyzer(
                             TAG,
                             "  [$idx] SUCCESS: ${result?.nPoints ?: MIN_POINTS} points, req=${result?.reqMedian ?: LOWER_REQ}"
                         )
-                        if ((result?.reqMedian?: LOWER_REQ) > LOWER_REQ &&
+                        if ((result?.reqMedian ?: LOWER_REQ) > LOWER_REQ &&
                             (result?.tempBoardMax) != null &&
                             (result?.nPoints ?: MIN_POINTS) >= MIN_POINTS
-                        ){
+                        ) {
                             validCsvPath.add(path)
 
                             val fileName = path.substringAfterLast('/')
@@ -189,7 +189,7 @@ class SohAnalyzer(
                                         nPoints = result?.nPoints ?: 0
                                     )
 
-                                (result?.reqMedian?: LOWER_REQ) <= LOWER_REQ ->
+                                (result?.reqMedian ?: LOWER_REQ) <= LOWER_REQ ->
                                     FileReport(
                                         path, fileName, source, false,
                                         rejectionReason = "Req not computable (reqMedian = ${result?.reqMedian ?: LOWER_REQ})",
@@ -417,7 +417,7 @@ class SohAnalyzer(
 
         logger.d(TAG, "Analysis complete: ${allAlarms.size} alarms detected")
 
-        val plotData = buildPlotData(dfStats, thresholds)
+        val plotData = buildPlotData(dfStats, thresholds, rPackNominal)
 
         AnalysisResult(
             stats = dfStats,
@@ -429,14 +429,15 @@ class SohAnalyzer(
             rPackNominal = rPackNominal,
             plotData = plotData,
             fileReports = fileReports.toList(),
-            macAddress=macAddress
+            macAddress = macAddress
         )
 
     }
 
     private fun buildPlotData(
         dfStats: DataFrame<*>,
-        thresholds: Map<String, ThresholdInfo>
+        thresholds: Map<String, ThresholdInfo>,
+        rPackNominal: Double?
     ): PlotData {
         val series = mutableMapOf<Metrics, List<Pair<Double, Double>>>()
         val gaussianResults = mutableMapOf<Metrics, PlotData.GaussianPlotResult>()
@@ -527,7 +528,15 @@ class SohAnalyzer(
             }
         }
 
-        return PlotData(series, gaussianResults, cusumResults, trendResults, inflexionResults)
+        return PlotData(
+            series,
+            gaussianResults,
+            cusumResults,
+            trendResults,
+            inflexionResults,
+            mosfetParams?.rDsOn25cTotal,
+            rPackNominal
+        )
     }
 
 

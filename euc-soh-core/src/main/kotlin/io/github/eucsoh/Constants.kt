@@ -114,6 +114,7 @@ object Constants {
     // Metrics for CUSUM and trend detection
     val CUSUM_METRICS: Set<Metrics> = setOf(
         Metrics.R_BATT_MEDIAN_25C,
+        Metrics.R_BATT_MEDIAN,
         Metrics.R_MOSFET_HOT,
         Metrics.REQ_MEDIAN,
         Metrics.REQ_MEDIAN_25C,
@@ -124,6 +125,7 @@ object Constants {
 
     val TREND_METRICS: Set<Metrics> = setOf(
         Metrics.R_BATT_MEDIAN_25C,
+        Metrics.R_BATT_MEDIAN,
         Metrics.R_MOSFET_HOT,
         Metrics.REQ_MEDIAN,
         Metrics.REQ_MEDIAN_25C,
