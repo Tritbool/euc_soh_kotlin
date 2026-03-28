@@ -58,7 +58,8 @@ fun MainScreen(
                         // Calcule la largeur de la tuile en gardant le ratio original
                         val originalW = tileBitmap.width.toFloat()
                         val originalH = tileBitmap.height.toFloat()
-                        val tileH = size.height                      // on fit à la hauteur du bandeau
+                        val tileH =
+                            size.height                      // on fit à la hauteur du bandeau
                         val tileW = originalW * (tileH / originalH) // largeur proportionnelle
 
                         var x = 0f
@@ -68,7 +69,7 @@ fun MainScreen(
                                 dstOffset = IntOffset(x.toInt(), 0),
                                 dstSize = IntSize(tileW.toInt(), tileH.toInt())
                             )
-                            x += tileW-1f
+                            x += tileW - 1f
                         }
                     }
             ) {
@@ -246,8 +247,9 @@ fun AnalysisProgressScreen(
             )
 
             Spacer(Modifier.height(24.dp))
-
+            // TODO: replace with strings 
             Text(
+                 
                 phase,
                 style = MaterialTheme.typography.headlineSmall
             )

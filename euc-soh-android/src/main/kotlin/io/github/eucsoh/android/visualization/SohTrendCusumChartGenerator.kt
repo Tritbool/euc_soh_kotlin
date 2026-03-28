@@ -161,7 +161,7 @@ class SohTrendCusumChartGenerator(private val context: Context) {
         }
 
         // Dataset fantôme uniquement pour afficher "Change detected" dans la légende
-        val legendAlarmEntry = listOf(Entry(xVals.first(), yVals.first()))
+        val legendAlarmEntry = listOf(Entry(Float.MIN_VALUE, Float.MAX_VALUE))
         val legendAlarm = LineDataSet(legendAlarmEntry, "Change detected (CUSUM)").apply {
             lineWidth = 0f
             setDrawCircles(true)
@@ -170,6 +170,7 @@ class SohTrendCusumChartGenerator(private val context: Context) {
             setCircleHoleColor(Color.WHITE)
             circleHoleRadius = 2f
             setDrawValues(false)
+            isVisible = false
         }
 
         chart.data = LineData(
