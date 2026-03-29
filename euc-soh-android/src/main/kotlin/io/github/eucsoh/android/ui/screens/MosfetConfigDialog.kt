@@ -15,6 +15,10 @@ import io.github.eucsoh.model.MOSFETParams
 import java.util.Locale
 import androidx.compose.ui.res.stringResource
 import io.github.eucsoh.android.R
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.heightIn
+
 
 /**
  * Dialog de configuration des paramètres MOSFET pour une roue.
@@ -58,8 +62,9 @@ fun MosfetConfigDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .heightIn(max = 520.dp)
+                    .verticalScroll(rememberScrollState())
                     .padding(vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 // Wheel name field
                 OutlinedTextField(

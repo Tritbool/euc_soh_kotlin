@@ -275,7 +275,6 @@ class SohAnalyzer(
                 }
             }
 
-        onProgress?.invoke(finalPaths.size, finalPaths.size, DONE)
         logger.d(TAG, "Pass 2: ${finalStats.size}/${finalPaths.size} files processed")
 
         if (finalStats.isEmpty()) {
@@ -422,6 +421,8 @@ class SohAnalyzer(
         logger.d(TAG, "Analysis complete: ${allAlarms.size} alarms detected")
 
         val plotData = buildPlotData(dfStats, thresholds, rPackNominal)
+
+        onProgress?.invoke(finalPaths.size, finalPaths.size, DONE)
 
         AnalysisResult(
             stats = dfStats,

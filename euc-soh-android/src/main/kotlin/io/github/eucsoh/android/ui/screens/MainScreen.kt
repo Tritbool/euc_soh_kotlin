@@ -145,7 +145,7 @@ fun MainScreen(
                         currentFile = state.progressState?.current!!,
                         totalFiles = state.progressState?.total!!,
                         fileName = "",//state.currentFileName,
-                        phase = stringResource(R.string.analyze_button, R.string.analyzing_phase)
+                        phase = stringResource(R.string.analyzing_phase)
                     )
                 }
 
@@ -154,7 +154,7 @@ fun MainScreen(
                         currentFile = state.progressState?.current!!,
                         totalFiles = state.progressState?.total!!,
                         fileName = "",//state.currentFileName,
-                        phase = stringResource(R.string.analyze_button, R.string.calibrating_phase)
+                        phase = stringResource(R.string.calibrating_phase)
                     )
                 }
 
@@ -247,9 +247,7 @@ fun AnalysisProgressScreen(
             )
 
             Spacer(Modifier.height(24.dp))
-            // TODO: replace with strings 
             Text(
-                 
                 phase,
                 style = MaterialTheme.typography.headlineSmall
             )
