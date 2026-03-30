@@ -131,20 +131,5 @@ class WheelConfigRepository(context: Context) {
         val config = getConfig(macAddress).clearMosfetParams()
         saveConfig(config)
     }
-    
-    /**
-     * Vérifie si une roue a une config MOSFET.
-     */
-    suspend fun hasMosfetConfig(macAddress: String): Boolean {
-        return getConfig(macAddress).hasMosfetConfig()
-    }
-    
-    /**
-     * Liste toutes les roues avec config MOSFET.
-     */
-    suspend fun listConfiguredWheels(): List<String> = withContext(Dispatchers.IO) {
-        prefs.all.keys
-            .filter { it.startsWith(PREFIX_MOSFET_RDS) }
-            .map { it.removePrefix(PREFIX_MOSFET_RDS) }
-    }
+
 }

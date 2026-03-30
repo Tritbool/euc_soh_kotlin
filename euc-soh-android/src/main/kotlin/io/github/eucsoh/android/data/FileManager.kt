@@ -20,8 +20,6 @@ package io.github.eucsoh.android.data
 
 import android.content.Context
 import android.net.Uri
-import androidx.documentfile.provider.DocumentFile
-import io.github.eucsoh.android.data.model.CsvFileInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
@@ -39,33 +37,6 @@ import java.io.InputStreamReader
 class FileManager(private val context: Context) {
 
     /**
-     * List all CSV files in the wheel directory.
-     * Returns lightweight CsvFileInfo without full validation for performance.
-     */
-    suspend fun listCsvFiles(wheelDirUri: Uri): List<CsvFileInfo> = withContext(Dispatchers.IO) {
-        val wheelDir = DocumentFile.fromTreeUri(context, wheelDirUri)
-            ?: return@withContext emptyList()
-
-        wheelDir.listFiles()
-            .filter { it.isFile && it.name?.endsWith(".csv", ignoreCase = true) == true }
-            .map { docFile ->
-                CsvFileInfo(
-                    uri = docFile.uri,
-                    fileName = docFile.name ?: "unknown.csv",
-                    sizeBytes = docFile.length(),
-                    isValid = true, // Assume valid for listing, full validation happens during analysis
-                    validationMessage = "",
-                    nPoints = null,
-                    hasTemperature = false,
-                    reqMedian = null,
-                    wheelKm = null,
-                    isExcluded = false
-                )
-            }
-            .sortedByDescending { it.sizeBytes }
-    }
-
-    /**
      * Read first N lines of CSV for preview.
      */
     suspend fun previewCsv(fileUri: Uri, maxLines: Int = 20): List<String> = withContext(Dispatchers.IO) {
@@ -80,18 +51,4 @@ class FileManager(private val context: Context) {
         }
     }
 
-    /**
-     * Count lines in CSV file.
-     */
-    suspend fun countLines(fileUri: Uri): Int = withContext(Dispatchers.IO) {
-        try {
-            context.contentResolver.openInputStream(fileUri)?.use { inputStream ->
-                BufferedReader(InputStreamReader(inputStream)).useLines { lines ->
-                    lines.count()
-                }
-            } ?: 0
-        } catch (e: Exception) {
-            0
-        }
-    }
 }

@@ -270,6 +270,7 @@ fun FileListScreen(
                             onPreview = { path ->
                                 scope.launch {
                                     isLoadingPreview = true
+                                    // TODO: Needs rework
                                     previewLines = fileManager.previewCsv(Uri.parse(path))
                                     selectedReport = report
                                     isLoadingPreview = false

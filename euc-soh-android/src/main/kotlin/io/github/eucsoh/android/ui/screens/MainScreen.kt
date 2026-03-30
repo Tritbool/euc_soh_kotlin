@@ -60,7 +60,6 @@ import androidx.compose.ui.unit.IntSize
 fun MainScreen(
     viewModel: SohViewModel,
     onRequestPermissions: () -> Unit,
-    onRequestFolderPicker: () -> Unit,
     onOpenLicenses: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
@@ -203,7 +202,6 @@ fun MainScreen(
                 state.detectedWheels.isEmpty() -> {
                     EmptyStateScreen(
                         onRequestPermissions = onRequestPermissions,
-                        onRequestFolderPicker = onRequestFolderPicker,
                         onRetry = { viewModel.scanWheels(forceRefresh = true) },
                         scanPath = state.scanRootPath
                     )
@@ -324,7 +322,6 @@ fun AnalysisProgressScreen(
 @Composable
 fun EmptyStateScreen(
     onRequestPermissions: () -> Unit,
-    onRequestFolderPicker: () -> Unit,
     onRetry: () -> Unit,
     scanPath: String
 ) {
@@ -345,10 +342,6 @@ fun EmptyStateScreen(
                 stringResource(R.string.no_wheel_hint, scanPath),
                 style = MaterialTheme.typography.bodyMedium
             )
-            Spacer(Modifier.height(24.dp))
-            Button(onClick = onRequestFolderPicker) {
-                Text(stringResource(R.string.choose_folder))
-            }
             Spacer(Modifier.height(8.dp))
             Button(onClick = onRequestPermissions) {
                 Text(stringResource(R.string.check_permissions))

@@ -33,17 +33,7 @@ data class WheelConfig(
      * Vérifie si la roue a une config MOSFET.
      */
     fun hasMosfetConfig(): Boolean = mosfetParams != null
-    
-    /**
-     * Crée une copie avec nouveaux paramètres MOSFET.
-     */
-    fun withMosfetParams(params: MOSFETParams): WheelConfig {
-        return copy(
-            mosfetParams = params,
-            lastModified = System.currentTimeMillis()
-        )
-    }
-    
+
     /**
      * Crée une copie sans paramètres MOSFET.
      */

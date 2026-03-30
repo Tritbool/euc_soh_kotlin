@@ -18,17 +18,11 @@
 
 package io.github.eucsoh.android
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
-import android.provider.Settings
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,18 +47,6 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         if (permissionManager.hasStoragePermissions()) {
             viewModel.scanWheels(forceRefresh = false)
-        }
-    }
-
-    // Folder picker launcher
-    private val folderPickerLauncher = registerForActivityResult(
-        ActivityResultContracts.OpenDocumentTree()
-    ) { uri: Uri? ->
-        if (uri != null) {
-            Log.d(TAG, "Folder selected: $uri")
-            handleSelectedFolder(uri)
-        } else {
-            Log.w(TAG, "No folder selected")
         }
     }
 
@@ -105,9 +87,6 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             },
-                            onRequestFolderPicker = {
-                                // ton code existant ici, si tu en as besoin
-                            },
                             onOpenLicenses = {
                                 showLicenses = true
                             }
@@ -118,38 +97,4 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /**
-     * Launches the Android folder picker.
-     */
-    private fun launchFolderPicker() {
-        try {
-            folderPickerLauncher.launch(null)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error launching folder picker", e)
-        }
-    }
-
-    /**
-     * Handles the selected folder URI.
-     * Takes persistable permission and passes URI to ViewModel.
-     */
-    private fun handleSelectedFolder(uri: Uri) {
-        try {
-            Log.d(TAG, "Processing URI: $uri")
-            intent
-            // Take persistable permission
-            try {
-                val flags = android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
-                contentResolver.takePersistableUriPermission(uri, flags)
-                Log.d(TAG, "Persistable permission taken")
-            } catch (e: Exception) {
-                Log.w(TAG, "Could not take persistable permission", e)
-            }
-
-            // Pass URI to ViewModel
-            viewModel.setRootUri(uri)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error handling selected folder", e)
-        }
-    }
 }

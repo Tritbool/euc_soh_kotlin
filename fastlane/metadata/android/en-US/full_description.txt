@@ -1,0 +1,24 @@
+EUC SoH is a state-of-health (SoH) analysis tool for electric unicycles. It processes ride logs from popular EUC logging apps to estimate battery health, internal resistance and long-term degradation patterns.
+
+The app runs entirely on-device, without trackers or network access. It is fully free and open source under the AGPL license.
+
+Main features:
+- Scan storage recursively to discover WheelLog and EUC World subfolders and CSV log files automatically.
+- Parse ride logs and separate accepted files from rejected ones, with clear rejection reasons (too few data points, invalid Req computation, etc.).
+- Compute state-of-health metrics such as equivalent resistance (Req) and CUSUM-based indicators.
+- Display interactive charts using MPAndroidChart to visualize resistance evolution and SoH trends over time.
+- Maintain per-wheel file management: inspect which logs belong to each wheel, exclude problematic files, and keep only the relevant data set for analysis.
+- Export a structured archive suitable for resale, expertise or maintenance: a PDF report (soh.pdf), a statistics summary CSV, plus the corresponding WheelLog and EUC World logs, organized by wheel identifier.
+- Offer direct sharing of the generated PDF and archive to messaging apps, e-mail or cloud storage, with a UX designed around a small number of clear actions.
+- Work offline by default; no account, no registration, no external server.
+
+Typical workflow:
+1. Scan storage for folders where WheelLog or EUC World logs are stored.
+2. Let EUC SoH scan subfolders recursively to find all compatible CSV files and group them by wheel.
+3. Run the SoH analysis to compute Req and related metrics, then inspect the generated charts for long-term battery degradation.
+4. Review the list of accepted and rejected logs files during the analysis.
+5. Export a PDF report along with a structured archive of the underlying logs, ready to be shared with a buyer, technician or for your personal records.
+
+EUC SoH is intended for technically minded riders, enthusiasts and repair shops who need transparent and reproducible diagnostics for electric unicycle battery health.
+
+Based on https://hal.science/hal-05553115
