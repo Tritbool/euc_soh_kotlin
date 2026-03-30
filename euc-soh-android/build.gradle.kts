@@ -155,6 +155,19 @@ tasks.register<Copy>("copyLicenseReportToAssets") {
     from(generatedReport)
     into(layout.projectDirectory.dir("src/main/assets"))
     rename { "third_party_licenses.md" }
+
+    doLast {
+        val destFile = layout.projectDirectory.file("src/main/assets/third_party_licenses.md").asFile
+        val cleaned = destFile.readLines()
+            .map { line ->
+                if (line.matches(Regex("^_\\d{4}-\\d{2}-\\d{2}.*UTC_$")))
+                    "_Generated at build time_"
+                else
+                    line
+            }
+            .joinToString("\n")
+        destFile.writeText(cleaned)
+    }
 }
 
 tasks.named("preBuild") {
