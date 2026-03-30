@@ -71,7 +71,6 @@ import org.jetbrains.kotlinx.dataframe.api.take
 
 /**
  * Main orchestrator for SoH analysis.
- * Port of analyze_folder_for_req() from soh_core_en.py.
  */
 class SohAnalyzer(
     private val csvSource: CsvSource? = null,
@@ -565,7 +564,6 @@ class SohAnalyzer(
 
     /**
      * Builds a platform-agnostic summary from analysis results.
-     * Port of build_summary_dict() from soh_core_en.py.
      *
      * @param result Analysis results from analyzeFolderForReq()
      * @param wheelName Name/identifier of the wheel

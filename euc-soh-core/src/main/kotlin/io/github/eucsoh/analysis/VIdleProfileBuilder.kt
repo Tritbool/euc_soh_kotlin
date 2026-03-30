@@ -25,7 +25,6 @@ import kotlin.math.abs
 
 /**
  * Builds local V_idle profile from quasi-idle segments.
- * New feature from soh_core_en.py v3.
  */
 object VIdleProfileBuilder {
 

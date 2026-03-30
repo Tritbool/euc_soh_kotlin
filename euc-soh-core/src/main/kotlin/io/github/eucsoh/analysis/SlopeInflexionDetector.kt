@@ -26,7 +26,6 @@ import kotlin.math.abs
 
 /**
  * Detects slope inflexions (sustained regime changes) using sliding window regression.
- * Port of detect_slope_inflexions() from soh_core_en.py
  */
 object SlopeInflexionDetector {
 

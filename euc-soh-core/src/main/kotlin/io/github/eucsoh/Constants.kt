@@ -19,7 +19,7 @@
 package io.github.eucsoh
 
 /**
- * Constants from soh_core_en.py
+ * Constants
  */
 object Constants {
     const val DEBUG = true  // Activé pour débogage Android

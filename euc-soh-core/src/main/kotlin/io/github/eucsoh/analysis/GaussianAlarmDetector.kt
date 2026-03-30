@@ -32,7 +32,6 @@ import kotlin.math.pow
 
 /**
  * Gaussian-based alarm detection for SoH metrics.
- * Port of detect_alarms_gauss() from soh_core_en.py.
  */
 object GaussianAlarmDetector {
     data class Alarm(

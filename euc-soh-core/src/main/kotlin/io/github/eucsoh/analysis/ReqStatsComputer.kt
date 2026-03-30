@@ -47,7 +47,6 @@ import kotlin.math.round
 
 /**
  * Main CSV analysis: computes R_eq and SoH metrics for a single file.
- * Port of compute_req_stats_for_file() from soh_core_en.py.
  */
 object ReqStatsComputer {
     const val TAG = "ReqStatsComputer"

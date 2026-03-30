@@ -25,7 +25,6 @@ import kotlin.math.max
 
 /**
  * CUSUM (Cumulative Sum) detector for regime changes.
- * Port of cusum_detection() from soh_core_en.py.
  */
 object CUSUMDetector {
 
