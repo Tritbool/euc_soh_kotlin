@@ -16,17 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import com.github.jk1.license.render.InventoryMarkdownReportRenderer
+import com.github.jk1.license.filter.LicenseBundleNormalizer
+import com.github.jk1.license.filter.ExcludeTransitiveDependenciesFilter
+
 plugins {
     id("com.android.application")
     kotlin("android") version "2.1.0"
     kotlin("plugin.serialization") version "2.1.0"
     kotlin("plugin.compose") version "2.1.0"  // Compose Compiler for Kotlin 2.0+
     id("com.google.devtools.ksp") version "2.1.0-1.0.29"
+    id("com.github.jk1.dependency-license-report") version "3.1.1"
 }
 
 android {
     namespace = "io.github.eucsoh.android"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "io.github.eucsoh.android"
@@ -111,4 +116,47 @@ dependencies {
     
     // PDF Export - iText7 for Android
     implementation("com.itextpdf:itext7-core:7.2.5")
+
+    // MD Compose
+    // MD Compose
+    implementation("com.halilibo.compose-richtext:richtext-ui-material3:1.0.0-alpha03")
+    implementation("com.halilibo.compose-richtext:richtext-commonmark-android:1.0.0-alpha03")
+}
+
+licenseReport {
+    outputDir = layout.buildDirectory.dir("licenses").get().asFile.toString()
+
+    renderers = arrayOf(
+        InventoryMarkdownReportRenderer(
+            "third-party-licenses.md",
+            "Android dependencies"
+        )
+    )
+
+    configurations = arrayOf("releaseRuntimeClasspath")
+
+    filters = arrayOf(
+        LicenseBundleNormalizer(),
+        ExcludeTransitiveDependenciesFilter()
+    )
+}
+
+tasks.register<Copy>("copyLicenseReportToAssets") {
+    // Cette tâche doit attendre la génération du rapport
+    dependsOn("generateLicenseReport")
+
+    val generatedReport = layout.buildDirectory
+        .file("licenses/third-party-licenses.md")
+
+    // Déclarations explicites pour éviter le warning Gradle
+    inputs.file(generatedReport)
+    outputs.file(layout.projectDirectory.file("src/main/assets/third_party_licenses.md"))
+
+    from(generatedReport)
+    into(layout.projectDirectory.dir("src/main/assets"))
+    rename { "third_party_licenses.md" }
+}
+
+tasks.named("preBuild") {
+    dependsOn("copyLicenseReportToAssets")
 }

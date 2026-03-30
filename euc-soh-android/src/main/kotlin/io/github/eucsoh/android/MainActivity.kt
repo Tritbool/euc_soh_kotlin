@@ -30,8 +30,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import io.github.eucsoh.android.ui.PermissionManager
 import io.github.eucsoh.android.ui.SohViewModel
+import io.github.eucsoh.android.ui.about.LicensesScreen
 import io.github.eucsoh.android.ui.screens.MainScreen
 import io.github.eucsoh.android.ui.theme.EucSohTheme
 
@@ -84,20 +89,30 @@ class MainActivity : ComponentActivity() {
         setContent {
             EucSohTheme {
                 Surface {
-                    MainScreen(
-                        viewModel = viewModel,
-                        onRequestPermissions = {
-                            permissionManager.requestStoragePermissions { granted ->
-                                if (granted) {
-                                    viewModel.scanWheels(forceRefresh = true)
+                    var showLicenses by remember { mutableStateOf(false) }
+
+                    if (showLicenses) {
+                        LicensesScreen(
+                            onClose = { showLicenses = false }
+                        )
+                    } else {
+                        MainScreen(
+                            viewModel = viewModel,
+                            onRequestPermissions = {
+                                permissionManager.requestStoragePermissions { granted ->
+                                    if (granted) {
+                                        viewModel.scanWheels(forceRefresh = true)
+                                    }
                                 }
+                            },
+                            onRequestFolderPicker = {
+                                // ton code existant ici, si tu en as besoin
+                            },
+                            onOpenLicenses = {
+                                showLicenses = true
                             }
-                        },
-                        onRequestFolderPicker = {
-                            //Log.d(TAG, "Launching folder picker")
-                            //launchFolderPicker()
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
