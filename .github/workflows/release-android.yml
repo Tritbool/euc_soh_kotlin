@@ -22,26 +22,32 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
-      - name: Grant execute permission for Gradle wrapper
-        run: chmod +x ./gradlew
-
       - name: Build Android release APK
         run: ./gradlew :euc-soh-android:assembleRelease --stacktrace --no-daemon
+
+      - name: Sign APK
+        uses: ilharp/sign-android-release@v2
+        id: sign_app
+        with:
+          releaseDir: euc-soh-android/build/outputs/apk/release
+          signingKey: ${{ secrets.SIGNING_KEY }}
+          keyAlias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+          buildToolsVersion: "35.0.0"
 
       - name: Upload release APK as artifact
         uses: actions/upload-artifact@v4
         with:
           name: euc-soh-android-release-apk
-          path: euc-soh-android/build/outputs/apk/release/*.apk
+          path: ${{ steps.sign_app.outputs.signedFile }}
           retention-days: 30
 
       - name: Create GitHub Release and upload APK
         uses: softprops/action-gh-release@v2
         with:
-          name: "EUC SoH ${{
-            github.ref_name
-          }}"
+          name: "EUC SoH ${{ github.ref_name }}"
           tag_name: ${{ github.ref_name }}
-          files: euc-soh-android/build/outputs/apk/release/*.apk
+          files: ${{ steps.sign_app.outputs.signedFile }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
