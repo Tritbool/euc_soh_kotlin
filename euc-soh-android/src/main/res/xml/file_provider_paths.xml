@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
     <external-files-path name="euc_soh_exports" path="EUC_SoH/" />
+    <external-files-path name="euc_soh_exports_archives" path="EUC_SoH_Archives/" />
 </paths>

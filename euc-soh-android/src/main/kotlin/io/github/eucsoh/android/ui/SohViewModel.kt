@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 /**
  * Analysis mode selection.
@@ -53,7 +54,9 @@ data class SohUiState(
     val configDialogWheel: WheelIdentity? = null,
     var progressState: ProgressState? = null,
     val showResults: Boolean = false,
-    val aliasInput: String = ""
+    val aliasInput: String = "",
+    val lastExportMime: String? = null,    // "application/pdf", "text/csv", "application/zip"
+    val lastExportPath: String? = null     // juste pour debug / logs (optionnel)
 )
 
 /**
@@ -82,14 +85,31 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     init {
+        clearExportCache(application)
         Log.d(TAG, "ViewModel initialized")
-
-
         updateScanPathDisplay()
         // Auto-scan on startup
         scanWheels(forceRefresh = false)
     }
 
+    private fun clearExportCache(context: Context) {
+        val pdf_csv = File(context.getExternalFilesDir(null), "EUC_SoH") ?: return
+        pdf_csv.listFiles()
+            ?.filter { it.extension in listOf("pdf", "csv") }
+            ?.forEach { it.delete() }
+
+        val archives = File(context.getExternalFilesDir(null), "EUC_SoH_Archives") ?: return
+        archives.listFiles()
+            ?.filter { it.extension in listOf("zip") }
+            ?.forEach { it.delete() }
+    }
+    fun markLastExport(mime: String, name: String?) {
+        _state.update { it.copy(lastExportMime = mime, lastExportPath = name) }
+    }
+
+    fun clearLastExport() {
+        _state.update { it.copy(lastExportMime = null, lastExportPath = null) }
+    }
 
     /**
      * Updates the scan path display in UI state.

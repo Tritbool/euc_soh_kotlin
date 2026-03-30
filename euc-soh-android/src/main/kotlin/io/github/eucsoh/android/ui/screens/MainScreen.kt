@@ -162,7 +162,11 @@ fun MainScreen(
                     ResultsScreenEnhanced(
                         result = state.analysisResult!!,
                         selectedWheel = state.selectedWheel,
+                        lastExportMime = state.lastExportMime,
+                        lastExportPath = state.lastExportPath,
+                        onMarkExport = viewModel::markLastExport,
                         onBack = viewModel::hideResults
+
                     )
                 }
 

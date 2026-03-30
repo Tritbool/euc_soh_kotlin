@@ -1,5 +1,7 @@
 package io.github.eucsoh.android.ui.screens
 
+import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.horizontalScroll
@@ -16,12 +18,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.FolderZip
 import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -30,10 +31,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,10 +41,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.eucsoh.SohAnalyzer
+import io.github.eucsoh.android.R
 import io.github.eucsoh.android.data.model.WheelIdentity
 import io.github.eucsoh.android.util.ShareUtils
 import io.github.eucsoh.android.visualization.CsvExportService
@@ -58,9 +59,11 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import androidx.activity.compose.BackHandler
-import androidx.compose.ui.res.stringResource
-import io.github.eucsoh.android.R
+import android.widget.Toast
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.runtime.saveable.rememberSaveable
+
 /**
  * Enhanced ResultsScreen avec accès aux fichiers et graphiques.
  */
@@ -68,8 +71,12 @@ import io.github.eucsoh.android.R
 fun ResultsScreenEnhanced(
     result: SohAnalyzer.AnalysisResult,
     selectedWheel: WheelIdentity?,
+    lastExportMime: String?,
+    lastExportPath: String?,
+    onMarkExport: (String, String?) -> Unit,
     onBack: () -> Unit
 ) {
+    val TAG = "ResultsScreenEnhanced"
     val summary = result.buildSummary(selectedWheel?.displayName ?: "Wheel")
     val columnNames = summary.logs.firstOrNull()?.keys?.toList() ?: emptyList()
     val rows = summary.logs
@@ -77,14 +84,13 @@ fun ResultsScreenEnhanced(
     var showFiles by remember { mutableStateOf(false) }
     var showCharts by remember { mutableStateOf(false) }
 
-    // En haut du composable, avec les autres remember :
-    var pdfFile by remember { mutableStateOf<File?>(null) }
-    var csvFile by remember { mutableStateOf<File?>(null) }
-    var zipFile by remember { mutableStateOf<File?>(null) }
-    var lastSavedType by remember { mutableStateOf<String?>(null) } // "pdf" | "csv" | "zip"
+    // Fichiers exportés
+    var pdfFile by rememberSaveable { mutableStateOf<File?>(null) }
+    var csvFile by rememberSaveable { mutableStateOf<File?>(null) }
+    var zipFile by rememberSaveable { mutableStateOf<File?>(null) }
 
     var isExporting by remember { mutableStateOf(false) }
-    var exportMessage by remember { mutableStateOf<String?>(null) }
+
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val pdfExporter = remember { PdfExportService(context) }
@@ -97,6 +103,7 @@ fun ResultsScreenEnhanced(
     val wheelDisplayName = selectedWheel?.displayName ?: "Wheel"
     val mac = selectedWheel?.macAddress ?: "unknown"
 
+    // Launchers "Enregistrer sous..." : ne font que copier + Toast
     val createPdfLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/pdf")
     ) { uri ->
@@ -104,8 +111,11 @@ fun ResultsScreenEnhanced(
         scope.launch {
             context.contentResolver.openOutputStream(uri)
                 ?.use { pdfFile!!.inputStream().copyTo(it) }
-            lastSavedType = "pdf"
-            exportMessage = context.getString(R.string.pdf_saved)
+            Toast.makeText(
+                context,
+                context.getString(R.string.pdf_saved),
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -116,10 +126,14 @@ fun ResultsScreenEnhanced(
         scope.launch {
             context.contentResolver.openOutputStream(uri)
                 ?.use { csvFile!!.inputStream().copyTo(it) }
-            lastSavedType = "csv"
-            exportMessage = context.getString(R.string.csv_saved)
+            Toast.makeText(
+                context,
+                context.getString(R.string.csv_saved),
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
+
     val createZipLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/zip")
     ) { uri ->
@@ -127,13 +141,16 @@ fun ResultsScreenEnhanced(
         scope.launch {
             context.contentResolver.openOutputStream(uri)
                 ?.use { zipFile!!.inputStream().copyTo(it) }
-            lastSavedType = "zip"
-            exportMessage = context.getString(R.string.zip_saved)
-
+            Toast.makeText(
+                context,
+                context.getString(R.string.zip_saved),
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
     BackHandler(enabled = !showFiles && !showCharts) {
+        context.getExternalFilesDir(null)
         onBack()
     }
 
@@ -173,11 +190,22 @@ fun ResultsScreenEnhanced(
                         )
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            stringResource(R.string.results_subtitle, rows.size, columnNames.size),
+                            stringResource(
+                                R.string.results_subtitle,
+                                rows.size,
+                                columnNames.size
+                            ),
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Text(
-                            stringResource(R.string.results_ea, String.format("%.1f", summary.arrhenius.eaKjPerMol)),
+                            stringResource(
+                                R.string.results_ea,
+                                String.format(
+                                    Locale.getDefault(),
+                                    "%.1f",
+                                    summary.arrhenius.eaKjPerMol
+                                )
+                            ),
                             style = MaterialTheme.typography.bodyMedium
                         )
                         if (result.alarms.isNotEmpty()) {
@@ -191,7 +219,7 @@ fun ResultsScreenEnhanced(
                     }
                 }
 
-                // ACTION BUTTONS (NEW)
+                // ACTION BUTTONS
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant,
                     modifier = Modifier.fillMaxWidth()
@@ -214,7 +242,6 @@ fun ResultsScreenEnhanced(
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(Modifier.width(4.dp))
-                                // Text("Files")
                             }
                         }
 
@@ -230,8 +257,8 @@ fun ResultsScreenEnhanced(
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(Modifier.width(4.dp))
-                            // Text("Charts")
                         }
+
                         // Bouton PDF
                         IconButton(
                             onClick = {
@@ -259,9 +286,19 @@ fun ResultsScreenEnhanced(
                                             gauss, inflex, cusum, trend,
                                             result, wheelDisplayName, mac
                                         )
+                                        onMarkExport("application/pdf", pdfFile!!.absolutePath)
                                         createPdfLauncher.launch("${wheelDisplayName}_SoH_${timestamp}.pdf")
+
                                     } catch (e: Exception) {
-                                        exportMessage = context.getString(R.string.export_failed, "PDF", e.message ?: "")
+                                        Toast.makeText(
+                                            context,
+                                            context.getString(
+                                                R.string.export_failed,
+                                                "PDF",
+                                                e.message ?: ""
+                                            ),
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     } finally {
                                         isExporting = false
                                     }
@@ -273,20 +310,38 @@ fun ResultsScreenEnhanced(
                                 modifier = Modifier.size(24.dp),
                                 strokeWidth = 2.dp
                             )
-                            else Icon(Icons.Default.PictureAsPdf, stringResource(R.string.export_pdf_cd))
+                            else Icon(
+                                Icons.Default.PictureAsPdf,
+                                stringResource(R.string.export_pdf_cd)
+                            )
                         }
 
-// Bouton CSV
+                        // Bouton CSV
                         IconButton(
                             onClick = {
                                 scope.launch {
                                     isExporting = true
                                     try {
                                         csvFile =
-                                            csvExporter.exportToCsv(result, wheelDisplayName, mac)
+                                            csvExporter.exportToCsv(
+                                                result,
+                                                wheelDisplayName,
+                                                mac
+                                            )
+
+                                        onMarkExport("text/csv", csvFile!!.absolutePath)
                                         createCsvLauncher.launch("${wheelDisplayName}_SoH_${timestamp}.csv")
+
                                     } catch (e: Exception) {
-                                        exportMessage = context.getString(R.string.export_failed, "CSV", e.message ?: "")
+                                        Toast.makeText(
+                                            context,
+                                            context.getString(
+                                                R.string.export_failed,
+                                                "CSV",
+                                                e.message ?: ""
+                                            ),
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     } finally {
                                         isExporting = false
                                     }
@@ -294,10 +349,13 @@ fun ResultsScreenEnhanced(
                             },
                             enabled = !isExporting
                         ) {
-                            Icon(Icons.Default.TableChart, stringResource(R.string.export_csv_cd))
+                            Icon(
+                                Icons.Default.TableChart,
+                                stringResource(R.string.export_csv_cd)
+                            )
                         }
 
-// Bouton Archive
+                        // Bouton Archive
                         IconButton(
                             onClick = {
                                 scope.launch {
@@ -311,17 +369,34 @@ fun ResultsScreenEnhanced(
                                                 result, wheelDisplayName, mac
                                             )
                                         }
+                                        if (csvFile == null) {
+                                            csvFile =
+                                                csvExporter.exportToCsv(
+                                                    result,
+                                                    wheelDisplayName,
+                                                    mac
+                                                )
+                                        }
                                         zipFile = archiveService.exportArchive(
                                             wheelName = wheelDisplayName,
                                             macAddress = mac,
                                             fileReports = result.fileReports,
                                             pdfFile = pdfFile!!,
-                                            csvFile = csvFile  // null si pas encore exporté = pas inclus
+                                            csvFile = csvFile!!  // null si pas encore exporté = pas inclus
                                         )
+
+                                        onMarkExport("application/zip", zipFile!!.absolutePath)
                                         createZipLauncher.launch("${wheelDisplayName}_SoH_${timestamp}.zip")
                                     } catch (e: Exception) {
-                                        exportMessage = context.getString(R.string.export_failed, "Archive", e.message ?: "")
-
+                                        Toast.makeText(
+                                            context,
+                                            context.getString(
+                                                R.string.export_failed,
+                                                "Archive",
+                                                e.message ?: ""
+                                            ),
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     } finally {
                                         isExporting = false
                                     }
@@ -329,9 +404,53 @@ fun ResultsScreenEnhanced(
                             },
                             enabled = !isExporting
                         ) {
-                            Icon(Icons.Default.FolderZip, stringResource(R.string.export_archive_cd))
+                            Icon(
+                                Icons.Default.FolderZip,
+                                stringResource(R.string.export_archive_cd)
+                            )
                         }
 
+                        IconButton(
+                            onClick = {
+                                try {
+                                    if (lastExportPath != null && lastExportMime != null) {
+                                        Log.d(
+                                            TAG,
+                                            "last file: $lastExportPath, last MIME: $lastExportMime"
+                                        )
+                                        ShareUtils.shareFile(
+                                            context = context,
+                                            file = File(lastExportPath),
+                                            mimeType = lastExportMime,
+                                            chooserTitle = context.getString(R.string.share_chooser_title)
+                                        )
+                                    } else {
+                                        Toast.makeText(
+                                            context,
+                                            "Aucun fichier exporté (ou recréation après clear cache)",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                } catch (e: Exception) {
+                                    Log.d(TAG,e.message?:"")
+                                    Toast.makeText(
+                                        context,
+                                        context.getString(
+                                            R.string.export_failed,
+                                            "SHARE",
+                                            e.message ?: ""
+                                        ),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            },
+                            enabled = lastExportMime != null
+                        ) {
+                            Icon(
+                                Icons.Default.Share,
+                                contentDescription = stringResource(R.string.share)
+                            )
+                        }
                     }
                 }
 
@@ -389,40 +508,6 @@ fun ResultsScreenEnhanced(
                         }
                     }
                 }
-                exportMessage?.let { msg ->
-                    Snackbar(
-                        action = {
-                            if (lastSavedType != null) {
-                                TextButton(onClick = {
-                                    val fileToShare = when (lastSavedType) {
-                                        "pdf" -> pdfFile
-                                        "csv" -> csvFile
-                                        "zip" -> zipFile
-                                        else -> null
-                                    }
-                                    if (fileToShare != null) {
-                                        val mime = when (lastSavedType) {
-                                            "pdf" -> "application/pdf"
-                                            "csv" -> "text/csv"
-                                            "zip" -> "application/zip"
-                                            else -> "*/*"
-                                        }
-                                        ShareUtils.shareFile(
-                                            context = context,
-                                            file = fileToShare,
-                                            mimeType = mime,
-                                            chooserTitle = context.getString(R.string.share_chooser_title)
-                                        )
-                                    }
-                                    exportMessage = null
-                                }) {  Text(stringResource(R.string.share)) }
-                            } else {
-                                TextButton(onClick = { exportMessage = null }) {  Text(stringResource(R.string.dismiss)) }
-                            }
-                        }
-                    ) { Text(msg) }
-                }
-
 
                 // Back button
                 Button(
@@ -431,7 +516,7 @@ fun ResultsScreenEnhanced(
                         .fillMaxWidth()
                         .padding(16.dp)
                 ) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = null)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
                     Text(stringResource(R.string.back))
                 }
@@ -444,11 +529,17 @@ private fun formatValue(value: Any?): String {
     return when (value) {
         null -> ""
         is Double -> if (value.isNaN() || value.isInfinite()) "N/A" else String.format(
+            Locale.getDefault(),
             "%.2f",
             value
         )
 
-        is Float -> if (value.isNaN() || value.isInfinite()) "N/A" else String.format("%.2f", value)
+        is Float -> if (value.isNaN() || value.isInfinite()) "N/A" else String.format(
+            Locale.getDefault(),
+            "%.2f",
+            value
+        )
+
         is Number -> value.toString()
         is Boolean -> if (value) "✓" else "✗"
         else -> value.toString()
