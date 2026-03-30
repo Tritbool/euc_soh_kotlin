@@ -8,9 +8,7 @@
 <h1 align="center">EUC SoH – Electric Unicycle State of Health</h1>
 
 [![Run Tests](https://github.com/Tritbool/euc_soh_kotlin/actions/workflows/test.yml/badge.svg)](https://github.com/Tritbool/euc_soh_kotlin/actions/workflows/test.yml)
-
 [![License: AGPL v3+](https://img.shields.io/badge/License-AGPL_v3+-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-
 [![HAL](https://img.shields.io/badge/HAL-05553115-4b6c8b)](https://hal.science/hal-05553115)
 
 <!-- Uncomment once published on F-Droid
