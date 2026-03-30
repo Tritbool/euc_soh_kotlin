@@ -63,6 +63,7 @@ import android.widget.Toast
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.foundation.clickable
 
 /**
  * Enhanced ResultsScreen avec accès aux fichiers et graphiques.
@@ -83,6 +84,8 @@ fun ResultsScreenEnhanced(
 
     var showFiles by remember { mutableStateOf(false) }
     var showCharts by remember { mutableStateOf(false) }
+    var showAlarmsDialog by remember { mutableStateOf(false) }
+
 
     // Fichiers exportés
     var pdfFile by rememberSaveable { mutableStateOf<File?>(null) }
@@ -149,6 +152,13 @@ fun ResultsScreenEnhanced(
         }
     }
 
+    if (showAlarmsDialog) {
+        AlarmsDialog(
+            alarms = result.alarms,
+            onDismiss = { showAlarmsDialog = false }
+        )
+    }
+
     BackHandler(enabled = !showFiles && !showCharts) {
         context.getExternalFilesDir(null)
         onBack()
@@ -213,7 +223,10 @@ fun ResultsScreenEnhanced(
                                 stringResource(R.string.results_alarms, result.alarms.size),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.error,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .clickable { showAlarmsDialog = true }
+                                    .padding(vertical = 2.dp)
                             )
                         }
                     }
