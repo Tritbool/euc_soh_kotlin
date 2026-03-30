@@ -59,3 +59,8 @@ jobs:
           files: ${{ steps.rename_apk.outputs.finalApk }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Clear temporary APKs
+        run: |
+          rm -f euc-soh-android/build/outputs/apk/release/*-unsigned.apk
+          rm -f euc-soh-android/build/outputs/apk/release/*-unsigned-signed.apk
