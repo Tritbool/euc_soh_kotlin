@@ -86,7 +86,8 @@ fun ChartGalleryScreen(
     var csvFile by remember { mutableStateOf<File?>(null) }
     var zipFile by remember { mutableStateOf<File?>(null) }
 
-    BackHandler {
+
+    fun clearCharts() {
         gaussCharts?.forEach { it.second.recycle() }
         trendCharts?.forEach { it.second.recycle() }
         cusumCharts?.forEach { it.second.recycle() }
@@ -96,6 +97,10 @@ fun ChartGalleryScreen(
         trendCharts = null
         cusumCharts = null
         inflexCharts = null
+    }
+
+    BackHandler {
+        clearCharts()
         onBack()
     }
 
@@ -177,7 +182,10 @@ fun ChartGalleryScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.charts_title, wheelName)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = {
+                        clearCharts()
+                        onBack()
+                    }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
                     }
                 },

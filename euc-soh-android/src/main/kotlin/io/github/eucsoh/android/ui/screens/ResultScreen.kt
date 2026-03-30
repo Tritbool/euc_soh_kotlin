@@ -119,6 +119,18 @@ fun ResultsScreenEnhanced(
         wheelDisplayNameRaw
     }
 
+    fun clearCharts() {
+        gaussCharts?.forEach { it.second.recycle() }
+        trendCharts?.forEach { it.second.recycle() }
+        cusumCharts?.forEach { it.second.recycle() }
+        inflexCharts?.forEach { it.second.recycle() }
+
+        gaussCharts = null
+        trendCharts = null
+        cusumCharts = null
+        inflexCharts = null
+    }
+
     fun generateCharts() {
         gaussCharts =
             gaussGenerator.generateOverviewCharts(result.plotData)
@@ -194,16 +206,7 @@ fun ResultsScreenEnhanced(
     }
 
     BackHandler(enabled = !showFiles && !showCharts) {
-        gaussCharts?.forEach { it.second.recycle() }
-        trendCharts?.forEach { it.second.recycle() }
-        cusumCharts?.forEach { it.second.recycle() }
-        inflexCharts?.forEach { it.second.recycle() }
-
-        gaussCharts = null
-        trendCharts = null
-        cusumCharts = null
-        inflexCharts = null
-
+        clearCharts()
         context.getExternalFilesDir(null)
         onBack()
     }
@@ -561,7 +564,10 @@ fun ResultsScreenEnhanced(
 
                 // Back button
                 Button(
-                    onClick = onBack,
+                    onClick = {
+                        clearCharts()
+                        onBack()
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
