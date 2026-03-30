@@ -1,5 +1,6 @@
 package io.github.eucsoh.android.ui.screens
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -78,7 +79,7 @@ fun ResultsScreenEnhanced(
     onBack: () -> Unit
 ) {
     val TAG = "ResultsScreenEnhanced"
-    val summary = result.buildSummary(selectedWheel?.displayName ?: "Wheel")
+    val summary = remember(result) { result.buildSummary(selectedWheel?.displayName ?: "Wheel") }
     val columnNames = summary.logs.firstOrNull()?.keys?.toList() ?: emptyList()
     val rows = summary.logs
 
@@ -102,10 +103,43 @@ fun ResultsScreenEnhanced(
     val gaussGenerator = remember { SohChartGeneratorFixed(context) }
     val trendGenerator = remember { SohTrendCusumChartGenerator(context) }
 
-    val timestamp = remember { SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date()) }
-    val wheelDisplayName = selectedWheel?.displayName ?: "Wheel"
-    val mac = selectedWheel?.macAddress ?: "unknown"
+    var gaussCharts by remember { mutableStateOf<List<Pair<String, Bitmap>>?>(null) }
+    var trendCharts by remember { mutableStateOf<List<Pair<String, Bitmap>>?>(null) }
+    var cusumCharts by remember { mutableStateOf<List<Pair<String, Bitmap>>?>(null) }
+    var inflexCharts by remember { mutableStateOf<List<Pair<String, Bitmap>>?>(null) }
 
+    val timestamp = remember { SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date()) }
+    val wheelDisplayNameRaw = selectedWheel?.displayName ?: "Wheel"
+    val mac = selectedWheel?.macAddress ?: "unknown"
+    val macSafe = mac.replace(":", "_")
+
+    val wheelDisplayName = if (mac == wheelDisplayNameRaw) {
+        macSafe
+    } else {
+        wheelDisplayNameRaw
+    }
+
+    fun generateCharts() {
+        gaussCharts =
+            gaussGenerator.generateOverviewCharts(result.plotData)
+        trendCharts = if (result.alarms.isNotEmpty())
+            trendGenerator.generateAllTrendCharts(
+                result.plotData,
+                wheelDisplayName
+            ) else null
+        cusumCharts = if (result.alarms.isNotEmpty())
+            trendGenerator.generateAllCusumCharts(
+                result.plotData,
+                wheelDisplayName
+            ) else null
+        inflexCharts = if (result.alarms.isNotEmpty())
+            trendGenerator.generateAllInflexionCharts(
+                result.plotData,
+                wheelDisplayName
+            ) else null
+    }
+
+    Log.d(TAG, "MAC : $macSafe")
     // Launchers "Enregistrer sous..." : ne font que copier + Toast
     val createPdfLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/pdf")
@@ -160,6 +194,16 @@ fun ResultsScreenEnhanced(
     }
 
     BackHandler(enabled = !showFiles && !showCharts) {
+        gaussCharts?.forEach { it.second.recycle() }
+        trendCharts?.forEach { it.second.recycle() }
+        cusumCharts?.forEach { it.second.recycle() }
+        inflexCharts?.forEach { it.second.recycle() }
+
+        gaussCharts = null
+        trendCharts = null
+        cusumCharts = null
+        inflexCharts = null
+
         context.getExternalFilesDir(null)
         onBack()
     }
@@ -278,29 +322,18 @@ fun ResultsScreenEnhanced(
                                 scope.launch {
                                     isExporting = true
                                     try {
-                                        val gauss =
-                                            gaussGenerator.generateOverviewCharts(result.plotData)
-                                        val trend = if (result.alarms.isNotEmpty())
-                                            trendGenerator.generateAllTrendCharts(
-                                                result.plotData,
-                                                wheelDisplayName
-                                            ) else null
-                                        val cusum = if (result.alarms.isNotEmpty())
-                                            trendGenerator.generateAllCusumCharts(
-                                                result.plotData,
-                                                wheelDisplayName
-                                            ) else null
-                                        val inflex = if (result.alarms.isNotEmpty())
-                                            trendGenerator.generateAllInflexionCharts(
-                                                result.plotData,
-                                                wheelDisplayName
-                                            ) else null
+                                        generateCharts()
                                         pdfFile = pdfExporter.exportToPdf(
-                                            gauss, inflex, cusum, trend,
-                                            result, wheelDisplayName, mac
+                                            gaussCharts!!,
+                                            inflexCharts!!,
+                                            cusumCharts!!,
+                                            trendCharts!!,
+                                            result,
+                                            wheelDisplayName,
+                                            macSafe
                                         )
                                         onMarkExport("application/pdf", pdfFile!!.absolutePath)
-                                        createPdfLauncher.launch("${wheelDisplayName}_SoH_${timestamp}.pdf")
+                                        createPdfLauncher.launch("${wheelDisplayName}-${macSafe}_SoH_${timestamp}.pdf")
 
                                     } catch (e: Exception) {
                                         Toast.makeText(
@@ -339,11 +372,11 @@ fun ResultsScreenEnhanced(
                                             csvExporter.exportToCsv(
                                                 result,
                                                 wheelDisplayName,
-                                                mac
+                                                macSafe
                                             )
 
                                         onMarkExport("text/csv", csvFile!!.absolutePath)
-                                        createCsvLauncher.launch("${wheelDisplayName}_SoH_${timestamp}.csv")
+                                        createCsvLauncher.launch("${wheelDisplayName}-${macSafe}_SoH_${timestamp}.csv")
 
                                     } catch (e: Exception) {
                                         Toast.makeText(
@@ -375,11 +408,15 @@ fun ResultsScreenEnhanced(
                                     isExporting = true
                                     try {
                                         if (pdfFile == null) {
-                                            val gauss =
-                                                gaussGenerator.generateOverviewCharts(result.plotData)
+                                            generateCharts()
                                             pdfFile = pdfExporter.exportToPdf(
-                                                gauss, null, null, null,
-                                                result, wheelDisplayName, mac
+                                                gaussCharts!!,
+                                                inflexCharts!!,
+                                                cusumCharts!!,
+                                                trendCharts!!,
+                                                result,
+                                                wheelDisplayName,
+                                                macSafe
                                             )
                                         }
                                         if (csvFile == null) {
@@ -387,19 +424,19 @@ fun ResultsScreenEnhanced(
                                                 csvExporter.exportToCsv(
                                                     result,
                                                     wheelDisplayName,
-                                                    mac
+                                                    macSafe
                                                 )
                                         }
                                         zipFile = archiveService.exportArchive(
                                             wheelName = wheelDisplayName,
-                                            macAddress = mac,
+                                            macAddress = macSafe,
                                             fileReports = result.fileReports,
                                             pdfFile = pdfFile!!,
                                             csvFile = csvFile!!  // null si pas encore exporté = pas inclus
                                         )
 
                                         onMarkExport("application/zip", zipFile!!.absolutePath)
-                                        createZipLauncher.launch("${wheelDisplayName}_SoH_${timestamp}.zip")
+                                        createZipLauncher.launch("${wheelDisplayName}-${macSafe}_SoH_${timestamp}.zip")
                                     } catch (e: Exception) {
                                         Toast.makeText(
                                             context,
@@ -445,7 +482,7 @@ fun ResultsScreenEnhanced(
                                         ).show()
                                     }
                                 } catch (e: Exception) {
-                                    Log.d(TAG,e.message?:"")
+                                    Log.d(TAG, e.message ?: "")
                                     Toast.makeText(
                                         context,
                                         context.getString(

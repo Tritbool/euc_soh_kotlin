@@ -63,7 +63,7 @@ fun ChartGalleryScreen(
     result: SohAnalyzer.AnalysisResult,
     alarms: Int = 0,
     onBack: () -> Unit
-){
+) {
     val context = LocalContext.current
     val gaussGenerator = remember { SohChartGeneratorFixed(context) }
     val trendGenerator = remember { SohTrendCusumChartGenerator(context) }
@@ -85,7 +85,19 @@ fun ChartGalleryScreen(
     var pdfFile by remember { mutableStateOf<File?>(null) }
     var csvFile by remember { mutableStateOf<File?>(null) }
     var zipFile by remember { mutableStateOf<File?>(null) }
-    BackHandler { onBack() }
+
+    BackHandler {
+        gaussCharts?.forEach { it.second.recycle() }
+        trendCharts?.forEach { it.second.recycle() }
+        cusumCharts?.forEach { it.second.recycle() }
+        inflexCharts?.forEach { it.second.recycle() }
+
+        gaussCharts = null
+        trendCharts = null
+        cusumCharts = null
+        inflexCharts = null
+        onBack()
+    }
 
     /**
      * Résout le label d'une métrique à partir de son csv_code.
@@ -97,13 +109,13 @@ fun ChartGalleryScreen(
     LaunchedEffect(selectedTab, plotData) {
         isLoading = true
         when (selectedTab) {
-            ChartTab.GAUSSIAN  -> if (gaussCharts == null)
+            ChartTab.GAUSSIAN -> if (gaussCharts == null)
                 gaussCharts = gaussGenerator.generateOverviewCharts(plotData)
 
-            ChartTab.TREND     -> if (trendCharts == null)
+            ChartTab.TREND -> if (trendCharts == null)
                 trendCharts = trendGenerator.generateAllTrendCharts(plotData, wheelName)
 
-            ChartTab.CUSUM     -> if (cusumCharts == null)
+            ChartTab.CUSUM -> if (cusumCharts == null)
                 cusumCharts = trendGenerator.generateAllCusumCharts(plotData, wheelName)
 
             ChartTab.INFLEXION -> if (inflexCharts == null)
@@ -115,9 +127,9 @@ fun ChartGalleryScreen(
 
     val currentCharts: List<Pair<String, Bitmap>>? = when (selectedTab) {
         ChartTab.GAUSSIAN -> gaussCharts
-        ChartTab.TREND -> if(alarms > 0) trendCharts  else null
-        ChartTab.CUSUM ->if(alarms > 0)  cusumCharts else null
-        ChartTab.INFLEXION -> if(alarms > 0) inflexCharts else null
+        ChartTab.TREND -> if (alarms > 0) trendCharts else null
+        ChartTab.CUSUM -> if (alarms > 0) cusumCharts else null
+        ChartTab.INFLEXION -> if (alarms > 0) inflexCharts else null
     }
 
     val timestamp = remember {
@@ -153,7 +165,8 @@ fun ChartGalleryScreen(
                 }
                 exportMessage = context.getString(R.string.chart_archive_saved)
             } catch (e: Exception) {
-                exportMessage = context.getString(R.string.chart_archive_copy_failed, e.message ?: "")
+                exportMessage =
+                    context.getString(R.string.chart_archive_copy_failed, e.message ?: "")
             }
         }
     }
@@ -176,29 +189,52 @@ fun ChartGalleryScreen(
                                     isExportingPdf = true
                                     try {
                                         // Génère les charts manquants
-                                        val gauss = gaussCharts ?: gaussGenerator.generateOverviewCharts(plotData)
-                                            .also { gaussCharts = it }
+                                        val gauss =
+                                            gaussCharts ?: gaussGenerator.generateOverviewCharts(
+                                                plotData
+                                            )
+                                                .also { gaussCharts = it }
                                         val inflex = if (alarms > 0) inflexCharts
-                                            ?: trendGenerator.generateAllInflexionCharts(plotData, wheelName)
+                                            ?: trendGenerator.generateAllInflexionCharts(
+                                                plotData,
+                                                wheelName
+                                            )
                                                 .also { inflexCharts = it }
                                         else null
                                         val cusum = if (alarms > 0) cusumCharts
-                                            ?: trendGenerator.generateAllCusumCharts(plotData, wheelName)
+                                            ?: trendGenerator.generateAllCusumCharts(
+                                                plotData,
+                                                wheelName
+                                            )
                                                 .also { cusumCharts = it }
                                         else null
                                         val trend = if (alarms > 0) trendCharts
-                                            ?: trendGenerator.generateAllTrendCharts(plotData, wheelName)
+                                            ?: trendGenerator.generateAllTrendCharts(
+                                                plotData,
+                                                wheelName
+                                            )
                                                 .also { trendCharts = it }
                                         else null
 
                                         // Étape 1 : génère dans le dossier privé (toujours permis)
-                                        pdfFile = pdfExporter.exportToPdf(gauss, inflex, cusum, trend, result,wheelName, macAddress)
+                                        pdfFile = pdfExporter.exportToPdf(
+                                            gauss,
+                                            inflex,
+                                            cusum,
+                                            trend,
+                                            result,
+                                            wheelName,
+                                            macAddress
+                                        )
 
                                         // Étape 2 : ouvre le picker — le lambda createPdfLauncher s'occupe de la copie
                                         createPdfLauncher.launch("${wheelName}_SoH_${timestamp}.pdf")
 
                                     } catch (e: Exception) {
-                                        exportMessage = context.getString(R.string.chart_export_failed, e.message ?: "")
+                                        exportMessage = context.getString(
+                                            R.string.chart_export_failed,
+                                            e.message ?: ""
+                                        )
                                     } finally {
                                         isExportingPdf = false
                                     }
@@ -211,7 +247,10 @@ fun ChartGalleryScreen(
                                     strokeWidth = 2.dp
                                 )
                             else
-                                Icon(Icons.Default.PictureAsPdf, stringResource(R.string.charts_export_pdf_cd))
+                                Icon(
+                                    Icons.Default.PictureAsPdf,
+                                    stringResource(R.string.charts_export_pdf_cd)
+                                )
                         }
                         IconButton(
                             onClick = {
@@ -220,14 +259,25 @@ fun ChartGalleryScreen(
                                     try {
                                         // Génère le PDF temp si pas déjà fait
                                         if (pdfFile == null) {
-                                            val gauss = gaussCharts ?: gaussGenerator.generateOverviewCharts(plotData)
-                                                .also { gaussCharts = it }
+                                            val gauss = gaussCharts
+                                                ?: gaussGenerator.generateOverviewCharts(plotData)
+                                                    .also { gaussCharts = it }
                                             pdfFile = pdfExporter.exportToPdf(
-                                                gauss, inflexCharts, cusumCharts, trendCharts, result,wheelName, macAddress
+                                                gauss,
+                                                inflexCharts,
+                                                cusumCharts,
+                                                trendCharts,
+                                                result,
+                                                wheelName,
+                                                macAddress
                                             )
                                         }
-                                        if (csvFile == null){
-                                            csvFile = csvExporter.exportToCsv(result,wheelName,macAddress)
+                                        if (csvFile == null) {
+                                            csvFile = csvExporter.exportToCsv(
+                                                result,
+                                                wheelName,
+                                                macAddress
+                                            )
                                         }
                                         // Génère le ZIP dans le dossier privé
                                         val archiveService = SohArchiveExportService(context)
@@ -244,7 +294,10 @@ fun ChartGalleryScreen(
                                         createZipLauncher.launch("${wheelName}_SoH_${timestamp}.zip")
 
                                     } catch (e: Exception) {
-                                        exportMessage = context.getString(R.string.chart_archive_failed, e.message ?: "")
+                                        exportMessage = context.getString(
+                                            R.string.chart_archive_failed,
+                                            e.message ?: ""
+                                        )
                                     } finally {
                                         isExportingPdf = false
                                     }
@@ -252,7 +305,10 @@ fun ChartGalleryScreen(
                             }
 
                         ) {
-                            Icon(Icons.Default.FolderZip, stringResource(R.string.charts_export_archive_cd))
+                            Icon(
+                                Icons.Default.FolderZip,
+                                stringResource(R.string.charts_export_archive_cd)
+                            )
                         }
                     }
                 }
@@ -261,7 +317,15 @@ fun ChartGalleryScreen(
         snackbarHost = {
             exportMessage?.let { msg ->
                 Snackbar(
-                    action = { TextButton(onClick = { exportMessage = null }) { Text(stringResource(R.string.dismiss)) } }
+                    action = {
+                        TextButton(onClick = { exportMessage = null }) {
+                            Text(
+                                stringResource(
+                                    R.string.dismiss
+                                )
+                            )
+                        }
+                    }
                 ) { Text(msg) }
             }
         }
@@ -276,12 +340,18 @@ fun ChartGalleryScreen(
                     Tab(
                         selected = selectedTab == tab,
                         onClick = { selectedTab = tab },
-                        text = { Text(stringResource(when (tab) {
-                            ChartTab.GAUSSIAN  -> R.string.charts_tab_gaussian
-                            ChartTab.TREND     -> R.string.charts_tab_trend
-                            ChartTab.CUSUM     -> R.string.charts_tab_cusum
-                            ChartTab.INFLEXION -> R.string.charts_tab_inflexion
-                        })) }
+                        text = {
+                            Text(
+                                stringResource(
+                                    when (tab) {
+                                        ChartTab.GAUSSIAN -> R.string.charts_tab_gaussian
+                                        ChartTab.TREND -> R.string.charts_tab_trend
+                                        ChartTab.CUSUM -> R.string.charts_tab_cusum
+                                        ChartTab.INFLEXION -> R.string.charts_tab_inflexion
+                                    }
+                                )
+                            )
+                        }
                     )
                 }
             }
