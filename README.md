@@ -7,6 +7,17 @@
 
 <h1 align="center">EUC SoH – Electric Unicycle State of Health</h1>
 
+[![Run Tests](https://github.com/Tritbool/euc_soh_kotlin/actions/workflows/test.yml/badge.svg)](https://github.com/Tritbool/euc_soh_kotlin/actions/workflows/test.yml)
+
+[![License: AGPL v3+](https://img.shields.io/badge/License-AGPL_v3+-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+
+[![HAL](https://img.shields.io/badge/HAL-<HAL_ID>-4b6c8b)](https://hal.science/<hal-05553115>)
+
+<!-- Uncomment once published on F-Droid
+[![F-Droid](https://img.shields.io/f-droid/v/io.github.eucsoh.android)](https://f-droid.org/packages/io.github.eucsoh.android/)
+-->
+
+
 EUC SoH is an Android app that analyzes the **state of health (SoH)** of electric unicycles from ride logs produced by apps such as **WheelLog** and **EUC World**.
 It estimates battery health and internal resistance, and generates charts and reports suitable for resale, maintenance or long‑term monitoring.
 
