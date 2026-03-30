@@ -1,0 +1,20 @@
+## RETAGGING
+
+git tag -d v1.0
+git push origin :refs/tags/v1.0
+git tag -a v1.0 -m "First release"
+git push origin v1.0
+
+## APK CERT
+
+docker run --rm \
+-v /Users/tritbool/Workspace/:/apk \
+registry.gitlab.com/fdroid/fdroidserver:buildserver \
+apksigner verify --print-certs /apk/apk_signed.apk
+
+## FDROIDSERVER RUN (based on fdroid metadata fork)
+
+docker run --rm -itu vagrant --entrypoint /bin/bash \
+  -v ~/Workspace/euc-soh:/build:z \
+  -v ~/fdroidserver:/home/vagrant/fdroidserver:Z \
+  registry.gitlab.com/fdroid/fdroidserver:buildserver

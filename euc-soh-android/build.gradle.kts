@@ -142,22 +142,23 @@ licenseReport {
 }
 
 tasks.register<Copy>("copyLicenseReportToAssets") {
-    // Cette tâche doit attendre la génération du rapport
     dependsOn("generateLicenseReport")
 
     val generatedReport = layout.buildDirectory
         .file("licenses/third-party-licenses.md")
 
-    // Déclarations explicites pour éviter le warning Gradle
+    val destDir = layout.projectDirectory.dir("src/main/assets")
+    val destFile = destDir.file("third_party_licenses.md").asFile  // résolu ici, hors du doLast
+
     inputs.file(generatedReport)
-    outputs.file(layout.projectDirectory.file("src/main/assets/third_party_licenses.md"))
+    outputs.file(destFile)
 
     from(generatedReport)
-    into(layout.projectDirectory.dir("src/main/assets"))
+    into(destDir)
     rename { "third_party_licenses.md" }
 
     doLast {
-        val destFile = layout.projectDirectory.file("src/main/assets/third_party_licenses.md").asFile
+        // destFile est un java.io.File ordinaire, pas une référence à Project
         val cleaned = destFile.readLines()
             .map { line ->
                 if (line.matches(Regex("^_\\d{4}-\\d{2}-\\d{2}.*UTC_$")))
