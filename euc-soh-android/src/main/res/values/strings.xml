@@ -138,4 +138,69 @@
     <string name="analyzing_phase">Analyzing</string>
     <string name="calibrating_phase">Calibrating</string>
 
+    <!-- InfoScreen -->
+    <string name="info_title" translatable="false">About EUC SoH</string>
+
+    <!-- Section 1: What the tool does -->
+    <string name="info_s1_title" translatable="false">What this tool does — and doesn\'t do</string>
+    <string name="info_s1_does" translatable="false">EUC SoH analyzes your ride logs (WheelLog / EUC World CSV) over thousands of kilometers to track the long-term health of your battery pack and power electronics (MOSFETs). It derives empirical indicators — equivalent resistance, voltage sag, thermal stress — and detects degradation trends or abnormal events using statistical thresholds and CUSUM change-point detection.</string>
+    <string name="info_s1_does_not_title" translatable="false">What it does NOT do:</string>
+    <string name="info_s1_limit1" translatable="false">It does not predict an exact remaining lifespan.</string>
+    <string name="info_s1_limit2" translatable="false">It does not replace an oscilloscope, a lab charge/discharge cycle, or a controlled BMS diagnostic.</string>
+    <string name="info_s1_limit3" translatable="false">It does not compare your wheel to other riders — each wheel is its own reference.</string>
+    <string name="info_s1_limit4" translatable="false">Indicators are relative, not absolute: a high R_eq does not mean the battery is bad in isolation, only that it has drifted from its own baseline.</string>
+
+    <!-- Section 2: How to act -->
+    <string name="info_s2_title" translatable="false">How to act on the results</string>
+    <string name="info_s2_intro" translatable="false">Alarms use three levels based on how far a metric has drifted from its per-wheel baseline (mean ± σ computed on the full ride history):</string>
+    <string name="info_s2_alarm_danger_label" translatable="false">Danger (≥ µ + 2σ or absolute threshold)</string>
+    <string name="info_s2_alarm_danger_desc" translatable="false">A clear abnormal deviation. Reduce aggressive riding sessions (high current, low battery), inspect connectors and cells, and consider professional maintenance before continuing long trips.</string>
+    <string name="info_s2_alarm_orange_label" translatable="false">Warning (between green band and danger)</string>
+    <string name="info_s2_alarm_orange_desc" translatable="false">An early drift worth watching. Increase monitoring frequency. No immediate action required, but plan ahead.</string>
+    <string name="info_s2_alarm_green_label" translatable="false">Normal (µ ± 1σ)</string>
+    <string name="info_s2_alarm_green_desc" translatable="false">Metrics within the expected range for this wheel\'s history.</string>
+    <string name="info_s2_action" translatable="false">When a danger alarm fires on R_eq or R_batt: avoid riding near empty battery, avoid sustained high-current conditions (steep hills, heavy load at low SoC). Consult the CUSUM and trend charts to see when the drift started.</string>
+
+    <!-- Section 3: Nominal pack resistance -->
+    <string name="info_s3_title" translatable="false">How nominal pack resistance is estimated</string>
+    <string name="info_s3_intro" translatable="false">EUC SoH infers the nominal resistance of your battery pack from the maximum pack voltage recorded in your logs, without requiring you to enter the exact cell model. The number of cells in series (S) is derived from the maximum voltage. A typical new-cell DC internal resistance (r_cell) is then looked up from public data for 18650 and 21700 chemistries.</string>
+    <string name="info_s3_formula" translatable="false">R_pack_nominal = S × r_cell / P\n\nwhere S = series cell count, P = parallel cell count (configurable, default 1)</string>
+    <string name="info_s3_detail" translatable="false">This nominal value is used as an absolute safety net: if R_eq_median exceeds a configurable multiple of R_pack_nominal (e.g. 1.8×), an alarm is raised regardless of the statistical baseline. This catches the case where the wheel was already degraded when you started logging.</string>
+    <string name="info_s3_example_title" translatable="false">Example</string>
+    <string name="info_s3_example" translatable="false">A 100V wheel typically has 24S cells. With r_cell = 80 mΩ (fresh 21700) and P = 1: R_nominal = 24 × 0.080 / 1 = 1.92 Ω. A measured R_eq_median of 3.5 Ω would be ~1.8× nominal, triggering the absolute alarm.</string>
+    <string name="info_s3_note" translatable="false">The P value can be set in the MOSFET config dialog (field "N parallel cells"). It does not affect resistance computation — only the R_nominal alarm threshold.</string>
+
+    <!-- Section 4: Metrics -->
+    <string name="info_s4_title" translatable="false">Key metrics and how to read them</string>
+
+    <string name="info_m1_name" translatable="false">R_eq_median (mΩ)</string>
+    <string name="info_m1_desc" translatable="false">Median equivalent resistance of the full pack (battery + MOSFETs + wiring) across all high-load samples in a ride. Main global health indicator.</string>
+    <string name="info_m1_interp" translatable="false">Trend upward over rides = pack degrading. Large sudden jump on one ride = anomaly (bad connector, thermal event). Compare to the trend line, not to a single value.</string>
+
+    <string name="info_m2_name" translatable="false">R_batt_median_25C (mΩ)</string>
+    <string name="info_m2_desc" translatable="false">Battery-dominated resistance, estimated by subtracting the MOSFET contribution and correcting to 25°C (requires MOSFET config). Only available if you set R_ds(on) in the MOSFET config.</string>
+    <string name="info_m2_interp" translatable="false">Slow increase = cell ageing. Fast increase = possible cell failure, bad contact, or BMS issue. Flat while R_eq rises = MOSFET degradation is the dominant cause.</string>
+
+    <string name="info_m3_name" translatable="false">R_mosfet_hot (mΩ)</string>
+    <string name="info_m3_desc" translatable="false">Estimated MOSFET bridge resistance at operating temperature, derived from board temperature using the configured thermal coefficient.</string>
+    <string name="info_m3_interp" translatable="false">Rising trend = MOSFET on-state resistance increasing, a known precursor of semiconductor degradation. Verify with the trend and CUSUM charts.</string>
+
+    <string name="info_m4_name" translatable="false">sag_95p / sag_max (V)</string>
+    <string name="info_m4_desc" translatable="false">95th percentile and maximum voltage sag (Vidle − V) recorded under high load. Captures worst-case ohmic drops during a ride.</string>
+    <string name="info_m4_interp" translatable="false">High sag = pack cannot maintain voltage under load, which shrinks the firmware\'s safety margin before cut-off. Dangerous at low SoC or in cold conditions.</string>
+
+    <string name="info_m5_name" translatable="false">v_min_strong (V)</string>
+    <string name="info_m5_desc" translatable="false">Minimum pack voltage reached under high-load conditions. Reflects the remaining margin before the firmware\'s low-voltage protection triggers.</string>
+    <string name="info_m5_interp" translatable="false">Decreasing over time = safety margin shrinking. Value dropping below your firmware\'s cut-off threshold means a sudden power cut is possible under hard acceleration.</string>
+
+    <string name="info_m6_name" translatable="false">temp_board_max (°C)</string>
+    <string name="info_m6_desc" translatable="false">Maximum controller/board temperature recorded during a ride. Used as a proxy for MOSFET junction temperature.</string>
+    <string name="info_m6_interp" translatable="false">Upward trend at similar power conditions = increasing thermal resistance in the power stage (degraded thermal interface, aging MOSFETs). High values increase failure risk.</string>
+
+    <string name="info_m7_name" translatable="false">i_95p / i_max (A)</string>
+    <string name="info_m7_desc" translatable="false">95th percentile and maximum battery current. Characterizes electrical stress on the pack cells and MOSFETs.</string>
+    <string name="info_m7_interp" translatable="false">Alarms on these metrics indicate unusually aggressive riding sessions (high acceleration, steep terrain). High currents accelerate both battery and MOSFET degradation.</string>
+
+    <!-- Footer -->
+    <string name="info_footer" translatable="false">EUC SoH is open-source research software. Results are indicative only. Always prioritize safety and consult a qualified technician for maintenance decisions.</string>
 </resources>

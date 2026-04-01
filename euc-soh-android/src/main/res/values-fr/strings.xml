@@ -138,4 +138,69 @@
     <string name="analyzing_phase">Analyse en cours</string>
     <string name="calibrating_phase">Étalonnage en cours</string>
 
+    <!-- InfoScreen -->
+    <string name="info_title">À propos d\'EUC SoH</string>
+
+    <!-- Section 1 -->
+    <string name="info_s1_title">Ce que fait l\'outil — et ce qu\'il ne fait pas</string>
+    <string name="info_s1_does">EUC SoH analyse vos logs de trajet (CSV WheelLog / EUC World) sur des milliers de kilomètres pour suivre la santé à long terme de votre pack batterie et de l\'étage de puissance (MOSFETs). Il en dérive des indicateurs empiriques — résistance équivalente, voltage sag, stress thermique — et détecte les tendances de dégradation ou les événements anormaux via des seuils statistiques et une détection de rupture CUSUM.</string>
+    <string name="info_s1_does_not_title">Ce qu\'il ne fait PAS :</string>
+    <string name="info_s1_limit1">Il ne prédit pas une durée de vie résiduelle précise.</string>
+    <string name="info_s1_limit2">Il ne remplace pas un oscilloscope, un cycle charge/décharge en laboratoire, ni un diagnostic BMS contrôlé.</string>
+    <string name="info_s1_limit3">Il ne compare pas votre roue aux autres riders — chaque roue est sa propre référence.</string>
+    <string name="info_s1_limit4">Les indicateurs sont relatifs, pas absolus : un R_eq élevé ne signifie pas que la batterie est mauvaise en soi, seulement qu\'elle a dérivé par rapport à son propre historique.</string>
+
+    <!-- Section 2 -->
+    <string name="info_s2_title">Comment agir sur les résultats</string>
+    <string name="info_s2_intro">Les alarmes utilisent trois niveaux selon l\'écart d\'une métrique par rapport à sa référence propre à la roue (moyenne ± σ calculés sur l\'historique complet des trajets) :</string>
+    <string name="info_s2_alarm_danger_label">Danger (≥ µ + 2σ ou seuil absolu)</string>
+    <string name="info_s2_alarm_danger_desc">Déviation clairement anormale. Réduisez les sessions agressives (fort courant, batterie basse), inspectez les connecteurs et les cellules, et envisagez une maintenance professionnelle avant de continuer de longs trajets.</string>
+    <string name="info_s2_alarm_orange_label">Avertissement (entre bande verte et danger)</string>
+    <string name="info_s2_alarm_orange_desc">Dérive précoce à surveiller. Augmentez la fréquence de suivi. Aucune action immédiate requise, mais anticipez.</string>
+    <string name="info_s2_alarm_green_label">Normal (µ ± 1σ)</string>
+    <string name="info_s2_alarm_green_desc">Métriques dans la plage attendue pour l\'historique de cette roue.</string>
+    <string name="info_s2_action">Quand une alarme Danger se déclenche sur R_eq ou R_batt : évitez de rouler à batterie presque vide et les conditions à fort courant soutenu (côtes raides, forte charge à faible SoC). Consultez les graphiques CUSUM et tendance pour voir quand la dérive a commencé.</string>
+
+    <!-- Section 3 -->
+    <string name="info_s3_title">Comment la résistance nominale du pack est estimée</string>
+    <string name="info_s3_intro">EUC SoH infère la résistance nominale de votre pack batterie à partir de la tension maximale enregistrée dans vos logs, sans que vous ayez à saisir le modèle exact de cellule. Le nombre de cellules en série (S) est déduit de la tension maximale. Une résistance interne DC typique d\'une cellule neuve (r_cell) est ensuite lue dans des données publiques pour les chimies 18650 et 21700.</string>
+    <string name="info_s3_formula">R_pack_nominal = S × r_cell / P\n\noù S = nombre de cellules en série, P = cellules en parallèle (configurable, défaut 1)</string>
+    <string name="info_s3_detail">Cette valeur nominale sert de filet de sécurité absolu : si R_eq_median dépasse un multiple configurable de R_pack_nominal (ex. 1,8×), une alarme est levée quelle que soit la référence statistique. Cela détecte le cas où la roue était déjà dégradée au début de l\'enregistrement.</string>
+    <string name="info_s3_example_title">Exemple</string>
+    <string name="info_s3_example">Une roue 100V a typiquement 24S cellules. Avec r_cell = 80 mΩ (21700 neuves) et P = 1 : R_nominal = 24 × 0,080 / 1 = 1,92 Ω. Un R_eq_median mesuré à 3,5 Ω représente ~1,8× le nominal, ce qui déclenche l\'alarme absolue.</string>
+    <string name="info_s3_note">La valeur P se configure dans le dialogue MOSFET (champ "N cellules en parallèle"). Elle n\'affecte pas le calcul de résistance — uniquement le seuil d\'alarme R_nominal.</string>
+
+    <!-- Section 4 -->
+    <string name="info_s4_title">Métriques importantes et comment les interpréter</string>
+
+    <string name="info_m1_name">R_eq_median (mΩ)</string>
+    <string name="info_m1_desc">Résistance équivalente médiane du pack complet (batterie + MOSFETs + câblage) sur tous les échantillons à forte charge d\'un trajet. Indicateur de santé global principal.</string>
+    <string name="info_m1_interp">Tendance à la hausse sur les trajets = dégradation du pack. Saut soudain important sur un trajet = anomalie (mauvais connecteur, événement thermique). Comparez à la droite de tendance, pas à une valeur isolée.</string>
+
+    <string name="info_m2_name">R_batt_median_25C (mΩ)</string>
+    <string name="info_m2_desc">Résistance dominée par la batterie, estimée en soustrayant la contribution MOSFET et en corrigeant à 25°C (nécessite la config MOSFET). Disponible uniquement si vous avez renseigné R_ds(on).</string>
+    <string name="info_m2_interp">Augmentation lente = vieillissement des cellules. Augmentation rapide = possible défaillance d\'une cellule, mauvais contact, ou problème BMS. Plate pendant que R_eq monte = la dégradation dominante est côté MOSFET.</string>
+
+    <string name="info_m3_name">R_mosfet_hot (mΩ)</string>
+    <string name="info_m3_desc">Résistance estimée du pont MOSFET à la température de fonctionnement, dérivée de la température de carte via le coefficient thermique configuré.</string>
+    <string name="info_m3_interp">Tendance à la hausse = résistance à l\'état passant des MOSFETs en augmentation, précurseur connu de la dégradation des semi-conducteurs. Vérifiez avec les graphiques tendance et CUSUM.</string>
+
+    <string name="info_m4_name">sag_95p / sag_max (V)</string>
+    <string name="info_m4_desc">95e centile et maximum du voltage sag (Vidle − V) enregistré à forte charge. Capture les pires chutes ohmiques durant un trajet.</string>
+    <string name="info_m4_interp">Sag élevé = le pack ne maintient pas la tension sous charge, ce qui réduit la marge de sécurité du firmware avant la coupure. Dangereux à faible SoC ou par temps froid.</string>
+
+    <string name="info_m5_name">v_min_strong (V)</string>
+    <string name="info_m5_desc">Tension minimale du pack atteinte sous conditions à forte charge. Reflète la marge restante avant que la protection basse tension du firmware se déclenche.</string>
+    <string name="info_m5_interp">Diminution au fil du temps = marge de sécurité en train de se réduire. Une valeur tombant sous le seuil de coupure du firmware signifie qu\'une coupure soudaine est possible sous forte accélération.</string>
+
+    <string name="info_m6_name">temp_board_max (°C)</string>
+    <string name="info_m6_desc">Température maximale du contrôleur/carte enregistrée durant un trajet. Utilisée comme proxy de la température de jonction des MOSFETs.</string>
+    <string name="info_m6_interp">Tendance à la hausse à puissance comparable = résistance thermique en augmentation dans l\'étage de puissance (interface thermique dégradée, MOSFETs vieillissants). Des valeurs élevées augmentent le risque de défaillance.</string>
+
+    <string name="info_m7_name">i_95p / i_max (A)</string>
+    <string name="info_m7_desc">95e centile et maximum du courant batterie. Caractérise le stress électrique sur les cellules du pack et les MOSFETs.</string>
+    <string name="info_m7_interp">Alarmes sur ces métriques = sessions de conduite inhabituellement agressives (fortes accélérations, terrain pentu). Les forts courants accélèrent la dégradation de la batterie et des MOSFETs.</string>
+
+    <!-- Footer -->
+    <string name="info_footer">EUC SoH est un logiciel de recherche open-source. Les résultats sont indicatifs uniquement. Privilégiez toujours la sécurité et consultez un technicien qualifié pour les décisions de maintenance.</string>
 </resources>

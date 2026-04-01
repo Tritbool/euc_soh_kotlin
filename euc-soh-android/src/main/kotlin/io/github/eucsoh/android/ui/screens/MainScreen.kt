@@ -60,7 +60,7 @@ import androidx.compose.ui.unit.IntSize
 fun MainScreen(
     viewModel: SohViewModel,
     onRequestPermissions: () -> Unit,
-    onOpenLicenses: () -> Unit
+    onOpenInfo: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -124,13 +124,14 @@ fun MainScreen(
                         tint = Color(0xFF1A1C1E)
                     )
                 }
+                // Bouton Info (aide) à gauche
                 IconButton(
                     modifier = Modifier.align(Alignment.CenterStart),
-                    onClick = onOpenLicenses
+                    onClick = onOpenInfo
                 ) {
                     Icon(
                         imageVector = Icons.Default.Info,
-                        contentDescription = "Licenses",
+                        contentDescription = stringResource(R.string.info_title),
                         tint = Color(0xFF1A1C1E)
                     )
                 }

@@ -30,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import io.github.eucsoh.android.ui.PermissionManager
 import io.github.eucsoh.android.ui.SohViewModel
+import io.github.eucsoh.android.ui.about.InfoScreen
 import io.github.eucsoh.android.ui.about.LicensesScreen
 import io.github.eucsoh.android.ui.screens.MainScreen
 import io.github.eucsoh.android.ui.theme.EucSohTheme
@@ -71,26 +72,28 @@ class MainActivity : ComponentActivity() {
         setContent {
             EucSohTheme {
                 Surface {
-                    var showLicenses by remember { mutableStateOf(false) }
+                    var showInfo by remember { mutableStateOf(false) }
 
-                    if (showLicenses) {
-                        LicensesScreen(
-                            onClose = { showLicenses = false }
-                        )
-                    } else {
-                        MainScreen(
-                            viewModel = viewModel,
-                            onRequestPermissions = {
-                                permissionManager.requestStoragePermissions { granted ->
-                                    if (granted) {
-                                        viewModel.scanWheels(forceRefresh = true)
+                    when {
+
+                        showInfo -> {
+                            InfoScreen(
+                                onClose = { showInfo = false }
+                            )
+                        }
+                        else -> {
+                            MainScreen(
+                                viewModel = viewModel,
+                                onRequestPermissions = {
+                                    permissionManager.requestStoragePermissions { granted ->
+                                        if (granted) {
+                                            viewModel.scanWheels(forceRefresh = true)
+                                        }
                                     }
-                                }
-                            },
-                            onOpenLicenses = {
-                                showLicenses = true
-                            }
-                        )
+                                },
+                                onOpenInfo = { showInfo = true }
+                            )
+                        }
                     }
                 }
             }
