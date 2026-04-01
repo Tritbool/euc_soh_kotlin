@@ -94,7 +94,7 @@ object Constants {
         NS_GLOBAL("ns_global"),
         V_NOMINAL("v_nominal"),
         V_IDLE("v_idle"),
-        R_PACK_NOMINAL("r_pack_nominal"),
+        R_PACK_NOMINAL("R_pack_nominal"),
         SOURCE("source"),
         N_POINTS("n_points"),
         CSV_FILE("csv_file")
@@ -107,24 +107,25 @@ object Constants {
         val higher_is_bad: Boolean = true,
         val label: String? = null
     ) {
+        REQ_MEDIAN("Req_median", true, "Equivalent resistance median (Ω)"),
+        R_BATT_MEDIAN_25C("R_batt_median_25C", true, "R_batt median @25°C (Ω)"),
+        R_BATT_MEDIAN("R_batt_median", true, "R_batt median (Ω)"),
+        R_MOSFET_HOT("R_mosfet_hot", true, "R_MOSFET hot (Ω)"),
+        SAG_95P("sag_95p", true, "Sag 95th percentile (V)"),
+        SAG_MAX("sag_max", true, "Sag max (V)"),
+
+        SAG_MEDIAN("sag_median", true, "Sag median (V)"),
+        TEMP_BOARD_MAX("temp_board_max", true, "Max board temperature (°C)"),
+        TEMP_MOTOR_MAX("temp_motor_max", true, "Max motor temperature (°C)"),
         I_MAX("i_max", true, "Max battery current (A)"),
         I_95P("i_95p", true, "Battery current 95th percentile (A)"),
         I_PHASE_MAX("i_phase_max", true, "Max phase current (A)"),
         I_PHASE_95P("i_phase_95p", true, "Phase current 95th percentile (A)"),
         I_PHASE2_INT("I_phase2_int", true, "Phase I² dose – ∫ I_phase² dt (A²·s)"),
-        R_BATT_MEDIAN("R_batt_median", true, "R_batt median (Ω)"),
         REQ_MEAN("Req_mean", true, "Equivalent resistance mean (Ω)"),
-        REQ_MEDIAN("Req_median", true, "Equivalent resistance median (Ω)"),
         REQ_MEDIAN_25C("Req_median_25C", true, "Equivalent resistance median @25°C (Ω)"),
         REQ_95P("Req_95p", true, "Equivalent resistance 95th percentile (Ω)"),
         V_MIN_STRONG("v_min_strong", false, "Maximum voltage collapse under load (V)"),
-        R_BATT_MEDIAN_25C("R_batt_median_25C", true, "R_batt median @25°C (Ω)"),
-        R_MOSFET_HOT("R_mosfet_hot", true, "R_MOSFET hot (Ω)"),
-        SAG_95P("sag_95p", true, "Sag 95th percentile (V)"),
-        SAG_MAX("sag_max", true, "Sag max (V)"),
-        SAG_MEDIAN("sag_median", true, "Sag median (V)"),
-        TEMP_BOARD_MAX("temp_board_max", true, "Max board temperature (°C)"),
-        TEMP_MOTOR_MAX("temp_motor_max", true, "Max motor temperature (°C)"),
         PWM_95P("pwm_95p", true, "PWM 95th percentile (%)"),
         PWM_MAX("pwm_max", true, "PWM max (%)")
     }

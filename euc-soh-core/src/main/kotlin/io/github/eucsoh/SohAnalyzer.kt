@@ -58,6 +58,7 @@ import io.github.eucsoh.analysis.CUSUMDetector
 import io.github.eucsoh.analysis.GaussianAlarmDetector
 import io.github.eucsoh.analysis.PackInference
 import io.github.eucsoh.analysis.ReqStatsComputer
+import io.github.eucsoh.analysis.SlopeInflexionDetector
 import io.github.eucsoh.analysis.TrendDetector
 import io.github.eucsoh.model.MOSFETParams
 import io.github.eucsoh.model.PlotData
@@ -68,6 +69,7 @@ import org.jetbrains.kotlinx.dataframe.api.add
 import org.jetbrains.kotlinx.dataframe.api.dataFrameOf
 import org.jetbrains.kotlinx.dataframe.api.sortBy
 import org.jetbrains.kotlinx.dataframe.api.take
+import kotlin.collections.mutableMapOf
 
 /**
  * Main orchestrator for SoH analysis.
@@ -312,6 +314,9 @@ class SohAnalyzer(
 
         var dfStats = statsToDataFrame(validStats)
 
+        val cusumData = mutableMapOf<Metrics, CUSUMDetector.CUSUMResult>()
+        val trendData = mutableMapOf<Metrics, TrendDetector.TrendResult>()
+
         // Sort by datetime
         dfStats = dfStats.sortBy(DATETIME_FIRST.csv_code)
 
@@ -344,9 +349,9 @@ class SohAnalyzer(
         // Add derived columns
         dfStats = dfStats.add("Req_band_low") { reqBandLow }
         dfStats = dfStats.add("Req_band_high") { reqBandHigh }
-        dfStats = dfStats.add("Ns_global") { nsGlobal }
-        dfStats = dfStats.add("v_nominal") { vNominal }
-        dfStats = dfStats.add("R_pack_nominal") { rPackNominal }
+        dfStats = dfStats.add(Constants.MetaColumns.NS_GLOBAL.csv_code) { nsGlobal }
+        dfStats = dfStats.add(Constants.MetaColumns.V_NOMINAL.csv_code) { vNominal }
+        dfStats = dfStats.add(Constants.MetaColumns.R_PACK_NOMINAL.csv_code) { rPackNominal }
         dfStats = dfStats.add("arrhenius_ea_j_per_mol") { ea }
         dfStats = dfStats.add("arrhenius_ea_kj_per_mol") { ea / 1000.0 }
         dfStats = dfStats.add("arrhenius_auto_calibrated") { eaJPerMol == null }
@@ -389,6 +394,8 @@ class SohAnalyzer(
             if (cusumResult.alarmKm.isNotEmpty()) {
                 val firstAlarmKm = cusumResult.alarmKm.first()
 
+                cusumData[metric] = cusumResult
+
                 // Retrouver l'index de ligne dans dfStats dont wheel_km == firstAlarmKm
                 val firstIdx = (0 until dfStats.rowsCount()).firstOrNull { i ->
                     (dfStats[WHEEL_KM.csv_code][i] as? Number)?.toDouble() == firstAlarmKm
@@ -420,6 +427,9 @@ class SohAnalyzer(
             )
 
             if (trendResult.isSignificant && trendResult.slope != null) {
+
+                trendData[metric] = trendResult
+
                 val slopePer1000km = trendResult.slope * 1000.0
                 trendAlarms.add(
                     GaussianAlarmDetector.Alarm(
@@ -437,7 +447,7 @@ class SohAnalyzer(
 
         logger.d(TAG, "Analysis complete: ${allAlarms.size} alarms detected")
 
-        val plotData = buildPlotData(dfStats, thresholds, rPackNominal)
+        val plotData = buildPlotData(dfStats, thresholds, cusumData, trendData, rPackNominal)
 
         onProgress?.invoke(finalPaths.size, finalPaths.size, DONE)
 
@@ -459,6 +469,8 @@ class SohAnalyzer(
     private fun buildPlotData(
         dfStats: DataFrame<*>,
         thresholds: Map<String, ThresholdInfo>,
+        cusumData : Map<Metrics, CUSUMDetector.CUSUMResult>,
+        trendData : Map<Metrics, TrendDetector.TrendResult>,
         rPackNominal: Double?
     ): PlotData {
         val series = mutableMapOf<Metrics, List<Pair<Double, Double>>>()
@@ -473,7 +485,6 @@ class SohAnalyzer(
 
         for (metric in Metrics.entries) {
             if (metric.csv_code !in dfStats.columnNames()) continue
-
             // Série brute
             val pts = (0 until dfStats.rowsCount()).mapNotNull { i ->
                 val km =
@@ -488,6 +499,7 @@ class SohAnalyzer(
             series[metric] = pts
 
             val t = thresholds[metric.csv_code] ?: continue
+            logger.d(TAG,"buildPlotData current metric: $metric")
             gaussianResults[metric] = PlotData.GaussianPlotResult(
                 mu = t.mean,
                 sigma = t.std,
@@ -496,12 +508,8 @@ class SohAnalyzer(
 
             // CUSUM (métriques concernées uniquement)
             if (metric in Constants.CUSUM_METRICS) {
-                val r = CUSUMDetector.detectCUSUM(
-                    df = dfStats,
-                    metric = metric.csv_code,
-                    refKmMax = refKmMax,
-                    testKmMin = refKmMax
-                )
+                val r = cusumData[metric]?: CUSUMDetector.CUSUMResult(emptyList(),null,null)
+
                 if (r.muRef != null && r.sigmaRef != null) {
                     cusumResults[metric] = PlotData.CusumPlotResult(
                         alarmKm = r.alarmKm.toSet(),
@@ -514,7 +522,7 @@ class SohAnalyzer(
 
             // Trend
             if (metric in Constants.TREND_METRICS) {
-                val r = TrendDetector.detectTrendLinear(dfStats, metric.csv_code)
+                val r = trendData[metric]?: TrendDetector.TrendResult(null,null,false)
                 if (r.slope != null) {
                     val xVals = pts.map { it.first }
                     val yVals = pts.map { it.second }
@@ -643,6 +651,8 @@ class SohAnalyzer(
     }
 
     private fun statsToDataFrame(stats: List<ReqStatsComputer.FileStats>): DataFrame<*> {
+        logger.d(TAG,"rBattMedian size: ${stats.map{it.rBattMedian}.size}")
+        logger.d(TAG,"rBattMedian25C size: ${stats.map{it.rBattMedian25C}.size}")
         return dataFrameOf(
             FILE.csv_code to stats.map { it.file },
             SOURCE.csv_code to stats.map { it.source },

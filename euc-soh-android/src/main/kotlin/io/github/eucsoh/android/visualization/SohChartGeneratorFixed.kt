@@ -22,6 +22,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.util.Log
 import android.view.View
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.LimitLine
@@ -47,6 +48,7 @@ import io.github.eucsoh.android.visualization.SohTrendCusumChartGenerator.Compan
 class SohChartGeneratorFixed(private val context: Context) {
 
     companion object {
+        const val TAG = "SohChartGeneratorFixed"
         const val CHART_WIDTH  = 1200
         const val CHART_HEIGHT = 800
 
@@ -146,6 +148,7 @@ class SohChartGeneratorFixed(private val context: Context) {
 
     fun generateOverviewCharts(plotData: PlotData): List<Pair<String, Bitmap>> =
         Metrics.entries.mapNotNull { metric ->
+            Log.d(TAG,"gaussian metric: $metric, data ? ${plotData.gaussianResults[metric] != null}")
             if (plotData.gaussianResults[metric] == null) return@mapNotNull null
             if (plotData.series[metric].isNullOrEmpty()) return@mapNotNull null
             try {

@@ -40,21 +40,8 @@ object GaussianAlarmDetector {
         val datetimeFirst: String?,
         val reasons: String
     )
-    private val TAG:String="GaussianAlarmDetector"
-    private val METRICS = listOf(
-        REQ_MEDIAN,
-        REQ_95P,
-        SAG_95P,
-        SAG_MAX,
-        TEMP_BOARD_MAX,
-        TEMP_MOTOR_MAX,
-        V_MIN_STRONG,
-        R_BATT_MEDIAN,
-        R_MOSFET_HOT,
-        I_PHASE2_INT,
-        I_PHASE_MAX,
-        I_PHASE_95P
-    )
+    private const val TAG:String="GaussianAlarmDetector"
+    private val METRICS = Constants.Metrics.entries.toList()
 
     /**
      * Computes thresholds for all available metrics.
@@ -79,7 +66,7 @@ object GaussianAlarmDetector {
             val metric = metricInfo.csv_code
             val direction = metricInfo.higher_is_bad
             if (metric !in df.columnNames()) continue
-
+            logger.d(TAG,"computeThresholds current metric: $metric")
             val vals = dfOpt[metric].values()
                 .filterIsInstance<Number>()
                 .map { it.toDouble() }
