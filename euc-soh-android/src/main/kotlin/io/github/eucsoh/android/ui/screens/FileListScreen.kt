@@ -107,7 +107,7 @@ fun FileReportItem(
                     modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    report.fileName,
+                    Uri.decode(report.fileName),
                     style = MaterialTheme.typography.titleSmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -267,7 +267,7 @@ fun FileListScreen(
 
             AlertDialog(
                 onDismissRequest = { selectedReport = null },
-                title = { Text(report.fileName) },
+                title = { Text(Uri.decode(report.fileName)) },
                 text = {
                     Column {
                         SelectionContainer {
