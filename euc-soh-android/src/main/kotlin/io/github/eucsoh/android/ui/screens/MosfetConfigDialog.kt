@@ -290,7 +290,7 @@ fun MosfetConfigDialog(
                     if (rds != null && rds > 0) {
                         onSave(MOSFETParams(rds, tc, rw, np))   // ← ajouter np
                     }
-                    else if(np != null && np > 1){
+                    else if(np > 1){
                         onSave(MOSFETParams(null, tc, rw, np))
                     }
                 },

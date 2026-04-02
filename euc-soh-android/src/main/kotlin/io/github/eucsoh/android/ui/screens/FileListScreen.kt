@@ -32,16 +32,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.OpenInNew
-import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -72,13 +69,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.eucsoh.SohAnalyzer
 import io.github.eucsoh.android.data.FileManager
-import io.github.eucsoh.android.data.model.CsvFileInfo
 import kotlinx.coroutines.launch
-import java.text.DecimalFormat
-import java.text.SimpleDateFormat
-import java.util.Locale
 import androidx.compose.ui.res.stringResource
 import io.github.eucsoh.android.R
+import androidx.core.net.toUri
 
 @Composable
 fun FileReportItem(
@@ -209,7 +203,7 @@ fun FileListScreen(
                 title = { Text(stringResource(R.string.files_title, wheelName)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
                     }
                 },
                 actions = {
@@ -271,7 +265,7 @@ fun FileListScreen(
                                 scope.launch {
                                     isLoadingPreview = true
                                     // TODO: Needs rework
-                                    previewLines = fileManager.previewCsv(Uri.parse(path))
+                                    previewLines = fileManager.previewCsv(path.toUri())
                                     selectedReport = report
                                     isLoadingPreview = false
                                 }
@@ -300,7 +294,7 @@ fun FileListScreen(
                         if (report.accepted && previewLines.isEmpty() && !isLoadingPreview) {
                             LaunchedEffect(report) {
                                 isLoadingPreview = true
-                                previewLines = fileManager.previewCsv(Uri.parse(report.path))
+                                previewLines = fileManager.previewCsv(report.path.toUri())
                                 isLoadingPreview = false
                             }
                         }
@@ -329,74 +323,3 @@ fun FileListScreen(
 }
 
 
-@Composable
-fun FileListItem(
-    fileInfo: CsvFileInfo,
-    onPreview: (CsvFileInfo) -> Unit,
-    onOpenWith: (String) -> Unit
-) {
-    val sizeFormatter = DecimalFormat("#,##0.0")
-    val dateFormatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onPreview(fileInfo) },
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
-        ) {
-            // File name
-            Text(
-                text = fileInfo.fileName,
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            // Metadata
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "${sizeFormatter.format(fileInfo.sizeBytes / 1024.0)} KB",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Text(
-                    text = dateFormatter.format((fileInfo.isValid)),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Actions
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextButton(onClick = { onPreview(fileInfo) }) {
-                    Icon(Icons.Default.Visibility, "Preview", modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Preview")
-                }
-
-                TextButton(onClick = { onOpenWith(fileInfo.uri.toString()) }) {
-                    Icon(Icons.Default.OpenInNew, "Open", modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Open")
-                }
-            }
-        }
-    }
-}
