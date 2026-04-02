@@ -38,6 +38,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.halilibo.richtext.commonmark.Markdown
 import com.halilibo.richtext.ui.material3.RichText
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import io.github.eucsoh.android.R
 
 // ---------------------------------------------------------------------------
@@ -202,14 +205,43 @@ fun InfoScreen(onClose: () -> Unit) {
                     interpretation = stringResource(R.string.info_m6_interp)
                 )
                 InfoMetricDivider()
+                InfoMetricDivider()
                 InfoMetricBlock(
-                    name = stringResource(R.string.info_m7_name),
-                    description = stringResource(R.string.info_m7_desc),
-                    interpretation = stringResource(R.string.info_m7_interp)
+                    name = stringResource(R.string.info_m8_name),
+                    description = stringResource(R.string.info_m8_desc),
+                    interpretation = stringResource(R.string.info_m8_interp)
                 )
             }
 
-            // ── Pied de page ─────────────────────────────────────────────
+            // ── Section 5 : Exemples de graphiques ───────────────────────────
+            InfoSection(
+                icon = Icons.Default.ImageSearch,
+                iconContentDescription = null,
+                title = stringResource(R.string.info_s5_title),
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                onContainerColor = MaterialTheme.colorScheme.onSurfaceVariant
+            ) {
+                // Légende commune aux deux graphiques
+                InfoLegendRow(color = MaterialTheme.colorScheme.primary,  label = stringResource(R.string.info_graph_legend_green))
+                InfoLegendRow(color = MaterialTheme.colorScheme.tertiary, label = stringResource(R.string.info_graph_legend_orange))
+                InfoLegendRow(color = MaterialTheme.colorScheme.error,    label = stringResource(R.string.info_graph_legend_red))
+
+                Spacer(Modifier.height(12.dp))
+
+                // Exemple OK
+                InfoSubtitle(stringResource(R.string.info_graph_ok_title))
+                InfoGraphImage(drawableRes = R.drawable.ok)
+                InfoBody(stringResource(R.string.info_graph_ok_desc))
+
+                Spacer(Modifier.height(14.dp))
+
+                // Exemple KO
+                InfoSubtitle(stringResource(R.string.info_graph_ko_title))
+                InfoGraphImage(drawableRes = R.drawable.ko)
+                InfoBody(stringResource(R.string.info_graph_ko_desc))
+            }
+
+            // ── Pied de page ─────────────────────────────────────────────────
             Text(
                 stringResource(R.string.info_footer),
                 style = MaterialTheme.typography.bodySmall,
@@ -382,3 +414,33 @@ private fun InfoMetricDivider() {
     )
 }
 
+@Composable
+private fun InfoLegendRow(
+    color: androidx.compose.ui.graphics.Color,
+    label: String
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.padding(vertical = 2.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(width = 20.dp, height = 3.dp)
+                .background(color = color, shape = RoundedCornerShape(2.dp))
+        )
+        Text(label, style = MaterialTheme.typography.bodySmall)
+    }
+}
+
+@Composable
+private fun InfoGraphImage(@androidx.annotation.DrawableRes drawableRes: Int) {
+    Image(
+        painter = painterResource(id = drawableRes),
+        contentDescription = null,
+        contentScale = ContentScale.FillWidth,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp)
+    )
+}

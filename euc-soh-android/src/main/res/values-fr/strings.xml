@@ -133,8 +133,8 @@
     <string name="wheel_name_title">Nom de la roue</string>
 
     <string name="mosfet_field_nparallel_label">N cellules en parallèle (P)</string>
-    <string name="mosfet_field_nparallel_support">Cellules en parallèle par groupe (1P, 2P, 3P…) — valeur par défaut : 1</string>
-    <string name="mosfet_current_nparallel">Parallèle : %1$dP</string>
+    <string name="mosfet_field_nparallel_support">Cellules en parallèle par groupe (1P, 2P, 3P…) — valeur par défaut : 1</string>
+    <string name="mosfet_current_nparallel">Parallèle : %1$dP</string>
     <string name="analyzing_phase">Analyse en cours</string>
     <string name="calibrating_phase">Étalonnage en cours</string>
 
@@ -203,4 +203,18 @@
 
     <!-- Footer -->
     <string name="info_footer">EUC SoH est un logiciel de recherche open-source. Les résultats sont indicatifs uniquement. Privilégiez toujours la sécurité et consultez un technicien qualifié pour les décisions de maintenance.</string>
+
+    <!-- InfoScreen additions: I_phase2_Int + exemples graphiques -->
+    <string name="info_m8_name">I_phase2_Int (A²·s/km)</string>
+    <string name="info_m8_desc">Intégrale cumulée du carré du courant de phase (∫ I² dt) sommée sur tous les trajets, normalisée par la distance. Mesure l\'énergie électrique totale dissipée sous forme de chaleur dans l\'étage de puissance sur toute la vie de la roue.</string>
+    <string name="info_m8_interp">C\'est un accumulateur d\'usure : il ne peut qu\'augmenter. Un saut brusque vers le haut par rapport à la tendance signifie qu\'un trajet récent a eu un courant soutenu inhabituellement élevé. Utilisez-le conjointement avec temp_board_max et R_mosfet_hot pour diagnostiquer des événements de stress thermique. Une valeur absolue élevée confirme que l\'étage de puissance a subi un stress cumulé important, même si les métriques instantanées semblent normales aujourd\'hui.</string>
+    <string name="info_s5_title">Lire les graphiques : exemples</string>
+    <string name="info_graph_ok_title">Profil normal — roue stable</string>
+    <string name="info_graph_ok_desc">R_eq_median fluctue autour d\'une ligne de base plate sur des milliers de kilomètres. Les points restent dans la bande verte — orange. Aucune tendance à la hausse. C\'est la signature attendue d\'un pack sain avec des conditions de conduite régulières.</string>
+    <string name="info_graph_ko_title">Profil anormal — dérive claire</string>
+    <string name="info_graph_ko_desc">R_eq_median montre une tendance à la hausse soutenue de ~0,12 Ω à plus de 0,40 Ω sur 27 000 km, franchissant finalement le seuil orange (+1σ) puis le seuil rouge Danger. Les dernières sessions piquent nettement au-dessus de 0,40 Ω. Ce schéma indique une dégradation accélérée du pack — la vitesse d\'augmentation compte autant que la valeur absolue.</string>
+    <string name="info_graph_legend_green">Ligne verte : bande −1σ (sous la moyenne)</string>
+    <string name="info_graph_legend_orange">Ligne orange : seuil +1σ (avertissement précoce)</string>
+    <string name="info_graph_legend_red">Ligne rouge pointillée : seuil Danger (µ + 2σ ou absolu)</string>
+
 </resources>

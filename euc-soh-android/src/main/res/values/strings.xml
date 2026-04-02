@@ -203,4 +203,19 @@
 
     <!-- Footer -->
     <string name="info_footer" translatable="false">EUC SoH is open-source research software. Results are indicative only. Always prioritize safety and consult a qualified technician for maintenance decisions.</string>
+
+    <!-- InfoScreen additions: I_phase2_Int + graph examples -->
+    <string name="info_m8_name" translatable="false">I_phase2_Int (A²·s/km)</string>
+    <string name="info_m8_desc" translatable="false">Cumulative integral of phase current squared (∫ I² dt) summed over all rides, normalized by distance. Measures the total electrical energy dissipated as heat in the power stage over the wheel\'s lifetime.</string>
+    <string name="info_m8_interp" translatable="false">This is a wear accumulator: it only increases. A sharp upward jump relative to the trend means a recent ride had unusually high sustained current. Use it alongside temp_board_max and R_mosfet_hot to diagnose thermal stress events. A high absolute value confirms the power stage has experienced significant cumulative stress, even if instantaneous metrics appear normal today.</string>
+
+    <string name="info_s5_title" translatable="false">Reading the charts: examples</string>
+    <string name="info_graph_ok_title" translatable="false">Normal profile — stable wheel</string>
+    <string name="info_graph_ok_desc" translatable="false">R_eq_median fluctuates around a flat baseline across thousands of kilometres. Points stay inside the green–orange band. No upward trend. This is the expected signature of a healthy pack with consistent riding conditions.</string>
+    <string name="info_graph_ko_title" translatable="false">Abnormal profile — clear drift</string>
+    <string name="info_graph_ko_desc" translatable="false">R_eq_median shows a sustained upward trend from ~0.12 Ω to above 0.40 Ω over 27 000 km, eventually crossing the orange (+1σ) then the red Danger threshold. The last sessions spike sharply above 0.40 Ω. This pattern indicates accelerating pack degradation — the rate of increase matters as much as the absolute value.</string>
+    <string name="info_graph_legend_green" translatable="false">Green line: −1σ band (below average)</string>
+    <string name="info_graph_legend_orange" translatable="false">Orange line: +1σ threshold (early warning)</string>
+    <string name="info_graph_legend_red" translatable="false">Red dashed line: Danger threshold (µ + 2σ or absolute)</string>
+
 </resources>

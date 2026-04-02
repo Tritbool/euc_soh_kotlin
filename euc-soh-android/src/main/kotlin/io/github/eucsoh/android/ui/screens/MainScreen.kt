@@ -71,6 +71,7 @@ fun MainScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .statusBarsPadding()
                     .height(64.dp)
                     .clip(RectangleShape)
                     .drawBehind {

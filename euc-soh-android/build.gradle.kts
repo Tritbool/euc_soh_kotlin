@@ -36,8 +36,8 @@ android {
     defaultConfig {
         applicationId = "io.github.eucsoh.android"
         minSdk = 26
-        targetSdk = 34
-        versionCode = 1
+        targetSdk = 36
+        versionCode = 5
         versionName = "1.0"
     }
 
