@@ -619,7 +619,7 @@ private fun formatValue(value: Any?): String {
         is Boolean -> if (value) "✓" else "✗"
         is String -> try {
             Uri.decode(value)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             value
         }
 
