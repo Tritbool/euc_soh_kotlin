@@ -22,6 +22,7 @@ import android.content.Context
 import android.net.Uri
 import io.github.eucsoh.CsvSource
 import java.io.InputStream
+import androidx.core.net.toUri
 
 /**
  * Android implementation of CsvSource using ContentResolver.
@@ -32,7 +33,7 @@ import java.io.InputStream
 class AndroidCsvSource(private val context: Context) : CsvSource {
 
     override fun openCsvStream(path: String): InputStream {
-        val uri = Uri.parse(path)
+        val uri = path.toUri()
         return context.contentResolver.openInputStream(uri)
             ?: throw IllegalArgumentException("Cannot open stream for $path")
     }

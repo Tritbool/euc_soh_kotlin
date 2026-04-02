@@ -19,6 +19,7 @@
 package io.github.eucsoh.android.ui.screens
 
 import android.graphics.Bitmap
+import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -616,6 +617,12 @@ private fun formatValue(value: Any?): String {
 
         is Number -> value.toString()
         is Boolean -> if (value) "✓" else "✗"
+        is String -> try {
+            Uri.decode(value)
+        } catch (e: Exception) {
+            value
+        }
+
         else -> value.toString()
     }
 }

@@ -19,6 +19,7 @@
 package io.github.eucsoh.android.visualization
 
 import android.content.Context
+import android.net.Uri
 import io.github.eucsoh.SohAnalyzer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -74,6 +75,11 @@ class CsvExportService(private val context: Context) {
         else "%.6f".format(value)
         is Number -> value.toString()
         is Boolean -> if (value) "1" else "0"
+        is String -> try {
+            Uri.decode(value)
+        } catch (e: Exception) {
+            value
+        }
         else -> value.toString()
     }
 
