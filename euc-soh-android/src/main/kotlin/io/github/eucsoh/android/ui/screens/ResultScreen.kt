@@ -628,7 +628,7 @@ private fun formatValue(value: Any?): String {
 }
 
 private fun SohAnalyzer.AnalysisResult.buildSummary(wheelName: String): SohAnalyzer.SummaryData {
-    val analyzer = io.github.eucsoh.SohAnalyzer(
+    val analyzer = SohAnalyzer(
         csvSource = null,
         mosfetParams = null,
         logger = object : io.github.eucsoh.Logger {
