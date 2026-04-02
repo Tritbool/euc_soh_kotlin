@@ -20,4 +20,5 @@
 <paths>
     <external-files-path name="euc_soh_exports" path="EUC_SoH/" />
     <external-files-path name="euc_soh_exports_archives" path="EUC_SoH_Archives/" />
+    <cache-path name="euc_soh_csv_cache" path="csv_share/" />
 </paths>

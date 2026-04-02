@@ -216,5 +216,5 @@
     <string name="info_graph_legend_green">Ligne verte : bande −1σ (sous la moyenne)</string>
     <string name="info_graph_legend_orange">Ligne orange : seuil +1σ (avertissement précoce)</string>
     <string name="info_graph_legend_red">Ligne rouge pointillée : seuil Danger (µ + 2σ ou absolu)</string>
-
+    <string name="files_open_with">Ouvrir avec…</string>
 </resources>

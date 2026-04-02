@@ -90,14 +90,6 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
     private val _state = MutableStateFlow(SohUiState())
     val state: StateFlow<SohUiState> = _state.asStateFlow()
 
-    @Suppress("unused so far")
-    private val prefs = application.getSharedPreferences("euc_soh_prefs", Context.MODE_PRIVATE)
-
-    private val _progressState = MutableStateFlow<ProgressState?>(null)
-    @Suppress("unused so far")
-    val progressState: StateFlow<ProgressState?> = _progressState.asStateFlow()
-
-
     companion object {
         private const val TAG = "SohViewModel"
     }
@@ -111,8 +103,8 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun clearExportCache(context: Context) {
-        val pdf_csv = File(context.getExternalFilesDir(null), "EUC_SoH") ?: return
-        pdf_csv.listFiles()
+        val pdfCsv = File(context.getExternalFilesDir(null), "EUC_SoH") ?: return
+        pdfCsv.listFiles()
             ?.filter { it.extension in listOf("pdf", "csv") }
             ?.forEach { it.delete() }
 
@@ -120,13 +112,14 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
         archives.listFiles()
             ?.filter { it.extension in listOf("zip") }
             ?.forEach { it.delete() }
+
+        val csvSourceShare = File(context.cacheDir, "csv_share") ?: return
+        csvSourceShare.listFiles()
+            ?.filter { it.extension in listOf("csv") }
+            ?.forEach { it.delete() }
     }
     fun markLastExport(mime: String, name: String?) {
         _state.update { it.copy(lastExportMime = mime, lastExportPath = name) }
-    }
-
-    fun clearLastExport() {
-        _state.update { it.copy(lastExportMime = null, lastExportPath = null) }
     }
 
     /**
@@ -143,15 +136,6 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
         _state.update { it.copy(scanRootPath = path) }
     }
 
-    /**
-     * Sets the root URI for scanning (from folder picker) and rescans.
-     */
-    fun setRootUri(uri: Uri) {
-        Log.d(TAG, "Setting root URI: $uri")
-        repository.setRootUri(uri)
-        updateScanPathDisplay()
-        scanWheels(forceRefresh = true)
-    }
 
     /**
      * Loads wheel configs from repository.
@@ -516,20 +500,6 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
         _state.update { it.copy(showResults = true) }
     }
 
-    /**
-     * Clears analysis results.
-     */
-    @Suppress("unused so far")
-    fun clearResults() {
-        Log.d(TAG, "Clearing results")
-        _state.update {
-            it.copy(
-                analysisResult = null,
-                showResults = false,
-                error = null
-            )
-        }
-    }
 
     /**
      * Clears error message.

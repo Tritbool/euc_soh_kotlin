@@ -217,5 +217,6 @@
     <string name="info_graph_legend_green" translatable="false">Green line: −1σ band (below average)</string>
     <string name="info_graph_legend_orange" translatable="false">Orange line: +1σ threshold (early warning)</string>
     <string name="info_graph_legend_red" translatable="false">Red dashed line: Danger threshold (µ + 2σ or absolute)</string>
+    <string name="files_open_with" translatable="false">Open with…</string>
 
 </resources>
