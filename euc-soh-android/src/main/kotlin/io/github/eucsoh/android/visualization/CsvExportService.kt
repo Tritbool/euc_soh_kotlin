@@ -77,7 +77,7 @@ class CsvExportService(private val context: Context) {
         is Boolean -> if (value) "1" else "0"
         is String -> try {
             Uri.decode(value)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             value
         }
         else -> value.toString()
@@ -87,7 +87,7 @@ class CsvExportService(private val context: Context) {
         result: SohAnalyzer.AnalysisResult,
         wheelName: String
     ): SohAnalyzer.SummaryData {
-        val analyzer = io.github.eucsoh.SohAnalyzer(
+        val analyzer = SohAnalyzer(
             csvSource = null, mosfetParams = null,
             logger = object : io.github.eucsoh.Logger {
                 override fun d(tag: String, message: String) {}

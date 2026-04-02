@@ -19,10 +19,9 @@
 package io.github.eucsoh.android
 
 import android.content.Context
-import android.net.Uri
+import androidx.core.net.toUri
 import io.github.eucsoh.CsvSource
 import java.io.InputStream
-import androidx.core.net.toUri
 
 /**
  * Android implementation of CsvSource using ContentResolver.
