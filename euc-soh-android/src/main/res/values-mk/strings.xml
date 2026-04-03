@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d отфрлени</string>
     <string name="files_none">Нема датотеки</string>
     <string name="files_tap_hint">Притисни за целосна патека</string>
-    <string name="files_tap_hint_preview">Притисни за целосна патека · Преглед</string>
     <string name="mosfet_dialog_title">Конфигурација MOSFET</string>
     <string name="mosfet_dialog_section_title">Параметри на мостот MOSFET</string>
     <string name="mosfet_help_cd">Помош</string>

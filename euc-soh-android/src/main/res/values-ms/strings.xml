@@ -93,7 +93,6 @@
     <string name="files_rejected">❌ %1$d ditolak</string>
     <string name="files_none">Tiada fail</string>
     <string name="files_tap_hint">Ketik untuk lihat laluan penuh</string>
-    <string name="files_tap_hint_preview">Ketik untuk lihat laluan penuh · Pratonton</string>
 
     <!-- MosfetConfigDialog -->
     <string name="mosfet_dialog_title">Konfigurasi MOSFET</string>

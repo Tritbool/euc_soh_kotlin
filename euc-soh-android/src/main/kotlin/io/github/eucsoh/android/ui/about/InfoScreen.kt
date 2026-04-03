@@ -241,6 +241,38 @@ fun InfoScreen(onClose: () -> Unit) {
                 InfoBody(stringResource(R.string.info_graph_ko_desc))
             }
 
+            // ── Section 6 : Méthodologie de calcul ──────────────────────
+            InfoSection(
+                icon = Icons.Default.Calculate,
+                iconContentDescription = null,
+                title = stringResource(R.string.info_s6_title),
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                onContainerColor = MaterialTheme.colorScheme.onPrimaryContainer
+            ) {
+                InfoSubtitle(stringResource(R.string.info_s6_req_title))
+                InfoBody(stringResource(R.string.info_s6_req_body))
+
+                Spacer(Modifier.height(10.dp))
+
+                InfoSubtitle(stringResource(R.string.info_s6_vidle_title))
+                InfoBody(stringResource(R.string.info_s6_vidle_body))
+
+                Spacer(Modifier.height(10.dp))
+
+                InfoSubtitle(stringResource(R.string.info_s6_mosfet_title))
+                InfoBody(stringResource(R.string.info_s6_mosfet_body))
+
+                Spacer(Modifier.height(10.dp))
+
+                InfoSubtitle(stringResource(R.string.info_s6_arrhenius_title))
+                InfoBody(stringResource(R.string.info_s6_arrhenius_body))
+
+                Spacer(Modifier.height(10.dp))
+
+                InfoSubtitle(stringResource(R.string.info_s6_i2int_title))
+                InfoBody(stringResource(R.string.info_s6_i2int_body))
+            }
+
             // ── Pied de page ─────────────────────────────────────────────────
             Text(
                 stringResource(R.string.info_footer),

@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d відхилено</string>
     <string name="files_none">Файлів немає</string>
     <string name="files_tap_hint">Натисніть для перегляду повного шляху</string>
-    <string name="files_tap_hint_preview">Натисніть для повного шляху · Попередній перегляд</string>
     <string name="mosfet_dialog_title">Конфігурація MOSFET</string>
     <string name="mosfet_dialog_section_title">Параметри моста MOSFET</string>
     <string name="mosfet_help_cd">Допомога</string>

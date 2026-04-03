@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d avvist</string>
     <string name="files_none">Ingen filer</string>
     <string name="files_tap_hint">Trykk for å se full bane</string>
-    <string name="files_tap_hint_preview">Trykk for å se full bane · Forhåndsvisning</string>
     <string name="mosfet_dialog_title">MOSFET-konfigurasjon</string>
     <string name="mosfet_dialog_section_title">MOSFET-bro-parametere</string>
     <string name="mosfet_help_cd">Hjelp</string>

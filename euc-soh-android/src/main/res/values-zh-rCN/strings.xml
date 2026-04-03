@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d 已拒绝</string>
     <string name="files_none">无文件</string>
     <string name="files_tap_hint">点击查看完整路径</string>
-    <string name="files_tap_hint_preview">点击查看完整路径 · 预览</string>
     <string name="mosfet_dialog_title">MOSFET配置</string>
     <string name="mosfet_dialog_section_title">MOSFET桥接参数</string>
     <string name="mosfet_help_cd">帮助</string>

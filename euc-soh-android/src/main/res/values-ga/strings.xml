@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d diúltaithe</string>
     <string name="files_none">Níl comhaid ar bith</string>
     <string name="files_tap_hint">Brúigh chun an cosán iomlán a fheiceáil</string>
-    <string name="files_tap_hint_preview">Brúigh chun an cosán iomlán a fheiceáil · Réamhamharc</string>
     <string name="mosfet_dialog_title">Cumraíocht MOSFET</string>
     <string name="mosfet_dialog_section_title">Paraiméadair droichead MOSFET</string>
     <string name="mosfet_help_cd">Cabhair</string>

@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d imekataliwa</string>
     <string name="files_none">Hakuna faili</string>
     <string name="files_tap_hint">Gusa kuona njia kamili</string>
-    <string name="files_tap_hint_preview">Gusa kuona njia kamili · Hakiki</string>
     <string name="mosfet_dialog_title">Mipangilio ya MOSFET</string>
     <string name="mosfet_dialog_section_title">Vigezo vya daraja la MOSFET</string>
     <string name="mosfet_help_cd">Msaada</string>

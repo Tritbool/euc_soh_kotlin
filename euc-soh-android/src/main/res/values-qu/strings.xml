@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d chayqasqa</string>
     <string name="files_none">Mana librukunachu</string>
     <string name="files_tap_hint">Ñan lliwta qawanayapaq tocay</string>
-    <string name="files_tap_hint_preview">Ñan lliwta qawanayapaq tocay · Nawpaqmanta qaway</string>
     <string name="mosfet_dialog_title">MOSFET churay</string>
     <string name="mosfet_dialog_section_title">MOSFET puente parametrokuna</string>
     <string name="mosfet_help_cd">Yanapay</string>

@@ -1,26 +1,9 @@
-<!--
-  ~ EUC SoH Kotlin - State of Health analysis for Electric Unicycles
-  ~ Copyright (C) 2026  Gauthier LE BARTZ LYAN
-  ~
-  ~ This program is free software: you can redistribute it and/or modify
-  ~ it under the terms of the GNU Affero General Public License as
-  ~ published by the Free Software Foundation, either version 3 of the
-  ~ License, or (at your option) any later version.
-  ~
-  ~ This program is distributed in the hope that it will be useful,
-  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ~ GNU Affero General Public License for more details.
-  ~
-  ~ You should have received a copy of the GNU Affero General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
-  -->
-
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <!-- App -->
+
     <string name="app_name">EUC SoH Analyzer</string>
 
-    <!-- Common -->
+
     <string name="back">Back</string>
     <string name="close">Close</string>
     <string name="dismiss">Dismiss</string>
@@ -28,12 +11,12 @@
     <string name="ok">OK</string>
     <string name="retry">Retry</string>
 
-    <!-- MainScreen / TopBar -->
+
     <string name="topbar_title">EUC SoH Analyzer</string>
     <string name="topbar_refresh">Actualize</string>
     <string name="selected_euc_label">Selected EUC:</string>
 
-    <!-- WheelListContent -->
+
     <string name="detected_eucs">Detected EUCs (%1$d)</string>
     <string name="analyze_button">Analyze %1$s</string>
     <string name="view_last_results">View last results</string>
@@ -42,16 +25,16 @@
     <string name="mosfet_badge">MOSFET</string>
     <string name="mosfet_config_cd">MOSFET Config</string>
 
-    <!-- EmptyStateScreen -->
+
     <string name="no_wheel_detected">No EUC found</string>
     <string name="no_wheel_hint">Recusrively scanning in:\n- WheelLog/\n- EUC World/\n\nfrom: %1$s\n\nEnsure your logs are in those folders.</string>
     <string name="choose_folder">📁 Choose another folder</string>
     <string name="check_permissions">Check permissions</string>
 
-    <!-- Loading / Progress -->
+
     <string name="scanning_eucs">Scanning for EUCs</string>
 
-    <!-- ResultsScreenEnhanced -->
+
     <string name="results_title">Analysis results</string>
     <string name="results_subtitle">%1$d analyzed files, %2$d metrics</string>
     <string name="results_ea">Ea = %1$s kJ/mol</string>
@@ -68,7 +51,7 @@
     <string name="share_failed">Share failed: %1$s</string>
     <string name="share_chooser_title">Share SoH export</string>
 
-    <!-- ChartGalleryScreen -->
+
     <string name="charts_title">Charts — %1$s</string>
     <string name="charts_tab_gaussian">Gaussian</string>
     <string name="charts_tab_trend">Trend</string>
@@ -85,16 +68,15 @@
     <string name="chart_pdf_copy_failed">PDF copy failed: %1$s</string>
     <string name="chart_archive_copy_failed">Archive copy failed: %1$s</string>
 
-    <!-- FileListScreen -->
+
     <string name="files_title">Files — %1$s</string>
     <string name="files_show_rejected">Show rejected (%1$d)</string>
     <string name="files_accepted">✅ %1$d accepted</string>
     <string name="files_rejected">❌ %1$d rejected</string>
     <string name="files_none">No files</string>
     <string name="files_tap_hint">Tap to see full path</string>
-    <string name="files_tap_hint_preview">Tap to see full path · Preview</string>
 
-    <!-- MosfetConfigDialog -->
+
     <string name="mosfet_dialog_title">MOSFET Config</string>
     <string name="mosfet_dialog_section_title">MOSFET bridge parameters</string>
     <string name="mosfet_help_cd">Help</string>
@@ -119,7 +101,7 @@
     <string name="mosfet_reset">Reset</string>
     <string name="mosfet_cancel">Cancel</string>
 
-    <!-- FileDetailsScreen -->
+
     <string name="file_details_title">File details (%1$d)</string>
     <string name="file_details_valid_label">Valid files</string>
     <string name="file_details_valid_count">%1$d/%2$d</string>
@@ -127,7 +109,7 @@
     <string name="file_details_analyze_button">Analyze %1$d files</string>
     <string name="file_details_excluded_hint">❌ EXCLUDED (tap to re-enable)</string>
 
-    <!-- MosfetConfigDialog — lire le fichier si besoin plus tard -->
+
     <string name="wheel_name_blocked">Name from logs — cannot be overridden</string>
     <string name="wheel_name_save">Save wheel name</string>
     <string name="wheel_name_title">Wheel name</string>
@@ -138,10 +120,10 @@
     <string name="analyzing_phase">Analyzing</string>
     <string name="calibrating_phase">Calibrating</string>
 
-    <!-- InfoScreen -->
+
     <string name="info_title" translatable="false">About EUC SoH</string>
 
-    <!-- Section 1: What the tool does -->
+
     <string name="info_s1_title" translatable="false">What this tool does — and doesn\'t do</string>
     <string name="info_s1_does" translatable="false">EUC SoH analyzes your ride logs (WheelLog / EUC World CSV) over thousands of kilometers to track the long-term health of your battery pack and power electronics (MOSFETs). It derives empirical indicators — equivalent resistance, voltage sag, thermal stress — and detects degradation trends or abnormal events using statistical thresholds and CUSUM change-point detection.</string>
     <string name="info_s1_does_not_title" translatable="false">What it does NOT do:</string>
@@ -150,7 +132,7 @@
     <string name="info_s1_limit3" translatable="false">It does not compare your wheel to other riders — each wheel is its own reference.</string>
     <string name="info_s1_limit4" translatable="false">Indicators are relative, not absolute: a high R_eq does not mean the battery is bad in isolation, only that it has drifted from its own baseline.</string>
 
-    <!-- Section 2: How to act -->
+
     <string name="info_s2_title" translatable="false">How to act on the results</string>
     <string name="info_s2_intro" translatable="false">Alarms use three levels based on how far a metric has drifted from its per-wheel baseline (mean ± σ computed on the full ride history):</string>
     <string name="info_s2_alarm_danger_label" translatable="false">Danger (≥ µ + 2σ or absolute threshold)</string>
@@ -161,7 +143,7 @@
     <string name="info_s2_alarm_green_desc" translatable="false">Metrics within the expected range for this wheel\'s history.</string>
     <string name="info_s2_action" translatable="false">When a danger alarm fires on R_eq or R_batt: avoid riding near empty battery, avoid sustained high-current conditions (steep hills, heavy load at low SoC). Consult the CUSUM and trend charts to see when the drift started.</string>
 
-    <!-- Section 3: Nominal pack resistance -->
+
     <string name="info_s3_title" translatable="false">How nominal pack resistance is estimated</string>
     <string name="info_s3_intro" translatable="false">EUC SoH infers the nominal resistance of your battery pack from the maximum pack voltage recorded in your logs, without requiring you to enter the exact cell model. The number of cells in series (S) is derived from the maximum voltage. A typical new-cell DC internal resistance (r_cell) is then looked up from public data for 18650 and 21700 chemistries.</string>
     <string name="info_s3_formula" translatable="false">R_pack_nominal = S × r_cell / P\n\nwhere S = series cell count, P = parallel cell count (configurable, default 1)</string>
@@ -170,20 +152,24 @@
     <string name="info_s3_example" translatable="false">A 100V wheel typically has 24S cells. With r_cell = 80 mΩ (fresh 21700) and P = 1: R_nominal = 24 × 0.080 / 1 = 1.92 Ω. A measured R_eq_median of 3.5 Ω would be ~1.8× nominal, triggering the absolute alarm.</string>
     <string name="info_s3_note" translatable="false">The P value can be set in the MOSFET config dialog (field "N parallel cells"). It does not affect resistance computation — only the R_nominal alarm threshold.</string>
 
-    <!-- Section 4: Metrics -->
+
     <string name="info_s4_title" translatable="false">Key metrics and how to read them</string>
 
     <string name="info_m1_name" translatable="false">R_eq_median (mΩ)</string>
     <string name="info_m1_desc" translatable="false">Median equivalent resistance of the full pack (battery + MOSFETs + wiring) across all high-load samples in a ride. Main global health indicator.</string>
-    <string name="info_m1_interp" translatable="false">Trend upward over rides = pack degrading. Large sudden jump on one ride = anomaly (bad connector, thermal event). Compare to the trend line, not to a single value.</string>
+    <string name="info_m1_interp" translatable="false">R_eq_median captures all drift regardless of its origin — battery, MOSFETs, or wiring. A sustained upward trend means the circuit is degrading, but it does not tell you what is failing. To attribute the drift, cross-reference with other metrics: rising SAG and R_batt point to the cells; exploding temp_board_max with stable SAG points to the MOSFETs. R_eq_median is the primary alarm trigger — the other metrics explain it.</string>
 
     <string name="info_m2_name" translatable="false">R_batt_median_25C (mΩ)</string>
-    <string name="info_m2_desc" translatable="false">Battery-dominated resistance, estimated by subtracting the MOSFET contribution and correcting to 25°C (requires MOSFET config). Only available if you set R_ds(on) in the MOSFET config.</string>
+    <string name="info_m2_desc" translatable="false">Battery resistance isolated from MOSFETs and wiring, corrected to 25°C. Only available when MOSFET parameters are configured. Without them, this metric is not shown — R_eq_median_25C is the closest available value but it includes the full circuit.</string>
     <string name="info_m2_interp" translatable="false">Slow increase = cell ageing. Fast increase = possible cell failure, bad contact, or BMS issue. Flat while R_eq rises = MOSFET degradation is the dominant cause.</string>
 
     <string name="info_m3_name" translatable="false">R_mosfet_hot (mΩ)</string>
-    <string name="info_m3_desc" translatable="false">Estimated MOSFET bridge resistance at operating temperature, derived from board temperature using the configured thermal coefficient.</string>
-    <string name="info_m3_interp" translatable="false">Rising trend = MOSFET on-state resistance increasing, a known precursor of semiconductor degradation. Verify with the trend and CUSUM charts.</string>
+    <string name="info_m3_desc" translatable="false">Static proxy for MOSFET bridge resistance at operating temperature. Computed as R_ds(on)_25°C (from the datasheet value you entered) scaled by a linear thermal coefficient. The reference value R_ds(on)_25°C is fixed — it does not update as the component ages.</string>
+    <string name="info_m3_interp" translatable="false">Because R_ds(on)_25°C is a fixed constant in the model, R_mosfet_hot does not directly track MOSFET ageing. What it captures is the thermal variation around that fixed baseline.
+
+Real MOSFET degradation (increased on-state resistance due to oxide wear, bond fatigue, etc.) will appear in R_eq_median rising over time — not in R_mosfet_hot alone.
+
+The diagnostic signature of MOSFET failure is: R_eq_median trending up + temp_board_max increasing at comparable power conditions + SAG remaining relatively stable (cells still healthy). If SAG and R_batt also rise, the degradation is more widespread.</string>
 
     <string name="info_m4_name" translatable="false">sag_95p / sag_max (V)</string>
     <string name="info_m4_desc" translatable="false">95th percentile and maximum voltage sag (Vidle − V) recorded under high load. Captures worst-case ohmic drops during a ride.</string>
@@ -201,13 +187,13 @@
     <string name="info_m7_desc" translatable="false">95th percentile and maximum battery current. Characterizes electrical stress on the pack cells and MOSFETs.</string>
     <string name="info_m7_interp" translatable="false">Alarms on these metrics indicate unusually aggressive riding sessions (high acceleration, steep terrain). High currents accelerate both battery and MOSFET degradation.</string>
 
-    <!-- Footer -->
+
     <string name="info_footer" translatable="false">EUC SoH is open-source research software. Results are indicative only. Always prioritize safety and consult a qualified technician for maintenance decisions.</string>
 
-    <!-- InfoScreen additions: I_phase2_Int + graph examples -->
+
     <string name="info_m8_name" translatable="false">I_phase2_Int (A²·s/km)</string>
     <string name="info_m8_desc" translatable="false">Cumulative integral of phase current squared (∫ I² dt) summed over all rides, normalized by distance. Measures the total electrical energy dissipated as heat in the power stage over the wheel\'s lifetime.</string>
-    <string name="info_m8_interp" translatable="false">This is a wear accumulator: it only increases. A sharp upward jump relative to the trend means a recent ride had unusually high sustained current. Use it alongside temp_board_max and R_mosfet_hot to diagnose thermal stress events. A high absolute value confirms the power stage has experienced significant cumulative stress, even if instantaneous metrics appear normal today.</string>
+    <string name="info_m8_interp" translatable="false">Each point is the thermal dose for one ride — it does not accumulate between rides. A ride with unusually high sustained current will produce a high point relative to the trend. The chart also shows a cumulative line (right axis) that sums the dose from ride 1 to ride N, giving a picture of total thermal stress accumulated over the wheel\'s lifetime. Use the per-ride points to spot aggressive sessions; use the cumulative line to assess long-term load history.</string>
 
     <string name="info_s5_title" translatable="false">Reading the charts: examples</string>
     <string name="info_graph_ok_title" translatable="false">Normal profile — stable wheel</string>
@@ -217,6 +203,48 @@
     <string name="info_graph_legend_green" translatable="false">Green line: −1σ band (below average)</string>
     <string name="info_graph_legend_orange" translatable="false">Orange line: +1σ threshold (early warning)</string>
     <string name="info_graph_legend_red" translatable="false">Red dashed line: Danger threshold (µ + 2σ or absolute)</string>
+
     <string name="files_open_with" translatable="false">Open with…</string>
+
+
+    <string name="info_s6_title" translatable="false">How the metrics are computed</string>
+
+    <string name="info_s6_req_title" translatable="false">R_eq — Equivalent resistance</string>
+    <string name="info_s6_req_body" translatable="false">For each ride, the app selects samples where speed &gt; 20 km/h and battery current is in a meaningful range. For each such sample it computes:
+
+R_eq = (V_idle − V_measured) / |I_battery|
+
+where V_idle is a local estimate of the no-load voltage, rebuilt from rest segments scattered throughout the ride (not a single value for the whole ride). R_eq_median is the median of all those per-sample values. It reflects the combined resistance of battery cells + MOSFETs + wiring.</string>
+
+    <string name="info_s6_vidle_title" translatable="false">V_idle — local no-load voltage</string>
+    <string name="info_s6_vidle_body" translatable="false">V_idle is not a fixed number. The app identifies segments where |I| &lt; 3 A for at least 5 s with no abrupt voltage change (dV/dt &lt; 0.5 V/s). It interpolates a smooth profile between those rest points. This gives a local reference that follows SoC naturally, without needing a precise SoC measurement.</string>
+
+    <string name="info_s6_mosfet_title" translatable="false">R_mosfet and R_batt — splitting the resistance</string>
+    <string name="info_s6_mosfet_body" translatable="false">R_eq_median is always computed. It is then normalized to 25°C via Arrhenius to give reqMedian25C — this is the temperature-corrected equivalent resistance of the full circuit (cells + MOSFETs + wiring).
+
+R_batt (the battery resistance isolated from the rest) is only computed when MOSFET parameters are configured:
+R_mosfet(T) = R_ds(on)_25°C × (1 + α × (T − 25)) + R_wiring
+R_batt = max(0, R_eq_median − R_mosfet(T_board))
+R_batt_median_25C = Arrhenius correction of R_batt
+
+Without MOSFET config, R_batt and R_batt_median_25C are not shown. The code does not assume R_eq ≈ R_batt — it simply does not attempt the split.</string>
+
+    <string name="info_s6_arrhenius_title" translatable="false">Temperature correction to 25°C</string>
+    <string name="info_s6_arrhenius_body" translatable="false">Battery internal resistance depends on temperature. To make values comparable across seasons and conditions, R_batt is normalized to 25°C using the Arrhenius law:
+
+R_25°C = R_measured / exp((Ea/R_gas) × (1/T_meas − 1/298.15))
+
+Ea defaults to 20 kJ/mol (typical Li-ion). The app can auto-calibrate Ea from your history if the temperature span in your logs is large enough (≥ 5°C).</string>
+
+    <string name="info_s6_i2int_title" translatable="false">I_phase2_Int — thermal dose</string>
+    <string name="info_s6_i2int_body" translatable="false">This metric integrates the square of the phase current over the ride duration:
+
+I²_int = (∫ I_phase² dt) / T_ride
+
+The integral is computed with the trapezoid rule using actual timestamps when available, or a 0.1 s fallback. Squaring the current makes it proportional to Joule heating — doubling the current quadruples the heat. Normalizing by ride duration makes a long calm ride and a short aggressive ride comparable on a per-ride basis.
+
+The chart displays both the per-ride dose (left axis) and a cumulative sum from ride 1 to N (right axis, dashed grey line).
+
+I_phase2_Int is only available when your logger records phase current (EUC World or WheelLog with that column enabled).</string>
 
 </resources>

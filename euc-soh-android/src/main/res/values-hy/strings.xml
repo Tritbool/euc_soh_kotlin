@@ -93,7 +93,6 @@
     <string name="files_rejected">❌ %1$d մերժված</string>
     <string name="files_none">Ֆայլեր չկան</string>
     <string name="files_tap_hint">Հպեք՝ լրիվ ուղին տեսնելու համար</string>
-    <string name="files_tap_hint_preview">Հպեք՝ լրիվ ուղին տեսնելու համար · Նախադիտում</string>
 
     <!-- MosfetConfigDialog -->
     <string name="mosfet_dialog_title">MOSFET կարգավորում</string>

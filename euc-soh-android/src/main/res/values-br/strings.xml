@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d diskarget</string>
     <string name="files_none">Restr ebet</string>
     <string name="files_tap_hint">Pouezit evit gwelet an hent a-bezh</string>
-    <string name="files_tap_hint_preview">Pouezit evit gwelet an hent a-bezh · Rakwel</string>
     <string name="mosfet_dialog_title">Kefluniadur MOSFET</string>
     <string name="mosfet_dialog_section_title">Parametroù pont MOSFET</string>
     <string name="mosfet_help_cd">Skoazell</string>

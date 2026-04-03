@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d rejectat(s)</string>
     <string name="files_none">Cap de fichièr</string>
     <string name="files_tap_hint">Picar per veire lo camin complet</string>
-    <string name="files_tap_hint_preview">Picar per veire lo camin complet · Avantvisor</string>
     <string name="mosfet_dialog_title">Configuracion MOSFET</string>
     <string name="mosfet_dialog_section_title">Paramètres del pont MOSFET</string>
     <string name="mosfet_help_cd">Ajuda</string>

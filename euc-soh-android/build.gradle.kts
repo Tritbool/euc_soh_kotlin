@@ -37,7 +37,7 @@ android {
         applicationId = "io.github.eucsoh.android"
         minSdk = 26
         targetSdk = 36
-        versionCode = 5
+        versionCode = 7
         versionName = "1.1"
     }
 

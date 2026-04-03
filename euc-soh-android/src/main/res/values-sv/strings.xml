@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d avvisad(e)</string>
     <string name="files_none">Inga filer</string>
     <string name="files_tap_hint">Tryck för att se fullständig sökväg</string>
-    <string name="files_tap_hint_preview">Tryck för att se fullständig sökväg · Förhandsvisning</string>
     <string name="mosfet_dialog_title">MOSFET-konfiguration</string>
     <string name="mosfet_dialog_section_title">MOSFET-broparametrar</string>
     <string name="mosfet_help_cd">Hjälp</string>

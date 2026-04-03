@@ -93,7 +93,6 @@
     <string name="files_rejected">❌ %1$d nolavina</string>
     <string name="files_none">Tsy misy rakitra</string>
     <string name="files_tap_hint">Tsindrio hijery ny lalana feno</string>
-    <string name="files_tap_hint_preview">Tsindrio hijery ny lalana feno · Fijery aloha</string>
 
     <!-- MosfetConfigDialog -->
     <string name="mosfet_dialog_title">Fandrindrana MOSFET</string>

@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d απορριφθέντα</string>
     <string name="files_none">Δεν υπάρχουν αρχεία</string>
     <string name="files_tap_hint">Πατήστε για πλήρη διαδρομή</string>
-    <string name="files_tap_hint_preview">Πατήστε για πλήρη διαδρομή · Προεπισκόπηση</string>
     <string name="mosfet_dialog_title">Ρύθμιση MOSFET</string>
     <string name="mosfet_dialog_section_title">Παράμετροι γέφυρας MOSFET</string>
     <string name="mosfet_help_cd">Βοήθεια</string>
