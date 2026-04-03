@@ -107,6 +107,7 @@ object Constants {
         val higher_is_bad: Boolean = true,
         val label: String? = null
     ) {
+        REQ_MEDIAN_25C("Req_median_25C", true, "Equivalent resistance median @25°C (Ω)"),
         REQ_MEDIAN("Req_median", true, "Equivalent resistance median (Ω)"),
         R_BATT_MEDIAN_25C("R_batt_median_25C", true, "R_batt median @25°C (Ω)"),
         R_BATT_MEDIAN("R_batt_median", true, "R_batt median (Ω)"),
@@ -123,7 +124,6 @@ object Constants {
         I_PHASE_95P("i_phase_95p", true, "Phase current 95th percentile (A)"),
         I_PHASE2_INT("I_phase2_int", true, "Phase I² dose – ∫ I_phase² dt (A²·s)"),
         REQ_MEAN("Req_mean", true, "Equivalent resistance mean (Ω)"),
-        REQ_MEDIAN_25C("Req_median_25C", true, "Equivalent resistance median @25°C (Ω)"),
         REQ_95P("Req_95p", true, "Equivalent resistance 95th percentile (Ω)"),
         V_MIN_STRONG("v_min_strong", false, "Maximum voltage collapse under load (V)"),
         PWM_95P("pwm_95p", true, "PWM 95th percentile (%)"),

@@ -162,7 +162,7 @@ class SohTrendCusumChartGenerator(private val context: Context) {
                 expandAxisForRefLine(chart.axisLeft, it.toFloat())
                 addMosfetRefLine(chart.axisLeft, it)
             }
-            Metrics.R_BATT_MEDIAN_25C, Metrics.R_BATT_MEDIAN -> plotData.battPackRNominal?.let {
+            Metrics.R_BATT_MEDIAN_25C, Metrics.R_BATT_MEDIAN, Metrics.REQ_MEDIAN_25C, Metrics.REQ_MEDIAN -> plotData.battPackRNominal?.let {
                 expandAxisForRefLine(chart.axisLeft, it.toFloat())
                 addPackRefLine(chart.axisLeft, it)
             }
@@ -297,7 +297,7 @@ class SohTrendCusumChartGenerator(private val context: Context) {
                 expandAxisForRefLine(chart.axisLeft, it.toFloat())
                 addMosfetRefLine(chart.axisLeft, it)
             }
-            Metrics.R_BATT_MEDIAN_25C, Metrics.R_BATT_MEDIAN -> plotData.battPackRNominal?.let {
+            Metrics.R_BATT_MEDIAN_25C, Metrics.R_BATT_MEDIAN, Metrics.REQ_MEDIAN_25C, Metrics.REQ_MEDIAN -> plotData.battPackRNominal?.let {
                 expandAxisForRefLine(chart.axisLeft, it.toFloat())
                 addPackRefLine(chart.axisLeft, it)
             }
@@ -410,7 +410,7 @@ class SohTrendCusumChartGenerator(private val context: Context) {
                 expandAxisForRefLine(chart.axisLeft, it.toFloat())
                 addMosfetRefLine(chart.axisLeft, it)
             }
-            Metrics.R_BATT_MEDIAN_25C, Metrics.R_BATT_MEDIAN -> plotData.battPackRNominal?.let {
+            Metrics.R_BATT_MEDIAN_25C, Metrics.R_BATT_MEDIAN, Metrics.REQ_MEDIAN_25C, Metrics.REQ_MEDIAN -> plotData.battPackRNominal?.let {
                 expandAxisForRefLine(chart.axisLeft, it.toFloat())
                 addPackRefLine(chart.axisLeft, it)
             }
