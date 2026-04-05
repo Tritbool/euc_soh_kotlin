@@ -219,13 +219,19 @@ object ReqStatsComputer {
             }
         }
 
+        // Current window
+        val (iMinBase, iMaxBase) = PackInference.chooseBatteryCurrentWindow(ns)
+        var i_Min = maxOf(iMinBase, curThr)
+        var i_Max = iMaxBase
+
+
         // Build V_idle_local
         val vIdleLocal = VIdleProfileBuilder.buildVIdleProfile(
             df = df,
             vCol = vCol,
             iCol = iCol,
             socVoltCol = socVoltCol,
-            idleCurrentAbs = 3.0,
+            idleCurrentAbs = i_Min,
             minIdleDurationS = 5.0,
             maxDvdtAbs = 0.5
         )
@@ -233,10 +239,6 @@ object ReqStatsComputer {
         // Global V_idle (for export/info)
         val vIdleGlobal = vIdleLocal.average()
 
-        // Current window
-        val (iMinBase, iMaxBase) = PackInference.chooseBatteryCurrentWindow(ns)
-        var i_Min = maxOf(iMinBase, curThr)
-        var i_Max = iMaxBase
 
         // Build arrays with null-safe extraction
         // Python implicitly filters nulls via boolean conditions - we do the same
