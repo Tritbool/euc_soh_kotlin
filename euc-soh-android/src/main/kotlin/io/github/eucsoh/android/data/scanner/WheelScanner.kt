@@ -47,6 +47,7 @@ class WheelScanner(
 
     private val wheelLogScanner = WheelLogScanner(context)
     private val eucWorldScanner = EucWorldScanner(context)
+    private val darknessBotScanner = DarknessBotScanner(context)
 
     companion object {
         private const val TAG = "WheelScanner"
@@ -58,12 +59,12 @@ class WheelScanner(
      */
     suspend fun scanFromFile(rootPath: File): Map<String, WheelIdentity> = withContext(Dispatchers.IO) {
         Log.d(TAG, "Starting File-based scan from: ${rootPath.absolutePath}")
-        
+
         if (!rootPath.exists()) {
             Log.e(TAG, "Root path does not exist: ${rootPath.absolutePath}")
             return@withContext emptyMap()
         }
-        
+
         if (!rootPath.isDirectory) {
             Log.e(TAG, "Root path is not a directory: ${rootPath.absolutePath}")
             return@withContext emptyMap()
@@ -78,6 +79,7 @@ class WheelScanner(
 
         val wheelLogFolders = mutableListOf<File>()
         val eucWorldFolders = mutableListOf<File>()
+        val dbbFiles = listOf(rootPath)
 
         try {
             var foldersScanned = 0
@@ -103,7 +105,7 @@ class WheelScanner(
                         }
                     }
                 }
-            
+
             Log.d(TAG, "Scan complete: $foldersScanned folders scanned")
             Log.d(TAG, "Found ${wheelLogFolders.size} WheelLog folders")
             Log.d(TAG, "Found ${eucWorldFolders.size} EUC World folders")
@@ -111,7 +113,7 @@ class WheelScanner(
             Log.e(TAG, "Error during folder walk", e)
         }
 
-        return@withContext scanFoundFolders(wheelLogFolders, eucWorldFolders)
+        return@withContext scanFoundFolders(wheelLogFolders, eucWorldFolders, dbbFiles)
     }
 
     /**
@@ -119,7 +121,7 @@ class WheelScanner(
      */
     suspend fun scanFromUri(rootUri: Uri): Map<String, WheelIdentity> = withContext(Dispatchers.IO) {
         Log.d(TAG, "Starting DocumentFile-based scan from: $rootUri")
-        
+
         val rootDoc = DocumentFile.fromTreeUri(context, rootUri)
         if (rootDoc == null || !rootDoc.exists() || !rootDoc.isDirectory) {
             Log.e(TAG, "Invalid root URI")
@@ -130,6 +132,7 @@ class WheelScanner(
 
         val wheelLogDocs = mutableListOf<DocumentFile>()
         val eucWorldDocs = mutableListOf<DocumentFile>()
+        val dbbDocs = mutableListOf<DocumentFile>()
 
         try {
             var foldersScanned = 0
@@ -138,7 +141,7 @@ class WheelScanner(
                 if (foldersScanned % 100 == 0) {
                     Log.d(TAG, "Scanned $foldersScanned folders...")
                 }
-                
+
                 val name = doc.name ?: return@walkDocumentTree
                 when {
                     name.equals("WheelLog", ignoreCase = true) -> {
@@ -151,7 +154,7 @@ class WheelScanner(
                     }
                 }
             }
-            
+
             Log.d(TAG, "Scan complete: $foldersScanned folders scanned")
             Log.d(TAG, "Found ${wheelLogDocs.size} WheelLog folders")
             Log.d(TAG, "Found ${eucWorldDocs.size} EUC World folders")
@@ -159,7 +162,7 @@ class WheelScanner(
             Log.e(TAG, "Error during document tree walk", e)
         }
 
-        return@withContext scanFoundDocuments(wheelLogDocs, eucWorldDocs)
+        return@withContext scanFoundDocuments(wheelLogDocs, eucWorldDocs, dbbDocs)
     }
 
     /**
@@ -187,9 +190,10 @@ class WheelScanner(
      */
     private suspend fun scanFoundFolders(
         wheelLogFolders: List<File>,
-        eucWorldFolders: List<File>
+        eucWorldFolders: List<File>,
+        dbbFiles: List<File>
     ): Map<String, WheelIdentity> = withContext(Dispatchers.IO) {
-        val wheelLogDeferred = async { 
+        val wheelLogDeferred = async {
             try {
                 val wheels = wheelLogFolders.flatMap { folder ->
                     Log.d(TAG, "Scanning WheelLog folder: ${folder.absolutePath}")
@@ -204,8 +208,8 @@ class WheelScanner(
                 emptyMap()
             }
         }
-        
-        val eucWorldDeferred = async { 
+
+        val eucWorldDeferred = async {
             try {
                 val wheels = eucWorldFolders.flatMap { folder ->
                     Log.d(TAG, "Scanning EUC World folder: ${folder.absolutePath}")
@@ -221,10 +225,30 @@ class WheelScanner(
             }
         }
 
+        val darknessBotDeferred = async {
+            try {
+                val wheels = mutableMapOf<String, WheelIdentity>()
+                dbbFiles.forEach { dbb ->
+                    Log.d(TAG, "Scanning .dbb file: ${dbb.absolutePath}")
+                    val result = darknessBotScanner.scanFromFile(dbb ?: return@forEach)
+                    Log.d(TAG, "Found ${result.size} wheels in ${dbb.name}")
+                    result.forEach { (mac, identity) ->
+                        wheels.merge(mac, identity) { e, n -> e.copy(csvFiles = e.csvFiles + n.csvFiles) }
+                    }
+                }
+                Log.d(TAG, "Total DarknessBot wheels: ${wheels.size}")
+                wheels
+            } catch (e: Exception) {
+                Log.e(TAG, "Error scanning .dbb files", e)
+                emptyMap()
+            }
+        }
+
         val wheelLogWheels = wheelLogDeferred.await()
         val eucWorldWheels = eucWorldDeferred.await()
+        val darknessBotWheels = darknessBotDeferred.await()
 
-        return@withContext mergeWheels(wheelLogWheels, eucWorldWheels)
+        return@withContext mergeWheels(wheelLogWheels, eucWorldWheels, darknessBotWheels)
     }
 
     /**
@@ -232,9 +256,10 @@ class WheelScanner(
      */
     private suspend fun scanFoundDocuments(
         wheelLogDocs: List<DocumentFile>,
-        eucWorldDocs: List<DocumentFile>
+        eucWorldDocs: List<DocumentFile>,
+        dbbDocs: List<DocumentFile>
     ): Map<String, WheelIdentity> = withContext(Dispatchers.IO) {
-        val wheelLogDeferred = async { 
+        val wheelLogDeferred = async {
             try {
                 val wheels = wheelLogDocs.flatMap { doc ->
                     Log.d(TAG, "Scanning WheelLog document: ${doc.uri}")
@@ -249,8 +274,8 @@ class WheelScanner(
                 emptyMap()
             }
         }
-        
-        val eucWorldDeferred = async { 
+
+        val eucWorldDeferred = async {
             try {
                 val wheels = eucWorldDocs.flatMap { doc ->
                     Log.d(TAG, "Scanning EUC World document: ${doc.uri}")
@@ -278,7 +303,8 @@ class WheelScanner(
      */
     private fun mergeWheels(
         wheelLogWheels: Map<String, WheelIdentity>,
-        eucWorldWheels: Map<String, WheelIdentity>
+        eucWorldWheels: Map<String, WheelIdentity>,
+        darknessBotWheels: Map<String, WheelIdentity> = emptyMap()
     ): Map<String, WheelIdentity> {
         val result = mutableMapOf<String, WheelIdentity>()
 
@@ -287,17 +313,31 @@ class WheelScanner(
         eucWorldWheels.forEach { (mac, eucWheel) ->
             result.merge(mac, eucWheel) { existing, new ->
                 existing.copy(
-                    displayName = if (new.displayName != new.macAddress) 
-                        new.displayName 
-                    else 
+                    displayName = if (new.displayName != new.macAddress)
+                        new.displayName
+                    else
                         existing.displayName,
                     csvFiles = existing.csvFiles + new.csvFiles,
                     manufacturer = new.manufacturer ?: existing.manufacturer,
                     model = new.model ?: existing.model,
                     serialNumber = new.serialNumber ?: existing.serialNumber,
-                    source = if (existing.csvFiles.isNotEmpty() && new.csvFiles.isNotEmpty()) 
+                    source = if (existing.csvFiles.isNotEmpty() && new.csvFiles.isNotEmpty())
                         io.github.eucsoh.android.data.model.WheelDataSource.MIX
-                    else 
+                    else
+                        new.source
+                )
+            }
+        }
+
+        // DarknessBot: merge by MAC, aggregate CSV files
+        darknessBotWheels.forEach { (mac, dbWheel) ->
+            Log.d(TAG, "DBB Wheel : $mac -> $dbWheel")
+            result.merge(mac, dbWheel) { existing, new ->
+                existing.copy(
+                    csvFiles = existing.csvFiles + new.csvFiles,
+                    source = if (existing.csvFiles.isNotEmpty())
+                        io.github.eucsoh.android.data.model.WheelDataSource.MIX
+                    else
                         new.source
                 )
             }

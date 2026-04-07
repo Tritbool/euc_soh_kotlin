@@ -27,6 +27,9 @@ object Constants {
     const val EUC_WORLD = "euc_world"
     const val WHEELLOG = "wheellog"
 
+
+    const val DARKNESS_BOT = "darkness_bot"
+
     // ANALYSIS PHASES
     const val ANALYZING = "Analyzing"
     const val CALIBRATING = "Calibrating"
@@ -68,6 +71,28 @@ object Constants {
         TIME("time"),
         DISTANCE_TOTAL("totaldistance"),
         PWM("pwm")
+    }
+
+    /**
+     * Native DarknessBot CSV column names (inside .dbb archives).
+     * Date format: ISO 8601 with microseconds (2026-03-27T20:56:46.948611)
+     * Distance unit: km (Total mileage)
+     */
+    enum class DarknessBotColumns(val csv_code: String) {
+        TIMESTAMP("Date"),
+        SPEED("Speed"),
+        VOLTAGE("Voltage"),
+        PWM("PWM"),
+        CURRENT("Current"),
+        POWER("Power"),
+        SOC("Battery level"),
+        DISTANCE_TOTAL("Total mileage"),
+        TEMPERATURE("Temperature"),
+        PITCH("Pitch"),
+        ROLL("Roll"),
+        LATITUDE("Latitude"),
+        LONGITUDE("Longitude"),
+        ALTITUDE("Altitude")
     }
 
     enum class EUCWorldColumns(val csv_code: String) {

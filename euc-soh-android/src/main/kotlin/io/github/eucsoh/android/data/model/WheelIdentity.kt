@@ -46,6 +46,7 @@ data class WheelIdentity(
 enum class WheelDataSource {
     WHEELLOG,      // From Download/WheelLog/MAC_ADDRESS/ folders
     EUC_WORLD,     // From Download/EUC World/EUC Data Logs/
+    DARKNESS_BOT,    // From .dbb archive files (DarknessBot app)
     MANUAL,        // User-selected folder
     MIX,
     UNKNOWN
