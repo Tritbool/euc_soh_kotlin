@@ -208,13 +208,13 @@ The diagnostic signature of MOSFET failure is: R_eq_median trending up + temp_bo
 
 
     <!-- DarknessBot toggle -->
-    <string name="darknessbot_toggle_label">Include DarknessBot files (.dbb)</string>
-    <string name="darknessbot_warning_title">DarknessBot data — limited accuracy</string>
-    <string name="darknessbot_warning_body">DarknessBot does not distinguish phase current from battery current. If your wheel exposes phase current (Gotway/Begode in particular), R_eq and R_batt calculations will be physically incorrect.
+    <string name="darknessbot_toggle_label" translatable="false">Include DarknessBot files (.dbb)</string>
+    <string name="darknessbot_warning_title" translatable="false">DarknessBot data — limited accuracy</string>
+    <string name="darknessbot_warning_body" translatable="false">DarknessBot does not distinguish phase current from battery current. If your wheel exposes phase current (Gotway/Begode in particular), R_eq and R_batt calculations will be physically incorrect.
 
 Enable for exploration only — do not use to diagnose real battery state of health.</string>
-    <string name="darknessbot_warning_confirm">Enable anyway</string>
-    <string name="darknessbot_warning_cancel">Cancel</string>
+    <string name="darknessbot_warning_confirm" translatable="false">Enable anyway</string>
+    <string name="darknessbot_warning_cancel" translatable="false">Cancel</string>
 
 
     <string name="info_s6_title" translatable="false">How the metrics are computed</string>
