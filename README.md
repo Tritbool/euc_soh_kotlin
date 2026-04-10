@@ -17,7 +17,7 @@
 -->
 
 
-EUC SoH is an Android app that analyzes the **state of health (SoH)** of electric unicycles from ride logs produced by apps such as **WheelLog** and **EUC World**.
+EUC SoH is an Android app that analyzes the **state of health (SoH)** of electric unicycles from ride logs produced by apps such as **WheelLog**, **EUC World** or **DarknessBot** (partially).
 It estimates battery health and internal resistance, and generates charts and reports suitable for resale, maintenance or long‑term monitoring.
 
 > The project is based on [EUC SOH: A Vehicle Health and Usage Monitoring System to Enhance the Safety of Electric Unicycles
@@ -60,7 +60,7 @@ It estimates battery health and internal resistance, and generates charts and re
 
 - Generate a **structured archive** for each wheel, containing:
   - A **PDF report** (e.g. `soh.pdf`) summarizing the analysis.
-  - The underlying WheelLog and EUC World logs, organized by wheel identifier and type.
+  - The underlying WheelLog, EUC World and DarknessBot (when relevant) logs, organized by wheel identifier and type.
 - The UI revolves around a small number of **clear export buttons** that:
   - Save the generated files.
   - Immediately offer **sharing** via Android’s standard share sheet (mail, messengers, cloud, etc.).
@@ -89,7 +89,7 @@ This is what a typical SoH analysis session looks like:
 
 1. **Prepare your logs**
 
-  - Make sure your rides have been recorded with **WheelLog** or **EUC World**.
+  - Make sure your rides have been recorded with **WheelLog**, **EUC World** or **DarknessBot**.
   - The logs must be accessible on your device's internal storage or SD card in their default location.
 
 2. **Launch the scan**
