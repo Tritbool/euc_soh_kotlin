@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d zamítnuto</string>
     <string name="files_none">Žádné soubory</string>
     <string name="files_tap_hint">Klepněte pro zobrazení celé cesty</string>
-    <string name="files_tap_hint_preview">Klepněte pro zobrazení celé cesty · Náhled</string>
     <string name="mosfet_dialog_title">Nastavení MOSFET</string>
     <string name="mosfet_dialog_section_title">Parametry mostu MOSFET</string>
     <string name="mosfet_help_cd">Nápověda</string>

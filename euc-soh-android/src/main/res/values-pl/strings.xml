@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d odrzuconych</string>
     <string name="files_none">Brak plików</string>
     <string name="files_tap_hint">Dotknij, aby zobaczyć pełną ścieżkę</string>
-    <string name="files_tap_hint_preview">Dotknij, aby zobaczyć pełną ścieżkę · Podgląd</string>
     <string name="mosfet_dialog_title">Konfiguracja MOSFET</string>
     <string name="mosfet_dialog_section_title">Parametry mostka MOSFET</string>
     <string name="mosfet_help_cd">Pomoc</string>

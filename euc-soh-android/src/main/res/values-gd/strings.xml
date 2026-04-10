@@ -93,7 +93,6 @@
     <string name="files_rejected">❌ %1$d air a dhiùltadh</string>
     <string name="files_none">Chan eil faidhlichean ann</string>
     <string name="files_tap_hint">Brùth gus an t-slighe iomlan fhaicinn</string>
-    <string name="files_tap_hint_preview">Brùth gus an t-slighe iomlan fhaicinn · Ro-shealladh</string>
 
     <!-- MosfetConfigDialog -->
     <string name="mosfet_dialog_title">Rèiteachadh MOSFET</string>

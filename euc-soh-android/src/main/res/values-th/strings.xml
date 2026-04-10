@@ -93,7 +93,6 @@
     <string name="files_rejected">❌ %1$d ถูกปฏิเสธ</string>
     <string name="files_none">ไม่มีไฟล์</string>
     <string name="files_tap_hint">แตะเพื่อดูเส้นทางเต็ม</string>
-    <string name="files_tap_hint_preview">แตะเพื่อดูเส้นทางเต็ม · ดูตัวอย่าง</string>
 
     <!-- MosfetConfigDialog -->
     <string name="mosfet_dialog_title">ตั้งค่า MOSFET</string>

@@ -34,7 +34,6 @@
     <string name="files_rejected">❌ %1$d rejeitado(s)</string>
     <string name="files_none">Sem arquivos</string>
     <string name="files_tap_hint">Toque para ver o caminho completo</string>
-    <string name="files_tap_hint_preview">Toque para ver o caminho completo · Pré-visualização</string>
     <string name="mosfet_save">Salvar</string>
     <string name="file_details_title">Detalhes dos arquivos (%1$d)</string>
     <string name="file_details_valid_label">Arquivos válidos</string>

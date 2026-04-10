@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d hafnað</string>
     <string name="files_none">Engar skrár</string>
     <string name="files_tap_hint">Ýttu til að sjá fulla slóð</string>
-    <string name="files_tap_hint_preview">Ýttu til að sjá fulla slóð · Forskoðun</string>
     <string name="mosfet_dialog_title">MOSFET-stillingar</string>
     <string name="mosfet_dialog_section_title">MOSFET-brúarfæribreytur</string>
     <string name="mosfet_help_cd">Hjálp</string>

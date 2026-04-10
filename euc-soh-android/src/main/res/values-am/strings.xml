@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d ተቀንሷል</string>
     <string name="files_none">ፋይሎች የሉም</string>
     <string name="files_tap_hint">ሙሉ ዱካ ለማየት ይጫኑ</string>
-    <string name="files_tap_hint_preview">ሙሉ ዱካ ለማየት ይጫኑ · ቅድመ ዕይታ</string>
     <string name="mosfet_dialog_title">MOSFET ማዋቀሪያ</string>
     <string name="mosfet_dialog_section_title">የ MOSFET ድልድይ መለኪያዎች</string>
     <string name="mosfet_help_cd">እርዳታ</string>

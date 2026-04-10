@@ -74,7 +74,9 @@ data class SohUiState(
     val showResults: Boolean = false,
     val aliasInput: String = "",
     val lastExportMime: String? = null,    // "application/pdf", "text/csv", "application/zip"
-    val lastExportPath: String? = null     // juste pour debug / logs (optionnel)
+    val lastExportPath: String? = null,    // juste pour debug / logs (optionnel)
+    val darknessBotEnabled: Boolean = false,
+    val showDarknessBotWarningDialog: Boolean = false
 )
 
 /**
@@ -90,29 +92,27 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
     private val _state = MutableStateFlow(SohUiState())
     val state: StateFlow<SohUiState> = _state.asStateFlow()
 
-    @Suppress("unused so far")
-    private val prefs = application.getSharedPreferences("euc_soh_prefs", Context.MODE_PRIVATE)
-
-    private val _progressState = MutableStateFlow<ProgressState?>(null)
-    @Suppress("unused so far")
-    val progressState: StateFlow<ProgressState?> = _progressState.asStateFlow()
-
-
     companion object {
         private const val TAG = "SohViewModel"
+        private const val PREFS_NAME = "soh_settings"
+        private const val PREF_DARKNESSBOT_ENABLED = "darknessbot_enabled"
     }
 
     init {
         clearExportCache(application)
         Log.d(TAG, "ViewModel initialized")
         updateScanPathDisplay()
+        // Restore persisted DarknessBot setting
+        val prefs = application.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val dbEnabled = prefs.getBoolean(PREF_DARKNESSBOT_ENABLED, false)
+        _state.update { it.copy(darknessBotEnabled = dbEnabled) }
         // Auto-scan on startup
         scanWheels(forceRefresh = false)
     }
 
     private fun clearExportCache(context: Context) {
-        val pdf_csv = File(context.getExternalFilesDir(null), "EUC_SoH") ?: return
-        pdf_csv.listFiles()
+        val pdfCsv = File(context.getExternalFilesDir(null), "EUC_SoH") ?: return
+        pdfCsv.listFiles()
             ?.filter { it.extension in listOf("pdf", "csv") }
             ?.forEach { it.delete() }
 
@@ -120,13 +120,55 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
         archives.listFiles()
             ?.filter { it.extension in listOf("zip") }
             ?.forEach { it.delete() }
+
+        val csvSourceShare = File(context.cacheDir, "csv_share") ?: return
+        csvSourceShare.listFiles()
+            ?.filter { it.extension in listOf("csv") }
+            ?.forEach { it.delete() }
+
+        File(context.cacheDir, "dbb_repack_tmp")
+            .listFiles()
+            ?.filter { it.extension == "dbb" }
+            ?.forEach { it.delete() }
     }
-    fun markLastExport(mime: String, name: String?) {
-        _state.update { it.copy(lastExportMime = mime, lastExportPath = name) }
+    /**
+     * Called when the user taps the DarknessBot toggle.
+     * - If currently disabled → show warning dialog (activation requires confirmation).
+     * - If currently enabled  → disable immediately, no confirmation needed.
+     */
+    fun requestDarknessBotToggle() {
+        val current = _state.value.darknessBotEnabled
+        if (current) {
+            // Disable immediately
+            setDarknessBotEnabled(false)
+        } else {
+            // Show warning before enabling
+            _state.update { it.copy(showDarknessBotWarningDialog = true) }
+        }
     }
 
-    fun clearLastExport() {
-        _state.update { it.copy(lastExportMime = null, lastExportPath = null) }
+    /** User confirmed activation in the warning dialog. */
+    fun confirmDarknessBotEnable() {
+        _state.update { it.copy(showDarknessBotWarningDialog = false) }
+        setDarknessBotEnabled(true)
+    }
+
+    /** User dismissed (cancelled) the warning dialog. */
+    fun dismissDarknessBotWarning() {
+        _state.update { it.copy(showDarknessBotWarningDialog = false) }
+    }
+
+    private fun setDarknessBotEnabled(enabled: Boolean) {
+        Log.d(TAG, "DarknessBot enabled: $enabled")
+        getApplication<Application>().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit().putBoolean(PREF_DARKNESSBOT_ENABLED, enabled).apply()
+        _state.update { it.copy(darknessBotEnabled = enabled) }
+        // Re-scan so the wheel list reflects the new setting
+        scanWheels(forceRefresh = true)
+    }
+
+    fun markLastExport(mime: String, name: String?) {
+        _state.update { it.copy(lastExportMime = mime, lastExportPath = name) }
     }
 
     /**
@@ -143,15 +185,6 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
         _state.update { it.copy(scanRootPath = path) }
     }
 
-    /**
-     * Sets the root URI for scanning (from folder picker) and rescans.
-     */
-    fun setRootUri(uri: Uri) {
-        Log.d(TAG, "Setting root URI: $uri")
-        repository.setRootUri(uri)
-        updateScanPathDisplay()
-        scanWheels(forceRefresh = true)
-    }
 
     /**
      * Loads wheel configs from repository.
@@ -185,7 +218,7 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
             _state.update { it.copy(isScanning = true, error = null) }
 
             try {
-                val wheels = repository.getWheels(forceRefresh)
+                val wheels = repository.getWheels(forceRefresh, _state.value.darknessBotEnabled)
                 Log.d(TAG, "Scan complete: ${wheels.size} wheels found")
                 wheels.forEach { (mac, wheel) ->
                     Log.d(TAG, "  - $mac: ${wheel.displayName} (${wheel.csvFiles.size} files)")
@@ -516,20 +549,6 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
         _state.update { it.copy(showResults = true) }
     }
 
-    /**
-     * Clears analysis results.
-     */
-    @Suppress("unused so far")
-    fun clearResults() {
-        Log.d(TAG, "Clearing results")
-        _state.update {
-            it.copy(
-                analysisResult = null,
-                showResults = false,
-                error = null
-            )
-        }
-    }
 
     /**
      * Clears error message.

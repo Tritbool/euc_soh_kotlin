@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d an ƙi</string>
     <string name="files_none">Babu fayiloli</string>
     <string name="files_tap_hint">Taɓa don ganin hanya cikakka</string>
-    <string name="files_tap_hint_preview">Taɓa don ganin hanya cikakka · Duba kafin</string>
     <string name="mosfet_dialog_title">Saita MOSFET</string>
     <string name="mosfet_dialog_section_title">Sigogin gadar MOSFET</string>
     <string name="mosfet_help_cd">Taimako</string>

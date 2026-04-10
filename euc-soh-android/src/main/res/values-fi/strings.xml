@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d hylätty</string>
     <string name="files_none">Ei tiedostoja</string>
     <string name="files_tap_hint">Napauta nähdäksesi koko polun</string>
-    <string name="files_tap_hint_preview">Napauta nähdäksesi koko polun · Esikatselu</string>
     <string name="mosfet_dialog_title">MOSFET-asetukset</string>
     <string name="mosfet_dialog_section_title">MOSFET-sillan parametrit</string>
     <string name="mosfet_help_cd">Ohje</string>

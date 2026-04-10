@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d rifiutatu(i)</string>
     <string name="files_none">Nisun schedaghju</string>
     <string name="files_tap_hint">Tuccate per vede u percorsu cumpletu</string>
-    <string name="files_tap_hint_preview">Tuccate per vede u percorsu cumpletu · Anteprima</string>
     <string name="mosfet_dialog_title">Cunfigurazione MOSFET</string>
     <string name="mosfet_dialog_section_title">Parametri di u ponte MOSFET</string>
     <string name="mosfet_help_cd">Aiutu</string>

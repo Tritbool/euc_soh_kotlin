@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d rechazado(s)</string>
     <string name="files_none">Sin archivos</string>
     <string name="files_tap_hint">Pulse para ver la ruta completa</string>
-    <string name="files_tap_hint_preview">Pulse para ver la ruta completa · Vista previa</string>
     <string name="mosfet_dialog_title">Config MOSFET</string>
     <string name="mosfet_dialog_section_title">Parámetros del puente MOSFET</string>
     <string name="mosfet_help_cd">Ayuda</string>

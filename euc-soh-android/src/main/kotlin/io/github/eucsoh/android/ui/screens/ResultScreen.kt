@@ -19,6 +19,7 @@
 package io.github.eucsoh.android.ui.screens
 
 import android.graphics.Bitmap
+import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -94,7 +95,8 @@ fun ResultsScreenEnhanced(
     lastExportMime: String?,
     lastExportPath: String?,
     onMarkExport: (String, String?) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    darknessBotEnabled: Boolean = false
 ) {
     val TAG = "ResultsScreenEnhanced"
     val summary = remember(result) { result.buildSummary(selectedWheel?.displayName ?: "Wheel") }
@@ -246,7 +248,8 @@ fun ResultsScreenEnhanced(
                 plotData = result.plotData,
                 result = result,
                 alarms = result.alarms.size,
-                onBack = { showCharts = false }
+                onBack = { showCharts = false },
+                darknessBotEnabled = darknessBotEnabled
             )
         }
 
@@ -453,7 +456,8 @@ fun ResultsScreenEnhanced(
                                             macAddress = macSafe,
                                             fileReports = result.fileReports,
                                             pdfFile = pdfFile!!,
-                                            csvFile = csvFile!!  // null si pas encore exporté = pas inclus
+                                            csvFile = csvFile!!,  // null si pas encore exporté = pas inclus
+                                            darknessBotEnabled = darknessBotEnabled
                                         )
 
                                         onMarkExport("application/zip", zipFile!!.absolutePath)
@@ -616,12 +620,18 @@ private fun formatValue(value: Any?): String {
 
         is Number -> value.toString()
         is Boolean -> if (value) "✓" else "✗"
+        is String -> try {
+            Uri.decode(value)
+        } catch (_: Exception) {
+            value
+        }
+
         else -> value.toString()
     }
 }
 
 private fun SohAnalyzer.AnalysisResult.buildSummary(wheelName: String): SohAnalyzer.SummaryData {
-    val analyzer = io.github.eucsoh.SohAnalyzer(
+    val analyzer = SohAnalyzer(
         csvSource = null,
         mosfetParams = null,
         logger = object : io.github.eucsoh.Logger {

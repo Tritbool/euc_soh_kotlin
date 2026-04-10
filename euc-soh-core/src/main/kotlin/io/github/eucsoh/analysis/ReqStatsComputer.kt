@@ -120,7 +120,10 @@ object ReqStatsComputer {
         }
 
         if (df.rowsCount() == 0) return null
-        val source = SourceDetection.detectSource(df)
+        val source =
+            if (csvPath.contains(Constants.DARKNESS_BOT)) Constants.DARKNESS_BOT else SourceDetection.detectSource(
+                df
+            )
 
         val vCol = CommonColumns.VOLTAGE.csv_code
         val iCol = CommonColumns.CURRENT.csv_code
@@ -219,13 +222,19 @@ object ReqStatsComputer {
             }
         }
 
+        // Current window
+        val (iMinBase, iMaxBase) = PackInference.chooseBatteryCurrentWindow(ns)
+        var i_Min = maxOf(iMinBase, curThr)
+        var i_Max = iMaxBase
+
+
         // Build V_idle_local
         val vIdleLocal = VIdleProfileBuilder.buildVIdleProfile(
             df = df,
             vCol = vCol,
             iCol = iCol,
             socVoltCol = socVoltCol,
-            idleCurrentAbs = 3.0,
+            idleCurrentAbs = i_Min,
             minIdleDurationS = 5.0,
             maxDvdtAbs = 0.5
         )
@@ -233,10 +242,6 @@ object ReqStatsComputer {
         // Global V_idle (for export/info)
         val vIdleGlobal = vIdleLocal.average()
 
-        // Current window
-        val (iMinBase, iMaxBase) = PackInference.chooseBatteryCurrentWindow(ns)
-        var i_Min = maxOf(iMinBase, curThr)
-        var i_Max = iMaxBase
 
         // Build arrays with null-safe extraction
         // Python implicitly filters nulls via boolean conditions - we do the same
@@ -491,7 +496,7 @@ object ReqStatsComputer {
                 eaJPerMol = ea
             )
         }
-        logger.d(TAG,"R Batt Median 25C:$rBattMedian25C")
+        logger.d(TAG, "R Batt Median 25C:$rBattMedian25C")
         val firstDt = SourceDetection.getFirstDatetime(df, source)
 
         return FileStats(
@@ -521,7 +526,7 @@ object ReqStatsComputer {
             iPhase95p = iPhase95p,
             rMosfetHot = rMosfetHot,
             rBattMedian = rBattMedian,
-            rBattMedian25C = rBattMedian25C?:rBattMedian,
+            rBattMedian25C = rBattMedian25C ?: rBattMedian,
             pwm95p = pwm95p,
             pwmMax = pwmMax
         )

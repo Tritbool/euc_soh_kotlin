@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d abgelehnt</string>
     <string name="files_none">Keine Dateien</string>
     <string name="files_tap_hint">Tippen für vollständigen Pfad</string>
-    <string name="files_tap_hint_preview">Tippen für vollständigen Pfad · Vorschau</string>
     <string name="mosfet_dialog_title">MOSFET-Konfiguration</string>
     <string name="mosfet_dialog_section_title">MOSFET-Brückenparameter</string>
     <string name="mosfet_help_cd">Hilfe</string>

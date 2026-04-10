@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d atmesta</string>
     <string name="files_none">Failų nėra</string>
     <string name="files_tap_hint">Palieskite norėdami matyti visą kelią</string>
-    <string name="files_tap_hint_preview">Palieskite norėdami matyti visą kelią · Peržiūra</string>
     <string name="mosfet_dialog_title">MOSFET nustatymai</string>
     <string name="mosfet_dialog_section_title">MOSFET tilto parametrai</string>
     <string name="mosfet_help_cd">Pagalba</string>

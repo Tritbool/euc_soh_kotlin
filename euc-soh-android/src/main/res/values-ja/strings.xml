@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d 件除外済み</string>
     <string name="files_none">ファイルなし</string>
     <string name="files_tap_hint">タップしてフルパスを表示</string>
-    <string name="files_tap_hint_preview">タップしてフルパスを表示 · プレビュー</string>
     <string name="mosfet_dialog_title">MOSFET設定</string>
     <string name="mosfet_dialog_section_title">MOSFETブリッジパラメータ</string>
     <string name="mosfet_help_cd">ヘルプ</string>

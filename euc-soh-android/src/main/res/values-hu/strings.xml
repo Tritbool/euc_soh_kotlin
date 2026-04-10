@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d elutasítva</string>
     <string name="files_none">Nincsenek fájlok</string>
     <string name="files_tap_hint">Érintse meg a teljes elérési út megtekintéséhez</string>
-    <string name="files_tap_hint_preview">Érintse meg a teljes elérési út megtekintéséhez · Előnézet</string>
     <string name="mosfet_dialog_title">MOSFET konfiguráció</string>
     <string name="mosfet_dialog_section_title">MOSFET-híd paraméterei</string>
     <string name="mosfet_help_cd">Súgó</string>

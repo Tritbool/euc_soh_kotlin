@@ -27,6 +27,9 @@ object Constants {
     const val EUC_WORLD = "euc_world"
     const val WHEELLOG = "wheellog"
 
+
+    const val DARKNESS_BOT = "darkness_bot"
+
     // ANALYSIS PHASES
     const val ANALYZING = "Analyzing"
     const val CALIBRATING = "Calibrating"
@@ -70,6 +73,28 @@ object Constants {
         PWM("pwm")
     }
 
+    /**
+     * Native DarknessBot CSV column names (inside .dbb archives).
+     * Date format: ISO 8601 with microseconds (2026-03-27T20:56:46.948611)
+     * Distance unit: km (Total mileage)
+     */
+    enum class DarknessBotColumns(val csv_code: String) {
+        TIMESTAMP("Date"),
+        SPEED("Speed"),
+        VOLTAGE("Voltage"),
+        PWM("PWM"),
+        CURRENT("Current"),
+        POWER("Power"),
+        SOC("Battery level"),
+        DISTANCE_TOTAL("Total mileage"),
+        TEMPERATURE("Temperature"),
+        PITCH("Pitch"),
+        ROLL("Roll"),
+        LATITUDE("Latitude"),
+        LONGITUDE("Longitude"),
+        ALTITUDE("Altitude")
+    }
+
     enum class EUCWorldColumns(val csv_code: String) {
         BOARD_TEMPERATURE("system_temp"),
         MOTOR_TEMPERATURE("temp_motor"),
@@ -107,6 +132,7 @@ object Constants {
         val higher_is_bad: Boolean = true,
         val label: String? = null
     ) {
+        REQ_MEDIAN_25C("Req_median_25C", true, "Equivalent resistance median @25°C (Ω)"),
         REQ_MEDIAN("Req_median", true, "Equivalent resistance median (Ω)"),
         R_BATT_MEDIAN_25C("R_batt_median_25C", true, "R_batt median @25°C (Ω)"),
         R_BATT_MEDIAN("R_batt_median", true, "R_batt median (Ω)"),
@@ -123,7 +149,6 @@ object Constants {
         I_PHASE_95P("i_phase_95p", true, "Phase current 95th percentile (A)"),
         I_PHASE2_INT("I_phase2_int", true, "Phase I² dose – ∫ I_phase² dt (A²·s)"),
         REQ_MEAN("Req_mean", true, "Equivalent resistance mean (Ω)"),
-        REQ_MEDIAN_25C("Req_median_25C", true, "Equivalent resistance median @25°C (Ω)"),
         REQ_95P("Req_95p", true, "Equivalent resistance 95th percentile (Ω)"),
         V_MIN_STRONG("v_min_strong", false, "Maximum voltage collapse under load (V)"),
         PWM_95P("pwm_95p", true, "PWM 95th percentile (%)"),

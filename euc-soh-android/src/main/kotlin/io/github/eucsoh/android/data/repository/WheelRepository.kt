@@ -140,13 +140,14 @@ class WheelRepository(private val context: Context) {
      * @return Map of MAC address -> WheelIdentity
      */
     suspend fun getWheels(
-        forceRefresh: Boolean = false
+        forceRefresh: Boolean = false,
+        darknessBotEnabled: Boolean = false
     ): Map<String, WheelIdentity> = withContext(Dispatchers.IO) {
-        Log.d(TAG, "getWheels called: forceRefresh=$forceRefresh")
+        Log.d(TAG, "getWheels called: forceRefresh=$forceRefresh darknessBotEnabled=$darknessBotEnabled")
 
         if (forceRefresh) {
             Log.d(TAG, "Force refresh requested, scanning...")
-            scanAndCache()
+            scanAndCache(darknessBotEnabled)
         } else {
             // Try cache first
             val cached = wheelDao.getAllWheels()
@@ -157,7 +158,7 @@ class WheelRepository(private val context: Context) {
                 cached.toWheelIdentities()
             } else {
                 Log.d(TAG, "Cache miss or expired, scanning...")
-                scanAndCache()
+                scanAndCache(darknessBotEnabled)
             }
         }
     }
@@ -186,19 +187,19 @@ class WheelRepository(private val context: Context) {
     /**
      * Scans using configured path/URI and updates cache.
      */
-    private suspend fun scanAndCache(): Map<String, WheelIdentity> {
+    private suspend fun scanAndCache(darknessBotEnabled: Boolean = false): Map<String, WheelIdentity> {
         val rootUri = getRootUri()
 
         val wheels: Map<String, WheelIdentity> = if (rootUri != null) {
             Log.d(TAG, "Scanning from URI: $rootUri")
-            scanner.scanFromUri(rootUri)
+            scanner.scanFromUri(rootUri, darknessBotEnabled)
         } else {
             val roots = getStorageRoots()
             Log.d(TAG, "Scanning from ${roots.size} storage root(s)")
 
             // Collecte les résultats de chaque root SANS écraser les MACs communs
             val allResults = roots.map { root ->
-                scanner.scanFromFile(root)
+                scanner.scanFromFile(root, darknessBotEnabled = darknessBotEnabled)
             }
 
             // Merge explicite : pour chaque MAC, fusionne les csvFiles de toutes les roots

@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d tagasi lükatud</string>
     <string name="files_none">Faile pole</string>
     <string name="files_tap_hint">Puuduta täieliku tee nägemiseks</string>
-    <string name="files_tap_hint_preview">Puuduta täieliku tee nägemiseks · Eelvaade</string>
     <string name="mosfet_dialog_title">MOSFET seaded</string>
     <string name="mosfet_dialog_section_title">MOSFET-silla parameetrid</string>
     <string name="mosfet_help_cd">Abi</string>

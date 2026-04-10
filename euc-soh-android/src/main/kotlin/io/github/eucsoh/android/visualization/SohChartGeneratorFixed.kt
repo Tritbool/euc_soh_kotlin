@@ -136,9 +136,37 @@ class SohChartGeneratorFixed(private val context: Context) {
                 expandAxisForRefLine(chart.axisLeft, it.toFloat())
                 addMosfetRefLine(chart.axisLeft, it)
             }
-            Metrics.R_BATT_MEDIAN_25C, Metrics.R_BATT_MEDIAN -> plotData.battPackRNominal?.let {
+            Metrics.R_BATT_MEDIAN_25C, Metrics.R_BATT_MEDIAN, Metrics.REQ_MEDIAN_25C, Metrics.REQ_MEDIAN -> plotData.battPackRNominal?.let {
                 expandAxisForRefLine(chart.axisLeft, it.toFloat())
                 addPackRefLine(chart.axisLeft, it)
+            }
+            Metrics.I_PHASE2_INT -> {
+                // Cumulative sum on right Y axis.
+                // Each point is a per-ride dose; the cumulative line shows the
+                // total accumulated thermal stress over the wheel's lifetime.
+                val sortedPts = pts.sortedBy { it.first }
+                var runningSum = 0.0
+                val cumulEntries = sortedPts.map { (x, y) ->
+                    runningSum += y
+                    Entry(x.toFloat(), runningSum.toFloat())
+                }
+                val cumulDataSet = LineDataSet(cumulEntries, "Cumulative dose").apply {
+                    axisDependency = com.github.mikephil.charting.components.YAxis.AxisDependency.RIGHT
+                    color = Color.GRAY
+                    setCircleColor(Color.GRAY)
+                    lineWidth = 1.5f
+                    circleRadius = 3f
+                    enableDashedLine(8f, 4f, 0f)
+                    setDrawValues(false)
+                    mode = LineDataSet.Mode.LINEAR
+                }
+                chart.data = LineData(dataSet, cumulDataSet)
+                chart.axisRight.apply {
+                    isEnabled = true
+                    textColor = Color.GRAY
+                    axisMinimum = 0f
+                    setDrawGridLines(false)
+                }
             }
             else -> {}
         }

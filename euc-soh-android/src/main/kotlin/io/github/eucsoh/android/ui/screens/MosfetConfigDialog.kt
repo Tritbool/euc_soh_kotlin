@@ -92,8 +92,10 @@ fun MosfetConfigDialog(
                     enabled = !hasDataName,
                     supportingText = {
                         if (hasDataName)
-                            Text(stringResource(R.string.wheel_name_blocked),
-                                color = MaterialTheme.colorScheme.outline)
+                            Text(
+                                stringResource(R.string.wheel_name_blocked),
+                                color = MaterialTheme.colorScheme.outline
+                            )
                     },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
@@ -271,7 +273,10 @@ fun MosfetConfigDialog(
                             }
                             if (currentParams.nParallel > 1) {
                                 Text(
-                                    stringResource(R.string.mosfet_current_nparallel, currentParams.nParallel),
+                                    stringResource(
+                                        R.string.mosfet_current_nparallel,
+                                        currentParams.nParallel
+                                    ),
                                     style = MaterialTheme.typography.bodySmall
                                 )
                             }
@@ -289,12 +294,12 @@ fun MosfetConfigDialog(
                     val np = nParallel.toIntOrNull()?.coerceAtLeast(1) ?: 1
                     if (rds != null && rds > 0) {
                         onSave(MOSFETParams(rds, tc, rw, np))   // ← ajouter np
-                    }
-                    else if(np != null && np > 1){
+                    } else if (np > 1) {
                         onSave(MOSFETParams(null, tc, rw, np))
                     }
                 },
-                enabled = rDsOn.toDoubleOrNull()?.let { it > 0 } == true
+                enabled = rDsOn.toDoubleOrNull()?.let { it > 0 } == true || nParallel.toIntOrNull()
+                    ?.let { it > 1 } == true
             ) {
                 Text(stringResource(R.string.mosfet_save))
             }

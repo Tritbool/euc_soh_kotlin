@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d baztertua(k)</string>
     <string name="files_none">Ez dago fitxategirik</string>
     <string name="files_tap_hint">Sakatu bide osoa ikusteko</string>
-    <string name="files_tap_hint_preview">Sakatu bide osoa ikusteko · Aurrebista</string>
     <string name="mosfet_dialog_title">MOSFET konfigurazioa</string>
     <string name="mosfet_dialog_section_title">MOSFET zubiaren parametroak</string>
     <string name="mosfet_help_cd">Laguntza</string>

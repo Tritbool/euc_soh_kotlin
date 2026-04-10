@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d bañ</string>
     <string name="files_none">Amul fiixit</string>
     <string name="files_tap_hint">Dëgël ngir gis yoon bu dëgëlu</string>
-    <string name="files_tap_hint_preview">Dëgël ngir gis yoon bu dëgëlu · Xool ci kanam</string>
     <string name="mosfet_dialog_title">Settiwaat MOSFET</string>
     <string name="mosfet_dialog_section_title">Paramètre yu pont MOSFET</string>
     <string name="mosfet_help_cd">Ndimbal</string>

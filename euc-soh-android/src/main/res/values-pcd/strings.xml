@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d rejeté(s)</string>
     <string name="files_none">Pont d\'fichier</string>
     <string name="files_tap_hint">Apuiyez po vir ch\'chemin complet</string>
-    <string name="files_tap_hint_preview">Apuiyez po vir ch\'chemin complet · Aperchu</string>
     <string name="mosfet_dialog_title">Configurachon MOSFET</string>
     <string name="mosfet_dialog_section_title">Paramètes du pont MOSFET</string>
     <string name="mosfet_help_cd">Aide</string>

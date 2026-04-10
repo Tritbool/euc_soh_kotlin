@@ -76,7 +76,6 @@
     <string name="files_rejected">❌ %1$d respins(e)</string>
     <string name="files_none">Niciun fișier</string>
     <string name="files_tap_hint">Atinge pentru a vedea calea completă</string>
-    <string name="files_tap_hint_preview">Atinge pentru a vedea calea completă · Previzualizare</string>
     <string name="mosfet_dialog_title">Config MOSFET</string>
     <string name="mosfet_dialog_section_title">Parametrii podului MOSFET</string>
     <string name="mosfet_help_cd">Ajutor</string>

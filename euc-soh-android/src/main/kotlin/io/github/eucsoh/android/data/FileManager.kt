@@ -20,14 +20,14 @@ package io.github.eucsoh.android.data
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.BufferedReader
-import java.io.InputStreamReader
+import java.io.File
 
 /**
  * File management for wheel CSV files.
- * 
+ *
  * Features:
  * - List CSV files for a wheel
  * - Preview CSV content
@@ -37,18 +37,30 @@ import java.io.InputStreamReader
 class FileManager(private val context: Context) {
 
     /**
-     * Read first N lines of CSV for preview.
+     * Copie le CSV source (URI SAF) dans un fichier temporaire du cache de l'app,
+     * puis retourne une URI FileProvider pointant dessus.
+     *
+     * Pourquoi : une URI SAF (content://com.android.externalstorage/...) ne peut pas être
+     * transmise à une app tierce — elle n'a pas de grant actif dessus. On passe par le
+     * FileProvider de l'app pour exposer une copie via une URI que toute app peut lire.
+     *
+     * Le dossier csv_share/ est nettoyé à chaque appel pour éviter l'accumulation de copies.
      */
-    suspend fun previewCsv(fileUri: Uri, maxLines: Int = 20): List<String> = withContext(Dispatchers.IO) {
-        try {
-            context.contentResolver.openInputStream(fileUri)?.use { inputStream ->
-                BufferedReader(InputStreamReader(inputStream)).useLines { lines ->
-                    lines.take(maxLines).toList()
-                }
-            } ?: emptyList()
-        } catch (e: Exception) {
-            emptyList()
+    suspend fun copyToCache(sourceUri: Uri, fileName: String): Uri = withContext(Dispatchers.IO) {
+        val cacheDir = File(context.cacheDir, "csv_share").apply {
+            // Nettoie les anciennes copies au passage
+            deleteRecursively()
+            mkdirs()
         }
+        val destFile = File(cacheDir, fileName)
+        context.contentResolver.openInputStream(sourceUri)!!.use { input ->
+            destFile.outputStream().use { output -> input.copyTo(output) }
+        }
+        FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            destFile
+        )
     }
 
 }

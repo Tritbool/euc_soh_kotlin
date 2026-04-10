@@ -93,7 +93,6 @@
     <string name="files_rejected">❌ %1$d مرفوض(ة)</string>
     <string name="files_none">لا توجد ملفات</string>
     <string name="files_tap_hint">اضغط لعرض المسار الكامل</string>
-    <string name="files_tap_hint_preview">اضغط لعرض المسار الكامل · معاينة</string>
 
     <!-- MosfetConfigDialog -->
     <string name="mosfet_dialog_title">إعداد MOSFET</string>
