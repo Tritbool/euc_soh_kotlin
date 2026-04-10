@@ -133,6 +133,7 @@ class DarknessBotScanner(private val context: Context) {
 
         val cacheDir = File(context.cacheDir, "$CACHE_ROOT/$archiveStem")
         val lastModifiedFile = File(cacheDir, LAST_MODIFIED_FILE)
+        Log.d(TAG, "Cache dir: $cacheDir")
 
         // Cache hit: archive unchanged
         if (cacheDir.exists() && lastModifiedFile.exists()) {
@@ -149,7 +150,8 @@ class DarknessBotScanner(private val context: Context) {
         cacheDir.mkdirs()
 
         val wheelTrips = mutableMapOf<String, MutableList<Uri>>() // mac → trip URIs
-        val origCsvDir = File(cacheDir, ORIG_CSV_DIR).apply { mkdirs() }
+        val origCsvDir = File(cacheDir, ORIG_CSV_DIR)
+        origCsvDir.mkdirs()
 
         ZipInputStream(openStream().buffered()).use { zip ->
             var entry = zip.nextEntry

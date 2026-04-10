@@ -47,8 +47,13 @@ import io.github.eucsoh.android.data.model.WheelDataSource
  *           └── file.csv
  */
 class SohArchiveExportService(private val context: Context) {
-    private val TAG = "SohArchiveExportService"
+
+    companion object {
+        private val TAG = "SohArchiveExportService"
+
+    }
     private val repackService = DarknessBotRepackService(context)
+
     suspend fun exportArchive(
         wheelName: String,
         macAddress: String,
@@ -77,8 +82,7 @@ class SohArchiveExportService(private val context: Context) {
 
             // 2. CSV files groupés par source
             fileReports
-                .filter { it.accepted }
-                .filter { darknessBotEnabled || it.source != DARKNESS_BOT }
+                .filter { it.accepted && it.source != DARKNESS_BOT}
                 .forEach { report ->
                     val entryPath = when {
                         report.source == EUC_WORLD -> "EUC World/${report.fileName}"

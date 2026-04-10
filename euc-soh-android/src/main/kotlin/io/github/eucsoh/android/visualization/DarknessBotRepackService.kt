@@ -61,7 +61,7 @@ class DarknessBotRepackService(private val context: Context) {
      */
     suspend fun repack(outputDir: File, macAddress: String? = null): File? = withContext(Dispatchers.IO) {
         // Prefix used to match CSV filenames: "187A3E9C56FC" (no separators, uppercase)
-        val macPrefix: String? = macAddress?.replace(":", "")?.uppercase()
+        val macPrefix: String? = macAddress?.replace("_", "")?.uppercase()
 
         val dbbCacheRoot = File(context.cacheDir, "dbb")
         if (!dbbCacheRoot.exists()) {
@@ -75,7 +75,9 @@ class DarknessBotRepackService(private val context: Context) {
             .orEmpty()
             .flatMap { archiveDir ->
                 val origCsvDir = File(archiveDir, DarknessBotScanner.ORIG_CSV_DIR)
+                Log.d(TAG, "Searching original csv files for  ${macPrefix}")
                 if (origCsvDir.exists()) {
+                    Log.d(TAG, "Repacking ${origCsvDir.absolutePath}")
                     origCsvDir.listFiles { f ->
                         f.isFile &&
                         f.extension.equals("csv", ignoreCase = true) &&
