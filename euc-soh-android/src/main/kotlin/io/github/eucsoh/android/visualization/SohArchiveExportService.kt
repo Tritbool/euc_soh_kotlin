@@ -127,7 +127,7 @@ class SohArchiveExportService(private val context: Context) {
             if (darknessBotEnabled) {
                 try {
                     val dbbTempDir = File(context.cacheDir, "dbb_repack_tmp").also { it.mkdirs() }
-                    val dbbFile = repackService.repack(dbbTempDir)
+                    val dbbFile = repackService.repack(dbbTempDir, macAddress)
                     if (dbbFile != null) {
                         zos.addFile(dbbFile, dbbFile.name)
                         Log.d(TAG, "Added .dbb to archive: ${dbbFile.name}")

@@ -53,10 +53,15 @@ class DarknessBotRepackService(private val context: Context) {
     private val TAG = "DarknessBotRepackService"
 
     /**
-     * @param outputDir  Directory where the .dbb file will be written.
-     * @return           The produced .dbb [File], or null if no orig_csv files were found.
+     * @param outputDir   Directory where the .dbb file will be written.
+     * @param macAddress  If non-null, only CSV files belonging to this MAC are included.
+     *                    Expected format: colon-separated uppercase, e.g. "18:7A:3E:9C:56:FC".
+     *                    Converted internally to 12-char hex prefix, e.g. "187A3E9C56FC".
+     * @return            The produced .dbb [File], or null if no matching orig_csv files were found.
      */
-    suspend fun repack(outputDir: File): File? = withContext(Dispatchers.IO) {
+    suspend fun repack(outputDir: File, macAddress: String? = null): File? = withContext(Dispatchers.IO) {
+        // Prefix used to match CSV filenames: "187A3E9C56FC" (no separators, uppercase)
+        val macPrefix: String? = macAddress?.replace(":", "")?.uppercase()
 
         val dbbCacheRoot = File(context.cacheDir, "dbb")
         if (!dbbCacheRoot.exists()) {
@@ -64,7 +69,7 @@ class DarknessBotRepackService(private val context: Context) {
             return@withContext null
         }
 
-        // Collect all original CSV files from every archiveStem/orig_csv/
+        // Collect original CSV files from every archiveStem/orig_csv/, filtered by MAC if provided
         val csvFiles: List<File> = dbbCacheRoot
             .listFiles { f -> f.isDirectory }
             .orEmpty()
@@ -72,7 +77,9 @@ class DarknessBotRepackService(private val context: Context) {
                 val origCsvDir = File(archiveDir, DarknessBotScanner.ORIG_CSV_DIR)
                 if (origCsvDir.exists()) {
                     origCsvDir.listFiles { f ->
-                        f.isFile && f.extension.equals("csv", ignoreCase = true)
+                        f.isFile &&
+                        f.extension.equals("csv", ignoreCase = true) &&
+                        (macPrefix == null || f.nameWithoutExtension.startsWith(macPrefix, ignoreCase = true))
                     }.orEmpty().toList()
                 } else {
                     emptyList()
