@@ -125,6 +125,11 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
         csvSourceShare.listFiles()
             ?.filter { it.extension in listOf("csv") }
             ?.forEach { it.delete() }
+
+        File(context.cacheDir, "dbb_repack_tmp")
+            .listFiles()
+            ?.filter { it.extension == "dbb" }
+            ?.forEach { it.delete() }
     }
     /**
      * Called when the user taps the DarknessBot toggle.

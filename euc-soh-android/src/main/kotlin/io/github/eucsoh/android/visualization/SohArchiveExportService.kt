@@ -48,6 +48,7 @@ import io.github.eucsoh.android.data.model.WheelDataSource
  */
 class SohArchiveExportService(private val context: Context) {
     private val TAG = "SohArchiveExportService"
+    private val repackService = DarknessBotRepackService(context)
     suspend fun exportArchive(
         wheelName: String,
         macAddress: String,
@@ -121,6 +122,20 @@ class SohArchiveExportService(private val context: Context) {
                         Log.w("SohArchiveExport", "Skipping ${report.fileName}: ${e.message}")
                     }
                 }
+
+            // 3. .dbb repack (only when DarknessBot data was used)
+            if (darknessBotEnabled) {
+                try {
+                    val dbbTempDir = File(context.cacheDir, "dbb_repack_tmp").also { it.mkdirs() }
+                    val dbbFile = repackService.repack(dbbTempDir)
+                    if (dbbFile != null) {
+                        zos.addFile(dbbFile, dbbFile.name)
+                        Log.d(TAG, "Added .dbb to archive: ${dbbFile.name}")
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "DarknessBot repack failed, skipping: ${e.message}")
+                }
+            }
 
         }
 

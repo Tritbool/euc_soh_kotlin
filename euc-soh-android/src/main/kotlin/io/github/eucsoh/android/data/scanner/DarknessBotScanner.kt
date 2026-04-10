@@ -62,6 +62,8 @@ class DarknessBotScanner(private val context: Context) {
         private const val TAG = "DarknessBotScanner"
         private const val CACHE_ROOT = "dbb"
         private const val LAST_MODIFIED_FILE = ".last_modified"
+        /** Sub-directory inside each archiveStem cache dir holding the untouched original CSVs. */
+        const val ORIG_CSV_DIR = "orig_csv"
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -147,6 +149,7 @@ class DarknessBotScanner(private val context: Context) {
         cacheDir.mkdirs()
 
         val wheelTrips = mutableMapOf<String, MutableList<Uri>>() // mac → trip URIs
+        val origCsvDir = File(cacheDir, ORIG_CSV_DIR).apply { mkdirs() }
 
         ZipInputStream(openStream().buffered()).use { zip ->
             var entry = zip.nextEntry
@@ -155,10 +158,17 @@ class DarknessBotScanner(private val context: Context) {
                     val entryName = File(entry.name).name // strip any path prefix
                     Log.d(TAG, "ZIP entry: $entryName")
 
-                    // Pass the raw entry stream directly to the parser (no temp copy needed)
+                    // Buffer the full entry so we can (1) save the original and (2) parse it
+                    val entryBytes = zip.readBytes()
+
+                    // Save original CSV verbatim — used later by DarknessBotRepackService
+                    val origFile = File(origCsvDir, entryName)
+                    origFile.writeBytes(entryBytes)
+                    Log.d(TAG, "Saved original CSV: ${origFile.absolutePath}")
+
                     val result = DarknessBotParser.parse(
                         fileName = entryName,
-                        inputStream = zip//.buffered()
+                        inputStream = entryBytes.inputStream()
                     )
 
                     if (result != null) {
