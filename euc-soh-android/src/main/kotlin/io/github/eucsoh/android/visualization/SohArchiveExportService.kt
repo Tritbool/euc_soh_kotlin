@@ -21,6 +21,7 @@ package io.github.eucsoh.android.visualization
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import io.github.eucsoh.Constants.DARKNESS_BOT
 import io.github.eucsoh.Constants.EUC_WORLD
 import io.github.eucsoh.Constants.WHEELLOG
 import kotlinx.coroutines.Dispatchers
@@ -52,7 +53,8 @@ class SohArchiveExportService(private val context: Context) {
         macAddress: String,
         fileReports: List<SohAnalyzer.FileReport>,
         pdfFile: File,
-        csvFile: File?
+        csvFile: File?,
+        darknessBotEnabled: Boolean = false
     ): File = withContext(Dispatchers.IO) {
 
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
@@ -75,6 +77,7 @@ class SohArchiveExportService(private val context: Context) {
             // 2. CSV files groupés par source
             fileReports
                 .filter { it.accepted }
+                .filter { darknessBotEnabled || it.source != DARKNESS_BOT }
                 .forEach { report ->
                     val entryPath = when {
                         report.source == EUC_WORLD -> "EUC World/${report.fileName}"

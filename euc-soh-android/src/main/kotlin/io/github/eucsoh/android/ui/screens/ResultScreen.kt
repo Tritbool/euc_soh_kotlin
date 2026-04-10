@@ -95,7 +95,8 @@ fun ResultsScreenEnhanced(
     lastExportMime: String?,
     lastExportPath: String?,
     onMarkExport: (String, String?) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    darknessBotEnabled: Boolean = false
 ) {
     val TAG = "ResultsScreenEnhanced"
     val summary = remember(result) { result.buildSummary(selectedWheel?.displayName ?: "Wheel") }
@@ -247,7 +248,8 @@ fun ResultsScreenEnhanced(
                 plotData = result.plotData,
                 result = result,
                 alarms = result.alarms.size,
-                onBack = { showCharts = false }
+                onBack = { showCharts = false },
+                darknessBotEnabled = darknessBotEnabled
             )
         }
 
@@ -454,7 +456,8 @@ fun ResultsScreenEnhanced(
                                             macAddress = macSafe,
                                             fileReports = result.fileReports,
                                             pdfFile = pdfFile!!,
-                                            csvFile = csvFile!!  // null si pas encore exporté = pas inclus
+                                            csvFile = csvFile!!,  // null si pas encore exporté = pas inclus
+                                            darknessBotEnabled = darknessBotEnabled
                                         )
 
                                         onMarkExport("application/zip", zipFile!!.absolutePath)

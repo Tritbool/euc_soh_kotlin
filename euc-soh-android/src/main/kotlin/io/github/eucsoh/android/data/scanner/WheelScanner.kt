@@ -57,7 +57,7 @@ class WheelScanner(
     /**
      * Scans from File path.
      */
-    suspend fun scanFromFile(rootPath: File): Map<String, WheelIdentity> = withContext(Dispatchers.IO) {
+    suspend fun scanFromFile(rootPath: File, darknessBotEnabled: Boolean = false): Map<String, WheelIdentity> = withContext(Dispatchers.IO) {
         Log.d(TAG, "Starting File-based scan from: ${rootPath.absolutePath}")
 
         if (!rootPath.exists()) {
@@ -113,13 +113,13 @@ class WheelScanner(
             Log.e(TAG, "Error during folder walk", e)
         }
 
-        return@withContext scanFoundFolders(wheelLogFolders, eucWorldFolders, dbbFiles)
+        return@withContext scanFoundFolders(wheelLogFolders, eucWorldFolders, if (darknessBotEnabled) dbbFiles else emptyList())
     }
 
     /**
      * Scans from DocumentFile URI (Android SAF).
      */
-    suspend fun scanFromUri(rootUri: Uri): Map<String, WheelIdentity> = withContext(Dispatchers.IO) {
+    suspend fun scanFromUri(rootUri: Uri, darknessBotEnabled: Boolean = false): Map<String, WheelIdentity> = withContext(Dispatchers.IO) {
         Log.d(TAG, "Starting DocumentFile-based scan from: $rootUri")
 
         val rootDoc = DocumentFile.fromTreeUri(context, rootUri)
@@ -162,7 +162,7 @@ class WheelScanner(
             Log.e(TAG, "Error during document tree walk", e)
         }
 
-        return@withContext scanFoundDocuments(wheelLogDocs, eucWorldDocs, dbbDocs)
+        return@withContext scanFoundDocuments(wheelLogDocs, eucWorldDocs, if (darknessBotEnabled) dbbDocs else emptyList())
     }
 
     /**
