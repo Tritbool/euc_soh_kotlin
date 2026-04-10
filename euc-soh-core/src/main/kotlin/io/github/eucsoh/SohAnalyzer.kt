@@ -84,7 +84,7 @@ class SohAnalyzer(
     data class FileReport(
         val path: String,          // chemin complet original
         val fileName: String,      // basename
-        val source: String?,       // "WheelLog" / "EUC World" / null
+        val source: String?,       // "WheelLog" / "EUC World" / "darkness bot" / null
         val accepted: Boolean,
         val rejectionReason: String? = null,  // null si accepted
         val nPoints: Int? = null,

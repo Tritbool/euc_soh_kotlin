@@ -80,7 +80,8 @@ fun ChartGalleryScreen(
     plotData: io.github.eucsoh.model.PlotData,   // ← remplace stats: List<ReqStatsResult>
     result: SohAnalyzer.AnalysisResult,
     alarms: Int = 0,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    darknessBotEnabled: Boolean = false
 ) {
     val context = LocalContext.current
     val gaussGenerator = remember { SohChartGeneratorFixed(context) }
@@ -312,8 +313,8 @@ fun ChartGalleryScreen(
                                             macAddress = macAddress,
                                             fileReports = fileReports,
                                             pdfFile = pdfFile!!,
-                                            csvFile = csvFile!!
-
+                                            csvFile = csvFile!!,
+                                            darknessBotEnabled = darknessBotEnabled
                                         )
 
                                         // Ouvre le picker

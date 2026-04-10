@@ -21,6 +21,7 @@ package io.github.eucsoh.android.visualization
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import io.github.eucsoh.Constants.DARKNESS_BOT
 import io.github.eucsoh.Constants.EUC_WORLD
 import io.github.eucsoh.Constants.WHEELLOG
 import kotlinx.coroutines.Dispatchers
@@ -46,13 +47,20 @@ import io.github.eucsoh.android.data.model.WheelDataSource
  *           └── file.csv
  */
 class SohArchiveExportService(private val context: Context) {
-    private val TAG = "SohArchiveExportService"
+
+    companion object {
+        private val TAG = "SohArchiveExportService"
+
+    }
+    private val repackService = DarknessBotRepackService(context)
+
     suspend fun exportArchive(
         wheelName: String,
         macAddress: String,
         fileReports: List<SohAnalyzer.FileReport>,
         pdfFile: File,
-        csvFile: File?
+        csvFile: File?,
+        darknessBotEnabled: Boolean = false
     ): File = withContext(Dispatchers.IO) {
 
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
@@ -74,7 +82,7 @@ class SohArchiveExportService(private val context: Context) {
 
             // 2. CSV files groupés par source
             fileReports
-                .filter { it.accepted }
+                .filter { it.accepted && it.source != DARKNESS_BOT}
                 .forEach { report ->
                     val entryPath = when {
                         report.source == EUC_WORLD -> "EUC World/${report.fileName}"
@@ -118,6 +126,20 @@ class SohArchiveExportService(private val context: Context) {
                         Log.w("SohArchiveExport", "Skipping ${report.fileName}: ${e.message}")
                     }
                 }
+
+            // 3. .dbb repack (only when DarknessBot data was used)
+            if (darknessBotEnabled) {
+                try {
+                    val dbbTempDir = File(context.cacheDir, "dbb_repack_tmp").also { it.mkdirs() }
+                    val dbbFile = repackService.repack(dbbTempDir, macAddress)
+                    if (dbbFile != null) {
+                        zos.addFile(dbbFile, dbbFile.name)
+                        Log.d(TAG, "Added .dbb to archive: ${dbbFile.name}")
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "DarknessBot repack failed, skipping: ${e.message}")
+                }
+            }
 
         }
 

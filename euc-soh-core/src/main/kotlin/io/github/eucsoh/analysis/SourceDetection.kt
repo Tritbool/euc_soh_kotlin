@@ -19,6 +19,8 @@
 package io.github.eucsoh.analysis
 
 import io.github.eucsoh.Constants
+import io.github.eucsoh.Constants.DarknessBotColumns
+import io.github.eucsoh.Constants.DARKNESS_BOT
 import io.github.eucsoh.Constants.EUCWorldColumns
 import io.github.eucsoh.Constants.EUC_WORLD
 import io.github.eucsoh.Constants.WHEELLOG

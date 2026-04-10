@@ -31,6 +31,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -196,8 +199,8 @@ fun MainScreen(
                         lastExportMime = state.lastExportMime,
                         lastExportPath = state.lastExportPath,
                         onMarkExport = viewModel::markLastExport,
-                        onBack = viewModel::hideResults
-
+                        onBack = viewModel::hideResults,
+                        darknessBotEnabled = state.darknessBotEnabled
                     )
                 }
 
@@ -221,9 +224,44 @@ fun MainScreen(
                         onDismissError = viewModel::clearError,
                         hasResults = state.analysisResult != null &&
                                 state.analysisResult!!.macAddress == state.selectedWheel?.macAddress,
-                        onShowResults = viewModel::showResults
+                        onShowResults = viewModel::showResults,
+                        darknessBotEnabled = state.darknessBotEnabled,
+                        onDarknessBotToggle = viewModel::requestDarknessBotToggle
                     )
                 }
+            }
+
+            // DarknessBot warning dialog
+            if (state.showDarknessBotWarningDialog) {
+                AlertDialog(
+                    onDismissRequest = viewModel::dismissDarknessBotWarning,
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    },
+                    title = {
+                        Text(stringResource(R.string.darknessbot_warning_title))
+                    },
+                    text = {
+                        Text(stringResource(R.string.darknessbot_warning_body))
+                    },
+                    confirmButton = {
+                        TextButton(onClick = viewModel::confirmDarknessBotEnable) {
+                            Text(
+                                stringResource(R.string.darknessbot_warning_confirm),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = viewModel::dismissDarknessBotWarning) {
+                            Text(stringResource(R.string.darknessbot_warning_cancel))
+                        }
+                    }
+                )
             }
 
             // MOSFET config dialog
@@ -368,6 +406,8 @@ fun WheelListContent(
     onDismissError: () -> Unit,
     hasResults: Boolean,
     onShowResults: () -> Unit,
+    darknessBotEnabled: Boolean = false,
+    onDarknessBotToggle: () -> Unit = {},
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
@@ -416,6 +456,25 @@ fun WheelListContent(
                 }
             }
         }
+        // DarknessBot toggle
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                stringResource(R.string.darknessbot_toggle_label),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f)
+            )
+            Switch(
+                checked = darknessBotEnabled,
+                onCheckedChange = { onDarknessBotToggle() }
+            )
+        }
+
         if (hasResults && selectedWheel != null) {
             OutlinedButton(
                 onClick = onShowResults,
