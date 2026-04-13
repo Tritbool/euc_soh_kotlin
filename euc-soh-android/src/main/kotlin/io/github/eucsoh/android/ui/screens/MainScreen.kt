@@ -208,7 +208,9 @@ fun MainScreen(
                     EmptyStateScreen(
                         onRequestPermissions = onRequestPermissions,
                         onRetry = { viewModel.scanWheels(forceRefresh = true) },
-                        scanPath = state.scanRootPath
+                        scanPath = state.scanRootPath,
+                        darknessBotEnabled = state.darknessBotEnabled,
+                        onDarknessBotToggle = viewModel::requestDarknessBotToggle
                     )
                 }
 
@@ -363,7 +365,9 @@ fun AnalysisProgressScreen(
 fun EmptyStateScreen(
     onRequestPermissions: () -> Unit,
     onRetry: () -> Unit,
-    scanPath: String
+    scanPath: String,
+    darknessBotEnabled: Boolean = false,
+    onDarknessBotToggle: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -389,6 +393,23 @@ fun EmptyStateScreen(
             Spacer(Modifier.height(8.dp))
             TextButton(onClick = onRetry) {
                 Text(stringResource(R.string.retry))
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    stringResource(R.string.darknessbot_toggle_label),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f)
+                )
+                Switch(
+                    checked = darknessBotEnabled,
+                    onCheckedChange = { onDarknessBotToggle() }
+                )
             }
         }
     }
