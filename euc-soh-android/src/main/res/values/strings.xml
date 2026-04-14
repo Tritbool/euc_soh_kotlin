@@ -159,7 +159,7 @@
     <string name="info_s3_detail" translatable="false">This reference value acts as an absolute safety net: even if your wheel has always measured high (so the statistical baseline is already shifted), an alarm fires if R_eq exceeds a configurable multiple of the expected new-pack value (default 1.8×). This catches wheels that were already degraded when you first started logging.</string>
     <string name="info_s3_example_title" translatable="false">Example</string>
     <string name="info_s3_example" translatable="false">A 100V wheel typically has 24S cells. With r_cell = 80 mΩ (fresh 21700) and P = 1: R_nominal = 24 × 0.080 / 1 = 1.92 Ω. A measured R_eq_median of 3.5 Ω would be ~1.8× nominal, triggering the absolute alarm.</string>
-    <string name="info_s3_note" translatable="false">The P value can be set in the MOSFET config dialog (field "N parallel cells"). It does not affect resistance computation — only the R_nominal alarm threshold.</string>
+    <string name="info_s3_note" translatable="false">The P value can be set in the MOSFET config dialog (field \"N parallel cells\"). It does not affect resistance computation — only the R_nominal alarm threshold.</string>
 
 
     <string name="info_s4_title" translatable="false">Key metrics and how to read them</string>
