@@ -166,11 +166,7 @@
 
     <string name="info_m3_name">R_mosfet_hot (mΩ)</string>
     <string name="info_m3_desc">Proxy statique de la résistance du pont MOSFET à la température de fonctionnement. Calculée à partir de R_ds(on)_25°C (valeur datasheet que vous avez saisie) multipliée par un coefficient thermique linéaire. La valeur de référence R_ds(on)_25°C est fixe — elle ne se met pas à jour au fil du vieillissement du composant.</string>
-    <string name="info_m3_interp">Parce que R_ds(on)_25°C est une constante fixe dans le modèle, R_mosfet_hot ne trace pas directement le vieillissement des MOSFETs. Ce qu\'il capture, c\'est la variation thermique autour de cette référence fixe.
-
-La vraie dégradation MOSFET (augmentation de la résistance à l\'état passant par usure de l\'oxyde, fatigue des bondings, etc.) apparaîtra dans R_eq_median en hausse sur le long terme — pas dans R_mosfet_hot seul.
-
-La signature diagnostique d\'une défaillance MOSFET est : R_eq_median en tendance haussière + temp_board_max qui augmente à puissance comparable + SAG relativement stable (cellules encore saines). Si SAG et R_batt montent aussi, la dégradation est plus généralisée.</string>
+    <string name="info_m3_interp">Parce que R_ds(on)_25°C est une constante fixe dans le modèle, R_mosfet_hot ne trace pas directement le vieillissement des MOSFETs. Ce qu\'il capture, c\'est la variation thermique autour de cette référence fixe.\n\nLa vraie dégradation MOSFET (augmentation de la résistance à l\'état passant par usure de l\'oxyde, fatigue des bondings, etc.) apparaîtra dans R_eq_median en hausse sur le long terme — pas dans R_mosfet_hot seul.\n\nLa signature diagnostique d\'une défaillance MOSFET est : R_eq_median en tendance haussière + temp_board_max qui augmente à puissance comparable + SAG relativement stable (cellules encore saines). Si SAG et R_batt montent aussi, la dégradation est plus généralisée.</string>
 
     <string name="info_m4_name">sag_95p / sag_max (V)</string>
     <string name="info_m4_desc">95e centile et maximum du voltage sag (Vidle − V) enregistré à forte charge. Capture les pires chutes ohmiques durant un trajet.</string>
@@ -212,42 +208,19 @@ La signature diagnostique d\'une défaillance MOSFET est : R_eq_median en tendan
     <string name="info_s6_title">Comment les métriques sont calculées</string>
 
     <string name="info_s6_req_title">R_eq — résistance équivalente</string>
-    <string name="info_s6_req_body">Pour chaque trajet, l\'app sélectionne les échantillons où vitesse &gt; 20 km/h et courant batterie est dans une plage significative. Pour chacun :
-
-R_eq = (V_idle − V_mesurée) / |I_batterie|
-
-où V_idle est une estimation locale de la tension à vide, reconstruite à partir de segments de repos répartis dans le trajet (pas une valeur unique pour tout le trajet). R_eq_median est la médiane de toutes ces valeurs. Elle reflète la résistance combinée des cellules + MOSFETs + câblage.</string>
+    <string name="info_s6_req_body">Pour chaque trajet, l\'app sélectionne les échantillons où vitesse &gt; 20 km/h et courant batterie est dans une plage significative. Pour chacun :\n\nR_eq = (V_idle − V_mesurée) / |I_batterie|\n\noù V_idle est une estimation locale de la tension à vide, reconstruite à partir de segments de repos répartis dans le trajet (pas une valeur unique pour tout le trajet). R_eq_median est la médiane de toutes ces valeurs. Elle reflète la résistance combinée des cellules + MOSFETs + câblage.</string>
 
     <string name="info_s6_vidle_title">V_idle — tension à vide locale</string>
     <string name="info_s6_vidle_body">V_idle n\'est pas un nombre fixe. L\'app identifie les segments où |I| &lt; 3 A pendant au moins 5 s sans variation brusque (dV/dt &lt; 0,5 V/s). Elle interpole un profil lisse entre ces points de repos. Cela donne une référence locale qui suit naturellement le SoC, sans nécessiter une mesure précise de charge résiduelle.</string>
 
     <string name="info_s6_mosfet_title">R_mosfet et R_batt — décomposition de la résistance</string>
-    <string name="info_s6_mosfet_body">R_eq_median est toujours calculée. Elle est ensuite normalisée à 25°C via Arrhenius pour donner reqMedian25C — c\'est la résistance équivalente corrigée en température du circuit complet (cellules + MOSFETs + câblage).
-
-R_batt (résistance batterie isolée du reste) n\'est calculée que si les paramètres MOSFET sont configurés :
-R_mosfet(T) = R_ds(on)_25°C × (1 + α × (T − 25)) + R_câblage
-R_batt = max(0, R_eq_median − R_mosfet(T_carte))
-R_batt_median_25C = correction Arrhenius de R_batt
-
-Sans config MOSFET, R_batt et R_batt_median_25C ne sont pas affichées. Le code ne suppose pas R_eq ≈ R_batt — il ne tente simplement pas la décomposition.</string>
+    <string name="info_s6_mosfet_body">R_eq_median est toujours calculée. Elle est ensuite normalisée à 25°C via Arrhenius pour donner reqMedian25C — c\'est la résistance équivalente corrigée en température du circuit complet (cellules + MOSFETs + câblage).\n\nR_batt (résistance batterie isolée du reste) n\'est calculée que si les paramètres MOSFET sont configurés :\nR_mosfet(T) = R_ds(on)_25°C × (1 + α × (T − 25)) + R_câblage\nR_batt = max(0, R_eq_median − R_mosfet(T_carte))\nR_batt_median_25C = correction Arrhenius de R_batt\n\nSans config MOSFET, R_batt et R_batt_median_25C ne sont pas affichées. Le code ne suppose pas R_eq ≈ R_batt — il ne tente simplement pas la décomposition.</string>
 
     <string name="info_s6_arrhenius_title">Correction en température à 25°C</string>
-    <string name="info_s6_arrhenius_body">La résistance interne d\'une batterie dépend de la température. Pour rendre les valeurs comparables entre saisons et conditions, R_batt est normalisée à 25°C via la loi d\'Arrhenius :
-
-R_25°C = R_mesurée / exp((Ea/R_gaz) × (1/T_mes − 1/298,15))
-
-Ea vaut par défaut 20 kJ/mol (Li-ion typique). L\'app peut auto-calibrer Ea depuis votre historique si l\'amplitude thermique dans vos logs est suffisante (≥ 5°C).</string>
+    <string name="info_s6_arrhenius_body">La résistance interne d\'une batterie dépend de la température. Pour rendre les valeurs comparables entre saisons et conditions, R_batt est normalisée à 25°C via la loi d\'Arrhenius :\n\nR_25°C = R_mesurée / exp((Ea/R_gaz) × (1/T_mes − 1/298,15))\n\nEa vaut par défaut 20 kJ/mol (Li-ion typique). L\'app peut auto-calibrer Ea depuis votre historique si l\'amplitude thermique dans vos logs est suffisante (≥ 5°C).</string>
 
     <string name="info_s6_i2int_title">I_phase2_Int — dose thermique</string>
-    <string name="info_s6_i2int_body">Cette métrique intègre le carré du courant de phase sur la durée du trajet :
-
-I²_int = (∫ I_phase² dt) / T_trajet
-
-L\'intégrale est calculée par la méthode des trapèzes avec les horodatages réels si disponibles, sinon un pas de 0,1 s par défaut. Mettre le courant au carré le rend proportionnel à l\'échauffement par effet Joule — doubler le courant quadruple la chaleur. La normalisation par la durée rend comparables un long trajet calme et un trajet court agressif sur une base par trajet.
-
-Le graphique affiche à la fois la dose par trajet (axe gauche) et la somme cumulative du trajet 1 au trajet N (axe droit, ligne grise pointillée).
-
-I_phase2_Int n\'est disponible que si votre logger enregistre le courant de phase (EUC World ou WheelLog avec cette colonne activée).</string>
+    <string name="info_s6_i2int_body">Cette métrique intègre le carré du courant de phase sur la durée du trajet :\n\nI²_int = (∫ I_phase² dt) / T_trajet\n\nL\'intégrale est calculée par la méthode des trapèzes avec les horodatages réels si disponibles, sinon un pas de 0,1 s par défaut. Mettre le courant au carré le rend proportionnel à l\'échauffement par effet Joule — doubler le courant quadruple la chaleur. La normalisation par la durée rend comparables un long trajet calme et un trajet court agressif sur une base par trajet.\n\nLe graphique affiche à la fois la dose par trajet (axe gauche) et la somme cumulative du trajet 1 au trajet N (axe droit, ligne grise pointillée).\n\nI_phase2_Int n\'est disponible que si votre logger enregistre le courant de phase (EUC World ou WheelLog avec cette colonne activée).</string>
     <string name="darknessbot_toggle_label">Inclure les logs DarnkessBot (.dbb)</string>
     <string name="darknessbot_warning_title">Données DarknessBot - Précision limitée</string>
     <string name="darknessbot_warning_body">DarknessBot ne fait pas la distinction entre le courant de phase et le courant de batterie. Si votre roue fournit le courant de phase (notamment Gotway/Begode), les calculs de R_eq et R_batt seront physiquement erronés.  À activer uniquement à des fins d\'exploration — ne pas utiliser pour diagnostiquer l\'état de santé réel de la batterie.</string>
