@@ -151,7 +151,7 @@
     <string name="info_s3_detail">Cette valeur nominale sert de filet de sécurité absolu : si R_eq_median dépasse un multiple configurable de R_pack_nominal (ex. 1,8×), une alarme est levée quelle que soit la référence statistique. Cela détecte le cas où la roue était déjà dégradée au début de l\'enregistrement.</string>
     <string name="info_s3_example_title">Exemple</string>
     <string name="info_s3_example">Une roue 100V a typiquement 24S cellules. Avec r_cell = 80 mΩ (21700 neuves) et P = 1 : R_nominal = 24 × 0,080 / 1 = 1,92 Ω. Un R_eq_median mesuré à 3,5 Ω représente ~1,8× le nominal, ce qui déclenche l\'alarme absolue.</string>
-    <string name="info_s3_note">La valeur P se configure dans le dialogue MOSFET (champ "N cellules en parallèle"). Elle n\'affecte pas le calcul de résistance — uniquement le seuil d\'alarme R_nominal.</string>
+    <string name="info_s3_note">La valeur P se configure dans le dialogue MOSFET (champ \"N cellules en parallèle\"). Elle n\'affecte pas le calcul de résistance — uniquement le seuil d\'alarme R_nominal.</string>
 
 
     <string name="info_s4_title">Métriques importantes et comment les interpréter</string>
