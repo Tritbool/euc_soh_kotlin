@@ -133,8 +133,8 @@
 
 
 
-    <string name="info_s1_title" translatable="false">What this tool does — and doesn\'t do</string>
-    <string name="info_s1_does" translatable="false">EUC SoH reads the CSV logs produced by WheelLog or EUC World and tracks how your battery pack behaves over thousands of kilometres. Its main question: is the pack getting harder to push current through? Like an old AA battery that still reads 1.5 V but can&apos;t light a bright LED anymore, an ageing EUC pack loses its ability to deliver current cleanly — voltage drops more under load, heat rises. EUC SoH measures that drift ride after ride and warns you when it crosses meaningful thresholds.</string>
+    <string name="info_s1_title" translatable="false">What this tool does — and does not do</string>
+    <string name="info_s1_does" translatable="false">EUC SoH reads the CSV logs produced by WheelLog or EUC World and tracks how your battery pack behaves over thousands of kilometres. Its main question: is the pack getting harder to push current through? Like an old AA battery that still reads 1.5 V but cannot light a bright LED anymore, an ageing EUC pack loses its ability to deliver current cleanly — voltage drops more under load, heat rises. EUC SoH measures that drift ride after ride and warns you when it crosses meaningful thresholds.</string>
     <string name="info_s1_does_not_title" translatable="false">What it does NOT do:</string>
     <string name="info_s1_limit1" translatable="false">It does not predict an exact remaining lifespan.</string>
     <string name="info_s1_limit2" translatable="false">It does not replace hands-on testing (oscilloscope, controlled charge/discharge cycle, or a BMS — Battery Management System — diagnostic tool).</string>
