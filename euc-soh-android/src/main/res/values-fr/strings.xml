@@ -231,4 +231,13 @@
     <string name="offline_claim_b1">Pas de collecte de données</string>
     <string name="offline_claim_b2">Aucun échange réseau</string>
 
+
+    <string name="info_s3_tech">R_pack_nominal = S × r_cell / P\n\nS = nombre de cellules en série (déduit de la tension max du pack)\nP = nombre de strings en parallèle (configurable, défaut 1)\nr_cell = résistance interne DC typique d\'une cellule neuve de la chimie détectée\n\nLa valeur de P se règle dans la boîte de dialogue de configuration MOSFET. Elle n\'affecte pas le calcul de résistance — uniquement le multiplicateur de seuil d\'alarme R_nominal.</string>
+
+    <string name="info_m3_tech">R_mosfet_hot = R_ds(on)_25°C × (1 + α × (T_carte − 25)) + R_câblage\n\nR_ds(on)_25°C = résistance à l\'état passant issue de la fiche technique du MOSFET (saisie dans les paramètres)\nα = coefficient thermique linéaire (défaut 0,007 /°C pour les MOSFETs Si)\nR_câblage = estimation de la résistance de câblage (configurable)\n\nComme R_ds(on)_25°C est une constante fixe, R_mosfet_hot ne reflète pas le vieillissement du transistor. La dégradation réelle se manifeste par une hausse de R_eq_median pendant que R_mosfet_hot reste stable.</string>
+
+    <string name="info_s6_mosfet_tech">R_eq_median est toujours calculée. Elle est normalisée à 25°C via Arrhenius pour donner R_eq_median_25C.\n\nQuand les paramètres MOSFET sont configurés :\n  R_mosfet(T) = R_ds(on)_25°C × (1 + α × (T − 25)) + R_câblage\n  R_batt = max(0, R_eq_median − R_mosfet(T_carte))\n  R_batt_median_25C = correction Arrhenius de R_batt\n\nSans config MOSFET, R_batt et R_batt_median_25C ne sont pas calculées — le code ne suppose pas R_eq ≈ R_batt.</string>
+
+    <string name="info_s6_i2int_tech">I²_int = (∫ I_phase² dt) / T_trajet\n\nL\'intégrale est calculée par la méthode des trapèzes avec les horodatages réels si disponibles, sinon un pas de 0,1 s par défaut. Mettre le courant au carré le rend proportionnel à l\'échauffement par effet Joule (P = R·I²). La normalisation par la durée du trajet rend comparables un long trajet calme et un trajet court agressif sur une base par trajet.\n\nLe graphique affiche à la fois la dose par trajet (axe gauche) et la somme cumulative du trajet 1 au trajet N (axe droit, ligne grise pointillée).</string>
+
 </resources>
