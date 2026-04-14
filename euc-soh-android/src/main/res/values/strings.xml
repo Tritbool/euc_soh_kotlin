@@ -174,11 +174,7 @@
 
     <string name="info_m3_name" translatable="false">R_mosfet_hot (mΩ)</string>
     <string name="info_m3_desc" translatable="false">Estimated resistance of the power transistors (MOSFETs) at their operating temperature. Computed from the datasheet on-resistance you entered, scaled by how much resistance increases with heat. This is a fixed model — it does not update as the transistors age.</string>
-    <string name="info_m3_interp" translatable="false">Because R_ds(on)_25°C is a fixed constant in the model, R_mosfet_hot does not directly track MOSFET ageing. What it captures is the thermal variation around that fixed baseline.
-
-Real MOSFET degradation (increased on-state resistance due to oxide wear, bond fatigue, etc.) will appear in R_eq_median rising over time — not in R_mosfet_hot alone.
-
-The diagnostic signature of MOSFET failure is: R_eq_median trending up + temp_board_max increasing at comparable power conditions + SAG remaining relatively stable (cells still healthy). If SAG and R_batt also rise, the degradation is more widespread.</string>
+    <string name="info_m3_interp" translatable="false">Because R_ds(on)_25°C is a fixed constant in the model, R_mosfet_hot does not directly track MOSFET ageing. What it captures is the thermal variation around that fixed baseline.\n\nReal MOSFET degradation (increased on-state resistance due to oxide wear, bond fatigue, etc.) will appear in R_eq_median rising over time — not in R_mosfet_hot alone.\n\nThe diagnostic signature of MOSFET failure is: R_eq_median trending up + temp_board_max increasing at comparable power conditions + SAG remaining relatively stable (cells still healthy). If SAG and R_batt also rise, the degradation is more widespread.</string>
 
     <string name="info_m4_name" translatable="false">sag_95p / sag_max (V)</string>
     <string name="info_m4_desc" translatable="false">How much the voltage drops under hard load. Like squeezing a stiff water bottle: an ageing pack has to work harder to push the same current, and voltage collapses more. Measured as the gap between resting voltage and actual voltage during high-demand moments.</string>
@@ -219,9 +215,7 @@ The diagnostic signature of MOSFET failure is: R_eq_median trending up + temp_bo
     <!-- DarknessBot toggle -->
     <string name="darknessbot_toggle_label" translatable="false">Include DarknessBot files (.dbb)</string>
     <string name="darknessbot_warning_title" translatable="false">DarknessBot data — limited accuracy</string>
-    <string name="darknessbot_warning_body" translatable="false">DarknessBot does not distinguish phase current from battery current. If your wheel exposes phase current (Gotway/Begode in particular), R_eq and R_batt calculations will be physically incorrect.
-
-Enable for exploration only — do not use to diagnose real battery state of health.</string>
+    <string name="darknessbot_warning_body" translatable="false">DarknessBot does not distinguish phase current from battery current. If your wheel exposes phase current (Gotway/Begode in particular), R_eq and R_batt calculations will be physically incorrect.\n\nEnable for exploration only — do not use to diagnose real battery state of health.</string>
     <string name="darknessbot_warning_confirm" translatable="false">Enable anyway</string>
     <string name="darknessbot_warning_cancel" translatable="false">Cancel</string>
 
@@ -235,64 +229,26 @@ Enable for exploration only — do not use to diagnose real battery state of hea
     <string name="info_s6_vidle_body" translatable="false">The resting voltage of a battery changes as it discharges (State of Charge effect). Using a single voltage from the start of a ride would introduce errors over long sessions.\n\nThe app finds brief moments where current is near zero (|I| &lt; 3 A for at least 5 s, no abrupt voltage swing) and interpolates a smooth curve through them. This gives a local resting voltage for every moment of the ride, tracking SoC naturally without an explicit SoC measurement.</string>
 
     <string name="info_s6_mosfet_title" translatable="false">R_mosfet and R_batt — splitting the resistance</string>
-    <string name="info_s6_mosfet_body" translatable="false">R_eq_median is always computed. It is then normalized to 25°C via Arrhenius to give reqMedian25C — this is the temperature-corrected equivalent resistance of the full circuit (cells + MOSFETs + wiring).
-
-R_batt (the battery resistance isolated from the rest) is only computed when MOSFET parameters are configured:
-R_mosfet(T) = R_ds(on)_25°C × (1 + α × (T − 25)) + R_wiring
-R_batt = max(0, R_eq_median − R_mosfet(T_board))
-R_batt_median_25C = Arrhenius correction of R_batt
-
-Without MOSFET config, R_batt and R_batt_median_25C are not shown. The code does not assume R_eq ≈ R_batt — it simply does not attempt the split.</string>
+    <string name="info_s6_mosfet_body" translatable="false">R_eq_median is always computed. It is then normalized to 25°C via Arrhenius to give reqMedian25C — this is the temperature-corrected equivalent resistance of the full circuit (cells + MOSFETs + wiring).\n\nR_batt (the battery resistance isolated from the rest) is only computed when MOSFET parameters are configured:\nR_mosfet(T) = R_ds(on)_25°C × (1 + α × (T − 25)) + R_wiring\nR_batt = max(0, R_eq_median − R_mosfet(T_board))\nR_batt_median_25C = Arrhenius correction of R_batt\n\nWithout MOSFET config, R_batt and R_batt_median_25C are not shown. The code does not assume R_eq ≈ R_batt — it simply does not attempt the split.</string>
 
     <string name="info_s6_arrhenius_title" translatable="false">Temperature correction to 25°C</string>
     <string name="info_s6_arrhenius_body" translatable="false">A cold battery measures higher internal resistance than a warm one — even in perfect health. To make rides comparable across seasons, R_batt is corrected to a reference temperature of 25°C.\n\nThe correction uses the Arrhenius equation (a standard chemistry model for how rates — and resistance — change with temperature):\n\nR_25°C = R_measured / exp((Ea/R_gas) × (1/T_meas − 1/298.15))\n\nEa (activation energy) defaults to 20 kJ/mol, typical for Li-ion. If your logs span at least 5°C of temperature variation, the app can calibrate Ea automatically from your own riding history.</string>
 
     <string name="info_s6_i2int_title" translatable="false">I_phase2_Int — thermal dose</string>
-    <string name="info_s6_i2int_body" translatable="false">This metric integrates the square of the phase current over the ride duration:
-
-I²_int = (∫ I_phase² dt) / T_ride
-
-The integral is computed with the trapezoid rule using actual timestamps when available, or a 0.1 s fallback. Squaring the current makes it proportional to Joule heating — doubling the current quadruples the heat. Normalizing by ride duration makes a long calm ride and a short aggressive ride comparable on a per-ride basis.
-
-The chart displays both the per-ride dose (left axis) and a cumulative sum from ride 1 to N (right axis, dashed grey line).
-
-I_phase2_Int is only available when your logger records phase current (EUC World or WheelLog with that column enabled).</string>
+    <string name="info_s6_i2int_body" translatable="false">This metric integrates the square of the phase current over the ride duration:\n\nI²_int = (∫ I_phase² dt) / T_ride\n\nThe integral is computed with the trapezoid rule using actual timestamps when available, or a 0.1 s fallback. Squaring the current makes it proportional to Joule heating — doubling the current quadruples the heat. Normalizing by ride duration makes a long calm ride and a short aggressive ride comparable on a per-ride basis.\n\nThe chart displays both the per-ride dose (left axis) and a cumulative sum from ride 1 to N (right axis, dashed grey line).\n\nI_phase2_Int is only available when your logger records phase current (EUC World or WheelLog with that column enabled).</string>
 
 
     <!-- Technical details strings (shown in expandable sections) -->
     <string name="info_expand_label" translatable="false">Technical details</string>
     <string name="info_collapse_label" translatable="false">Hide details</string>
 
-    <string name="info_s3_tech" translatable="false">R_pack_nominal = S × r_cell / P
+    <string name="info_s3_tech" translatable="false">R_pack_nominal = S × r_cell / P\n\nS = number of cells in series (derived from max pack voltage)\nP = number of parallel cell strings (configurable, default 1)\nr_cell = typical DC internal resistance for a fresh cell of the detected chemistry\n\nThe P value can be set in the MOSFET config dialog. It does not affect resistance computation — only the R_nominal alarm threshold multiplier.</string>
 
-S = number of cells in series (derived from max pack voltage)
-P = number of parallel cell strings (configurable, default 1)
-r_cell = typical DC internal resistance for a fresh cell of the detected chemistry
+    <string name="info_m3_tech" translatable="false">R_mosfet_hot = R_ds(on)_25°C × (1 + α × (T_board − 25)) + R_wiring\n\nR_ds(on)_25°C = on-state resistance from the MOSFET datasheet (entered in settings)\nα = linear thermal coefficient (default 0.007 /°C for Si MOSFETs)\nR_wiring = wiring resistance estimate (configurable)\n\nBecause R_ds(on)_25°C is a fixed constant, R_mosfet_hot does not track transistor ageing. Real degradation appears as R_eq_median rising while R_mosfet_hot stays flat.</string>
 
-The P value can be set in the MOSFET config dialog. It does not affect resistance computation — only the R_nominal alarm threshold multiplier.</string>
+    <string name="info_s6_mosfet_tech" translatable="false">R_eq_median is always computed. It is normalised to 25°C via Arrhenius to give R_eq_median_25C.\n\nWhen MOSFET parameters are configured:\n  R_mosfet(T) = R_ds(on)_25°C × (1 + α × (T − 25)) + R_wiring\n  R_batt = max(0, R_eq_median − R_mosfet(T_board))\n  R_batt_median_25C = Arrhenius correction of R_batt\n\nWithout MOSFET config, R_batt and R_batt_median_25C are not computed — the code does not assume R_eq ≈ R_batt.</string>
 
-    <string name="info_m3_tech" translatable="false">R_mosfet_hot = R_ds(on)_25°C × (1 + α × (T_board − 25)) + R_wiring
-
-R_ds(on)_25°C = on-state resistance from the MOSFET datasheet (entered in settings)
-α = linear thermal coefficient (default 0.007 /°C for Si MOSFETs)
-R_wiring = wiring resistance estimate (configurable)
-
-Because R_ds(on)_25°C is a fixed constant, R_mosfet_hot does not track transistor ageing. Real degradation appears as R_eq_median rising while R_mosfet_hot stays flat.</string>
-
-    <string name="info_s6_mosfet_tech" translatable="false">R_eq_median is always computed. It is normalised to 25°C via Arrhenius to give R_eq_median_25C.
-
-When MOSFET parameters are configured:
-  R_mosfet(T) = R_ds(on)_25°C × (1 + α × (T − 25)) + R_wiring
-  R_batt = max(0, R_eq_median − R_mosfet(T_board))
-  R_batt_median_25C = Arrhenius correction of R_batt
-
-Without MOSFET config, R_batt and R_batt_median_25C are not computed — the code does not assume R_eq ≈ R_batt.</string>
-
-    <string name="info_s6_i2int_tech" translatable="false">I²_int = (∫ I_phase² dt) / T_ride
-
-The integral is computed with the trapezoid rule using actual timestamps when available, or a 0.1 s fallback. Squaring the current makes the metric proportional to Joule heating (P = R·I²). Normalising by ride duration makes long calm rides and short aggressive ones comparable on a per-ride basis.
-
-The chart shows both the per-ride dose (left axis) and a cumulative sum from ride 1 to N (right axis, dashed grey line).</string>
+    <string name="info_s6_i2int_tech" translatable="false">I²_int = (∫ I_phase² dt) / T_ride\n\nThe integral is computed with the trapezoid rule using actual timestamps when available, or a 0.1 s fallback. Squaring the current makes the metric proportional to Joule heating (P = R·I²). Normalising by ride duration makes long calm rides and short aggressive ones comparable on a per-ride basis.\n\nThe chart shows both the per-ride dose (left axis) and a cumulative sum from ride 1 to N (right axis, dashed grey line).</string>
 
 
 </resources>
