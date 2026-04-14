@@ -123,6 +123,8 @@
     <string name="info_title">À propos d\'EUC SoH</string>
 
 
+    <string name="offline_claim_b3">Aucun logiciel privé</string>
+    <string name="offline_claim_b4">Aucun tiers externe</string>
     <string name="info_s1_title">Ce que fait l\'outil — et ce qu\'il ne fait pas</string>
     <string name="info_s1_does">EUC SoH analyse vos logs de trajet (CSV WheelLog / EUC World) sur des milliers de kilomètres pour suivre la santé à long terme de votre pack batterie et de l\'étage de puissance (MOSFETs). Il en dérive des indicateurs empiriques — résistance équivalente, voltage sag, stress thermique — et détecte les tendances de dégradation ou les événements anormaux via des seuils statistiques et une détection de rupture CUSUM.</string>
     <string name="info_s1_does_not_title">Ce qu\'il ne fait PAS :</string>
@@ -206,6 +208,7 @@ La signature diagnostique d\'une défaillance MOSFET est : R_eq_median en tendan
     <string name="files_open_with">Ouvrir avec…</string>
 
 
+    <string name="darknessbot_warning_cancel">Annuler</string>
     <string name="info_s6_title">Comment les métriques sont calculées</string>
 
     <string name="info_s6_req_title">R_eq — résistance équivalente</string>
@@ -245,5 +248,14 @@ L\'intégrale est calculée par la méthode des trapèzes avec les horodatages r
 Le graphique affiche à la fois la dose par trajet (axe gauche) et la somme cumulative du trajet 1 au trajet N (axe droit, ligne grise pointillée).
 
 I_phase2_Int n\'est disponible que si votre logger enregistre le courant de phase (EUC World ou WheelLog avec cette colonne activée).</string>
+    <string name="darknessbot_toggle_label">Inclure les logs DarnkessBot (.dbb)</string>
+    <string name="darknessbot_warning_title">Données DarknessBot - Précision limitée</string>
+    <string name="darknessbot_warning_body">DarknessBot ne fait pas la distinction entre le courant de phase et le courant de batterie. Si votre roue fournit le courant de phase (notamment Gotway/Begode), les calculs de R_eq et R_batt seront physiquement erronés.  À activer uniquement à des fins d\'exploration — ne pas utiliser pour diagnostiquer l\'état de santé réel de la batterie.</string>
+    <string name="darknessbot_warning_confirm">Oui, activer</string>
+    <string name="offline_claim">La confidentialité avant tout</string>
+    <string name="offline_claim_exlain">EUC SoH se concentre sur le calcul de statistiques à partir de l\'analyse des journaux Euc locaux. Tout se passe et reste sur votre appareil.</string>
+    <string name="offline_claim_text">EUC SoH est un logiciel 100% déconnecté</string>
+    <string name="offline_claim_b1">Pas de collecte de données</string>
+    <string name="offline_claim_b2">Aucun échange réseau</string>
 
 </resources>

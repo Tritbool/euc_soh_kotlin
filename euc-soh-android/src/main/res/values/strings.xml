@@ -123,6 +123,15 @@
 
     <string name="info_title" translatable="false">About EUC SoH</string>
 
+    <string name="offline_claim" translatable="false">Privacy first</string>
+    <string name="offline_claim_exlain" translatable="false">EUC SoH focuses on computing statistics from local euc logs parsing. Everything happens and stays on your device.</string>
+    <string name="offline_claim_text" translatable="false">EUC SoH works 100% offline</string>
+    <string name="offline_claim_b1" translatable="false">No data collection</string>
+    <string name="offline_claim_b2" translatable="false">No network exchange</string>
+    <string name="offline_claim_b3" translatable="false">No closed source software </string>
+    <string name="offline_claim_b4" translatable="false">No third party</string>
+
+
 
     <string name="info_s1_title" translatable="false">What this tool does — and doesn\'t do</string>
     <string name="info_s1_does" translatable="false">EUC SoH analyzes your ride logs (WheelLog / EUC World CSV) over thousands of kilometers to track the long-term health of your battery pack and power electronics (MOSFETs). It derives empirical indicators — equivalent resistance, voltage sag, thermal stress — and detects degradation trends or abnormal events using statistical thresholds and CUSUM change-point detection.</string>

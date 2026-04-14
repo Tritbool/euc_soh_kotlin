@@ -93,6 +93,27 @@ fun InfoScreen(onClose: () -> Unit) {
             InfoSection(
                 icon = Icons.Default.Analytics,
                 iconContentDescription = null,
+                title = stringResource(R.string.offline_claim),
+                containerColor = MaterialTheme.colorScheme.primary,
+                onContainerColor = MaterialTheme.colorScheme.onPrimary
+            ) {
+                InfoBody(stringResource(R.string.offline_claim_exlain))
+                Spacer(Modifier.height(8.dp))
+                InfoSubtitle(stringResource(R.string.offline_claim_text))
+                InfoBulletList(
+                    items = listOf(
+                        stringResource(R.string.offline_claim_b1),
+                        stringResource(R.string.offline_claim_b2),
+                        stringResource(R.string.offline_claim_b3),
+                        stringResource(R.string.offline_claim_b4)
+                    )
+                )
+            }
+
+            // ── Section 1 : Ce que fait l'outil ──────────────────────────
+            InfoSection(
+                icon = Icons.Default.Analytics,
+                iconContentDescription = null,
                 title = stringResource(R.string.info_s1_title),
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 onContainerColor = MaterialTheme.colorScheme.onPrimaryContainer
