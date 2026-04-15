@@ -21,9 +21,11 @@ package io.github.eucsoh.android.ui.screens
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,10 +40,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.FolderZip
-import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.TableChart
@@ -51,7 +55,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -59,6 +62,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -87,11 +91,6 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import android.widget.Toast
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.foundation.clickable
 
 /**
  * Enhanced ResultsScreen avec accès aux fichiers et graphiques.
@@ -390,7 +389,7 @@ fun ResultsScreenEnhanced(
                                     .padding(8.dp)
                             ) {
                                 Icon(
-                                    Icons.Default.Help,
+                                    Icons.AutoMirrored.Filled.Help,
                                     contentDescription = stringResource(R.string.onboarding_help_cd),
                                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
@@ -411,7 +410,7 @@ fun ResultsScreenEnhanced(
                         ) {
                             // Button: Manage Files
                             if (selectedWheel != null) {
-                                OutlinedButton(
+                                IconButton (
                                     onClick = { showFiles = true },
                                     modifier = Modifier
                                         .weight(1f)
@@ -422,6 +421,7 @@ fun ResultsScreenEnhanced(
                                     Icon(
                                         Icons.Default.Folder,
                                         contentDescription = stringResource(R.string.files_button_cd),
+                                        //tint = MaterialTheme.colorScheme.onSurface,
                                         modifier = Modifier.size(18.dp)
                                     )
                                     Spacer(Modifier.width(4.dp))
@@ -429,7 +429,7 @@ fun ResultsScreenEnhanced(
                             }
 
                             // Button: View Charts
-                            Button(
+                            IconButton (
                                 onClick = { showCharts = true },
                                 modifier = Modifier
                                     .weight(1f)
@@ -441,6 +441,7 @@ fun ResultsScreenEnhanced(
                                 Icon(
                                     Icons.Default.BarChart,
                                     contentDescription = stringResource(R.string.charts_button_cd),
+                                    //tint = MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(Modifier.width(4.dp))

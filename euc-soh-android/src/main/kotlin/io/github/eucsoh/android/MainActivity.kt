@@ -33,7 +33,6 @@ import androidx.compose.runtime.setValue
 import io.github.eucsoh.android.ui.PermissionManager
 import io.github.eucsoh.android.ui.SohViewModel
 import io.github.eucsoh.android.ui.about.InfoScreen
-import io.github.eucsoh.android.ui.about.LicensesScreen
 import io.github.eucsoh.android.ui.screens.MainScreen
 import io.github.eucsoh.android.ui.theme.EucSohTheme
 
@@ -105,7 +104,7 @@ class MainActivity : ComponentActivity() {
                             if (shouldShowUpdatePopup(this)) {
                                 AlertDialog.Builder(this)
                                     .setTitle("What's New in version ${BuildConfig.VERSION_NAME} rev. ${BuildConfig.VERSION_CODE}")
-                                    .setMessage("- Interactive onboarding\n- More detailed and clearer information page\n- Archive import to reuse history in analysis")
+                                    .setMessage("- Enhanced legacy support (Android 8 - 11)\n- Unified results screen interface")
                                     .setPositiveButton("OK") { _, _ ->
                                         markUpdatePopupAsShown(this)
                                     }

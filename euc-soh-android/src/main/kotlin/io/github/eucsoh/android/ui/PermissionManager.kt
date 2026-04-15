@@ -24,6 +24,7 @@ import android.os.Build
 import android.os.Environment
 import android.provider.Settings
 import androidx.activity.ComponentActivity
+import androidx.core.net.toUri
 
 class PermissionManager(private val activity: ComponentActivity) {
 
@@ -33,7 +34,8 @@ class PermissionManager(private val activity: ComponentActivity) {
         } else {
             // API 26-29 : pas de Scoped Storage, READ_EXTERNAL_STORAGE suffit
             // et il est déjà accordé implicitement sur ces versions avec requestLegacyExternalStorage
-            true
+            activity.checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) ==
+                    android.content.pm.PackageManager.PERMISSION_GRANTED
         }
     }
 
@@ -42,14 +44,16 @@ class PermissionManager(private val activity: ComponentActivity) {
             // API 30+ : ouvre les paramètres système, pas de callback possible
             // L'utilisateur doit revenir dans l'app manuellement
             val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
-                data = Uri.parse("package:${activity.packageName}")
+                data = "package:${activity.packageName}".toUri()
             }
             activity.startActivity(intent)
             // onResult ne sera jamais appelé ici automatiquement
             // MainActivity doit re-checker dans onResume()
         } else {
             // API 26-29 : déjà OK grâce à requestLegacyExternalStorage dans le manifest
-            onResult(true)
+            activity.requestPermissions(
+                arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+                1)
         }
     }
 }
