@@ -273,4 +273,5 @@
     <string name="import_warn_body">Only archives exported by EUC SoH can be imported. The archive will be verified before extraction — any archive that fails verification will be rejected.</string>
     <string name="import_warn_filename_example">WheelName_SoH_YYYYMMDD_HHMMSS.zip</string>
     <string name="import_warn_continue">Select archive</string>
+    <string name="import_extracting_title">Extracting archive…</string>
 </resources>

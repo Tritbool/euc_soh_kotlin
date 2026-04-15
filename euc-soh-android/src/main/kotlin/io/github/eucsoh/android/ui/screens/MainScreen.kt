@@ -696,6 +696,7 @@ private enum class ImportStep {
     READING,
     DETAILS,
     PICKING_FOLDER,
+    EXTRACTING,
     RESULT
 }
 
@@ -722,6 +723,7 @@ fun ImportArchiveFlow(
         ActivityResultContracts.OpenDocumentTree()
     ) { destUri ->
         if (destUri != null && selectedZipUri != null) {
+            step = ImportStep.EXTRACTING
             onPerformImport(selectedZipUri!!, destUri)
         } else {
             onDismiss()
@@ -843,6 +845,23 @@ fun ImportArchiveFlow(
         }
 
         ImportStep.PICKING_FOLDER -> { /* SAF folder picker ouvert, pas de dialog */ }
+
+        ImportStep.EXTRACTING -> {
+            AlertDialog(
+                onDismissRequest = {},
+                title = { Text(stringResource(R.string.import_extracting_title)) },
+                text = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        Text(selectedZipName ?: "")
+                    }
+                },
+                confirmButton = {}
+            )
+        }
 
         ImportStep.RESULT -> {
             val result = importResult ?: return

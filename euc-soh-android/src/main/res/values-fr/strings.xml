@@ -265,4 +265,5 @@
     <string name="import_warn_body">Seules les archives exportées par EUC SoH peuvent être importées. L\'archive sera vérifiée avant extraction — toute archive ne passant pas la vérification sera rejetée.</string>
     <string name="import_warn_filename_example">NomRoue_SoH_AAAAMMJJ_HHMMSS.zip</string>
     <string name="import_warn_continue">Sélectionner l\'archive</string>
+    <string name="import_extracting_title">Extraction en cours…</string>
 </resources>
