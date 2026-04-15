@@ -18,6 +18,8 @@
 
 package io.github.eucsoh.android
 
+import android.app.AlertDialog
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -39,6 +41,23 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: SohViewModel by viewModels()
     private lateinit var permissionManager: PermissionManager
+
+    private val PREFS_NAME = "app_prefs"
+    private val KEY_LAST_SEEN_VERSION = "last_seen_version_code"
+
+    fun shouldShowUpdatePopup(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val lastSeenVersion = prefs.getInt(KEY_LAST_SEEN_VERSION, -1)
+        val currentVersion = BuildConfig.VERSION_CODE
+        return currentVersion > lastSeenVersion
+    }
+
+    fun markUpdatePopupAsShown(context: Context) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putInt(KEY_LAST_SEEN_VERSION, BuildConfig.VERSION_CODE)
+            .apply()
+    }
 
     companion object {
         private const val TAG = "MainActivity"
@@ -81,7 +100,18 @@ class MainActivity : ComponentActivity() {
                                 onClose = { showInfo = false }
                             )
                         }
+                        //TODO always update news prompt
                         else -> {
+                            if (shouldShowUpdatePopup(this)) {
+                                AlertDialog.Builder(this)
+                                    .setTitle("What's New in version ${BuildConfig.VERSION_NAME} rev. ${BuildConfig.VERSION_CODE}")
+                                    .setMessage("- Interactive onboarding\n- More detailed and clearer information page\n- Archive import to reuse history in analysis")
+                                    .setPositiveButton("OK") { _, _ ->
+                                        markUpdatePopupAsShown(this)
+                                    }
+                                    .setCancelable(false)
+                                    .show()
+                            }
                             MainScreen(
                                 viewModel = viewModel,
                                 onRequestPermissions = {

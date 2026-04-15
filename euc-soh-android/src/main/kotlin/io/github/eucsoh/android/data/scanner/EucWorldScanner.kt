@@ -216,24 +216,24 @@ class EucWorldScanner(private val context: Context) {
                             val value = parts[1].trim()
 
                             when (key) {
-                                "euc.btAddress" -> {
-                                    metadata[key] = value
+                                "euc.btAddress", "eucBluetoothAddress" -> {
+                                    metadata["euc.btAddress"] = value
                                     foundMac = true
                                 }
-                                "euc.btName" -> {
-                                    metadata[key] = value
+                                "euc.btName", "eucBluetoothName" -> {
+                                    metadata["euc.btName"] = value
                                     foundBtName = true
                                 }
-                                "euc.make" -> {
-                                    metadata[key] = value
+                                "euc.make", "eucType" -> {
+                                    metadata["euc.make"] = value
                                     foundMake = true
                                 }
-                                "euc.model" -> {
-                                    metadata[key] = value
+                                "euc.model", "eucModel" -> {
+                                    metadata["euc.model"] = value
                                     foundModel = true
                                 }
-                                "euc.serial" -> {
-                                    metadata[key] = value
+                                "euc.serial", "eucSerial" -> {
+                                    metadata["euc.serial"] = value
                                     foundSerial = true
                                 }
                             }

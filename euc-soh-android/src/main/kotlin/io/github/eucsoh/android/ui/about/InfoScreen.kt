@@ -18,7 +18,11 @@
 
 package io.github.eucsoh.android.ui.about
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,7 +32,10 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -93,6 +100,27 @@ fun InfoScreen(onClose: () -> Unit) {
             InfoSection(
                 icon = Icons.Default.Analytics,
                 iconContentDescription = null,
+                title = stringResource(R.string.offline_claim),
+                containerColor = MaterialTheme.colorScheme.primary,
+                onContainerColor = MaterialTheme.colorScheme.onPrimary
+            ) {
+                InfoBody(stringResource(R.string.offline_claim_exlain))
+                Spacer(Modifier.height(8.dp))
+                InfoSubtitle(stringResource(R.string.offline_claim_text))
+                InfoBulletList(
+                    items = listOf(
+                        stringResource(R.string.offline_claim_b1),
+                        stringResource(R.string.offline_claim_b2),
+                        stringResource(R.string.offline_claim_b3),
+                        stringResource(R.string.offline_claim_b4)
+                    )
+                )
+            }
+
+            // ── Section 1 : Ce que fait l'outil ──────────────────────────
+            InfoSection(
+                icon = Icons.Default.Analytics,
+                iconContentDescription = null,
                 title = stringResource(R.string.info_s1_title),
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 onContainerColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -151,14 +179,20 @@ fun InfoScreen(onClose: () -> Unit) {
             ) {
                 InfoBody(stringResource(R.string.info_s3_intro))
                 Spacer(Modifier.height(8.dp))
-                InfoFormula(stringResource(R.string.info_s3_formula))
-                Spacer(Modifier.height(8.dp))
                 InfoBody(stringResource(R.string.info_s3_detail))
-                Spacer(Modifier.height(8.dp))
-                InfoSubtitle(stringResource(R.string.info_s3_example_title))
-                InfoBody(stringResource(R.string.info_s3_example))
-                Spacer(Modifier.height(4.dp))
-                InfoNote(stringResource(R.string.info_s3_note))
+                ExpandableSection(
+                    expandLabel = stringResource(R.string.info_expand_label),
+                    collapseLabel = stringResource(R.string.info_collapse_label)
+                ) {
+                    InfoFormula(stringResource(R.string.info_s3_formula))
+                    Spacer(Modifier.height(6.dp))
+                    InfoBody(stringResource(R.string.info_s3_tech))
+                    Spacer(Modifier.height(4.dp))
+                    InfoSubtitle(stringResource(R.string.info_s3_example_title))
+                    InfoBody(stringResource(R.string.info_s3_example))
+                    Spacer(Modifier.height(4.dp))
+                    InfoNote(stringResource(R.string.info_s3_note))
+                }
             }
 
             // ── Section 4 : Métriques et interprétation ──────────────────
@@ -184,8 +218,14 @@ fun InfoScreen(onClose: () -> Unit) {
                 InfoMetricBlock(
                     name = stringResource(R.string.info_m3_name),
                     description = stringResource(R.string.info_m3_desc),
-                    interpretation = stringResource(R.string.info_m3_interp)
+                    interpretation = null
                 )
+                ExpandableSection(
+                    expandLabel = stringResource(R.string.info_expand_label),
+                    collapseLabel = stringResource(R.string.info_collapse_label)
+                ) {
+                    InfoFormula(stringResource(R.string.info_m3_tech))
+                }
                 InfoMetricDivider()
                 InfoMetricBlock(
                     name = stringResource(R.string.info_m4_name),
@@ -261,6 +301,12 @@ fun InfoScreen(onClose: () -> Unit) {
 
                 InfoSubtitle(stringResource(R.string.info_s6_mosfet_title))
                 InfoBody(stringResource(R.string.info_s6_mosfet_body))
+                ExpandableSection(
+                    expandLabel = stringResource(R.string.info_expand_label),
+                    collapseLabel = stringResource(R.string.info_collapse_label)
+                ) {
+                    InfoFormula(stringResource(R.string.info_s6_mosfet_tech))
+                }
 
                 Spacer(Modifier.height(10.dp))
 
@@ -271,6 +317,12 @@ fun InfoScreen(onClose: () -> Unit) {
 
                 InfoSubtitle(stringResource(R.string.info_s6_i2int_title))
                 InfoBody(stringResource(R.string.info_s6_i2int_body))
+                ExpandableSection(
+                    expandLabel = stringResource(R.string.info_expand_label),
+                    collapseLabel = stringResource(R.string.info_collapse_label)
+                ) {
+                    InfoFormula(stringResource(R.string.info_s6_i2int_tech))
+                }
             }
 
             // ── Pied de page ─────────────────────────────────────────────────
@@ -291,6 +343,60 @@ fun InfoScreen(onClose: () -> Unit) {
 // ---------------------------------------------------------------------------
 // Composables privés de mise en forme
 // ---------------------------------------------------------------------------
+
+/**
+ * Expandable "Technical details" block. Collapsed by default.
+ * Shows a chevron button labelled with [expandLabel]/[collapseLabel].
+ */
+@Composable
+fun ExpandableSection(
+    expandLabel: String = "Technical details",
+    collapseLabel: String = "Hide details",
+    content: @Composable ColumnScope.() -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = !expanded }
+                .padding(top = 8.dp, bottom = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Icon(
+                imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = if (expanded) collapseLabel else expandLabel,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        AnimatedVisibility(
+            visible = expanded,
+            enter = expandVertically(),
+            exit = shrinkVertically()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                content()
+            }
+        }
+    }
+}
 
 @Composable
 private fun InfoSection(
@@ -415,7 +521,7 @@ private fun InfoNote(text: String) {
 private fun InfoMetricBlock(
     name: String,
     description: String,
-    interpretation: String
+    interpretation: String? = null
 ) {
     Column(
         modifier = Modifier.padding(vertical = 6.dp),
@@ -430,11 +536,13 @@ private fun InfoMetricBlock(
             text = description,
             style = MaterialTheme.typography.bodyMedium
         )
-        Text(
-            text = interpretation,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        if (interpretation != null) {
+            Text(
+                text = interpretation,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 

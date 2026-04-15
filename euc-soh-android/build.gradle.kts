@@ -37,8 +37,8 @@ android {
         applicationId = "io.github.eucsoh.android"
         minSdk = 26
         targetSdk = 36
-        versionCode = 9
-        versionName = "1.2"
+        versionCode = 12
+        versionName = "1.3"
     }
 
     buildTypes {
@@ -58,6 +58,7 @@ android {
     
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -79,6 +80,7 @@ dependencies {
     }
     
     // Android core
+    implementation("androidx.documentfile:documentfile:1.0.1")
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("androidx.activity:activity-compose:1.9.3")

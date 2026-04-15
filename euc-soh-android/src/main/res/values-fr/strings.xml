@@ -19,6 +19,7 @@
 
     <string name="detected_eucs">EUC détectés (%1$d)</string>
     <string name="analyze_button">Analyser %1$s</string>
+    <string name="analyze_button_mock">Analyser</string>
     <string name="view_last_results">Voir les derniers résultats</string>
     <string name="csv_logs_count">%1$d logs CSV</string>
     <string name="mac_label">MAC : %1$s</string>
@@ -123,6 +124,8 @@
     <string name="info_title">À propos d\'EUC SoH</string>
 
 
+    <string name="offline_claim_b3">Aucun logiciel privé</string>
+    <string name="offline_claim_b4">Aucun tiers externe</string>
     <string name="info_s1_title">Ce que fait l\'outil — et ce qu\'il ne fait pas</string>
     <string name="info_s1_does">EUC SoH analyse vos logs de trajet (CSV WheelLog / EUC World) sur des milliers de kilomètres pour suivre la santé à long terme de votre pack batterie et de l\'étage de puissance (MOSFETs). Il en dérive des indicateurs empiriques — résistance équivalente, voltage sag, stress thermique — et détecte les tendances de dégradation ou les événements anormaux via des seuils statistiques et une détection de rupture CUSUM.</string>
     <string name="info_s1_does_not_title">Ce qu\'il ne fait PAS :</string>
@@ -149,7 +152,7 @@
     <string name="info_s3_detail">Cette valeur nominale sert de filet de sécurité absolu : si R_eq_median dépasse un multiple configurable de R_pack_nominal (ex. 1,8×), une alarme est levée quelle que soit la référence statistique. Cela détecte le cas où la roue était déjà dégradée au début de l\'enregistrement.</string>
     <string name="info_s3_example_title">Exemple</string>
     <string name="info_s3_example">Une roue 100V a typiquement 24S cellules. Avec r_cell = 80 mΩ (21700 neuves) et P = 1 : R_nominal = 24 × 0,080 / 1 = 1,92 Ω. Un R_eq_median mesuré à 3,5 Ω représente ~1,8× le nominal, ce qui déclenche l\'alarme absolue.</string>
-    <string name="info_s3_note">La valeur P se configure dans le dialogue MOSFET (champ "N cellules en parallèle"). Elle n\'affecte pas le calcul de résistance — uniquement le seuil d\'alarme R_nominal.</string>
+    <string name="info_s3_note">La valeur P se configure dans le dialogue MOSFET (champ \"N cellules en parallèle\"). Elle n\'affecte pas le calcul de résistance — uniquement le seuil d\'alarme R_nominal.</string>
 
 
     <string name="info_s4_title">Métriques importantes et comment les interpréter</string>
@@ -164,11 +167,7 @@
 
     <string name="info_m3_name">R_mosfet_hot (mΩ)</string>
     <string name="info_m3_desc">Proxy statique de la résistance du pont MOSFET à la température de fonctionnement. Calculée à partir de R_ds(on)_25°C (valeur datasheet que vous avez saisie) multipliée par un coefficient thermique linéaire. La valeur de référence R_ds(on)_25°C est fixe — elle ne se met pas à jour au fil du vieillissement du composant.</string>
-    <string name="info_m3_interp">Parce que R_ds(on)_25°C est une constante fixe dans le modèle, R_mosfet_hot ne trace pas directement le vieillissement des MOSFETs. Ce qu\'il capture, c\'est la variation thermique autour de cette référence fixe.
-
-La vraie dégradation MOSFET (augmentation de la résistance à l\'état passant par usure de l\'oxyde, fatigue des bondings, etc.) apparaîtra dans R_eq_median en hausse sur le long terme — pas dans R_mosfet_hot seul.
-
-La signature diagnostique d\'une défaillance MOSFET est : R_eq_median en tendance haussière + temp_board_max qui augmente à puissance comparable + SAG relativement stable (cellules encore saines). Si SAG et R_batt montent aussi, la dégradation est plus généralisée.</string>
+    <string name="info_m3_interp">Parce que R_ds(on)_25°C est une constante fixe dans le modèle, R_mosfet_hot ne trace pas directement le vieillissement des MOSFETs. Ce qu\'il capture, c\'est la variation thermique autour de cette référence fixe.\n\nLa vraie dégradation MOSFET (augmentation de la résistance à l\'état passant par usure de l\'oxyde, fatigue des bondings, etc.) apparaîtra dans R_eq_median en hausse sur le long terme — pas dans R_mosfet_hot seul.\n\nLa signature diagnostique d\'une défaillance MOSFET est : R_eq_median en tendance haussière + temp_board_max qui augmente à puissance comparable + SAG relativement stable (cellules encore saines). Si SAG et R_batt montent aussi, la dégradation est plus généralisée.</string>
 
     <string name="info_m4_name">sag_95p / sag_max (V)</string>
     <string name="info_m4_desc">95e centile et maximum du voltage sag (Vidle − V) enregistré à forte charge. Capture les pires chutes ohmiques durant un trajet.</string>
@@ -206,44 +205,105 @@ La signature diagnostique d\'une défaillance MOSFET est : R_eq_median en tendan
     <string name="files_open_with">Ouvrir avec…</string>
 
 
+    <string name="darknessbot_warning_cancel">Annuler</string>
+
+    <!-- Import archive -->
+    <string name="import_archive_button">Importer une archive</string>
+    <string name="import_confirm_title">Importer une archive</string>
+    <string name="import_confirm_file">Fichier : %1$s</string>
+    <string name="import_confirm_wheel_mac">MAC de la roue : %1$s</string>
+    <string name="import_confirm_file_count">Fichiers dans l\'archive : %1$d</string>
+    <string name="import_confirm_no_manifest">Cette archive ne contient pas de manifeste valide. Elle n\'a pas été créée par EUC SoH.</string>
+    <string name="import_confirm_warning">N\'importez que des archives créées par EUC SoH (format du nom : NomRoue_SoH_AAAAMMJJ_HHMMSS.zip). L\'intégrité de l\'archive sera vérifiée avant l\'extraction.</string>
+    <string name="import_confirm_extract">Extraire</string>
+    <string name="import_reading_manifest">Lecture de l\'archive\u2026</string>
+    <string name="import_success_title">Import réussi</string>
+    <string name="import_success_body">Roue importée : %1$s</string>
+    <string name="import_error_title">Échec de l\'import</string>
+    <string name="import_error_manifest_missing">Cette archive ne contient pas de manifeste. Elle n\'a pas été créée par EUC SoH ou l\'archive est corrompue.</string>
+    <string name="import_error_hmac_invalid">La signature de l\'archive est invalide. L\'archive a peut-être été modifiée en dehors d\'EUC SoH.</string>
+    <string name="import_error_file_corrupted">Un ou plusieurs fichiers de l\'archive sont corrompus. La somme de contrôle SHA-256 ne correspond pas.</string>
+
+
     <string name="info_s6_title">Comment les métriques sont calculées</string>
 
     <string name="info_s6_req_title">R_eq — résistance équivalente</string>
-    <string name="info_s6_req_body">Pour chaque trajet, l\'app sélectionne les échantillons où vitesse &gt; 20 km/h et courant batterie est dans une plage significative. Pour chacun :
-
-R_eq = (V_idle − V_mesurée) / |I_batterie|
-
-où V_idle est une estimation locale de la tension à vide, reconstruite à partir de segments de repos répartis dans le trajet (pas une valeur unique pour tout le trajet). R_eq_median est la médiane de toutes ces valeurs. Elle reflète la résistance combinée des cellules + MOSFETs + câblage.</string>
+    <string name="info_s6_req_body">Pour chaque trajet, l\'app sélectionne les échantillons où vitesse &gt; 20 km/h et courant batterie est dans une plage significative. Pour chacun :\n\nR_eq = (V_idle − V_mesurée) / |I_batterie|\n\noù V_idle est une estimation locale de la tension à vide, reconstruite à partir de segments de repos répartis dans le trajet (pas une valeur unique pour tout le trajet). R_eq_median est la médiane de toutes ces valeurs. Elle reflète la résistance combinée des cellules + MOSFETs + câblage.</string>
 
     <string name="info_s6_vidle_title">V_idle — tension à vide locale</string>
     <string name="info_s6_vidle_body">V_idle n\'est pas un nombre fixe. L\'app identifie les segments où |I| &lt; 3 A pendant au moins 5 s sans variation brusque (dV/dt &lt; 0,5 V/s). Elle interpole un profil lisse entre ces points de repos. Cela donne une référence locale qui suit naturellement le SoC, sans nécessiter une mesure précise de charge résiduelle.</string>
 
     <string name="info_s6_mosfet_title">R_mosfet et R_batt — décomposition de la résistance</string>
-    <string name="info_s6_mosfet_body">R_eq_median est toujours calculée. Elle est ensuite normalisée à 25°C via Arrhenius pour donner reqMedian25C — c\'est la résistance équivalente corrigée en température du circuit complet (cellules + MOSFETs + câblage).
-
-R_batt (résistance batterie isolée du reste) n\'est calculée que si les paramètres MOSFET sont configurés :
-R_mosfet(T) = R_ds(on)_25°C × (1 + α × (T − 25)) + R_câblage
-R_batt = max(0, R_eq_median − R_mosfet(T_carte))
-R_batt_median_25C = correction Arrhenius de R_batt
-
-Sans config MOSFET, R_batt et R_batt_median_25C ne sont pas affichées. Le code ne suppose pas R_eq ≈ R_batt — il ne tente simplement pas la décomposition.</string>
+    <string name="info_s6_mosfet_body">R_eq_median est toujours calculée. Elle est ensuite normalisée à 25°C via Arrhenius pour donner reqMedian25C — c\'est la résistance équivalente corrigée en température du circuit complet (cellules + MOSFETs + câblage).\n\nR_batt (résistance batterie isolée du reste) n\'est calculée que si les paramètres MOSFET sont configurés :\nR_mosfet(T) = R_ds(on)_25°C × (1 + α × (T − 25)) + R_câblage\nR_batt = max(0, R_eq_median − R_mosfet(T_carte))\nR_batt_median_25C = correction Arrhenius de R_batt\n\nSans config MOSFET, R_batt et R_batt_median_25C ne sont pas affichées. Le code ne suppose pas R_eq ≈ R_batt — il ne tente simplement pas la décomposition.</string>
 
     <string name="info_s6_arrhenius_title">Correction en température à 25°C</string>
-    <string name="info_s6_arrhenius_body">La résistance interne d\'une batterie dépend de la température. Pour rendre les valeurs comparables entre saisons et conditions, R_batt est normalisée à 25°C via la loi d\'Arrhenius :
-
-R_25°C = R_mesurée / exp((Ea/R_gaz) × (1/T_mes − 1/298,15))
-
-Ea vaut par défaut 20 kJ/mol (Li-ion typique). L\'app peut auto-calibrer Ea depuis votre historique si l\'amplitude thermique dans vos logs est suffisante (≥ 5°C).</string>
+    <string name="info_s6_arrhenius_body">La résistance interne d\'une batterie dépend de la température. Pour rendre les valeurs comparables entre saisons et conditions, R_batt est normalisée à 25°C via la loi d\'Arrhenius :\n\nR_25°C = R_mesurée / exp((Ea/R_gaz) × (1/T_mes − 1/298,15))\n\nEa vaut par défaut 20 kJ/mol (Li-ion typique). L\'app peut auto-calibrer Ea depuis votre historique si l\'amplitude thermique dans vos logs est suffisante (≥ 5°C).</string>
 
     <string name="info_s6_i2int_title">I_phase2_Int — dose thermique</string>
-    <string name="info_s6_i2int_body">Cette métrique intègre le carré du courant de phase sur la durée du trajet :
+    <string name="info_s6_i2int_body">Cette métrique intègre le carré du courant de phase sur la durée du trajet :\n\nI²_int = (∫ I_phase² dt) / T_trajet\n\nL\'intégrale est calculée par la méthode des trapèzes avec les horodatages réels si disponibles, sinon un pas de 0,1 s par défaut. Mettre le courant au carré le rend proportionnel à l\'échauffement par effet Joule — doubler le courant quadruple la chaleur. La normalisation par la durée rend comparables un long trajet calme et un trajet court agressif sur une base par trajet.\n\nLe graphique affiche à la fois la dose par trajet (axe gauche) et la somme cumulative du trajet 1 au trajet N (axe droit, ligne grise pointillée).\n\nI_phase2_Int n\'est disponible que si votre logger enregistre le courant de phase (EUC World ou WheelLog avec cette colonne activée).</string>
+    <string name="darknessbot_toggle_label">Inclure les logs DarnkessBot (.dbb)</string>
+    <string name="darknessbot_warning_title">Données DarknessBot - Précision limitée</string>
+    <string name="darknessbot_warning_body">DarknessBot ne fait pas la distinction entre le courant de phase et le courant de batterie. Si votre roue fournit le courant de phase (notamment Gotway/Begode), les calculs de R_eq et R_batt seront physiquement erronés.  À activer uniquement à des fins d\'exploration — ne pas utiliser pour diagnostiquer l\'état de santé réel de la batterie.</string>
+    <string name="darknessbot_warning_confirm">Oui, activer</string>
+    <string name="offline_claim">La confidentialité avant tout</string>
+    <string name="offline_claim_exlain">EUC SoH se concentre sur le calcul de statistiques à partir de l\'analyse des journaux Euc locaux. Tout se passe et reste sur votre appareil.</string>
+    <string name="offline_claim_text">EUC SoH est un logiciel 100% déconnecté</string>
+    <string name="offline_claim_b1">Pas de collecte de données</string>
+    <string name="offline_claim_b2">Aucun échange réseau</string>
 
-I²_int = (∫ I_phase² dt) / T_trajet
 
-L\'intégrale est calculée par la méthode des trapèzes avec les horodatages réels si disponibles, sinon un pas de 0,1 s par défaut. Mettre le courant au carré le rend proportionnel à l\'échauffement par effet Joule — doubler le courant quadruple la chaleur. La normalisation par la durée rend comparables un long trajet calme et un trajet court agressif sur une base par trajet.
+    <string name="info_collapse_label">Cacher détails</string>
+    <string name="info_s3_tech">R_pack_nominal = S × r_cell / P\n\nS = nombre de cellules en série (déduit de la tension max du pack)\nP = nombre de strings en parallèle (configurable, défaut 1)\nr_cell = résistance interne DC typique d\'une cellule neuve de la chimie détectée\n\nLa valeur de P se règle dans la boîte de dialogue de configuration MOSFET. Elle n\'affecte pas le calcul de résistance — uniquement le multiplicateur de seuil d\'alarme R_nominal.</string>
 
-Le graphique affiche à la fois la dose par trajet (axe gauche) et la somme cumulative du trajet 1 au trajet N (axe droit, ligne grise pointillée).
+    <string name="info_m3_tech">R_mosfet_hot = R_ds(on)_25°C × (1 + α × (T_carte − 25)) + R_câblage\n\nR_ds(on)_25°C = résistance à l\'état passant issue de la fiche technique du MOSFET (saisie dans les paramètres)\nα = coefficient thermique linéaire (défaut 0,007 /°C pour les MOSFETs Si)\nR_câblage = estimation de la résistance de câblage (configurable)\n\nComme R_ds(on)_25°C est une constante fixe, R_mosfet_hot ne reflète pas le vieillissement du transistor. La dégradation réelle se manifeste par une hausse de R_eq_median pendant que R_mosfet_hot reste stable.</string>
 
-I_phase2_Int n\'est disponible que si votre logger enregistre le courant de phase (EUC World ou WheelLog avec cette colonne activée).</string>
+    <string name="info_s6_mosfet_tech">R_eq_median est toujours calculée. Elle est normalisée à 25°C via Arrhenius pour donner R_eq_median_25C.\n\nQuand les paramètres MOSFET sont configurés :\n  R_mosfet(T) = R_ds(on)_25°C × (1 + α × (T − 25)) + R_câblage\n  R_batt = max(0, R_eq_median − R_mosfet(T_carte))\n  R_batt_median_25C = correction Arrhenius de R_batt\n\nSans config MOSFET, R_batt et R_batt_median_25C ne sont pas calculées — le code ne suppose pas R_eq ≈ R_batt.</string>
 
+    <string name="info_s6_i2int_tech">I²_int = (∫ I_phase² dt) / T_trajet\n\nL\'intégrale est calculée par la méthode des trapèzes avec les horodatages réels si disponibles, sinon un pas de 0,1 s par défaut. Mettre le courant au carré le rend proportionnel à l\'échauffement par effet Joule (P = R·I²). La normalisation par la durée du trajet rend comparables un long trajet calme et un trajet court agressif sur une base par trajet.\n\nLe graphique affiche à la fois la dose par trajet (axe gauche) et la somme cumulative du trajet 1 au trajet N (axe droit, ligne grise pointillée).</string>
+    <string name="info_expand_label">Détails techniques</string>
+
+    <string name="import_warn_title">Importer une archive EUC SoH</string>
+    <string name="import_warn_body">Seules les archives exportées par EUC SoH peuvent être importées. L\'archive sera vérifiée avant extraction — toute archive ne passant pas la vérification sera rejetée.</string>
+    <string name="import_warn_filename_example">NomRoue_SoH_AAAAMMJJ_HHMMSS.zip</string>
+    <string name="import_warn_continue">Sélectionner l\'archive</string>
+    <string name="import_extracting_title">Extraction en cours…</string>
+
+
+    <!-- Onboarding -->
+    <string name="onboarding_next">Suivant</string>
+    <string name="onboarding_prev">Précédent</string>
+    <string name="onboarding_finish">Terminer</string>
+    <string name="onboarding_skip">Passer</string>
+
+    <string name="onboarding_welcome_title">Bienvenue dans EUC SoH Analyzer</string>
+    <string name="onboarding_welcome_body">Cette application analyse vos logs de trajet EUC pour suivre la santé de la batterie et de l\'électronique de puissance.\nDécouvrons ensemble les fonctionnalités principales.</string>
+    <string name="onboarding_scan_title">Scanner vos logs</string>
+    <string name="onboarding_scan_body">Appuyez sur Actualiser pour rechercher les fichiers WheelLog, EUC World et DarknessBot sur votre appareil.\nLes roues détectées apparaîtront dans la liste ci-dessous.</string>
+    <string name="onboarding_info_body">Lisez la section d\'information pour comprendre le fonctionnement de l\'application et les calculs qu\'elle effectue en détail.</string>
+    <string name="onboarding_darknessbot_title">Option DarknessBot</string>
+    <string name="onboarding_darknessbot_body">Activez ce switch pour inclure les fichiers DarknessBot (.dbb) dans l\'analyse.\nAttention : les données DarknessBot ont une précision limitée pour certaines marques.</string>
+    <string name="onboarding_import_title">Analyser une roue</string>
+    <string name="onboarding_import_body">Sélectionnez une roue dans la liste, puis appuyez sur le bouton Analyser pour lancer l\'analyse SoH.\nLes résultats s\'afficheront une fois le traitement terminé.</string>
+    <string name="onboarding_analyze_body">"  Sélectionnez une roue dans la liste, puis appuyez sur le bouton Analyser pour lancer l'analyse de l'état de santé. Les résultats s'afficheront une fois le traitement terminé."</string>
+    <string name="onboarding_export_title">Exporter vos résultats</string>
+    <string name="onboarding_export_body">Après l\'analyse, vous pouvez exporter les résultats en PDF, CSV ou archive ZIP complète depuis l\'écran des résultats.</string>
+
+    <string name="onboarding_results_welcome_title">Aperçu des résultats</string>
+    <string name="onboarding_results_welcome_body">Cet écran affiche les métriques SoH de la roue sélectionnée.\nVous pouvez consulter les données détaillées, les graphiques et exporter des rapports.</string>
+    <string name="onboarding_results_files_body">Appuyez sur le bouton « Fichiers » pour afficher les fichiers journaux utilisés/rejetés pour l’analyse.</string>
+    <string name="onboarding_results_charts_title">Graphiques</string>
+    <string name="onboarding_results_charts_body">Appuyez sur le bouton Graphiques pour afficher les courbes Gaussienne, Tendance, CUSUM et Inflexion de vos métriques.</string>
+
+    <string name="onboarding_results_export_share_body">Une fois qu\'un fichier a été généré (CSV, PDF ou ZIP), vous pouvez le partager à l\'aide du bouton de partage. Ce bouton ne permet de partager que le dernier fichier qui a été généré.</string>
+    <string name="onboarding_help_cd">Afficher le guide d\'utilisation</string>
+    <string name="onboarding_info_title">Lire les explications</string>
+    <string name="onboarding_analyze_title">Analyser un EUC</string>
+    <string name="onboarding_results_files_title">Détails des fichiers</string>
+    <string name="onboarding_results_export_pdf_title">Exporter un PDF</string>
+    <string name="onboarding_results_export_pdf_body">Appuyez sur l\'icône PDF pour exporter un PDF contenant les résultats d\'analyse détaillés, y compris les données et toutes les graphiques.</string>
+    <string name="onboarding_results_export_csv_title">Exporter un CSV</string>
+    <string name="onboarding_results_export_csv_body">Appuyez sur l\'icône CSV pour exporter un fichier CSV contenant un résumé de l\'analyse.</string>
+    <string name="onboarding_results_export_archive_title">Exporter une archive ZIP</string>
+    <string name="onboarding_results_export_archive_body">Appuyez sur l\'icône d\'archive pour exporter un fichier ZIP contenant le rapport PDF, les données CSV et toutes les images des graphiques.</string>
+    <string name="onboarding_results_export_share_title">Partager les résultats</string>
 </resources>

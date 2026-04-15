@@ -32,6 +32,8 @@ import io.github.eucsoh.android.data.model.WheelConfig
 import io.github.eucsoh.android.data.model.WheelIdentity
 import io.github.eucsoh.android.data.repository.WheelConfigRepository
 import io.github.eucsoh.android.data.repository.WheelRepository
+import io.github.eucsoh.android.visualization.ArchiveImportService
+import io.github.eucsoh.android.visualization.ImportResult
 import io.github.eucsoh.model.MOSFETParams
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -76,7 +78,10 @@ data class SohUiState(
     val lastExportMime: String? = null,    // "application/pdf", "text/csv", "application/zip"
     val lastExportPath: String? = null,    // juste pour debug / logs (optionnel)
     val darknessBotEnabled: Boolean = false,
-    val showDarknessBotWarningDialog: Boolean = false
+    val showDarknessBotWarningDialog: Boolean = false,
+    val showImportDialog: Boolean = false,
+    val importResult: ImportResult? = null,
+    val importProgress: Float = 0f
 )
 
 /**
@@ -88,6 +93,7 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
     private val configRepository = WheelConfigRepository(application)
     private val csvSource = AndroidCsvSource(application)
     private val logger = AndroidLogger()
+    private val importService = ArchiveImportService(application)
 
     private val _state = MutableStateFlow(SohUiState())
     val state: StateFlow<SohUiState> = _state.asStateFlow()
@@ -549,6 +555,27 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
         _state.update { it.copy(showResults = true) }
     }
 
+
+    fun requestImport() {
+        _state.update { it.copy(showImportDialog = true) }
+    }
+
+    fun dismissImportDialog() {
+        _state.update { it.copy(showImportDialog = false, importResult = null) }
+    }
+
+    fun performImport(zipUri: Uri, destUri: Uri) {
+        viewModelScope.launch {
+            val result = importService.import(zipUri, destUri) { progress ->
+                _state.update { it.copy(importProgress = progress) }
+            }
+            _state.update { it.copy(importResult = result, importProgress = 0f) }
+            if (result is ImportResult.Success) {
+                Log.d(TAG, "Import successful: wheelMac=${result.wheelMac}, triggering re-scan")
+                scanWheels(forceRefresh = true)
+            }
+        }
+    }
 
     /**
      * Clears error message.
