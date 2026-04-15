@@ -44,7 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -236,7 +236,7 @@ fun MainScreen(
                         // Refresh
                         IconButton(
                             modifier = Modifier.onGloballyPositioned { coordinates ->
-                                refreshBounds = coordinates.boundsInWindow()
+                                refreshBounds = coordinates.boundsInRoot()
                             },
                             onClick = { viewModel.scanWheels(forceRefresh = true) }
                         ) {
@@ -557,7 +557,7 @@ fun EmptyStateScreen(
             Button(
                 onClick = onImport,
                 modifier = Modifier.onGloballyPositioned { coordinates ->
-                    onImportArchiveBounds(coordinates.boundsInWindow())
+                    onImportArchiveBounds(coordinates.boundsInRoot())
                 }
             ) {
                 Icon(
@@ -577,7 +577,7 @@ fun EmptyStateScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 4.dp)
                     .onGloballyPositioned { coordinates ->
-                        onDarknessBotToggleBounds(coordinates.boundsInWindow())
+                        onDarknessBotToggleBounds(coordinates.boundsInRoot())
                     },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -668,7 +668,7 @@ fun WheelListContent(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 4.dp)
                 .onGloballyPositioned { coordinates ->
-                    onDarknessBotToggleBounds(coordinates.boundsInWindow())
+                    onDarknessBotToggleBounds(coordinates.boundsInRoot())
                 },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
@@ -692,7 +692,7 @@ fun WheelListContent(
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 4.dp)
                 .onGloballyPositioned { coordinates ->
-                    onImportArchiveBounds(coordinates.boundsInWindow())
+                    onImportArchiveBounds(coordinates.boundsInRoot())
                 }
         ) {
             Icon(
@@ -723,7 +723,7 @@ fun WheelListContent(
                     .fillMaxWidth()
                     .padding(16.dp)
                     .onGloballyPositioned { coordinates ->
-                        onAnalyzeBounds(coordinates.boundsInWindow())
+                        onAnalyzeBounds(coordinates.boundsInRoot())
                     }
             ) {
                 Text(stringResource(R.string.analyze_button, selectedWheel.effectiveName))
