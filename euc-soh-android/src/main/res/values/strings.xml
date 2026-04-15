@@ -19,6 +19,7 @@
 
     <string name="detected_eucs">Detected EUCs (%1$d)</string>
     <string name="analyze_button">Analyze %1$s</string>
+    <string name="analyze_button_mock">Analyze</string>
     <string name="view_last_results">View last results</string>
     <string name="csv_logs_count">%1$d CSV Logs</string>
     <string name="mac_label">MAC: %1$s</string>

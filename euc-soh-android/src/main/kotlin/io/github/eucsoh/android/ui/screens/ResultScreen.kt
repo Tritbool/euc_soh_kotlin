@@ -76,6 +76,7 @@ import io.github.eucsoh.android.data.model.WheelIdentity
 import io.github.eucsoh.android.ui.onboarding.OnboardingManager
 import io.github.eucsoh.android.ui.onboarding.OnboardingStep
 import io.github.eucsoh.android.ui.onboarding.SpotlightOverlay
+import io.github.eucsoh.android.ui.SohViewModel
 import io.github.eucsoh.android.util.ShareUtils
 import io.github.eucsoh.android.visualization.CsvExportService
 import io.github.eucsoh.android.visualization.PdfExportService
@@ -92,6 +93,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.clickable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 /**
  * Enhanced ResultsScreen avec accès aux fichiers et graphiques.
@@ -125,12 +131,15 @@ fun ResultsScreenEnhanced(
     // Bounds collected via onGloballyPositioned for spotlight targets
     var chartsBounds by remember { mutableStateOf(Rect.Zero) }
     var archiveExportBounds by remember { mutableStateOf(Rect.Zero) }
+    var analyzeBounds by remember { mutableStateOf(Rect.Zero) }
 
-    val resultOnboardingSteps = remember(chartsBounds, archiveExportBounds) {
+
+
+    val resultOnboardingSteps = remember(chartsBounds, archiveExportBounds,analyzeBounds) {
         listOf(
             OnboardingStep(
                 titleRes = R.string.onboarding_results_welcome_title,
-                bodyRes = R.string.onboarding_results_welcome_body
+                bodyRes = R.string.onboarding_results_welcome_body,
             ),
             OnboardingStep(
                 titleRes = R.string.onboarding_results_charts_title,
@@ -539,6 +548,7 @@ fun ResultsScreenEnhanced(
                                     }
                                 },
                                 modifier = Modifier.onGloballyPositioned { coordinates ->
+                                    archiveExportBounds = coordinates.boundsInParent()
                                     archiveExportBounds = coordinates.boundsInRoot()
                                 },
                                 enabled = !isExporting

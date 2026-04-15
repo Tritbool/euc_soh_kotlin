@@ -70,9 +70,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.transition.Visibility
 import kotlinx.coroutines.launch
 
 
@@ -100,9 +102,16 @@ fun MainScreen(
 
     // Build onboarding steps — bounds are updated dynamically via onGloballyPositioned
     val mainOnboardingSteps =
-        remember(refreshBounds, darknessBotToggleBounds, importArchiveBounds, analyzeBounds, state.detectedWheels.isEmpty()) {
+        remember(
+            refreshBounds,
+            darknessBotToggleBounds,
+            importArchiveBounds,
+            analyzeBounds,
+            state.detectedWheels,
+            state.showResults
+        ) {
 
-            when{
+            when {
                 state.detectedWheels.isEmpty() ->
                     listOf(
                         OnboardingStep(
@@ -126,40 +135,46 @@ fun MainScreen(
                             targetBounds = importArchiveBounds
                         ),
 
-                    )
-                else ->
-                    listOf(
-                        OnboardingStep(
-                            titleRes = R.string.onboarding_welcome_title,
-                            bodyRes = R.string.onboarding_welcome_body
-                        ),
-                        OnboardingStep(
-                            titleRes = R.string.onboarding_scan_title,
-                            bodyRes = R.string.onboarding_scan_body,
-                            targetBounds = refreshBounds
-                        ),
-                        OnboardingStep(
-                            titleRes = R.string.onboarding_darknessbot_title,
-                            bodyRes = R.string.onboarding_darknessbot_body,
-                            targetBounds = darknessBotToggleBounds
-                        ),
-
-                        OnboardingStep(
-                            titleRes = R.string.onboarding_import_title,
-                            bodyRes = R.string.onboarding_import_body,
-                            targetBounds = importArchiveBounds
-                        ),
-
-                        OnboardingStep(
-                            titleRes = R.string.onboarding_analyze_title,
-                            bodyRes = R.string.onboarding_analyze_body,
-                            targetBounds = analyzeBounds
-                        ),
-                        OnboardingStep(
-                            titleRes = R.string.onboarding_export_title,
-                            bodyRes = R.string.onboarding_export_body
                         )
-                    )
+
+                else ->
+                    when {
+                        !state.showResults -> listOf(
+                            OnboardingStep(
+                                titleRes = R.string.onboarding_welcome_title,
+                                bodyRes = R.string.onboarding_welcome_body
+                            ),
+                            OnboardingStep(
+                                titleRes = R.string.onboarding_scan_title,
+                                bodyRes = R.string.onboarding_scan_body,
+                                targetBounds = refreshBounds
+                            ),
+                            OnboardingStep(
+                                titleRes = R.string.onboarding_darknessbot_title,
+                                bodyRes = R.string.onboarding_darknessbot_body,
+                                targetBounds = darknessBotToggleBounds
+                            ),
+
+                            OnboardingStep(
+                                titleRes = R.string.onboarding_import_title,
+                                bodyRes = R.string.onboarding_import_body,
+                                targetBounds = importArchiveBounds
+                            ),
+
+                            OnboardingStep(
+                                titleRes = R.string.onboarding_analyze_title,
+                                bodyRes = R.string.onboarding_analyze_body,
+                                targetBounds = analyzeBounds
+                            ),
+                            OnboardingStep(
+                                titleRes = R.string.onboarding_export_title,
+                                bodyRes = R.string.onboarding_export_body
+                            )
+                        )
+
+                        else -> emptyList()
+                    }
+
             }
 
         }
@@ -219,20 +234,23 @@ fun MainScreen(
                     Row(
                         modifier = Modifier.align(Alignment.CenterEnd)
                     ) {
-                        // Bouton ? pour relancer l'onboarding
-                        IconButton(
-                            onClick = {
-                                OnboardingManager.resetAll(context)
-                                mainOnboardingStep = 0
-                                showMainOnboarding = true
+                        if (!state.showResults && ! state.isScanning && ! state.isAnalyzing) {
+                            // Bouton ? pour relancer l'onboarding
+                            IconButton(
+                                onClick = {
+                                    OnboardingManager.resetAll(context)
+                                    mainOnboardingStep = 0
+                                    showMainOnboarding = true
+                                }
+                            ) {
+                                Icon(
+                                    Icons.Default.Help,
+                                    contentDescription = stringResource(R.string.onboarding_help_cd),
+                                    tint = Color(0xFF1A1C1E)
+                                )
                             }
-                        ) {
-                            Icon(
-                                Icons.Default.Help,
-                                contentDescription = stringResource(R.string.onboarding_help_cd),
-                                tint = Color(0xFF1A1C1E)
-                            )
                         }
+
                         // Refresh
                         IconButton(
                             modifier = Modifier.onGloballyPositioned { coordinates ->
@@ -354,7 +372,8 @@ fun MainScreen(
                             onImport = viewModel::requestImport,
                             onDarknessBotToggleBounds = { darknessBotToggleBounds = it },
                             onImportArchiveBounds = { importArchiveBounds = it },
-                            onAnalyzeBounds = { analyzeBounds = it }
+                            onAnalyzeBounds = { analyzeBounds = it },
+                            onboarding = showMainOnboarding
                         )
                     }
                 }
@@ -614,6 +633,7 @@ fun WheelListContent(
     onDarknessBotToggleBounds: (Rect) -> Unit = {},
     onImportArchiveBounds: (Rect) -> Unit = {},
     onAnalyzeBounds: (Rect) -> Unit = {},
+    onboarding: Boolean = false,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
@@ -716,6 +736,19 @@ fun WheelListContent(
             }
         }
         // Analyze button
+        if (onboarding) {
+            Button(
+                onClick = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .onGloballyPositioned { coordinates ->
+                        onAnalyzeBounds(coordinates.boundsInWindow())
+                    }
+            ) {
+                Text(stringResource(R.string.analyze_button_mock))
+            }
+        }
         if (selectedWheel != null) {
             Button(
                 onClick = onAnalyze,

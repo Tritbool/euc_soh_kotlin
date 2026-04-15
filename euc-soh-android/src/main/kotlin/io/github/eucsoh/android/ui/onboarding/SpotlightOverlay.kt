@@ -108,7 +108,7 @@ fun SpotlightOverlay(
             val bubbleAbove = step.targetBounds.center.y > screenHeightPx / 2
             val bubbleYOffset = if (bubbleAbove) {
                 // Position above the target
-                step.targetBounds.top.toInt() - with(density) { bubbleMargin.toPx() }.toInt()
+                step.targetBounds.top.toInt() - with(density) { bubbleMargin.toPx() }.toInt()*with(density) { bubblePadding.toPx() }.toInt()
             } else {
                 // Position below the target
                 step.targetBounds.bottom.toInt() + with(density) { bubbleMargin.toPx() }.toInt()
