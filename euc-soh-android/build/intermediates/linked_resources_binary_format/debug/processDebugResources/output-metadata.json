@@ -1,0 +1,20 @@
+{
+  "version": 3,
+  "artifactType": {
+    "type": "LINKED_RESOURCES_BINARY_FORMAT",
+    "kind": "Directory"
+  },
+  "applicationId": "io.github.eucsoh.android",
+  "variantName": "debug",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "attributes": [],
+      "versionCode": 11,
+      "versionName": "1.2",
+      "outputFile": "linked-resources-binary-format-debug.ap_"
+    }
+  ],
+  "elementType": "File"
+}

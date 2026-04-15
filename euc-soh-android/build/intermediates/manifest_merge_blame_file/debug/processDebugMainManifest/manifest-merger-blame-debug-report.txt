@@ -1,0 +1,205 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<!--
+3  ~ EUC SoH Kotlin - State of Health analysis for Electric Unicycles
+4  ~ Copyright (C) 2026  Gauthier LE BARTZ LYAN
+5  ~
+6  ~ This program is free software: you can redistribute it and/or modify
+7  ~ it under the terms of the GNU Affero General Public License as
+8  ~ published by the Free Software Foundation, either version 3 of the
+9  ~ License, or (at your option) any later version.
+10  ~
+11  ~ This program is distributed in the hope that it will be useful,
+12  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+13  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+14  ~ GNU Affero General Public License for more details.
+15  ~
+16  ~ You should have received a copy of the GNU Affero General Public License
+17  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+18-->
+19<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+20    package="io.github.eucsoh.android"
+21    android:versionCode="11"
+22    android:versionName="1.2" >
+23
+24    <uses-sdk
+25        android:minSdkVersion="26"
+26        android:targetSdkVersion="36" />
+27
+28    <!-- Android 10-12 (API 29-32) -->
+29    <uses-permission
+29-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:23:5-24:51
+30        android:name="android.permission.READ_EXTERNAL_STORAGE"
+30-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:23:22-77
+31        android:maxSdkVersion="32" />
+31-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:24:22-48
+32
+33    <!-- Android 9 et moins (API ≤28) -->
+34    <uses-permission
+34-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:27:5-28:51
+35        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+35-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:27:22-78
+36        android:maxSdkVersion="28" />
+36-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:28:22-48
+37    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+37-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:30:5-82
+37-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:30:22-79
+38
+39    <permission
+39-->[androidx.core:core:1.13.1] /Users/tritbool/.gradle/caches/9.3.0/transforms/a58fd65b2b4a1f535770f55ed44dd18a/transformed/core-1.13.1/AndroidManifest.xml:22:5-24:47
+40        android:name="io.github.eucsoh.android.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+40-->[androidx.core:core:1.13.1] /Users/tritbool/.gradle/caches/9.3.0/transforms/a58fd65b2b4a1f535770f55ed44dd18a/transformed/core-1.13.1/AndroidManifest.xml:23:9-81
+41        android:protectionLevel="signature" />
+41-->[androidx.core:core:1.13.1] /Users/tritbool/.gradle/caches/9.3.0/transforms/a58fd65b2b4a1f535770f55ed44dd18a/transformed/core-1.13.1/AndroidManifest.xml:24:9-44
+42
+43    <uses-permission android:name="io.github.eucsoh.android.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+43-->[androidx.core:core:1.13.1] /Users/tritbool/.gradle/caches/9.3.0/transforms/a58fd65b2b4a1f535770f55ed44dd18a/transformed/core-1.13.1/AndroidManifest.xml:26:5-97
+43-->[androidx.core:core:1.13.1] /Users/tritbool/.gradle/caches/9.3.0/transforms/a58fd65b2b4a1f535770f55ed44dd18a/transformed/core-1.13.1/AndroidManifest.xml:26:22-94
+44
+45    <application
+45-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:32:5-58:19
+46        android:allowBackup="true"
+46-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:33:9-35
+47        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+47-->[androidx.core:core:1.13.1] /Users/tritbool/.gradle/caches/9.3.0/transforms/a58fd65b2b4a1f535770f55ed44dd18a/transformed/core-1.13.1/AndroidManifest.xml:28:18-86
+48        android:debuggable="true"
+49        android:extractNativeLibs="false"
+50        android:icon="@mipmap/ic_launcher"
+50-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:36:9-43
+51        android:label="@string/app_name"
+51-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:34:9-41
+52        android:roundIcon="@mipmap/ic_launcher_round"
+52-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:37:9-54
+53        android:supportsRtl="true"
+53-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:38:9-35
+54        android:testOnly="true"
+55        android:theme="@style/Theme.Material3.DayNight.NoActionBar" >
+55-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:35:9-68
+56        <activity
+56-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:40:9-48:20
+57            android:name="io.github.eucsoh.android.MainActivity"
+57-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:41:13-41
+58            android:exported="true"
+58-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:42:13-36
+59            android:windowSoftInputMode="adjustResize" >
+59-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:43:13-55
+60            <intent-filter>
+60-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:44:13-47:29
+61                <action android:name="android.intent.action.MAIN" />
+61-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:45:17-69
+61-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:45:25-66
+62
+63                <category android:name="android.intent.category.LAUNCHER" />
+63-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:46:17-77
+63-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:46:27-74
+64            </intent-filter>
+65        </activity>
+66
+67        <provider
+68            android:name="androidx.core.content.FileProvider"
+68-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:50:13-62
+69            android:authorities="io.github.eucsoh.android.fileprovider"
+69-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:51:13-64
+70            android:exported="false"
+70-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:52:13-37
+71            android:grantUriPermissions="true" >
+71-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:53:13-47
+72            <meta-data
+72-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:54:13-56:63
+73                android:name="android.support.FILE_PROVIDER_PATHS"
+73-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:55:17-67
+74                android:resource="@xml/file_provider_paths" />
+74-->/Users/tritbool/StudioProjects/euc_soh_kotlin/euc-soh-android/src/main/AndroidManifest.xml:56:17-60
+75        </provider>
+76
+77        <activity
+77-->[androidx.compose.ui:ui-test-manifest:1.8.2] /Users/tritbool/.gradle/caches/9.3.0/transforms/e17461d8f54a92eedb05a70a8b4736e4/transformed/ui-test-manifest-1.8.2/AndroidManifest.xml:23:9-26:79
+78            android:name="androidx.activity.ComponentActivity"
+78-->[androidx.compose.ui:ui-test-manifest:1.8.2] /Users/tritbool/.gradle/caches/9.3.0/transforms/e17461d8f54a92eedb05a70a8b4736e4/transformed/ui-test-manifest-1.8.2/AndroidManifest.xml:24:13-63
+79            android:exported="true"
+79-->[androidx.compose.ui:ui-test-manifest:1.8.2] /Users/tritbool/.gradle/caches/9.3.0/transforms/e17461d8f54a92eedb05a70a8b4736e4/transformed/ui-test-manifest-1.8.2/AndroidManifest.xml:25:13-36
+80            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+80-->[androidx.compose.ui:ui-test-manifest:1.8.2] /Users/tritbool/.gradle/caches/9.3.0/transforms/e17461d8f54a92eedb05a70a8b4736e4/transformed/ui-test-manifest-1.8.2/AndroidManifest.xml:26:13-76
+81        <activity
+81-->[androidx.compose.ui:ui-tooling-android:1.8.2] /Users/tritbool/.gradle/caches/9.3.0/transforms/121792a35f95cbd2e2d4b4c752153a3d/transformed/ui-tooling-release/AndroidManifest.xml:23:9-25:39
+82            android:name="androidx.compose.ui.tooling.PreviewActivity"
+82-->[androidx.compose.ui:ui-tooling-android:1.8.2] /Users/tritbool/.gradle/caches/9.3.0/transforms/121792a35f95cbd2e2d4b4c752153a3d/transformed/ui-tooling-release/AndroidManifest.xml:24:13-71
+83            android:exported="true" />
+83-->[androidx.compose.ui:ui-tooling-android:1.8.2] /Users/tritbool/.gradle/caches/9.3.0/transforms/121792a35f95cbd2e2d4b4c752153a3d/transformed/ui-tooling-release/AndroidManifest.xml:25:13-36
+84
+85        <provider
+85-->[androidx.emoji2:emoji2:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/019be8e2b2a0f41006c1b34f2d38fe6d/transformed/emoji2-1.4.0/AndroidManifest.xml:24:9-32:20
+86            android:name="androidx.startup.InitializationProvider"
+86-->[androidx.emoji2:emoji2:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/019be8e2b2a0f41006c1b34f2d38fe6d/transformed/emoji2-1.4.0/AndroidManifest.xml:25:13-67
+87            android:authorities="io.github.eucsoh.android.androidx-startup"
+87-->[androidx.emoji2:emoji2:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/019be8e2b2a0f41006c1b34f2d38fe6d/transformed/emoji2-1.4.0/AndroidManifest.xml:26:13-68
+88            android:exported="false" >
+88-->[androidx.emoji2:emoji2:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/019be8e2b2a0f41006c1b34f2d38fe6d/transformed/emoji2-1.4.0/AndroidManifest.xml:27:13-37
+89            <meta-data
+89-->[androidx.emoji2:emoji2:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/019be8e2b2a0f41006c1b34f2d38fe6d/transformed/emoji2-1.4.0/AndroidManifest.xml:29:13-31:52
+90                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+90-->[androidx.emoji2:emoji2:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/019be8e2b2a0f41006c1b34f2d38fe6d/transformed/emoji2-1.4.0/AndroidManifest.xml:30:17-75
+91                android:value="androidx.startup" />
+91-->[androidx.emoji2:emoji2:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/019be8e2b2a0f41006c1b34f2d38fe6d/transformed/emoji2-1.4.0/AndroidManifest.xml:31:17-49
+92            <meta-data
+92-->[androidx.lifecycle:lifecycle-process:2.8.7] /Users/tritbool/.gradle/caches/9.3.0/transforms/5a50685798cff0d8bec0cb21586a899e/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:29:13-31:52
+93                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+93-->[androidx.lifecycle:lifecycle-process:2.8.7] /Users/tritbool/.gradle/caches/9.3.0/transforms/5a50685798cff0d8bec0cb21586a899e/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:30:17-78
+94                android:value="androidx.startup" />
+94-->[androidx.lifecycle:lifecycle-process:2.8.7] /Users/tritbool/.gradle/caches/9.3.0/transforms/5a50685798cff0d8bec0cb21586a899e/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:31:17-49
+95            <meta-data
+95-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/b0617415a492e955dcbf6c96cc99fc74/transformed/profileinstaller-1.4.0/AndroidManifest.xml:29:13-31:52
+96                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+96-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/b0617415a492e955dcbf6c96cc99fc74/transformed/profileinstaller-1.4.0/AndroidManifest.xml:30:17-85
+97                android:value="androidx.startup" />
+97-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/b0617415a492e955dcbf6c96cc99fc74/transformed/profileinstaller-1.4.0/AndroidManifest.xml:31:17-49
+98        </provider>
+99
+100        <service
+100-->[androidx.room:room-runtime:2.6.1] /Users/tritbool/.gradle/caches/9.3.0/transforms/cf9780c0a343815eafac5cd34ac59772/transformed/room-runtime-2.6.1/AndroidManifest.xml:24:9-28:63
+101            android:name="androidx.room.MultiInstanceInvalidationService"
+101-->[androidx.room:room-runtime:2.6.1] /Users/tritbool/.gradle/caches/9.3.0/transforms/cf9780c0a343815eafac5cd34ac59772/transformed/room-runtime-2.6.1/AndroidManifest.xml:25:13-74
+102            android:directBootAware="true"
+102-->[androidx.room:room-runtime:2.6.1] /Users/tritbool/.gradle/caches/9.3.0/transforms/cf9780c0a343815eafac5cd34ac59772/transformed/room-runtime-2.6.1/AndroidManifest.xml:26:13-43
+103            android:exported="false" />
+103-->[androidx.room:room-runtime:2.6.1] /Users/tritbool/.gradle/caches/9.3.0/transforms/cf9780c0a343815eafac5cd34ac59772/transformed/room-runtime-2.6.1/AndroidManifest.xml:27:13-37
+104
+105        <receiver
+105-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/b0617415a492e955dcbf6c96cc99fc74/transformed/profileinstaller-1.4.0/AndroidManifest.xml:34:9-52:20
+106            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+106-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/b0617415a492e955dcbf6c96cc99fc74/transformed/profileinstaller-1.4.0/AndroidManifest.xml:35:13-76
+107            android:directBootAware="false"
+107-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/b0617415a492e955dcbf6c96cc99fc74/transformed/profileinstaller-1.4.0/AndroidManifest.xml:36:13-44
+108            android:enabled="true"
+108-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/b0617415a492e955dcbf6c96cc99fc74/transformed/profileinstaller-1.4.0/AndroidManifest.xml:37:13-35
+109            android:exported="true"
+109-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/b0617415a492e955dcbf6c96cc99fc74/transformed/profileinstaller-1.4.0/AndroidManifest.xml:38:13-36
+110            android:permission="android.permission.DUMP" >
+110-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/b0617415a492e955dcbf6c96cc99fc74/transformed/profileinstaller-1.4.0/AndroidManifest.xml:39:13-57
+111            <intent-filter>
+111-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/b0617415a492e955dcbf6c96cc99fc74/transformed/profileinstaller-1.4.0/AndroidManifest.xml:40:13-42:29
+112                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+112-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/b0617415a492e955dcbf6c96cc99fc74/transformed/profileinstaller-1.4.0/AndroidManifest.xml:41:17-91
+112-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/b0617415a492e955dcbf6c96cc99fc74/transformed/profileinstaller-1.4.0/AndroidManifest.xml:41:25-88
+113            </intent-filter>
+114            <intent-filter>
+114-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/b0617415a492e955dcbf6c96cc99fc74/transformed/profileinstaller-1.4.0/AndroidManifest.xml:43:13-45:29
+115                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+115-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/b0617415a492e955dcbf6c96cc99fc74/transformed/profileinstaller-1.4.0/AndroidManifest.xml:44:17-85
+115-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/b0617415a492e955dcbf6c96cc99fc74/transformed/profileinstaller-1.4.0/AndroidManifest.xml:44:25-82
+116            </intent-filter>
+117            <intent-filter>
+117-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/b0617415a492e955dcbf6c96cc99fc74/transformed/profileinstaller-1.4.0/AndroidManifest.xml:46:13-48:29
+118                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+118-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/b0617415a492e955dcbf6c96cc99fc74/transformed/profileinstaller-1.4.0/AndroidManifest.xml:47:17-88
+118-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/b0617415a492e955dcbf6c96cc99fc74/transformed/profileinstaller-1.4.0/AndroidManifest.xml:47:25-85
+119            </intent-filter>
+120            <intent-filter>
+120-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/b0617415a492e955dcbf6c96cc99fc74/transformed/profileinstaller-1.4.0/AndroidManifest.xml:49:13-51:29
+121                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+121-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/b0617415a492e955dcbf6c96cc99fc74/transformed/profileinstaller-1.4.0/AndroidManifest.xml:50:17-95
+121-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/tritbool/.gradle/caches/9.3.0/transforms/b0617415a492e955dcbf6c96cc99fc74/transformed/profileinstaller-1.4.0/AndroidManifest.xml:50:25-92
+122            </intent-filter>
+123        </receiver>
+124    </application>
+125
+126</manifest>
