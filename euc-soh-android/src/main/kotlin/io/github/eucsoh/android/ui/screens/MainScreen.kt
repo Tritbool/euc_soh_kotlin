@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
@@ -42,6 +43,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -52,6 +56,9 @@ import io.github.eucsoh.Constants.CALIBRATING
 import io.github.eucsoh.Constants.DONE
 import io.github.eucsoh.android.data.model.WheelIdentity
 import io.github.eucsoh.android.ui.SohViewModel
+import io.github.eucsoh.android.ui.onboarding.OnboardingManager
+import io.github.eucsoh.android.ui.onboarding.OnboardingStep
+import io.github.eucsoh.android.ui.onboarding.SpotlightOverlay
 import io.github.eucsoh.android.visualization.ArchiveImportService
 import io.github.eucsoh.android.visualization.ArchiveManifest
 import io.github.eucsoh.android.visualization.ImportResult
@@ -77,235 +84,326 @@ fun MainScreen(
     onOpenInfo: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
 
-    Scaffold(
-        topBar = {
-            val tileBitmap = ImageBitmap.imageResource(R.drawable.topbar_bg)
+    // Onboarding state
+    var showMainOnboarding by remember {
+        mutableStateOf(!OnboardingManager.hasSeenMain(context))
+    }
+    var mainOnboardingStep by remember { mutableStateOf(0) }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .statusBarsPadding()
-                    .height(64.dp)
-                    .clip(RectangleShape)
-                    .drawBehind {
-                        // Calcule la largeur de la tuile en gardant le ratio original
-                        val originalW = tileBitmap.width.toFloat()
-                        val originalH = tileBitmap.height.toFloat()
-                        val tileH =
-                            size.height                      // on fit à la hauteur du bandeau
-                        val tileW = originalW * (tileH / originalH) // largeur proportionnelle
+    // Bounds collected via onGloballyPositioned for spotlight targets
+    var refreshBounds by remember { mutableStateOf(Rect.Zero) }
+    var darknessBotToggleBounds by remember { mutableStateOf(Rect.Zero) }
+    var importArchiveBounds by remember { mutableStateOf(Rect.Zero) }
+    var analyzeBounds by remember { mutableStateOf(Rect.Zero) }
 
-                        var x = 0f
-                        while (x < size.width) {
-                            drawImage(
-                                image = tileBitmap,
-                                dstOffset = IntOffset(x.toInt(), 0),
-                                dstSize = IntSize(tileW.toInt(), tileH.toInt())
+    // Build onboarding steps — bounds are updated dynamically via onGloballyPositioned
+    val mainOnboardingSteps = remember(refreshBounds, darknessBotToggleBounds, importArchiveBounds, analyzeBounds) {
+        listOf(
+            OnboardingStep(
+                titleRes = R.string.onboarding_welcome_title,
+                bodyRes = R.string.onboarding_welcome_body
+            ),
+            OnboardingStep(
+                titleRes = R.string.onboarding_scan_title,
+                bodyRes = R.string.onboarding_scan_body,
+                targetBounds = refreshBounds
+            ),
+            OnboardingStep(
+                titleRes = R.string.onboarding_darknessbot_title,
+                bodyRes = R.string.onboarding_darknessbot_body,
+                targetBounds = darknessBotToggleBounds
+            ),
+            OnboardingStep(
+                titleRes = R.string.onboarding_import_title,
+                bodyRes = R.string.onboarding_import_body,
+                targetBounds = analyzeBounds
+            ),
+            OnboardingStep(
+                titleRes = R.string.onboarding_export_title,
+                bodyRes = R.string.onboarding_export_body
+            )
+        )
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            topBar = {
+                val tileBitmap = ImageBitmap.imageResource(R.drawable.topbar_bg)
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .statusBarsPadding()
+                        .height(64.dp)
+                        .clip(RectangleShape)
+                        .drawBehind {
+                            // Calcule la largeur de la tuile en gardant le ratio original
+                            val originalW = tileBitmap.width.toFloat()
+                            val originalH = tileBitmap.height.toFloat()
+                            val tileH =
+                                size.height                      // on fit à la hauteur du bandeau
+                            val tileW = originalW * (tileH / originalH) // largeur proportionnelle
+
+                            var x = 0f
+                            while (x < size.width) {
+                                drawImage(
+                                    image = tileBitmap,
+                                    dstOffset = IntOffset(x.toInt(), 0),
+                                    dstSize = IntSize(tileW.toInt(), tileH.toInt())
+                                )
+                                x += tileW - 1f
+                            }
+                        }
+                ) {
+                    // Foreground : personnage à gauche
+                    Image(
+                        painter = painterResource(R.drawable.topbar_fg),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .padding(start = 8.dp)
+                            .fillMaxHeight()
+                            .aspectRatio(1.75f),
+                        contentScale = ContentScale.Fit
+                    )
+
+                    // Titre centré
+                    Text(
+                        stringResource(R.string.topbar_title),
+                        modifier = Modifier.align(Alignment.Center),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF1A1C1E)
+                    )
+
+                    // Boutons à droite : ? (onboarding) + Refresh
+                    Row(
+                        modifier = Modifier.align(Alignment.CenterEnd)
+                    ) {
+                        // Bouton ? pour relancer l'onboarding
+                        IconButton(
+                            onClick = {
+                                OnboardingManager.resetAll(context)
+                                mainOnboardingStep = 0
+                                showMainOnboarding = true
+                            }
+                        ) {
+                            Icon(
+                                Icons.Default.Help,
+                                contentDescription = stringResource(R.string.onboarding_help_cd),
+                                tint = Color(0xFF1A1C1E)
                             )
-                            x += tileW - 1f
+                        }
+                        // Refresh
+                        IconButton(
+                            modifier = Modifier.onGloballyPositioned { coordinates ->
+                                refreshBounds = coordinates.boundsInWindow()
+                            },
+                            onClick = { viewModel.scanWheels(forceRefresh = true) }
+                        ) {
+                            Icon(
+                                Icons.Default.Refresh,
+                                contentDescription = stringResource(R.string.topbar_refresh),
+                                tint = Color(0xFF1A1C1E)
+                            )
                         }
                     }
+                    // Bouton Info (aide) à gauche
+                    IconButton(
+                        modifier = Modifier.align(Alignment.CenterStart),
+                        onClick = onOpenInfo
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = stringResource(R.string.info_title),
+                            tint = Color(0xFF1A1C1E)
+                        )
+                    }
+                }
+            }
+        ) { padding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
             ) {
-                // Foreground : personnage à gauche
-                Image(
-                    painter = painterResource(R.drawable.topbar_fg),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .padding(start = 8.dp)
-                        .fillMaxHeight()
-                        .aspectRatio(1.75f),
-                    contentScale = ContentScale.Fit
-                )
+                // Show current scan path
+                if (state.scanRootPath.isNotEmpty()) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(8.dp)) {
+                            Text(
+                                stringResource(R.string.selected_euc_label),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                            Text(
+                                state.selectedWheel?.effectiveName ?: "",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        }
+                    }
+                }
 
-                // Titre centré
-                Text(
-                    stringResource(R.string.topbar_title),
-                    modifier = Modifier.align(Alignment.Center),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF1A1C1E)
-                )
+                when {
+                    state.isScanning -> {
+                        LoadingScreen(stringResource(R.string.scanning_eucs))
+                    }
 
-                // Refresh à droite
-                IconButton(
-                    modifier = Modifier.align(Alignment.CenterEnd),
-                    onClick = { viewModel.scanWheels(forceRefresh = true) }
-                ) {
-                    Icon(
-                        Icons.Default.Refresh,
-                        contentDescription = stringResource(R.string.topbar_refresh),
-                        tint = Color(0xFF1A1C1E)
+                    state.progressState?.phase == ANALYZING -> {
+                        AnalysisProgressScreen(
+                            currentFile = state.progressState?.current!!,
+                            totalFiles = state.progressState?.total!!,
+                            fileName = "",//state.currentFileName,
+                            phase = stringResource(R.string.analyzing_phase)
+                        )
+                    }
+
+                    state.progressState?.phase == CALIBRATING -> {
+                        AnalysisProgressScreen(
+                            currentFile = state.progressState?.current!!,
+                            totalFiles = state.progressState?.total!!,
+                            fileName = "",//state.currentFileName,
+                            phase = stringResource(R.string.calibrating_phase)
+                        )
+                    }
+
+                    state.progressState?.phase == DONE && state.analysisResult != null && state.showResults -> {
+                        ResultsScreenEnhanced(
+                            result = state.analysisResult!!,
+                            selectedWheel = state.selectedWheel,
+                            lastExportMime = state.lastExportMime,
+                            lastExportPath = state.lastExportPath,
+                            onMarkExport = viewModel::markLastExport,
+                            onBack = viewModel::hideResults,
+                            darknessBotEnabled = state.darknessBotEnabled
+                        )
+                    }
+
+                    state.detectedWheels.isEmpty() -> {
+                        EmptyStateScreen(
+                            onRequestPermissions = onRequestPermissions,
+                            onRetry = { viewModel.scanWheels(forceRefresh = true) },
+                            scanPath = state.scanRootPath,
+                            darknessBotEnabled = state.darknessBotEnabled,
+                            onDarknessBotToggle = viewModel::requestDarknessBotToggle,
+                            onImport = viewModel::requestImport
+                        )
+                    }
+
+                    else -> {
+                        WheelListContent(
+                            wheels = state.detectedWheels.values.toList(),
+                            selectedWheel = state.selectedWheel,
+                            wheelConfigs = state.wheelConfigs,
+                            onSelectWheel = viewModel::selectWheel,
+                            onAnalyze = viewModel::startAnalysis,
+                            onConfigMosfet = viewModel::showMosfetConfig,
+                            error = state.error,
+                            onDismissError = viewModel::clearError,
+                            hasResults = state.analysisResult != null &&
+                                    state.analysisResult!!.macAddress == state.selectedWheel?.macAddress,
+                            onShowResults = viewModel::showResults,
+                            darknessBotEnabled = state.darknessBotEnabled,
+                            onDarknessBotToggle = viewModel::requestDarknessBotToggle,
+                            onImport = viewModel::requestImport,
+                            onDarknessBotToggleBounds = { darknessBotToggleBounds = it },
+                            onImportArchiveBounds = { importArchiveBounds = it },
+                            onAnalyzeBounds = { analyzeBounds = it }
+                        )
+                    }
+                }
+
+                // Import archive flow
+                if (state.showImportDialog) {
+                    ImportArchiveFlow(
+                        onDismiss = viewModel::dismissImportDialog,
+                        onPerformImport = viewModel::performImport,
+                        importResult = state.importResult,
+                        importProgress = state.importProgress
                     )
                 }
-                // Bouton Info (aide) à gauche
-                IconButton(
-                    modifier = Modifier.align(Alignment.CenterStart),
-                    onClick = onOpenInfo
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = stringResource(R.string.info_title),
-                        tint = Color(0xFF1A1C1E)
+
+                // DarknessBot warning dialog
+                if (state.showDarknessBotWarningDialog) {
+                    AlertDialog(
+                        onDismissRequest = viewModel::dismissDarknessBotWarning,
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        },
+                        title = {
+                            Text(stringResource(R.string.darknessbot_warning_title))
+                        },
+                        text = {
+                            Text(stringResource(R.string.darknessbot_warning_body))
+                        },
+                        confirmButton = {
+                            TextButton(onClick = viewModel::confirmDarknessBotEnable) {
+                                Text(
+                                    stringResource(R.string.darknessbot_warning_confirm),
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = viewModel::dismissDarknessBotWarning) {
+                                Text(stringResource(R.string.darknessbot_warning_cancel))
+                            }
+                        }
+                    )
+                }
+
+                // MOSFET config dialog
+                if (state.showMosfetDialog && state.configDialogWheel != null) {
+                    val wheel = state.configDialogWheel!!
+                    val currentParams = state.wheelConfigs[wheel.macAddress]?.mosfetParams
+
+                    MosfetConfigDialog(
+                        wheelName = wheel.displayName,
+                        currentParams = currentParams,
+                        aliasInput = state.aliasInput,
+                        hasDataName = wheel.displayName != wheel.macAddress,
+                        onAliasChange = viewModel::updateAliasInput,
+                        onSaveAlias = { viewModel.renameWheel(wheel.macAddress, state.aliasInput) },
+                        onSave = viewModel::saveMosfetConfig,
+                        onClear = viewModel::clearMosfetConfig,
+                        onDismiss = viewModel::dismissMosfetDialog
                     )
                 }
             }
         }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            // Show current scan path
-            if (state.scanRootPath.isNotEmpty()) {
-                Surface(
-                    color = MaterialTheme.colorScheme.secondaryContainer,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(8.dp)) {
-                        Text(
-                            stringResource(R.string.selected_euc_label),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-                        Text(
-                            state.selectedWheel?.effectiveName ?: "",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
+
+        // Spotlight onboarding overlay — drawn on top of everything
+        if (showMainOnboarding) {
+            SpotlightOverlay(
+                steps = mainOnboardingSteps,
+                currentStep = mainOnboardingStep,
+                onNext = {
+                    if (mainOnboardingStep < mainOnboardingSteps.lastIndex) {
+                        mainOnboardingStep++
+                    } else {
+                        OnboardingManager.markMainSeen(context)
+                        showMainOnboarding = false
                     }
+                },
+                onPrev = {
+                    if (mainOnboardingStep > 0) mainOnboardingStep--
+                },
+                onDismiss = {
+                    OnboardingManager.markMainSeen(context)
+                    showMainOnboarding = false
                 }
-            }
-
-            when {
-                state.isScanning -> {
-                    LoadingScreen(stringResource(R.string.scanning_eucs))
-                }
-
-                state.progressState?.phase == ANALYZING -> {
-                    AnalysisProgressScreen(
-                        currentFile = state.progressState?.current!!,
-                        totalFiles = state.progressState?.total!!,
-                        fileName = "",//state.currentFileName,
-                        phase = stringResource(R.string.analyzing_phase)
-                    )
-                }
-
-                state.progressState?.phase == CALIBRATING -> {
-                    AnalysisProgressScreen(
-                        currentFile = state.progressState?.current!!,
-                        totalFiles = state.progressState?.total!!,
-                        fileName = "",//state.currentFileName,
-                        phase = stringResource(R.string.calibrating_phase)
-                    )
-                }
-
-                state.progressState?.phase == DONE && state.analysisResult != null && state.showResults -> {
-                    ResultsScreenEnhanced(
-                        result = state.analysisResult!!,
-                        selectedWheel = state.selectedWheel,
-                        lastExportMime = state.lastExportMime,
-                        lastExportPath = state.lastExportPath,
-                        onMarkExport = viewModel::markLastExport,
-                        onBack = viewModel::hideResults,
-                        darknessBotEnabled = state.darknessBotEnabled
-                    )
-                }
-
-                state.detectedWheels.isEmpty() -> {
-                    EmptyStateScreen(
-                        onRequestPermissions = onRequestPermissions,
-                        onRetry = { viewModel.scanWheels(forceRefresh = true) },
-                        scanPath = state.scanRootPath,
-                        darknessBotEnabled = state.darknessBotEnabled,
-                        onDarknessBotToggle = viewModel::requestDarknessBotToggle,
-                        onImport = viewModel::requestImport
-                    )
-                }
-
-                else -> {
-                    WheelListContent(
-                        wheels = state.detectedWheels.values.toList(),
-                        selectedWheel = state.selectedWheel,
-                        wheelConfigs = state.wheelConfigs,
-                        onSelectWheel = viewModel::selectWheel,
-                        onAnalyze = viewModel::startAnalysis,
-                        onConfigMosfet = viewModel::showMosfetConfig,
-                        error = state.error,
-                        onDismissError = viewModel::clearError,
-                        hasResults = state.analysisResult != null &&
-                                state.analysisResult!!.macAddress == state.selectedWheel?.macAddress,
-                        onShowResults = viewModel::showResults,
-                        darknessBotEnabled = state.darknessBotEnabled,
-                        onDarknessBotToggle = viewModel::requestDarknessBotToggle,
-                        onImport = viewModel::requestImport
-                    )
-                }
-            }
-
-            // Import archive flow
-            if (state.showImportDialog) {
-                ImportArchiveFlow(
-                    onDismiss = viewModel::dismissImportDialog,
-                    onPerformImport = viewModel::performImport,
-                    importResult = state.importResult,
-                    importProgress = state.importProgress
-                )
-            }
-
-            // DarknessBot warning dialog
-            if (state.showDarknessBotWarningDialog) {
-                AlertDialog(
-                    onDismissRequest = viewModel::dismissDarknessBotWarning,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                    },
-                    title = {
-                        Text(stringResource(R.string.darknessbot_warning_title))
-                    },
-                    text = {
-                        Text(stringResource(R.string.darknessbot_warning_body))
-                    },
-                    confirmButton = {
-                        TextButton(onClick = viewModel::confirmDarknessBotEnable) {
-                            Text(
-                                stringResource(R.string.darknessbot_warning_confirm),
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = viewModel::dismissDarknessBotWarning) {
-                            Text(stringResource(R.string.darknessbot_warning_cancel))
-                        }
-                    }
-                )
-            }
-
-            // MOSFET config dialog
-            if (state.showMosfetDialog && state.configDialogWheel != null) {
-                val wheel = state.configDialogWheel!!
-                val currentParams = state.wheelConfigs[wheel.macAddress]?.mosfetParams
-
-                MosfetConfigDialog(
-                    wheelName = wheel.displayName,
-                    currentParams = currentParams,
-                    aliasInput = state.aliasInput,
-                    hasDataName = wheel.displayName != wheel.macAddress,
-                    onAliasChange = viewModel::updateAliasInput,
-                    onSaveAlias = { viewModel.renameWheel(wheel.macAddress, state.aliasInput) },
-                    onSave = viewModel::saveMosfetConfig,
-                    onClear = viewModel::clearMosfetConfig,
-                    onDismiss = viewModel::dismissMosfetDialog
-                )
-            }
+            )
         }
     }
 }
@@ -466,6 +564,9 @@ fun WheelListContent(
     darknessBotEnabled: Boolean = false,
     onDarknessBotToggle: () -> Unit = {},
     onImport: () -> Unit = {},
+    onDarknessBotToggleBounds: (Rect) -> Unit = {},
+    onImportArchiveBounds: (Rect) -> Unit = {},
+    onAnalyzeBounds: (Rect) -> Unit = {},
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
@@ -518,7 +619,10 @@ fun WheelListContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp),
+                .padding(horizontal = 16.dp, vertical = 4.dp)
+                .onGloballyPositioned { coordinates ->
+                    onDarknessBotToggleBounds(coordinates.boundsInWindow())
+                },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -540,6 +644,9 @@ fun WheelListContent(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 4.dp)
+                .onGloballyPositioned { coordinates ->
+                    onImportArchiveBounds(coordinates.boundsInWindow())
+                }
         ) {
             Icon(
                 Icons.Default.Upload,
@@ -568,6 +675,9 @@ fun WheelListContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
+                    .onGloballyPositioned { coordinates ->
+                        onAnalyzeBounds(coordinates.boundsInWindow())
+                    }
             ) {
                 Text(stringResource(R.string.analyze_button, selectedWheel.effectiveName))
             }

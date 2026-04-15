@@ -41,6 +41,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.FolderZip
+import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.TableChart
@@ -59,7 +60,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -68,6 +73,9 @@ import androidx.compose.ui.unit.dp
 import io.github.eucsoh.SohAnalyzer
 import io.github.eucsoh.android.R
 import io.github.eucsoh.android.data.model.WheelIdentity
+import io.github.eucsoh.android.ui.onboarding.OnboardingManager
+import io.github.eucsoh.android.ui.onboarding.OnboardingStep
+import io.github.eucsoh.android.ui.onboarding.SpotlightOverlay
 import io.github.eucsoh.android.util.ShareUtils
 import io.github.eucsoh.android.visualization.CsvExportService
 import io.github.eucsoh.android.visualization.PdfExportService
@@ -106,6 +114,35 @@ fun ResultsScreenEnhanced(
     var showFiles by remember { mutableStateOf(false) }
     var showCharts by remember { mutableStateOf(false) }
     var showAlarmsDialog by remember { mutableStateOf(false) }
+
+    // Onboarding state
+    var showResultOnboarding by remember {
+        mutableStateOf(!OnboardingManager.hasSeenResult(context))
+    }
+    var resultOnboardingStep by remember { mutableStateOf(0) }
+
+    // Bounds collected via onGloballyPositioned for spotlight targets
+    var chartsBounds by remember { mutableStateOf(Rect.Zero) }
+    var archiveExportBounds by remember { mutableStateOf(Rect.Zero) }
+
+    val resultOnboardingSteps = remember(chartsBounds, archiveExportBounds) {
+        listOf(
+            OnboardingStep(
+                titleRes = R.string.onboarding_results_welcome_title,
+                bodyRes = R.string.onboarding_results_welcome_body
+            ),
+            OnboardingStep(
+                titleRes = R.string.onboarding_results_charts_title,
+                bodyRes = R.string.onboarding_results_charts_body,
+                targetBounds = chartsBounds
+            ),
+            OnboardingStep(
+                titleRes = R.string.onboarding_results_export_title,
+                bodyRes = R.string.onboarding_results_export_body,
+                targetBounds = archiveExportBounds
+            )
+        )
+    }
 
 
     // Fichiers exportés
@@ -254,184 +291,122 @@ fun ResultsScreenEnhanced(
         }
 
         else -> {
-            Column(modifier = Modifier.fillMaxSize()) {
-                // Header with summary
-                Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            stringResource(R.string.results_title),
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        Text(
-                            stringResource(
-                                R.string.results_subtitle,
-                                rows.size,
-                                columnNames.size
-                            ),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Text(
-                            stringResource(
-                                R.string.results_ea,
-                                String.format(
-                                    Locale.getDefault(),
-                                    "%.1f",
-                                    summary.arrhenius.eaKjPerMol
-                                )
-                            ),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        if (result.alarms.isNotEmpty()) {
-                            Text(
-                                stringResource(R.string.results_alarms, result.alarms.size),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.error,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier
-                                    .clickable { showAlarmsDialog = true }
-                                    .padding(vertical = 2.dp)
-                            )
-                        }
-                    }
-                }
-
-                // ACTION BUTTONS
-                Surface(
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+            Box(modifier = Modifier.fillMaxSize()) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    // Header with summary + ? button
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        // Button: Manage Files
-                        if (selectedWheel != null) {
-                            OutlinedButton(
-                                onClick = { showFiles = true },
-                                modifier = Modifier.weight(1f)
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            Column(modifier = Modifier.padding(16.dp).padding(end = 40.dp)) {
+                                Text(
+                                    stringResource(R.string.results_title),
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(Modifier.height(8.dp))
+                                Text(
+                                    stringResource(
+                                        R.string.results_subtitle,
+                                        rows.size,
+                                        columnNames.size
+                                    ),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Text(
+                                    stringResource(
+                                        R.string.results_ea,
+                                        String.format(
+                                            Locale.getDefault(),
+                                            "%.1f",
+                                            summary.arrhenius.eaKjPerMol
+                                        )
+                                    ),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                if (result.alarms.isNotEmpty()) {
+                                    Text(
+                                        stringResource(R.string.results_alarms, result.alarms.size),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.error,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier
+                                            .clickable { showAlarmsDialog = true }
+                                            .padding(vertical = 2.dp)
+                                    )
+                                }
+                            }
+                            // Bouton ? pour relancer l'onboarding résultats
+                            IconButton(
+                                onClick = {
+                                    OnboardingManager.resetAll(context)
+                                    resultOnboardingStep = 0
+                                    showResultOnboarding = true
+                                },
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(8.dp)
                             ) {
                                 Icon(
-                                    Icons.Default.Folder,
-                                    contentDescription = stringResource(R.string.files_button_cd),
+                                    Icons.Default.Help,
+                                    contentDescription = stringResource(R.string.onboarding_help_cd),
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+                        }
+                    }
+
+                    // ACTION BUTTONS
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            // Button: Manage Files
+                            if (selectedWheel != null) {
+                                OutlinedButton(
+                                    onClick = { showFiles = true },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Folder,
+                                        contentDescription = stringResource(R.string.files_button_cd),
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(Modifier.width(4.dp))
+                                }
+                            }
+
+                            // Button: View Charts
+                            Button(
+                                onClick = { showCharts = true },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .onGloballyPositioned { coordinates ->
+                                        chartsBounds = coordinates.boundsInWindow()
+                                    },
+                                enabled = result.plotData.gaussianResults.isNotEmpty()
+                            ) {
+                                Icon(
+                                    Icons.Default.BarChart,
+                                    contentDescription = stringResource(R.string.charts_button_cd),
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(Modifier.width(4.dp))
                             }
-                        }
 
-                        // Button: View Charts
-                        Button(
-                            onClick = { showCharts = true },
-                            modifier = Modifier.weight(1f),
-                            enabled = result.plotData.gaussianResults.isNotEmpty()
-                        ) {
-                            Icon(
-                                Icons.Default.BarChart,
-                                contentDescription = stringResource(R.string.charts_button_cd),
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(Modifier.width(4.dp))
-                        }
-
-                        // Bouton PDF
-                        IconButton(
-                            onClick = {
-                                scope.launch {
-                                    isExporting = true
-                                    try {
-                                        generateCharts()
-                                        pdfFile = pdfExporter.exportToPdf(
-                                            gaussCharts!!,
-                                            inflexCharts!!,
-                                            cusumCharts!!,
-                                            trendCharts!!,
-                                            result,
-                                            wheelDisplayName,
-                                            macSafe
-                                        )
-                                        onMarkExport("application/pdf", pdfFile!!.absolutePath)
-                                        createPdfLauncher.launch("${wheelDisplayName}-${macSafe}_SoH_${timestamp}.pdf")
-
-                                    } catch (e: Exception) {
-                                        Toast.makeText(
-                                            context,
-                                            context.getString(
-                                                R.string.export_failed,
-                                                "PDF",
-                                                e.message ?: ""
-                                            ),
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    } finally {
-                                        isExporting = false
-                                    }
-                                }
-                            },
-                            enabled = !isExporting && result.plotData.gaussianResults.isNotEmpty()
-                        ) {
-                            if (isExporting) CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                strokeWidth = 2.dp
-                            )
-                            else Icon(
-                                Icons.Default.PictureAsPdf,
-                                stringResource(R.string.export_pdf_cd)
-                            )
-                        }
-
-                        // Bouton CSV
-                        IconButton(
-                            onClick = {
-                                scope.launch {
-                                    isExporting = true
-                                    try {
-                                        csvFile =
-                                            csvExporter.exportToCsv(
-                                                result,
-                                                wheelDisplayName,
-                                                macSafe
-                                            )
-
-                                        onMarkExport("text/csv", csvFile!!.absolutePath)
-                                        createCsvLauncher.launch("${wheelDisplayName}-${macSafe}_SoH_${timestamp}.csv")
-
-                                    } catch (e: Exception) {
-                                        Toast.makeText(
-                                            context,
-                                            context.getString(
-                                                R.string.export_failed,
-                                                "CSV",
-                                                e.message ?: ""
-                                            ),
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    } finally {
-                                        isExporting = false
-                                    }
-                                }
-                            },
-                            enabled = !isExporting
-                        ) {
-                            Icon(
-                                Icons.Default.TableChart,
-                                stringResource(R.string.export_csv_cd)
-                            )
-                        }
-
-                        // Bouton Archive
-                        IconButton(
-                            onClick = {
-                                scope.launch {
-                                    isExporting = true
-                                    try {
-                                        if (pdfFile == null) {
+                            // Bouton PDF
+                            IconButton(
+                                onClick = {
+                                    scope.launch {
+                                        isExporting = true
+                                        try {
                                             generateCharts()
                                             pdfFile = pdfExporter.exportToPdf(
                                                 gaussCharts!!,
@@ -442,161 +417,274 @@ fun ResultsScreenEnhanced(
                                                 wheelDisplayName,
                                                 macSafe
                                             )
+                                            onMarkExport("application/pdf", pdfFile!!.absolutePath)
+                                            createPdfLauncher.launch("${wheelDisplayName}-${macSafe}_SoH_${timestamp}.pdf")
+
+                                        } catch (e: Exception) {
+                                            Toast.makeText(
+                                                context,
+                                                context.getString(
+                                                    R.string.export_failed,
+                                                    "PDF",
+                                                    e.message ?: ""
+                                                ),
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        } finally {
+                                            isExporting = false
                                         }
-                                        if (csvFile == null) {
+                                    }
+                                },
+                                enabled = !isExporting && result.plotData.gaussianResults.isNotEmpty()
+                            ) {
+                                if (isExporting) CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    strokeWidth = 2.dp
+                                )
+                                else Icon(
+                                    Icons.Default.PictureAsPdf,
+                                    stringResource(R.string.export_pdf_cd)
+                                )
+                            }
+
+                            // Bouton CSV
+                            IconButton(
+                                onClick = {
+                                    scope.launch {
+                                        isExporting = true
+                                        try {
                                             csvFile =
                                                 csvExporter.exportToCsv(
                                                     result,
                                                     wheelDisplayName,
                                                     macSafe
                                                 )
-                                        }
-                                        zipFile = archiveService.exportArchive(
-                                            wheelName = wheelDisplayName,
-                                            macAddress = macSafe,
-                                            fileReports = result.fileReports,
-                                            pdfFile = pdfFile!!,
-                                            csvFile = csvFile!!,  // null si pas encore exporté = pas inclus
-                                            darknessBotEnabled = darknessBotEnabled
-                                        )
 
-                                        onMarkExport("application/zip", zipFile!!.absolutePath)
-                                        createZipLauncher.launch("${wheelDisplayName}-${macSafe}_SoH_${timestamp}.zip")
+                                            onMarkExport("text/csv", csvFile!!.absolutePath)
+                                            createCsvLauncher.launch("${wheelDisplayName}-${macSafe}_SoH_${timestamp}.csv")
+
+                                        } catch (e: Exception) {
+                                            Toast.makeText(
+                                                context,
+                                                context.getString(
+                                                    R.string.export_failed,
+                                                    "CSV",
+                                                    e.message ?: ""
+                                                ),
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        } finally {
+                                            isExporting = false
+                                        }
+                                    }
+                                },
+                                enabled = !isExporting
+                            ) {
+                                Icon(
+                                    Icons.Default.TableChart,
+                                    stringResource(R.string.export_csv_cd)
+                                )
+                            }
+
+                            // Bouton Archive
+                            IconButton(
+                                onClick = {
+                                    scope.launch {
+                                        isExporting = true
+                                        try {
+                                            if (pdfFile == null) {
+                                                generateCharts()
+                                                pdfFile = pdfExporter.exportToPdf(
+                                                    gaussCharts!!,
+                                                    inflexCharts!!,
+                                                    cusumCharts!!,
+                                                    trendCharts!!,
+                                                    result,
+                                                    wheelDisplayName,
+                                                    macSafe
+                                                )
+                                            }
+                                            if (csvFile == null) {
+                                                csvFile =
+                                                    csvExporter.exportToCsv(
+                                                        result,
+                                                        wheelDisplayName,
+                                                        macSafe
+                                                    )
+                                            }
+                                            zipFile = archiveService.exportArchive(
+                                                wheelName = wheelDisplayName,
+                                                macAddress = macSafe,
+                                                fileReports = result.fileReports,
+                                                pdfFile = pdfFile!!,
+                                                csvFile = csvFile!!,  // null si pas encore exporté = pas inclus
+                                                darknessBotEnabled = darknessBotEnabled
+                                            )
+
+                                            onMarkExport("application/zip", zipFile!!.absolutePath)
+                                            createZipLauncher.launch("${wheelDisplayName}-${macSafe}_SoH_${timestamp}.zip")
+                                        } catch (e: Exception) {
+                                            Toast.makeText(
+                                                context,
+                                                context.getString(
+                                                    R.string.export_failed,
+                                                    "Archive",
+                                                    e.message ?: ""
+                                                ),
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        } finally {
+                                            isExporting = false
+                                        }
+                                    }
+                                },
+                                modifier = Modifier.onGloballyPositioned { coordinates ->
+                                    archiveExportBounds = coordinates.boundsInWindow()
+                                },
+                                enabled = !isExporting
+                            ) {
+                                Icon(
+                                    Icons.Default.FolderZip,
+                                    stringResource(R.string.export_archive_cd)
+                                )
+                            }
+
+                            IconButton(
+                                onClick = {
+                                    try {
+                                        if (lastExportPath != null && lastExportMime != null) {
+                                            Log.d(
+                                                TAG,
+                                                "last file: $lastExportPath, last MIME: $lastExportMime"
+                                            )
+                                            ShareUtils.shareFile(
+                                                context = context,
+                                                file = File(lastExportPath),
+                                                mimeType = lastExportMime,
+                                                chooserTitle = context.getString(R.string.share_chooser_title)
+                                            )
+                                        } else {
+                                            Toast.makeText(
+                                                context,
+                                                "Aucun fichier exporté (ou recréation après clear cache)",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
                                     } catch (e: Exception) {
+                                        Log.d(TAG, e.message ?: "")
                                         Toast.makeText(
                                             context,
                                             context.getString(
                                                 R.string.export_failed,
-                                                "Archive",
+                                                "SHARE",
                                                 e.message ?: ""
                                             ),
                                             Toast.LENGTH_SHORT
                                         ).show()
-                                    } finally {
-                                        isExporting = false
                                     }
-                                }
-                            },
-                            enabled = !isExporting
-                        ) {
-                            Icon(
-                                Icons.Default.FolderZip,
-                                stringResource(R.string.export_archive_cd)
-                            )
-                        }
-
-                        IconButton(
-                            onClick = {
-                                try {
-                                    if (lastExportPath != null && lastExportMime != null) {
-                                        Log.d(
-                                            TAG,
-                                            "last file: $lastExportPath, last MIME: $lastExportMime"
-                                        )
-                                        ShareUtils.shareFile(
-                                            context = context,
-                                            file = File(lastExportPath),
-                                            mimeType = lastExportMime,
-                                            chooserTitle = context.getString(R.string.share_chooser_title)
-                                        )
-                                    } else {
-                                        Toast.makeText(
-                                            context,
-                                            "Aucun fichier exporté (ou recréation après clear cache)",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                } catch (e: Exception) {
-                                    Log.d(TAG, e.message ?: "")
-                                    Toast.makeText(
-                                        context,
-                                        context.getString(
-                                            R.string.export_failed,
-                                            "SHARE",
-                                            e.message ?: ""
-                                        ),
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            },
-                            enabled = lastExportMime != null
-                        ) {
-                            Icon(
-                                Icons.Default.Share,
-                                contentDescription = stringResource(R.string.share)
-                            )
-                        }
-                    }
-                }
-
-                // Data table
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    Column {
-                        // Header row
-                        Row(modifier = Modifier.padding(8.dp)) {
-                            columnNames.forEach { colName ->
-                                Text(
-                                    colName,
-                                    modifier = Modifier
-                                        .width(150.dp)
-                                        .padding(horizontal = 4.dp),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis
+                                },
+                                enabled = lastExportMime != null
+                            ) {
+                                Icon(
+                                    Icons.Default.Share,
+                                    contentDescription = stringResource(R.string.share)
                                 )
                             }
                         }
+                    }
 
-                        HorizontalDivider()
+                    // Data table
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        Column {
+                            // Header row
+                            Row(modifier = Modifier.padding(8.dp)) {
+                                columnNames.forEach { colName ->
+                                    Text(
+                                        colName,
+                                        modifier = Modifier
+                                            .width(150.dp)
+                                            .padding(horizontal = 4.dp),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
 
-                        // Data rows
-                        rows.forEachIndexed { rowIdx, row ->
-                            Surface(
-                                color = if (rowIdx % 2 == 0)
-                                    MaterialTheme.colorScheme.surface
-                                else
-                                    MaterialTheme.colorScheme.surfaceVariant,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Row(modifier = Modifier.padding(8.dp)) {
-                                    columnNames.forEach { colName ->
-                                        val value = row[colName]
-                                        Text(
-                                            formatValue(value),
-                                            modifier = Modifier
-                                                .width(150.dp)
-                                                .padding(horizontal = 4.dp),
-                                            style = MaterialTheme.typography.bodySmall,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
+                            HorizontalDivider()
+
+                            // Data rows
+                            rows.forEachIndexed { rowIdx, row ->
+                                Surface(
+                                    color = if (rowIdx % 2 == 0)
+                                        MaterialTheme.colorScheme.surface
+                                    else
+                                        MaterialTheme.colorScheme.surfaceVariant,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Row(modifier = Modifier.padding(8.dp)) {
+                                        columnNames.forEach { colName ->
+                                            val value = row[colName]
+                                            Text(
+                                                formatValue(value),
+                                                modifier = Modifier
+                                                    .width(150.dp)
+                                                    .padding(horizontal = 4.dp),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+
+                    // Back button
+                    Button(
+                        onClick = {
+                            clearCharts()
+                            onBack()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.back))
+                    }
                 }
 
-                // Back button
-                Button(
-                    onClick = {
-                        clearCharts()
-                        onBack()
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.back))
+                // Spotlight onboarding overlay for results screen
+                if (showResultOnboarding) {
+                    SpotlightOverlay(
+                        steps = resultOnboardingSteps,
+                        currentStep = resultOnboardingStep,
+                        onNext = {
+                            if (resultOnboardingStep < resultOnboardingSteps.lastIndex) {
+                                resultOnboardingStep++
+                            } else {
+                                OnboardingManager.markResultSeen(context)
+                                showResultOnboarding = false
+                            }
+                        },
+                        onPrev = {
+                            if (resultOnboardingStep > 0) resultOnboardingStep--
+                        },
+                        onDismiss = {
+                            OnboardingManager.markResultSeen(context)
+                            showResultOnboarding = false
+                        }
+                    )
                 }
             }
         }
