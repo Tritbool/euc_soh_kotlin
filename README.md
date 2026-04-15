@@ -14,7 +14,7 @@
 
 [<img src="https://f-droid.org/badge/get-it-on-fr.png"
     alt="Disponible sur F-Droid"
-    height="80">]([https://f-droid.org/packages/NOM.DE.VOTRE.APPLICATION](https://f-droid.org/fr/packages/io.github.eucsoh.android/))
+    height="80">](https://f-droid.org/packages/io.github.eucsoh.android)
 
 <!-- Uncomment once published on F-Droid
 [![F-Droid](https://img.shields.io/f-droid/v/io.github.eucsoh.android)](https://f-droid.org/packages/io.github.eucsoh.android/)
