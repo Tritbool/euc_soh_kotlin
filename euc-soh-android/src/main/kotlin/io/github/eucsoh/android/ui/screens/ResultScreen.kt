@@ -76,7 +76,6 @@ import io.github.eucsoh.android.data.model.WheelIdentity
 import io.github.eucsoh.android.ui.onboarding.OnboardingManager
 import io.github.eucsoh.android.ui.onboarding.OnboardingStep
 import io.github.eucsoh.android.ui.onboarding.SpotlightOverlay
-import io.github.eucsoh.android.ui.SohViewModel
 import io.github.eucsoh.android.util.ShareUtils
 import io.github.eucsoh.android.visualization.CsvExportService
 import io.github.eucsoh.android.visualization.PdfExportService
@@ -93,9 +92,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.clickable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 /**
  * Enhanced ResultsScreen avec accès aux fichiers et graphiques.
@@ -128,17 +124,34 @@ fun ResultsScreenEnhanced(
     var resultOnboardingStep by remember { mutableStateOf(0) }
 
     // Bounds collected via onGloballyPositioned for spotlight targets
+    var filesBounds by remember { mutableStateOf(Rect.Zero) }
     var chartsBounds by remember { mutableStateOf(Rect.Zero) }
+    var pdfExportBounds by remember { mutableStateOf(Rect.Zero) }
+    var csvExportBounds by remember { mutableStateOf(Rect.Zero) }
     var archiveExportBounds by remember { mutableStateOf(Rect.Zero) }
+    var shareBounds by remember { mutableStateOf(Rect.Zero) }
+
     var analyzeBounds by remember { mutableStateOf(Rect.Zero) }
 
 
-
-    val resultOnboardingSteps = remember(chartsBounds, archiveExportBounds,analyzeBounds) {
+    val resultOnboardingSteps = remember(
+        filesBounds,
+        shareBounds,
+        chartsBounds,
+        pdfExportBounds,
+        csvExportBounds,
+        archiveExportBounds,
+        analyzeBounds
+    ) {
         listOf(
             OnboardingStep(
                 titleRes = R.string.onboarding_results_welcome_title,
                 bodyRes = R.string.onboarding_results_welcome_body,
+            ),
+            OnboardingStep(
+                titleRes = R.string.onboarding_results_files_title,
+                bodyRes = R.string.onboarding_results_files_body,
+                targetBounds = filesBounds
             ),
             OnboardingStep(
                 titleRes = R.string.onboarding_results_charts_title,
@@ -146,10 +159,26 @@ fun ResultsScreenEnhanced(
                 targetBounds = chartsBounds
             ),
             OnboardingStep(
-                titleRes = R.string.onboarding_results_export_title,
-                bodyRes = R.string.onboarding_results_export_body,
+                titleRes = R.string.onboarding_results_export_pdf_title,
+                bodyRes = R.string.onboarding_results_export_pdf_body,
+                targetBounds = pdfExportBounds
+            ),
+            OnboardingStep(
+                titleRes = R.string.onboarding_results_export_csv_title,
+                bodyRes = R.string.onboarding_results_export_csv_body,
+                targetBounds = csvExportBounds
+            ),
+            OnboardingStep(
+                titleRes = R.string.onboarding_results_export_archive_title,
+                bodyRes = R.string.onboarding_results_export_archive_body,
                 targetBounds = archiveExportBounds
+            ),
+            OnboardingStep(
+                titleRes = R.string.onboarding_results_export_share_title,
+                bodyRes = R.string.onboarding_results_export_share_body,
+                targetBounds = shareBounds
             )
+
         )
     }
 
@@ -307,7 +336,11 @@ fun ResultsScreenEnhanced(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Box(modifier = Modifier.fillMaxWidth()) {
-                            Column(modifier = Modifier.padding(16.dp).padding(end = 40.dp)) {
+                            Column(
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .padding(end = 40.dp)
+                            ) {
                                 Text(
                                     stringResource(R.string.results_title),
                                     style = MaterialTheme.typography.headlineSmall,
@@ -380,7 +413,11 @@ fun ResultsScreenEnhanced(
                             if (selectedWheel != null) {
                                 OutlinedButton(
                                     onClick = { showFiles = true },
-                                    modifier = Modifier.weight(1f)
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .onGloballyPositioned { coordinates ->
+                                            filesBounds = coordinates.boundsInRoot()
+                                        },
                                 ) {
                                     Icon(
                                         Icons.Default.Folder,
@@ -443,6 +480,9 @@ fun ResultsScreenEnhanced(
                                         }
                                     }
                                 },
+                                modifier = Modifier.onGloballyPositioned { coordinates ->
+                                    pdfExportBounds = coordinates.boundsInRoot()
+                                },
                                 enabled = !isExporting && result.plotData.gaussianResults.isNotEmpty()
                             ) {
                                 if (isExporting) CircularProgressIndicator(
@@ -485,6 +525,9 @@ fun ResultsScreenEnhanced(
                                             isExporting = false
                                         }
                                     }
+                                },
+                                modifier = Modifier.onGloballyPositioned { coordinates ->
+                                    csvExportBounds = coordinates.boundsInRoot()
                                 },
                                 enabled = !isExporting
                             ) {
@@ -590,6 +633,9 @@ fun ResultsScreenEnhanced(
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }
+                                },
+                                modifier = Modifier.onGloballyPositioned { coordinates ->
+                                    shareBounds = coordinates.boundsInRoot()
                                 },
                                 enabled = lastExportMime != null
                             ) {

@@ -285,8 +285,13 @@
 
     <string name="onboarding_welcome_title">Welcome to EUC SoH Analyzer</string>
     <string name="onboarding_welcome_body">This app analyzes your EUC ride logs to track battery and power-electronics health over time.\nLet\'s take a quick tour of the main features.</string>
+
     <string name="onboarding_scan_title">Scan your logs</string>
     <string name="onboarding_scan_body">Tap Refresh to scan for WheelLog, EUC World and DarknessBot log files on your device.\nDetected wheels will appear in the list below.</string>
+
+    <string name="onboarding_info_title">Read the information section</string>
+    <string name="onboarding_info_body">Read the information section to understand how the application works, and what it computes in details.</string>
+
     <string name="onboarding_darknessbot_title">DarknessBot toggle</string>
     <string name="onboarding_darknessbot_body">Enable this switch to include DarknessBot (.dbb) files in the analysis.\nNote: DarknessBot data has limited accuracy for some wheel brands.</string>
 
@@ -299,10 +304,24 @@
 
     <string name="onboarding_results_welcome_title">Results overview</string>
     <string name="onboarding_results_welcome_body">This screen shows the SoH metrics for the selected wheel.\nYou can view detailed data, charts and export reports.</string>
+
+    <string name="onboarding_results_files_title">Files details</string>
+    <string name="onboarding_results_files_body">Tap the files button to view the log files that are used / rejected for the analysis.</string>
+
     <string name="onboarding_results_charts_title">Charts</string>
     <string name="onboarding_results_charts_body">Tap the Charts button to view Gaussian, Trend, CUSUM and Inflexion charts for your wheel\'s metrics.</string>
-    <string name="onboarding_results_export_title">Export archive</string>
-    <string name="onboarding_results_export_body">Tap the archive icon to export a ZIP containing the PDF report, CSV data and all chart images.</string>
+
+    <string name="onboarding_results_export_pdf_title">Export PDF</string>
+    <string name="onboarding_results_export_pdf_body">Tap the PDF icon to export a PDF containing analysis results in detail, including data and all chart images.</string>
+
+    <string name="onboarding_results_export_csv_title">Export CSV</string>
+    <string name="onboarding_results_export_csv_body">Tap the CSV icon to export a CSV with analysis summary.</string>
+
+    <string name="onboarding_results_export_archive_title">Export archive</string>
+    <string name="onboarding_results_export_archive_body">Tap the archive icon to export a ZIP containing the PDF report, CSV data and all chart images.</string>
+
+    <string name="onboarding_results_export_share_title">Share results</string>
+    <string name="onboarding_results_export_share_body">Once you have generated a file (csv, pdf or zip), you can share it using the share button. The share button only shares the latest generated file</string>
 
     <string name="onboarding_help_cd">Show onboarding guide</string>
 </resources>

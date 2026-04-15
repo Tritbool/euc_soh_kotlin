@@ -86,6 +86,7 @@ fun MainScreen(
     onRequestPermissions: () -> Unit,
     onOpenInfo: () -> Unit
 ) {
+    val bannerHeight = 64.dp
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
 
@@ -96,6 +97,7 @@ fun MainScreen(
     var mainOnboardingStep by remember { mutableStateOf(0) }
 
     // Bounds collected via onGloballyPositioned for spotlight targets
+    var infoBounds by remember { mutableStateOf(Rect.Zero) }
     var refreshBounds by remember { mutableStateOf(Rect.Zero) }
     var darknessBotToggleBounds by remember { mutableStateOf(Rect.Zero) }
     var importArchiveBounds by remember { mutableStateOf(Rect.Zero) }
@@ -104,6 +106,7 @@ fun MainScreen(
     // Build onboarding steps — bounds are updated dynamically via onGloballyPositioned
     val mainOnboardingSteps =
         remember(
+            infoBounds,
             refreshBounds,
             darknessBotToggleBounds,
             importArchiveBounds,
@@ -118,6 +121,11 @@ fun MainScreen(
                         OnboardingStep(
                             titleRes = R.string.onboarding_welcome_title,
                             bodyRes = R.string.onboarding_welcome_body
+                        ),
+                        OnboardingStep(
+                            titleRes = R.string.onboarding_info_title,
+                            bodyRes = R.string.onboarding_info_body,
+                            targetBounds = infoBounds
                         ),
                         OnboardingStep(
                             titleRes = R.string.onboarding_scan_title,
@@ -144,6 +152,11 @@ fun MainScreen(
                             OnboardingStep(
                                 titleRes = R.string.onboarding_welcome_title,
                                 bodyRes = R.string.onboarding_welcome_body
+                            ),
+                            OnboardingStep(
+                                titleRes = R.string.onboarding_info_title,
+                                bodyRes = R.string.onboarding_info_body,
+                                targetBounds = infoBounds
                             ),
                             OnboardingStep(
                                 titleRes = R.string.onboarding_scan_title,
@@ -189,7 +202,7 @@ fun MainScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .statusBarsPadding()
-                        .height(64.dp)
+                        .height(bannerHeight)
                         .clip(RectangleShape)
                         .drawBehind {
                             // Calcule la largeur de la tuile en gardant le ratio original
@@ -235,7 +248,7 @@ fun MainScreen(
                     Row(
                         modifier = Modifier.align(Alignment.CenterEnd)
                     ) {
-                        if (!state.showResults && ! state.isScanning && ! state.isAnalyzing) {
+                        if (!state.showResults && !state.isScanning && !state.isAnalyzing) {
                             // Bouton ? pour relancer l'onboarding
                             IconButton(
                                 onClick = {
@@ -268,7 +281,11 @@ fun MainScreen(
                     }
                     // Bouton Info (aide) à gauche
                     IconButton(
-                        modifier = Modifier.align(Alignment.CenterStart),
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .onGloballyPositioned { coordinates ->
+                                infoBounds = coordinates.boundsInRoot()
+                            },
                         onClick = onOpenInfo
                     ) {
                         Icon(
@@ -280,7 +297,9 @@ fun MainScreen(
                 }
             }
         ) { padding ->
-            val topOffsetPx = with(LocalDensity.current) { padding.calculateTopPadding().toPx() }
+            val topOffsetPx = with(LocalDensity.current) {
+                padding.calculateTopPadding().toPx() + (bannerHeight.times(0.75f)).toPx()
+            }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -340,7 +359,7 @@ fun MainScreen(
                             onMarkExport = viewModel::markLastExport,
                             onBack = viewModel::hideResults,
                             darknessBotEnabled = state.darknessBotEnabled,
-                            topOffset = 0f
+                            topOffset = topOffsetPx
                         )
                     }
 
