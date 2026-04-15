@@ -220,6 +220,24 @@
     <string name="darknessbot_warning_cancel" translatable="false">Cancel</string>
 
 
+    <!-- Import archive -->
+    <string name="import_archive_button">Import archive</string>
+    <string name="import_confirm_title">Import archive</string>
+    <string name="import_confirm_file">File: %1$s</string>
+    <string name="import_confirm_wheel_mac">Wheel MAC: %1$s</string>
+    <string name="import_confirm_file_count">Files in archive: %1$d</string>
+    <string name="import_confirm_no_manifest">This archive does not contain a valid manifest. It was not created by EUC SoH.</string>
+    <string name="import_confirm_warning">Only import archives created by EUC SoH (file name format: WheelName_SoH_YYYYMMDD_HHMMSS.zip). The archive integrity will be verified before extraction.</string>
+    <string name="import_confirm_extract">Extract</string>
+    <string name="import_reading_manifest">Reading archive\u2026</string>
+    <string name="import_success_title">Import successful</string>
+    <string name="import_success_body">Wheel imported: %1$s</string>
+    <string name="import_error_title">Import failed</string>
+    <string name="import_error_manifest_missing">This archive does not contain a manifest. It was not created by EUC SoH or the archive is corrupted.</string>
+    <string name="import_error_hmac_invalid">The archive signature is invalid. The archive may have been modified outside of EUC SoH.</string>
+    <string name="import_error_file_corrupted">One or more files in the archive are corrupted. The SHA-256 checksum does not match.</string>
+
+
     <string name="info_s6_title" translatable="false">How the metrics are computed</string>
 
     <string name="info_s6_req_title" translatable="false">R_eq — Equivalent resistance</string>

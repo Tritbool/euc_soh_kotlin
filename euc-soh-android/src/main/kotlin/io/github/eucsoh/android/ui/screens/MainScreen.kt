@@ -18,6 +18,9 @@
 
 package io.github.eucsoh.android.ui.screens
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -27,15 +30,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,6 +51,9 @@ import io.github.eucsoh.Constants.CALIBRATING
 import io.github.eucsoh.Constants.DONE
 import io.github.eucsoh.android.data.model.WheelIdentity
 import io.github.eucsoh.android.ui.SohViewModel
+import io.github.eucsoh.android.visualization.ArchiveImportService
+import io.github.eucsoh.android.visualization.ArchiveManifest
+import io.github.eucsoh.android.visualization.ImportResult
 import androidx.compose.ui.res.stringResource
 import io.github.eucsoh.android.R
 import androidx.compose.ui.layout.ContentScale
@@ -56,6 +65,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -228,9 +238,19 @@ fun MainScreen(
                                 state.analysisResult!!.macAddress == state.selectedWheel?.macAddress,
                         onShowResults = viewModel::showResults,
                         darknessBotEnabled = state.darknessBotEnabled,
-                        onDarknessBotToggle = viewModel::requestDarknessBotToggle
+                        onDarknessBotToggle = viewModel::requestDarknessBotToggle,
+                        onImport = viewModel::requestImport
                     )
                 }
+            }
+
+            // Import archive flow
+            if (state.showImportDialog) {
+                ImportArchiveFlow(
+                    onDismiss = viewModel::dismissImportDialog,
+                    onPerformImport = viewModel::performImport,
+                    importResult = state.importResult
+                )
             }
 
             // DarknessBot warning dialog
@@ -429,6 +449,7 @@ fun WheelListContent(
     onShowResults: () -> Unit,
     darknessBotEnabled: Boolean = false,
     onDarknessBotToggle: () -> Unit = {},
+    onImport: () -> Unit = {},
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
@@ -494,6 +515,23 @@ fun WheelListContent(
                 checked = darknessBotEnabled,
                 onCheckedChange = { onDarknessBotToggle() }
             )
+        }
+
+        // Import archive button
+        OutlinedButton(
+            onClick = onImport,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 4.dp)
+        ) {
+            Icon(
+                Icons.Default.Upload,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(R.string.import_archive_button))
         }
 
         if (hasResults && selectedWheel != null) {
@@ -626,5 +664,178 @@ fun WheelCard(
                 }
             }
         }
+    }
+}
+
+/**
+ * Import archive flow:
+ * 1. User selects a ZIP file via ACTION_OPEN_DOCUMENT
+ * 2. Manifest is read to show confirmation dialog (wheel MAC, file name)
+ * 3. User confirms, then selects destination folder via ACTION_OPEN_DOCUMENT_TREE
+ * 4. Import is performed, result displayed
+ */
+@Composable
+fun ImportArchiveFlow(
+    onDismiss: () -> Unit,
+    onPerformImport: (Uri, Uri) -> Unit,
+    importResult: ImportResult?
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val importService = remember { ArchiveImportService(context) }
+
+    var selectedZipUri by remember { mutableStateOf<Uri?>(null) }
+    var selectedZipName by remember { mutableStateOf<String?>(null) }
+    var manifest by remember { mutableStateOf<ArchiveManifest?>(null) }
+    var showConfirmDialog by remember { mutableStateOf(false) }
+    var isReadingManifest by remember { mutableStateOf(false) }
+
+    // Step 3: folder picker launcher
+    val folderPickerLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocumentTree()
+    ) { destUri ->
+        if (destUri != null && selectedZipUri != null) {
+            onPerformImport(selectedZipUri!!, destUri)
+        }
+    }
+
+    // Step 1: ZIP picker launcher
+    val zipPickerLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            selectedZipUri = uri
+            // Get display name from URI
+            val cursor = context.contentResolver.query(uri, null, null, null, null)
+            selectedZipName = cursor?.use { c ->
+                if (c.moveToFirst()) {
+                    val nameIndex = c.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                    if (nameIndex >= 0) c.getString(nameIndex) else uri.lastPathSegment
+                } else uri.lastPathSegment
+            } ?: uri.lastPathSegment
+
+            // Read manifest to show confirmation
+            isReadingManifest = true
+            scope.launch {
+                manifest = importService.readManifest(uri)
+                isReadingManifest = false
+                showConfirmDialog = true
+            }
+        } else {
+            onDismiss()
+        }
+    }
+
+    // Show result dialog if import completed
+    if (importResult != null) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = {
+                Text(
+                    when (importResult) {
+                        is ImportResult.Success -> stringResource(R.string.import_success_title)
+                        is ImportResult.Error -> stringResource(R.string.import_error_title)
+                    }
+                )
+            },
+            text = {
+                Text(
+                    when (importResult) {
+                        is ImportResult.Success -> stringResource(R.string.import_success_body, importResult.wheelMac)
+                        is ImportResult.Error -> when (importResult.reason) {
+                            "manifest_missing" -> stringResource(R.string.import_error_manifest_missing)
+                            "hmac_invalid" -> stringResource(R.string.import_error_hmac_invalid)
+                            "file_corrupted" -> stringResource(R.string.import_error_file_corrupted)
+                            else -> importResult.reason
+                        }
+                    }
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.ok))
+                }
+            }
+        )
+        return
+    }
+
+    // Show confirmation dialog after manifest read
+    if (showConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showConfirmDialog = false
+                onDismiss()
+            },
+            title = { Text(stringResource(R.string.import_confirm_title)) },
+            text = {
+                Column {
+                    Text(stringResource(R.string.import_confirm_file, selectedZipName ?: ""))
+                    if (manifest != null) {
+                        Spacer(Modifier.height(8.dp))
+                        Text(stringResource(R.string.import_confirm_wheel_mac, manifest!!.wheelMac))
+                        Text(stringResource(R.string.import_confirm_file_count, manifest!!.files.size))
+                    } else {
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            stringResource(R.string.import_confirm_no_manifest),
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        stringResource(R.string.import_confirm_warning),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showConfirmDialog = false
+                        folderPickerLauncher.launch(null)
+                    },
+                    enabled = manifest != null
+                ) {
+                    Text(stringResource(R.string.import_confirm_extract))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showConfirmDialog = false
+                    onDismiss()
+                }) {
+                    Text(stringResource(R.string.mosfet_cancel))
+                }
+            }
+        )
+        return
+    }
+
+    // Loading indicator while reading manifest
+    if (isReadingManifest) {
+        AlertDialog(
+            onDismissRequest = {},
+            title = { Text(stringResource(R.string.import_reading_manifest)) },
+            text = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                    Text(selectedZipName ?: "")
+                }
+            },
+            confirmButton = {}
+        )
+        return
+    }
+
+    // Auto-launch ZIP picker on first composition
+    val launched = remember { mutableStateOf(false) }
+    if (!launched.value) {
+        launched.value = true
+        zipPickerLauncher.launch(arrayOf("application/zip"))
     }
 }

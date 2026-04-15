@@ -28,12 +28,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
+import java.io.OutputStream
+import java.security.DigestOutputStream
+import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import io.github.eucsoh.SohAnalyzer
+import io.github.eucsoh.android.BuildConfig
 import io.github.eucsoh.android.data.model.WheelDataSource
 
 /**
@@ -72,12 +76,19 @@ class SohArchiveExportService(private val context: Context) {
         val zipFile = File(outputDir, "${wheelName}_SoH_${timestamp}.zip")
         val macFolder = macAddress.replace(":", "_")
 
+        // Collect SHA256 hashes for each file written to the ZIP
+        val fileEntries = mutableListOf<ArchiveFileEntry>()
+
         ZipOutputStream(FileOutputStream(zipFile)).use { zos ->
 
             // 1. soh.pdf
-            zos.addFile(pdfFile, "soh-${wheelName}-${macAddress}.pdf")
+            val pdfEntryName = "soh-${wheelName}-${macAddress}.pdf"
+            fileEntries += zos.addFileWithHash(pdfFile, pdfEntryName)
             // soh.csv si fourni
-            csvFile?.let { zos.addFile(it, "soh_stats-${wheelName}-${macAddress}.csv") }
+            csvFile?.let {
+                val csvEntryName = "soh_stats-${wheelName}-${macAddress}.csv"
+                fileEntries += zos.addFileWithHash(it, csvEntryName)
+            }
 
 
             // 2. CSV files groupés par source
@@ -90,17 +101,6 @@ class SohArchiveExportService(private val context: Context) {
                         else                         -> "Other/${report.fileName}"
                     }
                     try {
-                        // Normalise le path en URI lisible par ContentResolver
-                        val uri = when {
-                            report.path.startsWith("content://") ->
-                                Uri.parse(report.path)
-                            report.path.startsWith("file://") ->
-                                Uri.parse(report.path)
-                            else ->
-                                // Chemin brut File → on lit directement avec java.io.File
-                                null
-                        }
-
                         val inputStream = when {
                             report.path.startsWith("content://") -> {
                                 try {
@@ -118,9 +118,14 @@ class SohArchiveExportService(private val context: Context) {
 
 
                         inputStream?.use { input ->
+                            val digest = MessageDigest.getInstance("SHA-256")
                             zos.putNextEntry(ZipEntry(entryPath))
-                            input.copyTo(zos)
+                            val digestOut = DigestOutputStream(zos as OutputStream, digest)
+                            input.copyTo(digestOut)
+                            digestOut.flush()
                             zos.closeEntry()
+                            val sha256 = digest.digest().joinToString("") { "%02x".format(it) }
+                            fileEntries += ArchiveFileEntry(name = entryPath, sha256 = sha256)
                         }
                     } catch (e: Exception) {
                         Log.w("SohArchiveExport", "Skipping ${report.fileName}: ${e.message}")
@@ -133,7 +138,7 @@ class SohArchiveExportService(private val context: Context) {
                     val dbbTempDir = File(context.cacheDir, "dbb_repack_tmp").also { it.mkdirs() }
                     val dbbFile = repackService.repack(dbbTempDir, macAddress)
                     if (dbbFile != null) {
-                        zos.addFile(dbbFile, dbbFile.name)
+                        fileEntries += zos.addFileWithHash(dbbFile, dbbFile.name)
                         Log.d(TAG, "Added .dbb to archive: ${dbbFile.name}")
                     }
                 } catch (e: Exception) {
@@ -141,14 +146,35 @@ class SohArchiveExportService(private val context: Context) {
                 }
             }
 
+            // 4. Build manifest, compute HMAC, write manifest.json as last entry
+            val manifest = ArchiveManifest(
+                appVersionCode = BuildConfig.VERSION_CODE,
+                wheelMac = macAddress,
+                files = fileEntries
+            ).let { m -> m.copy(hmac = m.computeHmac(ArchiveHmacKey.SECRET)) }
+
+            val manifestBytes = manifest.toJson().toByteArray(Charsets.UTF_8)
+            zos.putNextEntry(ZipEntry("manifest.json"))
+            zos.write(manifestBytes)
+            zos.closeEntry()
+            Log.d(TAG, "Manifest written: ${fileEntries.size} file entries, hmac=${manifest.hmac.take(16)}...")
+
         }
 
         zipFile
     }
 
-    private fun ZipOutputStream.addFile(file: File, entryName: String) {
+    /**
+     * Adds a file to the ZIP and returns its SHA256 hash for the manifest.
+     */
+    private fun ZipOutputStream.addFileWithHash(file: File, entryName: String): ArchiveFileEntry {
+        val digest = MessageDigest.getInstance("SHA-256")
         putNextEntry(ZipEntry(entryName))
-        file.inputStream().use { it.copyTo(this) }
+        val digestOut = DigestOutputStream(this as OutputStream, digest)
+        file.inputStream().use { it.copyTo(digestOut) }
+        digestOut.flush()
         closeEntry()
+        val sha256 = digest.digest().joinToString("") { "%02x".format(it) }
+        return ArchiveFileEntry(name = entryName, sha256 = sha256)
     }
 }
