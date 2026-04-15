@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -833,9 +834,7 @@ fun ImportArchiveFlow(
     }
 
     // Auto-launch ZIP picker on first composition
-    val launched = remember { mutableStateOf(false) }
-    if (!launched.value) {
-        launched.value = true
+    LaunchedEffect(Unit) {
         zipPickerLauncher.launch(arrayOf("application/zip"))
     }
 }
