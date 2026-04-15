@@ -100,7 +100,7 @@ fun MainScreen(
 
     // Build onboarding steps — bounds are updated dynamically via onGloballyPositioned
     val mainOnboardingSteps =
-        remember(refreshBounds, darknessBotToggleBounds, importArchiveBounds, analyzeBounds) {
+        remember(refreshBounds, darknessBotToggleBounds, importArchiveBounds, analyzeBounds, state.detectedWheels.isEmpty()) {
 
             when{
                 state.detectedWheels.isEmpty() ->

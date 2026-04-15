@@ -52,6 +52,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.zIndex
 import io.github.eucsoh.android.R
 
@@ -81,21 +83,23 @@ fun SpotlightOverlay(
         modifier = Modifier
             .fillMaxSize()
             .zIndex(100f)
+            // Consume all taps so the UI underneath is not interactive during onboarding
+            .pointerInput(Unit) { detectTapGestures { } }
     ) {
         // Semi-transparent overlay with cutout hole
-        Box(
+        // graphicsLayer on the Canvas itself with Offscreen strategy so BlendMode.Clear
+        // correctly punches through the black fill regardless of GPU/driver behaviour.
+        Canvas(
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
         ) {
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                // Draw semi-transparent black over entire surface
-                drawRect(color = Color.Black.copy(alpha = 0.7f))
+            // Draw semi-transparent black over entire surface
+            drawRect(color = Color.Black.copy(alpha = 0.7f))
 
-                // Cut out rounded rect hole if target is valid
-                if (hasTarget) {
-                    drawRoundRectHole(step.targetBounds, cornerRadiusPx)
-                }
+            // Cut out rounded rect hole if target is valid
+            if (hasTarget) {
+                drawRoundRectHole(step.targetBounds, cornerRadiusPx)
             }
         }
 
