@@ -99,33 +99,70 @@ fun MainScreen(
     var analyzeBounds by remember { mutableStateOf(Rect.Zero) }
 
     // Build onboarding steps — bounds are updated dynamically via onGloballyPositioned
-    val mainOnboardingSteps = remember(refreshBounds, darknessBotToggleBounds, importArchiveBounds, analyzeBounds) {
-        listOf(
-            OnboardingStep(
-                titleRes = R.string.onboarding_welcome_title,
-                bodyRes = R.string.onboarding_welcome_body
-            ),
-            OnboardingStep(
-                titleRes = R.string.onboarding_scan_title,
-                bodyRes = R.string.onboarding_scan_body,
-                targetBounds = refreshBounds
-            ),
-            OnboardingStep(
-                titleRes = R.string.onboarding_darknessbot_title,
-                bodyRes = R.string.onboarding_darknessbot_body,
-                targetBounds = darknessBotToggleBounds
-            ),
-            OnboardingStep(
-                titleRes = R.string.onboarding_import_title,
-                bodyRes = R.string.onboarding_import_body,
-                targetBounds = analyzeBounds
-            ),
-            OnboardingStep(
-                titleRes = R.string.onboarding_export_title,
-                bodyRes = R.string.onboarding_export_body
-            )
-        )
-    }
+    val mainOnboardingSteps =
+        remember(refreshBounds, darknessBotToggleBounds, importArchiveBounds, analyzeBounds) {
+
+            when{
+                state.detectedWheels.isEmpty() ->
+                    listOf(
+                        OnboardingStep(
+                            titleRes = R.string.onboarding_welcome_title,
+                            bodyRes = R.string.onboarding_welcome_body
+                        ),
+                        OnboardingStep(
+                            titleRes = R.string.onboarding_scan_title,
+                            bodyRes = R.string.onboarding_scan_body,
+                            targetBounds = refreshBounds
+                        ),
+                        OnboardingStep(
+                            titleRes = R.string.onboarding_darknessbot_title,
+                            bodyRes = R.string.onboarding_darknessbot_body,
+                            targetBounds = darknessBotToggleBounds
+                        ),
+
+                        OnboardingStep(
+                            titleRes = R.string.onboarding_import_title,
+                            bodyRes = R.string.onboarding_import_body,
+                            targetBounds = importArchiveBounds
+                        ),
+
+                    )
+                else ->
+                    listOf(
+                        OnboardingStep(
+                            titleRes = R.string.onboarding_welcome_title,
+                            bodyRes = R.string.onboarding_welcome_body
+                        ),
+                        OnboardingStep(
+                            titleRes = R.string.onboarding_scan_title,
+                            bodyRes = R.string.onboarding_scan_body,
+                            targetBounds = refreshBounds
+                        ),
+                        OnboardingStep(
+                            titleRes = R.string.onboarding_darknessbot_title,
+                            bodyRes = R.string.onboarding_darknessbot_body,
+                            targetBounds = darknessBotToggleBounds
+                        ),
+
+                        OnboardingStep(
+                            titleRes = R.string.onboarding_import_title,
+                            bodyRes = R.string.onboarding_import_body,
+                            targetBounds = importArchiveBounds
+                        ),
+
+                        OnboardingStep(
+                            titleRes = R.string.onboarding_analyze_title,
+                            bodyRes = R.string.onboarding_analyze_body,
+                            targetBounds = analyzeBounds
+                        ),
+                        OnboardingStep(
+                            titleRes = R.string.onboarding_export_title,
+                            bodyRes = R.string.onboarding_export_body
+                        )
+                    )
+            }
+
+        }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -293,7 +330,9 @@ fun MainScreen(
                             scanPath = state.scanRootPath,
                             darknessBotEnabled = state.darknessBotEnabled,
                             onDarknessBotToggle = viewModel::requestDarknessBotToggle,
-                            onImport = viewModel::requestImport
+                            onImport = viewModel::requestImport,
+                            onDarknessBotToggleBounds = { darknessBotToggleBounds = it },
+                            onImportArchiveBounds = { importArchiveBounds = it }
                         )
                     }
 
@@ -489,7 +528,9 @@ fun EmptyStateScreen(
     scanPath: String,
     darknessBotEnabled: Boolean = false,
     onDarknessBotToggle: () -> Unit = {},
-    onImport: () -> Unit = {}
+    onImport: () -> Unit = {},
+    onDarknessBotToggleBounds: (Rect) -> Unit = {},
+    onImportArchiveBounds: (Rect) -> Unit = {},
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -514,7 +555,10 @@ fun EmptyStateScreen(
             }
             Spacer(Modifier.height(8.dp))
             Button(
-                onClick = onImport
+                onClick = onImport,
+                modifier = Modifier.onGloballyPositioned { coordinates ->
+                    onImportArchiveBounds(coordinates.boundsInWindow())
+                }
             ) {
                 Icon(
                     Icons.Default.Upload,
@@ -531,7 +575,10 @@ fun EmptyStateScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .onGloballyPositioned { coordinates ->
+                        onDarknessBotToggleBounds(coordinates.boundsInWindow())
+                    },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -900,7 +947,8 @@ fun ImportArchiveFlow(
             )
         }
 
-        ImportStep.PICKING_ZIP -> { /* SAF picker ouvert, pas de dialog */ }
+        ImportStep.PICKING_ZIP -> { /* SAF picker ouvert, pas de dialog */
+        }
 
         ImportStep.READING -> {
             AlertDialog(
@@ -928,8 +976,18 @@ fun ImportArchiveFlow(
                         Text(stringResource(R.string.import_confirm_file, selectedZipName ?: ""))
                         if (manifest != null) {
                             Spacer(Modifier.height(4.dp))
-                            Text(stringResource(R.string.import_confirm_wheel_mac, manifest!!.wheelMac))
-                            Text(stringResource(R.string.import_confirm_file_count, manifest!!.files.size))
+                            Text(
+                                stringResource(
+                                    R.string.import_confirm_wheel_mac,
+                                    manifest!!.wheelMac
+                                )
+                            )
+                            Text(
+                                stringResource(
+                                    R.string.import_confirm_file_count,
+                                    manifest!!.files.size
+                                )
+                            )
                         } else {
                             Spacer(Modifier.height(4.dp))
                             Text(
@@ -955,7 +1013,8 @@ fun ImportArchiveFlow(
             )
         }
 
-        ImportStep.PICKING_FOLDER -> { /* SAF folder picker ouvert, pas de dialog */ }
+        ImportStep.PICKING_FOLDER -> { /* SAF folder picker ouvert, pas de dialog */
+        }
 
         ImportStep.EXTRACTING -> {
             AlertDialog(
@@ -994,7 +1053,11 @@ fun ImportArchiveFlow(
                 text = {
                     Text(
                         when (result) {
-                            is ImportResult.Success -> stringResource(R.string.import_success_body, result.wheelMac)
+                            is ImportResult.Success -> stringResource(
+                                R.string.import_success_body,
+                                result.wheelMac
+                            )
+
                             is ImportResult.Error -> when (result.reason) {
                                 "manifest_missing" -> stringResource(R.string.import_error_manifest_missing)
                                 "hmac_invalid" -> stringResource(R.string.import_error_hmac_invalid)

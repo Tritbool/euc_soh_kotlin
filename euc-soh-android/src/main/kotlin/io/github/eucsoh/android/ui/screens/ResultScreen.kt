@@ -110,6 +110,7 @@ fun ResultsScreenEnhanced(
     val summary = remember(result) { result.buildSummary(selectedWheel?.displayName ?: "Wheel") }
     val columnNames = summary.logs.firstOrNull()?.keys?.toList() ?: emptyList()
     val rows = summary.logs
+    val context = LocalContext.current
 
     var showFiles by remember { mutableStateOf(false) }
     var showCharts by remember { mutableStateOf(false) }
@@ -153,7 +154,6 @@ fun ResultsScreenEnhanced(
     var isExporting by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
     val pdfExporter = remember { PdfExportService(context) }
     val csvExporter = remember { CsvExportService(context) }
     val archiveService = remember { SohArchiveExportService(context) }
