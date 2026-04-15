@@ -270,58 +270,58 @@
     <string name="info_s6_i2int_tech" translatable="false">I²_int = (∫ I_phase² dt) / T_ride\n\nThe integral is computed with the trapezoid rule using actual timestamps when available, or a 0.1 s fallback. Squaring the current makes the metric proportional to Joule heating (P = R·I²). Normalising by ride duration makes long calm rides and short aggressive ones comparable on a per-ride basis.\n\nThe chart shows both the per-ride dose (left axis) and a cumulative sum from ride 1 to N (right axis, dashed grey line).</string>
 
 
-    <string name="import_warn_title">Import an EUC SoH archive</string>
-    <string name="import_warn_body">Only archives exported by EUC SoH can be imported. The archive will be verified before extraction — any archive that fails verification will be rejected.</string>
-    <string name="import_warn_filename_example">WheelName_SoH_YYYYMMDD_HHMMSS.zip</string>
-    <string name="import_warn_continue">Select archive</string>
-    <string name="import_extracting_title">Extracting archive…</string>
+    <string name="import_warn_title" translatable="false">Import an EUC SoH archive</string>
+    <string name="import_warn_body" translatable="false">Only archives exported by EUC SoH can be imported. The archive will be verified before extraction — any archive that fails verification will be rejected.</string>
+    <string name="import_warn_filename_example" translatable="false">WheelName_SoH_YYYYMMDD_HHMMSS.zip</string>
+    <string name="import_warn_continue" translatable="false">Select archive</string>
+    <string name="import_extracting_title" translatable="false">Extracting archive…</string>
 
 
     <!-- Onboarding -->
-    <string name="onboarding_next">Next</string>
-    <string name="onboarding_prev">Previous</string>
-    <string name="onboarding_finish">Finish</string>
-    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next" translatable="false">Next</string>
+    <string name="onboarding_prev" translatable="false">Previous</string>
+    <string name="onboarding_finish" translatable="false">Finish</string>
+    <string name="onboarding_skip" translatable="false">Skip</string>
 
-    <string name="onboarding_welcome_title">Welcome to EUC SoH Analyzer</string>
-    <string name="onboarding_welcome_body">This app analyzes your EUC ride logs to track battery and power-electronics health over time.\nLet\'s take a quick tour of the main features.</string>
+    <string name="onboarding_welcome_title" translatable="false">Welcome to EUC SoH Analyzer</string>
+    <string name="onboarding_welcome_body" translatable="false">This app analyzes your EUC ride logs to track battery and power-electronics health over time.\nLet\'s take a quick tour of the main features.</string>
 
-    <string name="onboarding_scan_title">Scan your logs</string>
-    <string name="onboarding_scan_body">Tap Refresh to scan for WheelLog, EUC World and DarknessBot log files on your device.\nDetected wheels will appear in the list below.</string>
+    <string name="onboarding_scan_title" translatable="false">Scan your logs</string>
+    <string name="onboarding_scan_body" translatable="false">Tap Refresh to scan for WheelLog, EUC World and DarknessBot log files on your device.\nDetected wheels will appear in the list below.</string>
 
     <string name="onboarding_info_title">Read the information section</string>
     <string name="onboarding_info_body">Read the information section to understand how the application works, and what it computes in details.</string>
 
-    <string name="onboarding_darknessbot_title">DarknessBot toggle</string>
-    <string name="onboarding_darknessbot_body">Enable this switch to include DarknessBot (.dbb) files in the analysis.\nNote: DarknessBot data has limited accuracy for some wheel brands.</string>
+    <string name="onboarding_darknessbot_title" translatable="false">DarknessBot toggle</string>
+    <string name="onboarding_darknessbot_body" translatable="false">Enable this switch to include DarknessBot (.dbb) files in the analysis.\nNote: DarknessBot data has limited accuracy for some wheel brands.</string>
 
-    <string name="onboarding_import_title">Import an EUC SoH Archive</string>
-    <string name="onboarding_import_body">Select an EUC SoH Archive to import data to your phone and include wheel history to the analysis</string>
-    <string name="onboarding_analyze_title">Analyze a wheel</string>
-    <string name="onboarding_analyze_body">Select a wheel from the list, then tap the Analyze button to start the SoH analysis.\nResults will appear once processing is complete.</string>
-    <string name="onboarding_export_title">Export your results</string>
-    <string name="onboarding_export_body">After analysis, you can export results as PDF, CSV or a full ZIP archive from the results screen.</string>
+    <string name="onboarding_import_title" translatable="false">Import an EUC SoH Archive</string>
+    <string name="onboarding_import_body" translatable="false">Select an EUC SoH Archive to import data to your phone and include wheel history to the analysis</string>
+    <string name="onboarding_analyze_title" translatable="false">Analyze a wheel</string>
+    <string name="onboarding_analyze_body" translatable="false">Select a wheel from the list, then tap the Analyze button to start the SoH analysis. Results will appear once processing is complete.</string>
+    <string name="onboarding_export_title" translatable="false">Export your results</string>
+    <string name="onboarding_export_body" translatable="false">After analysis, you can export results as PDF, CSV or a full ZIP archive from the results screen.</string>
 
-    <string name="onboarding_results_welcome_title">Results overview</string>
-    <string name="onboarding_results_welcome_body">This screen shows the SoH metrics for the selected wheel.\nYou can view detailed data, charts and export reports.</string>
+    <string name="onboarding_results_welcome_title" translatable="false">Results overview</string>
+    <string name="onboarding_results_welcome_body" translatable="false">This screen shows the SoH metrics for the selected wheel.\nYou can view detailed data, charts and export reports.</string>
 
-    <string name="onboarding_results_files_title">Files details</string>
-    <string name="onboarding_results_files_body">Tap the files button to view the log files that are used / rejected for the analysis.</string>
+    <string name="onboarding_results_files_title" translatable="false">Files details</string>
+    <string name="onboarding_results_files_body" translatable="false">Tap the files button to view the log files that are used / rejected for the analysis.</string>
 
-    <string name="onboarding_results_charts_title">Charts</string>
-    <string name="onboarding_results_charts_body">Tap the Charts button to view Gaussian, Trend, CUSUM and Inflexion charts for your wheel\'s metrics.</string>
+    <string name="onboarding_results_charts_title" translatable="false">Charts</string>
+    <string name="onboarding_results_charts_body" translatable="false">Tap the Charts button to view Gaussian, Trend, CUSUM and Inflexion charts for your wheel\'s metrics.</string>
 
-    <string name="onboarding_results_export_pdf_title">Export PDF</string>
-    <string name="onboarding_results_export_pdf_body">Tap the PDF icon to export a PDF containing analysis results in detail, including data and all chart images.</string>
+    <string name="onboarding_results_export_pdf_title" translatable="false">Export PDF</string>
+    <string name="onboarding_results_export_pdf_body" translatable="false">Tap the PDF icon to export a PDF containing analysis results in detail, including data and all chart images.</string>
 
-    <string name="onboarding_results_export_csv_title">Export CSV</string>
-    <string name="onboarding_results_export_csv_body">Tap the CSV icon to export a CSV with analysis summary.</string>
+    <string name="onboarding_results_export_csv_title" translatable="false">Export CSV</string>
+    <string name="onboarding_results_export_csv_body" translatable="false">Tap the CSV icon to export a CSV with analysis summary.</string>
 
-    <string name="onboarding_results_export_archive_title">Export archive</string>
-    <string name="onboarding_results_export_archive_body">Tap the archive icon to export a ZIP containing the PDF report, CSV data and all chart images.</string>
+    <string name="onboarding_results_export_archive_title" translatable="false">Export archive</string>
+    <string name="onboarding_results_export_archive_body" translatable="false">Tap the archive icon to export a ZIP containing the PDF report, CSV data and all chart images.</string>
 
-    <string name="onboarding_results_export_share_title">Share results</string>
-    <string name="onboarding_results_export_share_body">Once you have generated a file (csv, pdf or zip), you can share it using the share button. The share button only shares the latest generated file</string>
+    <string name="onboarding_results_export_share_title" translatable="false">Share results</string>
+    <string name="onboarding_results_export_share_body" translatable="false">Once you have generated a file (csv, pdf or zip), you can share it using the share button. The share button only shares the latest generated file</string>
 
-    <string name="onboarding_help_cd">Show onboarding guide</string>
+    <string name="onboarding_help_cd" translatable="false">Show onboarding guide</string>
 </resources>

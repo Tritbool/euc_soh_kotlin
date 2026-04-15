@@ -86,6 +86,9 @@ fun MainScreen(
     onRequestPermissions: () -> Unit,
     onOpenInfo: () -> Unit
 ) {
+
+
+
     val bannerHeight = 64.dp
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
@@ -192,6 +195,7 @@ fun MainScreen(
             }
 
         }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -409,6 +413,7 @@ fun MainScreen(
                         importProgress = state.importProgress
                     )
                 }
+
 
                 // DarknessBot warning dialog
                 if (state.showDarknessBotWarningDialog) {

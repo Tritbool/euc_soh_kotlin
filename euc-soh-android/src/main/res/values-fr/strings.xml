@@ -19,6 +19,7 @@
 
     <string name="detected_eucs">EUC détectés (%1$d)</string>
     <string name="analyze_button">Analyser %1$s</string>
+    <string name="analyze_button_mock">Analyser</string>
     <string name="view_last_results">Voir les derniers résultats</string>
     <string name="csv_logs_count">%1$d logs CSV</string>
     <string name="mac_label">MAC : %1$s</string>
@@ -278,19 +279,31 @@
     <string name="onboarding_welcome_body">Cette application analyse vos logs de trajet EUC pour suivre la santé de la batterie et de l\'électronique de puissance.\nDécouvrons ensemble les fonctionnalités principales.</string>
     <string name="onboarding_scan_title">Scanner vos logs</string>
     <string name="onboarding_scan_body">Appuyez sur Actualiser pour rechercher les fichiers WheelLog, EUC World et DarknessBot sur votre appareil.\nLes roues détectées apparaîtront dans la liste ci-dessous.</string>
+    <string name="onboarding_info_body">Lisez la section d\'information pour comprendre le fonctionnement de l\'application et les calculs qu\'elle effectue en détail.</string>
     <string name="onboarding_darknessbot_title">Option DarknessBot</string>
     <string name="onboarding_darknessbot_body">Activez ce switch pour inclure les fichiers DarknessBot (.dbb) dans l\'analyse.\nAttention : les données DarknessBot ont une précision limitée pour certaines marques.</string>
     <string name="onboarding_import_title">Analyser une roue</string>
     <string name="onboarding_import_body">Sélectionnez une roue dans la liste, puis appuyez sur le bouton Analyser pour lancer l\'analyse SoH.\nLes résultats s\'afficheront une fois le traitement terminé.</string>
+    <string name="onboarding_analyze_body">"  Sélectionnez une roue dans la liste, puis appuyez sur le bouton Analyser pour lancer l'analyse de l'état de santé. Les résultats s'afficheront une fois le traitement terminé."</string>
     <string name="onboarding_export_title">Exporter vos résultats</string>
     <string name="onboarding_export_body">Après l\'analyse, vous pouvez exporter les résultats en PDF, CSV ou archive ZIP complète depuis l\'écran des résultats.</string>
 
     <string name="onboarding_results_welcome_title">Aperçu des résultats</string>
     <string name="onboarding_results_welcome_body">Cet écran affiche les métriques SoH de la roue sélectionnée.\nVous pouvez consulter les données détaillées, les graphiques et exporter des rapports.</string>
+    <string name="onboarding_results_files_body">Appuyez sur le bouton « Fichiers » pour afficher les fichiers journaux utilisés/rejetés pour l’analyse.</string>
     <string name="onboarding_results_charts_title">Graphiques</string>
     <string name="onboarding_results_charts_body">Appuyez sur le bouton Graphiques pour afficher les courbes Gaussienne, Tendance, CUSUM et Inflexion de vos métriques.</string>
-    <string name="onboarding_results_export_title">Exporter l\'archive</string>
-    <string name="onboarding_results_export_body">Appuyez sur l\'icône d\'archive pour exporter un ZIP contenant le rapport PDF, les données CSV et toutes les images de graphiques.</string>
 
+    <string name="onboarding_results_export_share_body">Une fois qu\'un fichier a été généré (CSV, PDF ou ZIP), vous pouvez le partager à l\'aide du bouton de partage. Ce bouton ne permet de partager que le dernier fichier qui a été généré.</string>
     <string name="onboarding_help_cd">Afficher le guide d\'utilisation</string>
+    <string name="onboarding_info_title">Lire les explications</string>
+    <string name="onboarding_analyze_title">Analyser un EUC</string>
+    <string name="onboarding_results_files_title">Détails des fichiers</string>
+    <string name="onboarding_results_export_pdf_title">Exporter un PDF</string>
+    <string name="onboarding_results_export_pdf_body">Appuyez sur l\'icône PDF pour exporter un PDF contenant les résultats d\'analyse détaillés, y compris les données et toutes les graphiques.</string>
+    <string name="onboarding_results_export_csv_title">Exporter un CSV</string>
+    <string name="onboarding_results_export_csv_body">Appuyez sur l\'icône CSV pour exporter un fichier CSV contenant un résumé de l\'analyse.</string>
+    <string name="onboarding_results_export_archive_title">Exporter une archive ZIP</string>
+    <string name="onboarding_results_export_archive_body">Appuyez sur l\'icône d\'archive pour exporter un fichier ZIP contenant le rapport PDF, les données CSV et toutes les images des graphiques.</string>
+    <string name="onboarding_results_export_share_title">Partager les résultats</string>
 </resources>
