@@ -95,8 +95,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.clickable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.layout.boundsInParent
-import androidx.compose.ui.layout.boundsInRoot
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 /**
@@ -548,7 +546,6 @@ fun ResultsScreenEnhanced(
                                     }
                                 },
                                 modifier = Modifier.onGloballyPositioned { coordinates ->
-                                    archiveExportBounds = coordinates.boundsInParent()
                                     archiveExportBounds = coordinates.boundsInRoot()
                                 },
                                 enabled = !isExporting
