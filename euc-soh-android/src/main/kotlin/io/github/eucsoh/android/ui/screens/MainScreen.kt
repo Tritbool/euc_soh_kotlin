@@ -690,6 +690,16 @@ fun WheelCard(
  * 4. Import is performed, result displayed
  */
 @Composable
+private enum class ImportStep {
+    WARN,
+    PICKING_ZIP,
+    READING,
+    DETAILS,
+    PICKING_FOLDER,
+    RESULT
+}
+
+@Composable
 fun ImportArchiveFlow(
     onDismiss: () -> Unit,
     onPerformImport: (Uri, Uri) -> Unit,
@@ -699,28 +709,30 @@ fun ImportArchiveFlow(
     val scope = rememberCoroutineScope()
     val importService = remember { ArchiveImportService(context) }
 
+    var step by remember { mutableStateOf(ImportStep.WARN) }
     var selectedZipUri by remember { mutableStateOf<Uri?>(null) }
     var selectedZipName by remember { mutableStateOf<String?>(null) }
     var manifest by remember { mutableStateOf<ArchiveManifest?>(null) }
-    var showConfirmDialog by remember { mutableStateOf(false) }
-    var isReadingManifest by remember { mutableStateOf(false) }
 
-    // Step 3: folder picker launcher
+    if (importResult != null && step != ImportStep.RESULT) {
+        step = ImportStep.RESULT
+    }
+
     val folderPickerLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocumentTree()
     ) { destUri ->
         if (destUri != null && selectedZipUri != null) {
             onPerformImport(selectedZipUri!!, destUri)
+        } else {
+            onDismiss()
         }
     }
 
-    // Step 1: ZIP picker launcher
     val zipPickerLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri ->
         if (uri != null) {
             selectedZipUri = uri
-            // Get display name from URI
             val cursor = context.contentResolver.query(uri, null, null, null, null)
             selectedZipName = cursor?.use { c ->
                 if (c.moveToFirst()) {
@@ -728,127 +740,141 @@ fun ImportArchiveFlow(
                     if (nameIndex >= 0) c.getString(nameIndex) else uri.lastPathSegment
                 } else uri.lastPathSegment
             } ?: uri.lastPathSegment
-
-            // Read manifest to show confirmation
-            isReadingManifest = true
+            step = ImportStep.READING
             scope.launch {
                 manifest = importService.readManifest(uri)
-                isReadingManifest = false
-                showConfirmDialog = true
+                step = ImportStep.DETAILS
             }
         } else {
             onDismiss()
         }
     }
 
-    // Show result dialog if import completed
-    if (importResult != null) {
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            title = {
-                Text(
-                    when (importResult) {
-                        is ImportResult.Success -> stringResource(R.string.import_success_title)
-                        is ImportResult.Error -> stringResource(R.string.import_error_title)
-                    }
-                )
-            },
-            text = {
-                Text(
-                    when (importResult) {
-                        is ImportResult.Success -> stringResource(R.string.import_success_body, importResult.wheelMac)
-                        is ImportResult.Error -> when (importResult.reason) {
-                            "manifest_missing" -> stringResource(R.string.import_error_manifest_missing)
-                            "hmac_invalid" -> stringResource(R.string.import_error_hmac_invalid)
-                            "file_corrupted" -> stringResource(R.string.import_error_file_corrupted)
-                            else -> importResult.reason
-                        }
-                    }
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.ok))
-                }
-            }
-        )
-        return
+    LaunchedEffect(step) {
+        when (step) {
+            ImportStep.PICKING_ZIP -> zipPickerLauncher.launch(arrayOf("application/zip"))
+            ImportStep.PICKING_FOLDER -> folderPickerLauncher.launch(null)
+            else -> {}
+        }
     }
 
-    // Show confirmation dialog after manifest read
-    if (showConfirmDialog) {
-        AlertDialog(
-            onDismissRequest = {
-                showConfirmDialog = false
-                onDismiss()
-            },
-            title = { Text(stringResource(R.string.import_confirm_title)) },
-            text = {
-                Column {
-                    Text(stringResource(R.string.import_confirm_file, selectedZipName ?: ""))
-                    if (manifest != null) {
-                        Spacer(Modifier.height(8.dp))
-                        Text(stringResource(R.string.import_confirm_wheel_mac, manifest!!.wheelMac))
-                        Text(stringResource(R.string.import_confirm_file_count, manifest!!.files.size))
-                    } else {
-                        Spacer(Modifier.height(8.dp))
+    when (step) {
+        ImportStep.WARN -> {
+            AlertDialog(
+                onDismissRequest = onDismiss,
+                title = { Text(stringResource(R.string.import_warn_title)) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(stringResource(R.string.import_warn_body))
                         Text(
-                            stringResource(R.string.import_confirm_no_manifest),
-                            color = MaterialTheme.colorScheme.error
+                            stringResource(R.string.import_warn_filename_example),
+                            style = MaterialTheme.typography.bodySmall,
+                            fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    Spacer(Modifier.height(12.dp))
+                },
+                confirmButton = {
+                    TextButton(onClick = { step = ImportStep.PICKING_ZIP }) {
+                        Text(stringResource(R.string.import_warn_continue))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = onDismiss) {
+                        Text(stringResource(R.string.mosfet_cancel))
+                    }
+                }
+            )
+        }
+
+        ImportStep.PICKING_ZIP -> { /* SAF picker ouvert, pas de dialog */ }
+
+        ImportStep.READING -> {
+            AlertDialog(
+                onDismissRequest = {},
+                title = { Text(stringResource(R.string.import_reading_manifest)) },
+                text = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        Text(selectedZipName ?: "")
+                    }
+                },
+                confirmButton = {}
+            )
+        }
+
+        ImportStep.DETAILS -> {
+            AlertDialog(
+                onDismissRequest = onDismiss,
+                title = { Text(stringResource(R.string.import_confirm_title)) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(stringResource(R.string.import_confirm_file, selectedZipName ?: ""))
+                        if (manifest != null) {
+                            Spacer(Modifier.height(4.dp))
+                            Text(stringResource(R.string.import_confirm_wheel_mac, manifest!!.wheelMac))
+                            Text(stringResource(R.string.import_confirm_file_count, manifest!!.files.size))
+                        } else {
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                stringResource(R.string.import_confirm_no_manifest),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = { step = ImportStep.PICKING_FOLDER },
+                        enabled = manifest != null
+                    ) {
+                        Text(stringResource(R.string.import_confirm_extract))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = onDismiss) {
+                        Text(stringResource(R.string.mosfet_cancel))
+                    }
+                }
+            )
+        }
+
+        ImportStep.PICKING_FOLDER -> { /* SAF folder picker ouvert, pas de dialog */ }
+
+        ImportStep.RESULT -> {
+            val result = importResult ?: return
+            AlertDialog(
+                onDismissRequest = onDismiss,
+                title = {
                     Text(
-                        stringResource(R.string.import_confirm_warning),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        when (result) {
+                            is ImportResult.Success -> stringResource(R.string.import_success_title)
+                            is ImportResult.Error -> stringResource(R.string.import_error_title)
+                        }
                     )
+                },
+                text = {
+                    Text(
+                        when (result) {
+                            is ImportResult.Success -> stringResource(R.string.import_success_body, result.wheelMac)
+                            is ImportResult.Error -> when (result.reason) {
+                                "manifest_missing" -> stringResource(R.string.import_error_manifest_missing)
+                                "hmac_invalid" -> stringResource(R.string.import_error_hmac_invalid)
+                                "file_corrupted" -> stringResource(R.string.import_error_file_corrupted)
+                                else -> result.reason
+                            }
+                        }
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = onDismiss) {
+                        Text(stringResource(R.string.ok))
+                    }
                 }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showConfirmDialog = false
-                        folderPickerLauncher.launch(null)
-                    },
-                    enabled = manifest != null
-                ) {
-                    Text(stringResource(R.string.import_confirm_extract))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    showConfirmDialog = false
-                    onDismiss()
-                }) {
-                    Text(stringResource(R.string.mosfet_cancel))
-                }
-            }
-        )
-        return
-    }
-
-    // Loading indicator while reading manifest
-    if (isReadingManifest) {
-        AlertDialog(
-            onDismissRequest = {},
-            title = { Text(stringResource(R.string.import_reading_manifest)) },
-            text = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                    Text(selectedZipName ?: "")
-                }
-            },
-            confirmButton = {}
-        )
-        return
-    }
-
-    // Auto-launch ZIP picker on first composition
-    LaunchedEffect(Unit) {
-        zipPickerLauncher.launch(arrayOf("application/zip"))
+            )
+        }
     }
 }

@@ -269,4 +269,8 @@
     <string name="info_s6_i2int_tech" translatable="false">I²_int = (∫ I_phase² dt) / T_ride\n\nThe integral is computed with the trapezoid rule using actual timestamps when available, or a 0.1 s fallback. Squaring the current makes the metric proportional to Joule heating (P = R·I²). Normalising by ride duration makes long calm rides and short aggressive ones comparable on a per-ride basis.\n\nThe chart shows both the per-ride dose (left axis) and a cumulative sum from ride 1 to N (right axis, dashed grey line).</string>
 
 
+    <string name="import_warn_title">Import an EUC SoH archive</string>
+    <string name="import_warn_body">Only archives exported by EUC SoH can be imported. The archive will be verified before extraction — any archive that fails verification will be rejected.</string>
+    <string name="import_warn_filename_example">WheelName_SoH_YYYYMMDD_HHMMSS.zip</string>
+    <string name="import_warn_continue">Select archive</string>
 </resources>

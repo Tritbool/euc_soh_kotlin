@@ -261,4 +261,8 @@
     <string name="info_s6_i2int_tech">I²_int = (∫ I_phase² dt) / T_trajet\n\nL\'intégrale est calculée par la méthode des trapèzes avec les horodatages réels si disponibles, sinon un pas de 0,1 s par défaut. Mettre le courant au carré le rend proportionnel à l\'échauffement par effet Joule (P = R·I²). La normalisation par la durée du trajet rend comparables un long trajet calme et un trajet court agressif sur une base par trajet.\n\nLe graphique affiche à la fois la dose par trajet (axe gauche) et la somme cumulative du trajet 1 au trajet N (axe droit, ligne grise pointillée).</string>
     <string name="info_expand_label">Détails techniques</string>
 
+    <string name="import_warn_title">Importer une archive EUC SoH</string>
+    <string name="import_warn_body">Seules les archives exportées par EUC SoH peuvent être importées. L\'archive sera vérifiée avant extraction — toute archive ne passant pas la vérification sera rejetée.</string>
+    <string name="import_warn_filename_example">NomRoue_SoH_AAAAMMJJ_HHMMSS.zip</string>
+    <string name="import_warn_continue">Sélectionner l\'archive</string>
 </resources>
