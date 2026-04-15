@@ -221,7 +221,8 @@ fun MainScreen(
                         onRetry = { viewModel.scanWheels(forceRefresh = true) },
                         scanPath = state.scanRootPath,
                         darknessBotEnabled = state.darknessBotEnabled,
-                        onDarknessBotToggle = viewModel::requestDarknessBotToggle
+                        onDarknessBotToggle = viewModel::requestDarknessBotToggle,
+                        onImport = viewModel::requestImport
                     )
                 }
 
@@ -388,7 +389,8 @@ fun EmptyStateScreen(
     onRetry: () -> Unit,
     scanPath: String,
     darknessBotEnabled: Boolean = false,
-    onDarknessBotToggle: () -> Unit = {}
+    onDarknessBotToggle: () -> Unit = {},
+    onImport: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -412,7 +414,19 @@ fun EmptyStateScreen(
                 Text(stringResource(R.string.check_permissions))
             }
             Spacer(Modifier.height(8.dp))
-            TextButton(onClick = onRetry) {
+            Button(
+                onClick = onImport
+            ) {
+                Icon(
+                    Icons.Default.Upload,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.import_archive_button))
+            }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(onClick = onRetry) {
                 Text(stringResource(R.string.retry))
             }
             Row(
