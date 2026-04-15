@@ -12,6 +12,10 @@
 [![License: AGPL v3+](https://img.shields.io/badge/License-AGPL_v3+-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![HAL](https://img.shields.io/badge/HAL-05553115-4b6c8b)](https://hal.science/hal-05553115)
 
+[<img src="https://f-droid.org/badge/get-it-on-fr.png"
+    alt="Disponible sur F-Droid"
+    height="80">]([https://f-droid.org/packages/NOM.DE.VOTRE.APPLICATION](https://f-droid.org/fr/packages/io.github.eucsoh.android/))
+
 <!-- Uncomment once published on F-Droid
 [![F-Droid](https://img.shields.io/f-droid/v/io.github.eucsoh.android)](https://f-droid.org/packages/io.github.eucsoh.android/)
 -->
