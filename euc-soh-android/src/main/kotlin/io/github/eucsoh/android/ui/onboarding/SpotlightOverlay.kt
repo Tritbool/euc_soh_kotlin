@@ -63,13 +63,17 @@ fun SpotlightOverlay(
     currentStep: Int,
     onNext: () -> Unit,
     onPrev: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    topOffset: Float = 0f
 ) {
     if (steps.isEmpty()) return
     val step = steps[currentStep]
     val isLast = currentStep == steps.lastIndex
     val isFirst = currentStep == 0
     val hasTarget = step.targetBounds != Rect.Zero
+    // Subtract topOffset so the hole aligns with boundsInRoot() coordinates
+    // when the SpotlightOverlay is rendered inside a padded Scaffold content.
+    val adjustedBounds = if (hasTarget) step.targetBounds.translate(0f, -topOffset) else Rect.Zero
 
     val density = LocalDensity.current
     val screenHeightPx = with(density) {
@@ -99,19 +103,19 @@ fun SpotlightOverlay(
 
             // Cut out rounded rect hole if target is valid
             if (hasTarget) {
-                drawRoundRectHole(step.targetBounds, cornerRadiusPx)
+                drawRoundRectHole(adjustedBounds, cornerRadiusPx)
             }
         }
 
         // Tooltip bubble
         if (hasTarget) {
-            val bubbleAbove = step.targetBounds.center.y > screenHeightPx / 2
+            val bubbleAbove = adjustedBounds.center.y > screenHeightPx / 2
             val bubbleYOffset = if (bubbleAbove) {
                 // Position above the target
-                step.targetBounds.top.toInt() - with(density) { bubbleMargin.toPx() }.toInt()*with(density) { bubblePadding.toPx() }.toInt()
+                adjustedBounds.top.toInt() - with(density) { bubbleMargin.toPx() }.toInt()*with(density) { bubblePadding.toPx() }.toInt()
             } else {
                 // Position below the target
-                step.targetBounds.bottom.toInt() + with(density) { bubbleMargin.toPx() }.toInt()
+                adjustedBounds.bottom.toInt() + with(density) { bubbleMargin.toPx() }.toInt()
             }
 
             Box(

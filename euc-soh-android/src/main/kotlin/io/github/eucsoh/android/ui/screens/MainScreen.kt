@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -279,6 +280,7 @@ fun MainScreen(
                 }
             }
         ) { padding ->
+            val topOffsetPx = with(LocalDensity.current) { padding.calculateTopPadding().toPx() }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -337,7 +339,8 @@ fun MainScreen(
                             lastExportPath = state.lastExportPath,
                             onMarkExport = viewModel::markLastExport,
                             onBack = viewModel::hideResults,
-                            darknessBotEnabled = state.darknessBotEnabled
+                            darknessBotEnabled = state.darknessBotEnabled,
+                            topOffset = topOffsetPx
                         )
                     }
 

@@ -108,7 +108,8 @@ fun ResultsScreenEnhanced(
     lastExportPath: String?,
     onMarkExport: (String, String?) -> Unit,
     onBack: () -> Unit,
-    darknessBotEnabled: Boolean = false
+    darknessBotEnabled: Boolean = false,
+    topOffset: Float = 0f
 ) {
     val TAG = "ResultsScreenEnhanced"
     val summary = remember(result) { result.buildSummary(selectedWheel?.displayName ?: "Wheel") }
@@ -676,6 +677,7 @@ fun ResultsScreenEnhanced(
                     SpotlightOverlay(
                         steps = resultOnboardingSteps,
                         currentStep = resultOnboardingStep,
+                        topOffset = topOffset,
                         onNext = {
                             if (resultOnboardingStep < resultOnboardingSteps.lastIndex) {
                                 resultOnboardingStep++
