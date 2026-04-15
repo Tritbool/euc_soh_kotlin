@@ -690,7 +690,6 @@ fun WheelCard(
  * 3. User confirms, then selects destination folder via ACTION_OPEN_DOCUMENT_TREE
  * 4. Import is performed, result displayed
  */
-@Composable
 private enum class ImportStep {
     WARN,
     PICKING_ZIP,
