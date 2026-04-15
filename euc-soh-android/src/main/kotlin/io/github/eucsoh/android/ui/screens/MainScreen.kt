@@ -340,7 +340,7 @@ fun MainScreen(
                             onMarkExport = viewModel::markLastExport,
                             onBack = viewModel::hideResults,
                             darknessBotEnabled = state.darknessBotEnabled,
-                            topOffset = topOffsetPx
+                            topOffset = 0f
                         )
                     }
 
