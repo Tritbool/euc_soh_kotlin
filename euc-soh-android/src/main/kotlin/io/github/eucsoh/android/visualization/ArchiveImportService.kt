@@ -51,7 +51,7 @@ class ArchiveImportService(private val context: Context) {
      * 6. Extract all files (except manifest.json) into [destUri] (SAF DocumentFile)
      * 7. Return Success(wheelMac)
      */
-    suspend fun import(zipUri: Uri, destUri: Uri): ImportResult = withContext(Dispatchers.IO) {
+    suspend fun import(zipUri: Uri, destUri: Uri, onProgress: (Float) -> Unit = {}): ImportResult = withContext(Dispatchers.IO) {
         try {
             // First pass: read manifest and collect file hashes
             val manifestJson: String
@@ -116,9 +116,11 @@ class ArchiveImportService(private val context: Context) {
             val destDoc = DocumentFile.fromTreeUri(context, destUri)
                 ?: return@withContext ImportResult.Error("file_corrupted")
 
-            for ((name, bytes) in fileContents) {
-                if (name == MANIFEST_ENTRY) continue
+            val filesToExtract = fileContents.entries.filter { it.key != MANIFEST_ENTRY }
+            val total = filesToExtract.size.coerceAtLeast(1)
+            filesToExtract.forEachIndexed { index, (name, bytes) ->
                 writeFileToDocumentTree(destDoc, name, bytes)
+                onProgress((index + 1).toFloat() / total)
             }
 
             Log.d(TAG, "Import successful: wheelMac=${manifest.wheelMac}")

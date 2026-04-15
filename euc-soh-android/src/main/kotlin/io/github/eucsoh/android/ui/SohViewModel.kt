@@ -80,7 +80,8 @@ data class SohUiState(
     val darknessBotEnabled: Boolean = false,
     val showDarknessBotWarningDialog: Boolean = false,
     val showImportDialog: Boolean = false,
-    val importResult: ImportResult? = null
+    val importResult: ImportResult? = null,
+    val importProgress: Float = 0f
 )
 
 /**
@@ -565,8 +566,10 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
 
     fun performImport(zipUri: Uri, destUri: Uri) {
         viewModelScope.launch {
-            val result = importService.import(zipUri, destUri)
-            _state.update { it.copy(importResult = result) }
+            val result = importService.import(zipUri, destUri) { progress ->
+                _state.update { it.copy(importProgress = progress) }
+            }
+            _state.update { it.copy(importResult = result, importProgress = 0f) }
             if (result is ImportResult.Success) {
                 Log.d(TAG, "Import successful: wheelMac=${result.wheelMac}, triggering re-scan")
                 scanWheels(forceRefresh = true)

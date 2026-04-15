@@ -251,7 +251,8 @@ fun MainScreen(
                 ImportArchiveFlow(
                     onDismiss = viewModel::dismissImportDialog,
                     onPerformImport = viewModel::performImport,
-                    importResult = state.importResult
+                    importResult = state.importResult,
+                    importProgress = state.importProgress
                 )
             }
 
@@ -704,7 +705,8 @@ private enum class ImportStep {
 fun ImportArchiveFlow(
     onDismiss: () -> Unit,
     onPerformImport: (Uri, Uri) -> Unit,
-    importResult: ImportResult?
+    importResult: ImportResult?,
+    importProgress: Float = 0f
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -851,12 +853,17 @@ fun ImportArchiveFlow(
                 onDismissRequest = {},
                 title = { Text(stringResource(R.string.import_extracting_title)) },
                 text = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(selectedZipName ?: "")
+                        LinearProgressIndicator(
+                            progress = { importProgress },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Text(
+                            "${(importProgress * 100).toInt()} %",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 },
                 confirmButton = {}
