@@ -22,7 +22,9 @@ package io.github.eucsoh
  * Constants
  */
 object Constants {
-    const val DEBUG = true  // Activé pour débogage Android
+    const val DEBUG = false  // Activé pour débogage Android
+
+    const val project_url = "https://github.com/tritbool/euc_soh_kotlin"
 
     const val EUC_WORLD = "euc_world"
     const val WHEELLOG = "wheellog"

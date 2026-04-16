@@ -18,19 +18,54 @@
 
 package io.github.eucsoh.android.ui.about
 
+import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Calculate
+import androidx.compose.material.icons.filled.ElectricBolt
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.ImageSearch
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LocalLibrary
+import androidx.compose.material.icons.filled.ReportProblem
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,17 +73,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.startActivity
+import androidx.core.net.toUri
 import com.halilibo.richtext.commonmark.Markdown
 import com.halilibo.richtext.ui.material3.RichText
-import androidx.compose.foundation.Image
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import io.github.eucsoh.Constants.project_url
 import io.github.eucsoh.android.R
+
 
 // ---------------------------------------------------------------------------
 // InfoScreen — écran d'aide principal (bouton ℹ️ de la TopBar)
@@ -57,6 +96,16 @@ import io.github.eucsoh.android.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InfoScreen(onClose: () -> Unit) {
+
+
+    val localColorScheme = darkColorScheme(
+        primary = Color(0xFF4CAF50),
+        tertiary = Color(0xFFFF9800),
+        error = Color(0xFFF44336),
+        secondary = if (isSystemInDarkTheme()) Color(0xFF3B3B42) else Color(0xFF9C9CB0)
+        // ...
+    )
+
 
     val context = LocalContext.current
     val licensesText = remember {
@@ -149,19 +198,19 @@ fun InfoScreen(onClose: () -> Unit) {
                 InfoBody(stringResource(R.string.info_s2_intro))
                 Spacer(Modifier.height(8.dp))
                 InfoAlarmRow(
-                    color = MaterialTheme.colorScheme.error,
+                    color = localColorScheme.error,
                     label = stringResource(R.string.info_s2_alarm_danger_label),
                     description = stringResource(R.string.info_s2_alarm_danger_desc)
                 )
                 Spacer(Modifier.height(6.dp))
                 InfoAlarmRow(
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = localColorScheme.tertiary,
                     label = stringResource(R.string.info_s2_alarm_orange_label),
                     description = stringResource(R.string.info_s2_alarm_orange_desc)
                 )
                 Spacer(Modifier.height(6.dp))
                 InfoAlarmRow(
-                    color = MaterialTheme.colorScheme.primary,
+                    color = localColorScheme.primary,
                     label = stringResource(R.string.info_s2_alarm_green_label),
                     description = stringResource(R.string.info_s2_alarm_green_desc)
                 )
@@ -262,9 +311,18 @@ fun InfoScreen(onClose: () -> Unit) {
                 onContainerColor = MaterialTheme.colorScheme.onSurfaceVariant
             ) {
                 // Légende commune aux deux graphiques
-                InfoLegendRow(color = MaterialTheme.colorScheme.primary,  label = stringResource(R.string.info_graph_legend_green))
-                InfoLegendRow(color = MaterialTheme.colorScheme.tertiary, label = stringResource(R.string.info_graph_legend_orange))
-                InfoLegendRow(color = MaterialTheme.colorScheme.error,    label = stringResource(R.string.info_graph_legend_red))
+                InfoLegendRow(
+                    color = localColorScheme.primary,
+                    label = stringResource(R.string.info_graph_legend_green)
+                )
+                InfoLegendRow(
+                    color = localColorScheme.tertiary,
+                    label = stringResource(R.string.info_graph_legend_orange)
+                )
+                InfoLegendRow(
+                    color = localColorScheme.error,
+                    label = stringResource(R.string.info_graph_legend_red)
+                )
 
                 Spacer(Modifier.height(12.dp))
 
@@ -325,17 +383,65 @@ fun InfoScreen(onClose: () -> Unit) {
                 }
             }
 
-            // ── Pied de page ─────────────────────────────────────────────────
-            Text(
-                stringResource(R.string.info_footer),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            RichText(
+            InfoSection(
+                containerColor = localColorScheme.secondary,
+                onContainerColor = localColorScheme.secondary
             ) {
-                Markdown(licensesText)
             }
+            Spacer(Modifier.height(10.dp))
+            // ── Pied de page ─────────────────────────────────────────────────
+
+            InfoSection(
+                icon = Icons.Filled.Info,
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                onContainerColor = MaterialTheme.colorScheme.onPrimaryContainer
+            ) {
+                Text(
+                    stringResource(R.string.info_footer),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+            InfoSection(
+                icon = Icons.Filled.ReportProblem,
+                title = "Report problems",
+                containerColor = MaterialTheme.colorScheme.primary,
+                onContainerColor = MaterialTheme.colorScheme.onPrimary
+            ) {
+                Text(
+                    text = "Tap here to report problems on GitHub",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.clickable(onClick = { ->
+                        val uri = project_url.toUri()
+                        val intent = Intent(Intent.ACTION_VIEW, uri)
+                        context.startActivity(intent)
+                        return@clickable Unit
+                    })
+                )
+
+            }
+
+            Spacer(Modifier.height(10.dp))
+            InfoSection(
+                containerColor = localColorScheme.secondary,
+                onContainerColor = localColorScheme.secondary
+            ) {
+            }
+
+            InfoSection(
+                icon = Icons.Filled.LocalLibrary,
+                iconContentDescription = null,
+                title = "Third party software",
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                onContainerColor = MaterialTheme.colorScheme.onSurfaceVariant
+            ) {
+                RichText(
+                ) {
+                    Markdown(licensesText)
+                }
+            }
+
         }
     }
 }
@@ -400,9 +506,9 @@ fun ExpandableSection(
 
 @Composable
 private fun InfoSection(
-    icon: ImageVector,
-    iconContentDescription: String?,
-    title: String,
+    icon: ImageVector? = null,
+    iconContentDescription: String? = null,
+    title: String? = null,
     containerColor: androidx.compose.ui.graphics.Color,
     onContainerColor: androidx.compose.ui.graphics.Color,
     content: @Composable ColumnScope.() -> Unit
@@ -418,18 +524,23 @@ private fun InfoSection(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(bottom = 10.dp)
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = iconContentDescription,
-                    tint = onContainerColor,
-                    modifier = Modifier.size(20.dp)
-                )
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = onContainerColor
-                )
+                if (icon != null) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = iconContentDescription,
+                        tint = onContainerColor,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                if (title != null) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = onContainerColor
+                    )
+                }
+
             }
             content()
         }
@@ -512,8 +623,10 @@ private fun InfoNote(text: String) {
         modifier = Modifier.padding(top = 2.dp)
     ) {
         Text("ℹ️", style = MaterialTheme.typography.bodySmall)
-        Text(text, style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            text, style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
