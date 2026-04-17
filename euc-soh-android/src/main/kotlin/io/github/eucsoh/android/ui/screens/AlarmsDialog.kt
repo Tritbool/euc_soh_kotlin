@@ -18,6 +18,7 @@
 
 package io.github.eucsoh.android.ui.screens
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -118,7 +119,7 @@ private fun AlarmCard(index: Int, alarm: GaussianAlarmDetector.Alarm) {
             )
             Column {
                 Text(
-                    alarm.file,
+                    Uri.decode(alarm.file),
                     fontWeight = FontWeight.SemiBold,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error
