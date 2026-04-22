@@ -27,6 +27,9 @@ plugins {
     id("com.google.devtools.ksp") version "2.3.6"
     id("com.github.jk1.dependency-license-report") version "3.1.2"
 }
+kotlin {
+    jvmToolchain(21)
+}
 
 android {
     namespace = "io.github.eucsoh.android"
@@ -51,9 +54,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
 
-    kotlin {
-        jvmToolchain(21)
-    }
     
     buildFeatures {
         compose = true
