@@ -54,7 +54,6 @@ class SohChartGeneratorFixed(private val context: Context) {
         const val CHART_HEIGHT = 800
 
         const val N_SIGMA_BAND = 1.0f
-        const val N_SIGMA_WARNING = 2.0f
         const val N_SIGMA_DANGER = 2.0f
 
         const val COLOR_GREEN = 0xFF4CAF50.toInt()

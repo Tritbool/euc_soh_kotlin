@@ -477,9 +477,6 @@ class SohAnalyzer(
         val trendResults = mutableMapOf<Metrics, PlotData.TrendPlotResult>()
         val inflexionResults = mutableMapOf<Metrics, PlotData.InflexionPlotResult>()
 
-        val kmMax = dfStats[WHEEL_KM.csv_code].values()
-            .filterIsInstance<Number>().maxOfOrNull { it.toDouble() } ?: 0.0
-
         for (metric in Metrics.entries) {
             if (metric.csv_code !in dfStats.columnNames()) continue
             // Série brute
