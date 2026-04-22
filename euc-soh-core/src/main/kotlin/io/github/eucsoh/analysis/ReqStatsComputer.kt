@@ -35,12 +35,10 @@ import org.jetbrains.kotlinx.dataframe.api.ParserOptions
 import org.jetbrains.kotlinx.dataframe.api.add
 import org.jetbrains.kotlinx.dataframe.api.filter
 import org.jetbrains.kotlinx.dataframe.api.rows
-import org.jetbrains.kotlinx.dataframe.impl.asList
 import org.jetbrains.kotlinx.dataframe.io.readCSV
 import java.io.InputStream
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import kotlin.collections.toDoubleArray
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.round
@@ -80,7 +78,8 @@ object ReqStatsComputer {
         val rBattMedian: Double?,
         val rBattMedian25C: Double?,
         val pwm95p: Double?,
-        val pwmMax: Double?
+        val pwmMax: Double?,
+        val pwmMedian: Double?
     )
 
     /**
@@ -115,7 +114,7 @@ object ReqStatsComputer {
         } finally {
             try {
                 stream?.close()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
         }
 
@@ -352,7 +351,7 @@ object ReqStatsComputer {
 
         val pwm95p = if (pwms.isEmpty()) 0.0 else pwms.sorted()
             .let { it[(it.size * 0.95).toInt().coerceIn(0, it.size - 1)] }
-
+        val pwmMedian =  if (pwms.isEmpty()) 0.0 else pwms.sorted().let { it[it.size / 2] }
 
 // Phase current metrics (I²dt dose, normalized by ride duration like Python)
         var iPhase2Int: Double? = null
@@ -379,7 +378,7 @@ object ReqStatsComputer {
                                         val s = raw?.toString() ?: return@mapNotNull null
                                         try {
                                             java.time.OffsetDateTime.parse(s, fmt)
-                                        } catch (e: Exception) {
+                                        } catch (_: Exception) {
                                             null
                                         }
                                     }
@@ -399,7 +398,7 @@ object ReqStatsComputer {
                                                 val t = java.time.OffsetDateTime.parse(raw, fmt)
                                                 java.time.Duration.between(t0, t)
                                                     .toMillis() / 1000.0
-                                            } catch (e: Exception) {
+                                            } catch (_: Exception) {
                                                 Double.NaN
                                             }
                                         }
@@ -426,9 +425,8 @@ object ReqStatsComputer {
                                     val t = df[WheelLogColumns.TIME.csv_code][idx]?.toString()
                                         ?: return@map Double.NaN
                                     try {
-                                        java.time.LocalDateTime.parse("${d}T${t}").let {
-                                            it.toEpochSecond(java.time.ZoneOffset.UTC).toDouble()
-                                        }
+                                        java.time.LocalDateTime.parse("${d}T${t}").toEpochSecond(java.time.ZoneOffset.UTC)
+                                            .toDouble()
                                     } catch (e: Exception) {
                                         logger.d(
                                             TAG,
@@ -528,7 +526,8 @@ object ReqStatsComputer {
             rBattMedian = rBattMedian,
             rBattMedian25C = rBattMedian25C ?: rBattMedian,
             pwm95p = pwm95p,
-            pwmMax = pwmMax
+            pwmMax = pwmMax,
+            pwmMedian = pwmMedian
         )
     }
 }

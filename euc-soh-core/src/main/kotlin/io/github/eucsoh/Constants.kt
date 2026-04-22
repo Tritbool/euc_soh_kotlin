@@ -153,8 +153,16 @@ object Constants {
         REQ_MEAN("Req_mean", true, "Equivalent resistance mean (Ω)"),
         REQ_95P("Req_95p", true, "Equivalent resistance 95th percentile (Ω)"),
         V_MIN_STRONG("v_min_strong", false, "Maximum voltage collapse under load (V)"),
+        PWM_MAX("pwm_max", true, "PWM max (%)"),
         PWM_95P("pwm_95p", true, "PWM 95th percentile (%)"),
-        PWM_MAX("pwm_max", true, "PWM max (%)")
+        PWM_MEDIAN("pwm_median", true, "PWM median (%)")
+    }
+
+    fun isPwmMetric(m:Metrics): Boolean{
+        return when(m){
+            Metrics.PWM_MEDIAN, Metrics.PWM_95P, Metrics.PWM_MAX -> true
+            else -> false
+        }
     }
 
     // Metrics for CUSUM and trend detection

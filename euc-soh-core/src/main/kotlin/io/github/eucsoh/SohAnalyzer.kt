@@ -41,6 +41,7 @@ import io.github.eucsoh.Constants.Metrics.I_PHASE_95P
 import io.github.eucsoh.Constants.Metrics.I_PHASE_MAX
 import io.github.eucsoh.Constants.Metrics.PWM_95P
 import io.github.eucsoh.Constants.Metrics.PWM_MAX
+import io.github.eucsoh.Constants.Metrics.PWM_MEDIAN
 import io.github.eucsoh.Constants.Metrics.REQ_95P
 import io.github.eucsoh.Constants.Metrics.REQ_MEAN
 import io.github.eucsoh.Constants.Metrics.REQ_MEDIAN
@@ -58,7 +59,6 @@ import io.github.eucsoh.analysis.CUSUMDetector
 import io.github.eucsoh.analysis.GaussianAlarmDetector
 import io.github.eucsoh.analysis.PackInference
 import io.github.eucsoh.analysis.ReqStatsComputer
-import io.github.eucsoh.analysis.SlopeInflexionDetector
 import io.github.eucsoh.analysis.TrendDetector
 import io.github.eucsoh.model.MOSFETParams
 import io.github.eucsoh.model.PlotData
@@ -69,7 +69,6 @@ import org.jetbrains.kotlinx.dataframe.api.add
 import org.jetbrains.kotlinx.dataframe.api.dataFrameOf
 import org.jetbrains.kotlinx.dataframe.api.sortBy
 import org.jetbrains.kotlinx.dataframe.api.take
-import kotlin.collections.mutableMapOf
 
 /**
  * Main orchestrator for SoH analysis.
@@ -361,7 +360,6 @@ class SohAnalyzer(
             df = dfStats,
             optimalFrac = optimalFrac,
             nSigma = 2.0,
-            useBattMetric = true,
             logger = logger
         )
 
@@ -481,7 +479,6 @@ class SohAnalyzer(
 
         val kmMax = dfStats[WHEEL_KM.csv_code].values()
             .filterIsInstance<Number>().maxOfOrNull { it.toDouble() } ?: 0.0
-        val refKmMax = kmMax * 0.3
 
         for (metric in Metrics.entries) {
             if (metric.csv_code !in dfStats.columnNames()) continue
@@ -527,7 +524,7 @@ class SohAnalyzer(
                     val xVals = pts.map { it.first }
                     val yVals = pts.map { it.second }
                     val n = xVals.size
-                    val sx = xVals.sum();
+                    val sx = xVals.sum()
                     val sy = yVals.sum()
                     val intercept = (sy - r.slope * sx) / n
                     trendResults[metric] = PlotData.TrendPlotResult(
@@ -682,7 +679,8 @@ class SohAnalyzer(
             R_BATT_MEDIAN.csv_code to stats.map { it.rBattMedian },
             R_BATT_MEDIAN_25C.csv_code to stats.map { it.rBattMedian25C },
             PWM_95P.csv_code to stats.map { it.pwm95p },
-            PWM_MAX.csv_code to stats.map { it.pwmMax }
+            PWM_MAX.csv_code to stats.map { it.pwmMax },
+            PWM_MEDIAN.csv_code to stats.map { it.pwmMedian}
 
         )
     }

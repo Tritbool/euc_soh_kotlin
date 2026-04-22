@@ -59,6 +59,7 @@ data class ReqStatsResult(
 
     val pwmMax: Double? = null,
     val pwm95p: Double? = null,
+    val pwmMedian: Double? = null,
 
 
     // Mosfet metrics
@@ -93,7 +94,8 @@ data class ReqStatsResult(
             Metrics.TEMP_BOARD_MAX  to { it.tempBoardMax },
             Metrics.TEMP_MOTOR_MAX  to { it.tempMotorMax },
             Metrics.PWM_95P         to { it.pwm95p },
-            Metrics.PWM_MAX         to { it.pwmMax }
+            Metrics.PWM_MAX         to { it.pwmMax },
+            Metrics.PWM_MEDIAN        to { it.pwmMedian }
             // Metrics.REQ_MEAN intentionally absent — no field in ReqStatsResult
         )
     }

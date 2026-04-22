@@ -23,6 +23,7 @@ import io.github.eucsoh.Constants.HIGHER_IS_BAD
 import io.github.eucsoh.Constants.LOWER_IS_BAD
 import io.github.eucsoh.Constants.Metrics.*
 import io.github.eucsoh.Constants.MetaColumns.*
+import io.github.eucsoh.Constants.isPwmMetric
 import io.github.eucsoh.Logger
 import io.github.eucsoh.NoOpLogger
 import io.github.eucsoh.model.ThresholdInfo
@@ -40,7 +41,8 @@ object GaussianAlarmDetector {
         val datetimeFirst: String?,
         val reasons: String
     )
-    private const val TAG:String="GaussianAlarmDetector"
+
+    private const val TAG: String = "GaussianAlarmDetector"
     private val METRICS = Constants.Metrics.entries.toList()
 
     /**
@@ -50,7 +52,6 @@ object GaussianAlarmDetector {
         df: DataFrame<*>,
         optimalFrac: Double = 0.5,
         nSigma: Double = 2.0,
-        useBattMetric: Boolean = false,
         logger: Logger = NoOpLogger
     ): Map<String, ThresholdInfo> {
         val thresholds = mutableMapOf<String, ThresholdInfo>()
@@ -66,7 +67,7 @@ object GaussianAlarmDetector {
             val metric = metricInfo.csv_code
             val direction = metricInfo.higher_is_bad
             if (metric !in df.columnNames()) continue
-            logger.d(TAG,"computeThresholds current metric: $metric")
+            logger.d(TAG, "computeThresholds current metric: $metric")
             val vals = dfOpt[metric].values()
                 .filterIsInstance<Number>()
                 .map { it.toDouble() }
@@ -87,12 +88,24 @@ object GaussianAlarmDetector {
                 TAG,
                 "$metric: vals=${vals.size}, mean=$mean, std=$std, limit=$limit"
             )
-            thresholds[metric] = ThresholdInfo(
-                mean = mean,
-                std = std,
-                limit = limit,
-                direction = if(direction) HIGHER_IS_BAD else LOWER_IS_BAD
-            )
+            when (isPwmMetric(metricInfo)) {
+                true ->
+                    thresholds[metric] = ThresholdInfo(
+                        mean = 70.0,
+                        std = 10.0,
+                        limit = 90.0,
+                        direction = if (direction) HIGHER_IS_BAD else LOWER_IS_BAD
+                    )
+
+                else ->
+                    thresholds[metric] = ThresholdInfo(
+                        mean = mean,
+                        std = std,
+                        limit = limit,
+                        direction = if (direction) HIGHER_IS_BAD else LOWER_IS_BAD
+                    )
+            }
+
         }
 
         return thresholds

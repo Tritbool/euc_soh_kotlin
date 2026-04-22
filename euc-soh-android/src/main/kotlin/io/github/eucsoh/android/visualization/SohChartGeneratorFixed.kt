@@ -37,6 +37,7 @@ import java.util.Locale
 import kotlin.math.max
 import kotlin.math.min
 import androidx.core.graphics.createBitmap
+import io.github.eucsoh.Constants
 import io.github.eucsoh.android.visualization.SohTrendCusumChartGenerator.Companion.addMosfetRefLine
 import io.github.eucsoh.android.visualization.SohTrendCusumChartGenerator.Companion.addPackRefLine
 import io.github.eucsoh.android.visualization.SohTrendCusumChartGenerator.Companion.expandAxisForRefLine
@@ -49,16 +50,16 @@ class SohChartGeneratorFixed(private val context: Context) {
 
     companion object {
         const val TAG = "SohChartGeneratorFixed"
-        const val CHART_WIDTH  = 1200
+        const val CHART_WIDTH = 1200
         const val CHART_HEIGHT = 800
 
-        const val N_SIGMA_BAND    = 1.0f
+        const val N_SIGMA_BAND = 1.0f
         const val N_SIGMA_WARNING = 2.0f
-        const val N_SIGMA_DANGER  = 2.0f
+        const val N_SIGMA_DANGER = 2.0f
 
-        const val COLOR_GREEN     = 0xFF4CAF50.toInt()
-        const val COLOR_ORANGE    = 0xFFFF9800.toInt()
-        const val COLOR_RED       = 0xFFFF0000.toInt()
+        const val COLOR_GREEN = 0xFF4CAF50.toInt()
+        const val COLOR_ORANGE = 0xFFFF9800.toInt()
+        const val COLOR_RED = 0xFFFF0000.toInt()
         const val COLOR_DATA_BLUE = 0xFF2196F3.toInt()
 
         fun resolveLabel(csvCode: String): String =
@@ -76,7 +77,7 @@ class SohChartGeneratorFixed(private val context: Context) {
         val gauss = plotData.gaussianResults[metric]
         require(gauss != null) { "No gaussian result for $metric" }
 
-        val mu    = gauss.mu.toFloat()
+        val mu = gauss.mu.toFloat()
         val sigma = gauss.sigma.toFloat()
         val higherIsBad = gauss.higherIsBad
 
@@ -84,10 +85,14 @@ class SohChartGeneratorFixed(private val context: Context) {
         val globalMin = yVals.minOrNull()!!
         val globalMax = yVals.maxOrNull()!!
 
-        val greenLow         = if (higherIsBad) mu - N_SIGMA_BAND * sigma    else mu + N_SIGMA_BAND * sigma
-        val greenHigh        = if (higherIsBad) mu + N_SIGMA_BAND * sigma    else mu - N_SIGMA_BAND * sigma
-        val warningThreshold = if (higherIsBad) mu + N_SIGMA_WARNING * sigma else mu - N_SIGMA_WARNING * sigma
-        val dangerThreshold  = if (higherIsBad) mu + N_SIGMA_DANGER  * sigma else mu - N_SIGMA_DANGER  * sigma
+        val greenLow = if (higherIsBad) mu - N_SIGMA_BAND * sigma else mu + N_SIGMA_BAND * sigma
+        val greenHigh = if (higherIsBad) mu + N_SIGMA_BAND * sigma else mu - N_SIGMA_BAND * sigma
+        val dangerThreshold =
+            if (higherIsBad) mu + N_SIGMA_DANGER * sigma else mu - N_SIGMA_DANGER * sigma
+
+        val meanLabel = if (Constants.isPwmMetric(metric)) "low" else ""
+        val midLabel = if (Constants.isPwmMetric(metric)) "mid" else "±1σ"
+        val dangerLabel = if (Constants.isPwmMetric(metric)) "high" else "±2σ"
 
         val chart = LineChart(context)
         configureChart(chart, resolveLabel(metric.csv_code))
@@ -105,30 +110,39 @@ class SohChartGeneratorFixed(private val context: Context) {
 
         val yAxis = chart.axisLeft
         yAxis.removeAllLimitLines()
-        yAxis.addLimitLine(LimitLine(greenLow, "").apply {
-            lineColor = COLOR_GREEN; lineWidth = 1.5f; textSize = 0f
+        yAxis.addLimitLine(LimitLine(greenLow, meanLabel).apply {
+            lineColor = COLOR_GREEN; lineWidth = 1.5f
+            textColor = COLOR_GREEN; textSize = 10f
+            labelPosition = LimitLine.LimitLabelPosition.LEFT_TOP
         })
-        yAxis.addLimitLine(LimitLine(greenHigh, "±1σ").apply {
+        yAxis.addLimitLine(LimitLine(greenHigh, midLabel).apply {
             lineColor = COLOR_ORANGE; lineWidth = 1.5f
             textColor = COLOR_ORANGE; textSize = 10f
+            labelPosition = LimitLine.LimitLabelPosition.LEFT_TOP
         })
-        yAxis.addLimitLine(LimitLine(warningThreshold, "±2σ").apply {
-            lineColor = COLOR_ORANGE; lineWidth = 1.5f
-            textColor = COLOR_ORANGE; textSize = 10f
+        yAxis.addLimitLine(LimitLine(dangerThreshold, dangerLabel).apply {
+            lineColor = COLOR_RED; lineWidth = 0f
+            textColor = COLOR_RED; textSize = 10f
+            labelPosition = LimitLine.LimitLabelPosition.LEFT_TOP
+
         })
         yAxis.addLimitLine(
-            LimitLine(dangerThreshold, "Danger: ${String.format(Locale.getDefault(),"%.3f", dangerThreshold)}").apply {
+            LimitLine(
+                dangerThreshold,
+                "Danger: ${String.format(Locale.getDefault(), "%.3f", dangerThreshold)}"
+            ).apply {
                 lineColor = COLOR_RED; lineWidth = 3f
                 enableDashedLine(12f, 8f, 0f)
                 textColor = COLOR_RED; textSize = 11f
+                labelPosition = LimitLine.LimitLabelPosition.RIGHT_TOP
             })
 
         if (higherIsBad) {
-            yAxis.axisMinimum = min(globalMin, greenLow)        - sigma * 0.5f
+            yAxis.axisMinimum = min(globalMin, greenLow) - sigma * 0.5f
             yAxis.axisMaximum = max(globalMax, dangerThreshold) + sigma * 0.5f
         } else {
             yAxis.axisMinimum = min(globalMin, dangerThreshold) - sigma * 0.5f
-            yAxis.axisMaximum = max(globalMax, greenHigh)       + sigma * 0.5f
+            yAxis.axisMaximum = max(globalMax, greenHigh) + sigma * 0.5f
         }
 
         when (metric) {
@@ -136,10 +150,12 @@ class SohChartGeneratorFixed(private val context: Context) {
                 expandAxisForRefLine(chart.axisLeft, it.toFloat())
                 addMosfetRefLine(chart.axisLeft, it)
             }
+
             Metrics.R_BATT_MEDIAN_25C, Metrics.R_BATT_MEDIAN, Metrics.REQ_MEDIAN_25C, Metrics.REQ_MEDIAN -> plotData.battPackRNominal?.let {
                 expandAxisForRefLine(chart.axisLeft, it.toFloat())
                 addPackRefLine(chart.axisLeft, it)
             }
+
             Metrics.I_PHASE2_INT -> {
                 // Cumulative sum on right Y axis.
                 // Each point is a per-ride dose; the cumulative line shows the
@@ -151,7 +167,8 @@ class SohChartGeneratorFixed(private val context: Context) {
                     Entry(x.toFloat(), runningSum.toFloat())
                 }
                 val cumulDataSet = LineDataSet(cumulEntries, "Cumulative dose").apply {
-                    axisDependency = com.github.mikephil.charting.components.YAxis.AxisDependency.RIGHT
+                    axisDependency =
+                        com.github.mikephil.charting.components.YAxis.AxisDependency.RIGHT
                     color = Color.GRAY
                     setCircleColor(Color.GRAY)
                     lineWidth = 1.5f
@@ -168,6 +185,7 @@ class SohChartGeneratorFixed(private val context: Context) {
                     setDrawGridLines(false)
                 }
             }
+
             else -> {}
         }
 
@@ -176,7 +194,10 @@ class SohChartGeneratorFixed(private val context: Context) {
 
     fun generateOverviewCharts(plotData: PlotData): List<Pair<String, Bitmap>> =
         Metrics.entries.mapNotNull { metric ->
-            Log.d(TAG,"gaussian metric: $metric, data ? ${plotData.gaussianResults[metric] != null}")
+            Log.d(
+                TAG,
+                "gaussian metric: $metric, data ? ${plotData.gaussianResults[metric] != null}"
+            )
             if (plotData.gaussianResults[metric] == null) return@mapNotNull null
             if (plotData.series[metric].isNullOrEmpty()) return@mapNotNull null
             try {
