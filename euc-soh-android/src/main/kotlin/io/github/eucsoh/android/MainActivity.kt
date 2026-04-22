@@ -35,6 +35,7 @@ import io.github.eucsoh.android.ui.SohViewModel
 import io.github.eucsoh.android.ui.about.InfoScreen
 import io.github.eucsoh.android.ui.screens.MainScreen
 import io.github.eucsoh.android.ui.theme.EucSohTheme
+import androidx.core.content.edit
 
 class MainActivity : ComponentActivity() {
 
@@ -53,9 +54,9 @@ class MainActivity : ComponentActivity() {
 
     fun markUpdatePopupAsShown(context: Context) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit()
-            .putInt(KEY_LAST_SEEN_VERSION, BuildConfig.VERSION_CODE)
-            .apply()
+        prefs.edit {
+            putInt(KEY_LAST_SEEN_VERSION, BuildConfig.VERSION_CODE)
+        }
     }
 
     companion object {
@@ -104,7 +105,7 @@ class MainActivity : ComponentActivity() {
                             if (shouldShowUpdatePopup(this)) {
                                 AlertDialog.Builder(this)
                                     .setTitle("What's New in version ${BuildConfig.VERSION_NAME} rev. ${BuildConfig.VERSION_CODE}")
-                                    .setMessage("- Enhanced legacy support (Android 8 - 11)\n- Unified results screen interface")
+                                    .setMessage("- Enhanced information section\n- Unified charts - information section legend colors\n - Updated PWM charts with standard limit lines: 60% green, 80% orange, 90% red")
                                     .setPositiveButton("OK") { _, _ ->
                                         markUpdatePopupAsShown(this)
                                     }

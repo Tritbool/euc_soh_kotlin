@@ -1,0 +1,8 @@
+Dernières fonctionnalités:
+
+- Compatibilité améliorée avec les anciennes versions d'Android (jusqu'à Android 10)
+- Compatibilité améliorée avec les anciennes versions d'EUC World
+- Section d'information améliorée
+- Graphiques unifiés: couleurs de la légende de la section d'information.
+- Graphiques PWM mis à jour avec des lignes de limite standard: 60% vert, 80% orange, 90% rouge
+- Ajout de la prise en charge des dumps DarknessBot (.dbb), avec certaines limitations

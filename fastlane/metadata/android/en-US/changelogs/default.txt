@@ -1,0 +1,7 @@
+Latest features:
+- Enhanced support for older Android versions (up to Android 10)
+- Enhanced legacy EUC World support
+- Enhanced information section
+- Unified charts - information section legend colors
+- Updated PWM charts with standard limit lines: 60% green, 80% orange, 90% red
+- Added DarknessBot dumps (.dbb) support, with limitations

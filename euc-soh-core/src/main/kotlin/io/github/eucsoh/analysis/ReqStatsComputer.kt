@@ -106,7 +106,11 @@ object ReqStatsComputer {
                     )
                 )
             } else {
-                DataFrame.readCSV(csvPath)
+                DataFrame.readCSV(
+                    csvPath, parserOptions = ParserOptions(
+                        locale = Locale.US
+                    )
+                )
             }
         } catch (e: Exception) {
             if (Constants.DEBUG) println("[ERROR] Failed to read $csvPath: ${e.message}")
@@ -351,7 +355,7 @@ object ReqStatsComputer {
 
         val pwm95p = if (pwms.isEmpty()) 0.0 else pwms.sorted()
             .let { it[(it.size * 0.95).toInt().coerceIn(0, it.size - 1)] }
-        val pwmMedian =  if (pwms.isEmpty()) 0.0 else pwms.sorted().let { it[it.size / 2] }
+        val pwmMedian = if (pwms.isEmpty()) 0.0 else pwms.sorted().let { it[it.size / 2] }
 
 // Phase current metrics (I²dt dose, normalized by ride duration like Python)
         var iPhase2Int: Double? = null
@@ -425,7 +429,8 @@ object ReqStatsComputer {
                                     val t = df[WheelLogColumns.TIME.csv_code][idx]?.toString()
                                         ?: return@map Double.NaN
                                     try {
-                                        java.time.LocalDateTime.parse("${d}T${t}").toEpochSecond(java.time.ZoneOffset.UTC)
+                                        java.time.LocalDateTime.parse("${d}T${t}")
+                                            .toEpochSecond(java.time.ZoneOffset.UTC)
                                             .toDouble()
                                     } catch (e: Exception) {
                                         logger.d(

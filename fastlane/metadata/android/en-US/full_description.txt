@@ -1,24 +1,43 @@
-EUC SoH is a state-of-health (SoH) analysis tool for electric unicycles. It processes ride logs from popular EUC logging apps to estimate battery health, internal resistance and long-term degradation patterns.
+Put your HTML text here<p><b>EUC SoH</b> is a state-of-health (SoH) analysis tool for electric unicycles. It processes ride logs from popular EUC logging apps to estimate battery health, internal resistance, and long-term degradation patterns.</p>
 
-The app runs entirely on-device, without trackers or network access. It is fully free and open source under the AGPL license.
+<p>The app runs entirely on-device, without trackers or network access. It is fully free and open source under the AGPL license.</p>
 
-Main features:
-- Scan storage recursively to discover WheelLog and EUC World subfolders and CSV log files automatically.
-- Parse ride logs and separate accepted files from rejected ones, with clear rejection reasons (too few data points, invalid Req computation, etc.).
-- Compute state-of-health metrics such as equivalent resistance (Req) and CUSUM-based indicators.
-- Display interactive charts using MPAndroidChart to visualize resistance evolution and SoH trends over time.
-- Maintain per-wheel file management: inspect which logs belong to each wheel, exclude problematic files, and keep only the relevant data set for analysis.
-- Export a structured archive suitable for resale, expertise or maintenance: a PDF report (soh.pdf), a statistics summary CSV, plus the corresponding WheelLog and EUC World logs, organized by wheel identifier.
-- Offer direct sharing of the generated PDF and archive to messaging apps, e-mail or cloud storage, with a UX designed around a small number of clear actions.
-- Work offline by default; no account, no registration, no external server.
+<p><b>Main features:</b></p>
+<ul>
+<li>Scan storage recursively to discover WheelLog and EUC World subfolders and CSV log files automatically (optional support for DarknessBot dumps).</li>
+<li>Parse ride logs and separate accepted files from rejected ones, with explicit rejection reasons (e.g. too few data points, invalid Req computation).</li>
+<li>Compute state-of-health metrics such as equivalent resistance (Req) and CUSUM-based indicators.</li>
+<li>Display interactive charts (MPAndroidChart) to visualize resistance evolution and SoH trends over time.</li>
+<li>Maintain per-wheel file management: inspect logs per wheel, exclude problematic files, and keep a clean dataset.</li>
+<li>Export a structured archive for resale, expertise, or maintenance: PDF report (soh.pdf), statistics CSV, and associated logs organized by wheel identifier.</li>
+<li>Share generated PDF and archives directly via messaging apps, email, or cloud storage.</li>
+<li>Work fully offline: no account, no registration, no external server.</li>
+</ul>
 
-Typical workflow:
-1. Scan storage for folders where WheelLog or EUC World logs are stored.
-2. Let EUC SoH scan subfolders recursively to find all compatible CSV files and group them by wheel.
-3. Run the SoH analysis to compute Req and related metrics, then inspect the generated charts for long-term battery degradation.
-4. Review the list of accepted and rejected logs files during the analysis.
-5. Export a PDF report along with a structured archive of the underlying logs, ready to be shared with a buyer, technician or for your personal records.
+<p><b>Typical workflow:</b></p>
 
-EUC SoH is intended for technically minded riders, enthusiasts and repair shops who need transparent and reproducible diagnostics for electric unicycle battery health.
+<p><b>A - Your own wheel</b></p>
+<ul>
+<li>Record rides using WheelLog, EUC World, or DarknessBot.</li>
+<li>The app scans storage for folders containing compatible logs.</li>
+<li>If using DarknessBot: export a dump (.dbb) and enable .dbb search in the app.</li>
+</ul>
 
-Based on https://hal.science/hal-05553115
+<p><b>B - Purchased wheel with EUC SoH archive</b></p>
+<ul>
+<li>Import the archive into the app.</li>
+</ul>
+
+<p><b>Start analysis</b></p>
+
+<ul>
+<li>Scan subfolders recursively to find compatible CSV files and group them by wheel.</li>
+<li>Run SoH analysis to compute Req and related metrics.</li>
+<li>Inspect charts to evaluate long-term battery degradation.</li>
+<li>Review accepted and rejected log files.</li>
+<li>Export a PDF report and structured archive for sharing or record keeping.</li>
+</ul>
+
+<p>EUC SoH is intended for technically minded riders, enthusiasts, and repair shops who need transparent and reproducible diagnostics for electric unicycle battery health.</p>
+
+<p>Based on: <a href="https://hal.science/hal-05553115">https://hal.science/hal-05553115</a></p>

@@ -22,11 +22,10 @@ import com.github.jk1.license.filter.ExcludeTransitiveDependenciesFilter
 
 plugins {
     id("com.android.application")
-    kotlin("android") version "2.1.0"
-    kotlin("plugin.serialization") version "2.1.0"
-    kotlin("plugin.compose") version "2.1.0"  // Compose Compiler for Kotlin 2.0+
-    id("com.google.devtools.ksp") version "2.1.0-1.0.29"
-    id("com.github.jk1.dependency-license-report") version "3.1.1"
+    kotlin("plugin.serialization") version "2.3.0"
+    kotlin("plugin.compose") version "2.3.0"  // Compose Compiler for Kotlin 2.0+
+    id("com.google.devtools.ksp") version "2.3.6"
+    id("com.github.jk1.dependency-license-report") version "3.1.2"
 }
 
 android {
@@ -37,8 +36,8 @@ android {
         applicationId = "io.github.eucsoh.android"
         minSdk = 26
         targetSdk = 36
-        versionCode = 13
-        versionName = "1.4"
+        versionCode = 14
+        versionName = "1.5"
     }
 
     buildTypes {
@@ -60,6 +59,11 @@ android {
         compose = true
         buildConfig = true
     }
+    packaging {
+        resources {
+            excludes += "/META-INF/thirdparty-LICENSE"
+        }
+    }
 }
 
 dependencies {
@@ -80,15 +84,15 @@ dependencies {
     }
     
     // Android core
-    implementation("androidx.documentfile:documentfile:1.0.1")
-    implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("androidx.activity:activity-compose:1.9.3")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    implementation("androidx.documentfile:documentfile:1.1.0")
+    implementation("androidx.core:core-ktx:1.18.0")
+    implementation("androidx.appcompat:appcompat:1.7.1")
+    implementation("androidx.activity:activity-compose:1.13.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
     
     // Material Design
-    implementation("com.google.android.material:material:1.12.0")
+    implementation("com.google.android.material:material:1.13.0")
     
     // Jetpack Compose
     val composeBom = platform("androidx.compose:compose-bom:2024.10.01")
@@ -102,27 +106,27 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     
     // Room
-    val roomVersion = "2.6.1"
+    val roomVersion = "2.8.4"
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
     
     // Kotlinx Serialization
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
     
     // Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     
     // Charts - MPAndroidChart
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     
     // PDF Export - iText7 for Android
-    implementation("com.itextpdf:itext7-core:7.2.5")
+    implementation("com.itextpdf:itext7-core:9.6.0")
 
     // MD Compose
     // MD Compose
-    implementation("com.halilibo.compose-richtext:richtext-ui-material3:1.0.0-alpha03")
-    implementation("com.halilibo.compose-richtext:richtext-commonmark-android:1.0.0-alpha03")
+    implementation("com.halilibo.compose-richtext:richtext-ui-material3:1.0.0-alpha04")
+    implementation("com.halilibo.compose-richtext:richtext-commonmark-android:1.0.0-alpha04")
 }
 
 licenseReport {

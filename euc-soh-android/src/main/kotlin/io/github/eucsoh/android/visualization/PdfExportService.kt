@@ -86,7 +86,7 @@ class PdfExportService(private val context: Context) {
         document.add(
             Paragraph("EUC State of Health Report")
                 .setFontSize(28f)
-                .setBold()
+                .simulateBold()
                 .setTextAlignment(TextAlignment.CENTER)
                 .setMarginTop(100f)
         )
@@ -118,7 +118,7 @@ class PdfExportService(private val context: Context) {
             document.add(
                 Paragraph("⚠ ${result.alarms.size} alarm(s) detected")
                     .setFontSize(14f)
-                    .setBold()
+                    .simulateBold()
                     .setFontColor(DeviceRgb(0xE5, 0x39, 0x35))  // Material red
                     .setTextAlignment(TextAlignment.CENTER)
                     .setMarginTop(20f)
@@ -130,7 +130,7 @@ class PdfExportService(private val context: Context) {
         document.add(
             Paragraph("Analysis Statistics")
                 .setFontSize(16f)
-                .setBold()
+                .simulateBold()
                 .setMarginBottom(12f)
         )
         addStatsTable(document, result, wheelName)
@@ -202,14 +202,14 @@ class PdfExportService(private val context: Context) {
                 // Première page : titre stats
                 document.add(
                     Paragraph("Analysis Statistics (${idx + 1}/${chunks.size})")
-                        .setFontSize(14f).setBold().setMarginBottom(8f)
+                        .setFontSize(14f).simulateBold().setMarginBottom(8f)
                 )
             } else {
                 // Nouvelle page pour chaque sous-table suivante
                 document.add(AreaBreak(AreaBreakType.NEXT_PAGE))
                 document.add(
                     Paragraph("Analysis Statistics (${idx + 1}/${chunks.size})")
-                        .setFontSize(14f).setBold().setMarginBottom(8f)
+                        .setFontSize(14f).simulateBold().setMarginBottom(8f)
                 )
             }
 
@@ -224,7 +224,7 @@ class PdfExportService(private val context: Context) {
                         "${"%.2f".format(summary.arrhenius.eaKjPerMol)} kJ/mol"
             )
                 .setFontSize(9f)
-                .setItalic()
+                .simulateItalic()
                 .setMarginTop(6f)
         )
     }
@@ -237,7 +237,7 @@ class PdfExportService(private val context: Context) {
         document.add(AreaBreak(AreaBreakType.NEXT_PAGE))
         document.add(
             Paragraph("Alarms (${result.alarms.size})")
-                .setFontSize(16f).setBold().setMarginBottom(16f)
+                .setFontSize(16f).simulateBold().setMarginBottom(16f)
         )
 
         if (result.alarms.isEmpty()) {
@@ -254,7 +254,7 @@ class PdfExportService(private val context: Context) {
                 "The following anomalies were detected during analysis. " +
                         "This report is a decision-support tool — interpretation requires domain expertise."
             )
-                .setFontSize(9f).setItalic()
+                .setFontSize(9f).simulateItalic()
                 .setFontColor(ColorConstants.GRAY)
                 .setMarginBottom(12f)
         )
@@ -274,7 +274,7 @@ class PdfExportService(private val context: Context) {
 
             cell.add(
                 Paragraph("#${idx + 1}  ${alarm.file}$kmStr$dateStr")
-                    .setFontSize(10f).setBold()
+                    .setFontSize(10f).simulateBold()
                     .setFontColor(DeviceRgb(0xE6, 0x51, 0x00))   // orange foncé
             )
             cell.add(
@@ -315,7 +315,7 @@ class PdfExportService(private val context: Context) {
             table.addHeaderCell(
                 Cell().add(
                     Paragraph(header)
-                        .setBold()
+                        .simulateBold()
                         .setFontSize(7f)
                         .setTextAlignment(TextAlignment.CENTER)
                 )
@@ -371,7 +371,7 @@ class PdfExportService(private val context: Context) {
         document.add(
             Paragraph(sectionTitle)
                 .setFontSize(22f)
-                .setBold()
+                .simulateBold()
                 .setTextAlignment(TextAlignment.CENTER)
                 .setMarginTop(120f)
         )
@@ -387,7 +387,7 @@ class PdfExportService(private val context: Context) {
             document.add(
                 Paragraph(label)
                     .setFontSize(13f)
-                    .setBold()
+                    .simulateBold()
                     .setMarginBottom(6f)
             )
 

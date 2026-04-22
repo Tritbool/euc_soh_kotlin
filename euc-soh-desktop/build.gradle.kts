@@ -17,7 +17,7 @@
  */
 
 plugins {
-    kotlin("jvm") version "2.1.0"
+    kotlin("jvm") version "2.3.0"
     application
 }
 
@@ -34,11 +34,11 @@ dependencies {
         exclude(group = "org.slf4j")
         exclude(group = "ch.qos.logback")
     }
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.3.20")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     
     // Simple Swing UI for file picker
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.8.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.10.2")
 }
 
 kotlin {

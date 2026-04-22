@@ -1,0 +1,43 @@
+<p><b>EUC SoH</b> est un outil d’analyse de l’état de santé (SoH) pour les gyroroues. Il traite les journaux de trajet issus des applications populaires de logging EUC afin d’estimer la santé de la batterie, la résistance interne et les schémas de dégradation à long terme.</p>
+
+<p>L’application fonctionne entièrement en local, sans traqueurs ni accès réseau. Elle est entièrement libre et open source sous licence AGPL.</p>
+
+<p><b>Fonctionnalités principales :</b></p>
+<ul>
+<li>Analyse récursive du stockage pour détecter automatiquement les sous-dossiers WheelLog et EUC World ainsi que les fichiers CSV (prise en charge optionnelle des dumps DarknessBot).</li>
+<li>Analyse des journaux et séparation des fichiers acceptés et rejetés, avec des raisons explicites (ex. : trop peu de points, calcul de Req invalide).</li>
+<li>Calcul d’indicateurs de santé tels que la résistance équivalente (Req) et des métriques basées sur CUSUM.</li>
+<li>Affichage de graphiques interactifs (MPAndroidChart) pour visualiser l’évolution de la résistance et du SoH dans le temps.</li>
+<li>Gestion des fichiers par roue : inspection des logs associés, exclusion des fichiers problématiques et constitution d’un jeu de données propre.</li>
+<li>Export d’une archive structurée pour revente, expertise ou maintenance : rapport PDF (soh.pdf), CSV de statistiques et logs associés organisés par identifiant de roue.</li>
+<li>Partage direct du PDF et des archives via messagerie, e-mail ou stockage cloud.</li>
+<li>Fonctionnement entièrement hors ligne : aucun compte, aucune inscription, aucun serveur externe.</li>
+</ul>
+
+<p><b>Flux de travail typique :</b></p>
+
+<p><b>A - Votre propre roue</b></p>
+<ul>
+<li>Enregistrez vos trajets avec WheelLog, EUC World ou DarknessBot.</li>
+<li>L’application analyse le stockage pour trouver les dossiers contenant des logs compatibles.</li>
+<li>Avec DarknessBot : exportez un dump (.dbb) puis activez la recherche de fichiers .dbb dans l’application.</li>
+</ul>
+
+<p><b>B - Roue achetée avec archive EUC SoH</b></p>
+<ul>
+<li>Importez l’archive dans l’application.</li>
+</ul>
+
+<p><b>Lancer l’analyse</b></p>
+
+<ul>
+<li>Analyse récursive des sous-dossiers pour trouver les fichiers CSV compatibles et les regrouper par roue.</li>
+<li>Exécution de l’analyse SoH pour calculer Req et les métriques associées.</li>
+<li>Inspection des graphiques pour évaluer la dégradation à long terme de la batterie.</li>
+<li>Vérification des fichiers acceptés et rejetés.</li>
+<li>Export d’un rapport PDF et d’une archive structurée pour partage ou archivage.</li>
+</ul>
+
+<p>EUC SoH s’adresse aux utilisateurs techniques, passionnés et ateliers de réparation ayant besoin de diagnostics transparents et reproductibles de l’état de santé des batteries de gyroroues.</p>
+
+<p>Basé sur : <a href="https://hal.science/hal-05553115">https://hal.science/hal-05553115</a></p>

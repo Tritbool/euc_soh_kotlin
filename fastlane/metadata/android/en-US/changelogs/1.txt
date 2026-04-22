@@ -1,9 +1,0 @@
-First version features:
-- EUC scan
-- EUC configuration (name if absent, battery pack parallelism, MOSFETs bridge)
-- EUC logs analysis
-- EUC logs exploration (show valid and rejected ones)
-- Analysis stats
-- Analysis charts
-- Analysis alarms
-- Analsys exports (pdf, csv, zip)
