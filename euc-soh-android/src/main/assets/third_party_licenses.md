@@ -1,7 +1,7 @@
 
 # Android dependencies
 ## Dependency License Report
-_2026-04-22 22:50:29 CEST_
+_2026-04-23 16:37:54 CEST_
 ## Apache License, Version 2.0
 
 **1** **Group:** `androidx.activity` **Name:** `activity-compose` **Version:** `1.13.0` 

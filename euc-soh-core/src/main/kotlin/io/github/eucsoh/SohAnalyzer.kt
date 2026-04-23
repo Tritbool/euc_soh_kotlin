@@ -489,7 +489,7 @@ class SohAnalyzer(
                         ?: return@mapNotNull null
                 km to v
             }.sortedBy { it.first }
-            if (pts.size < 5) continue
+            if (pts.size < 3) continue
             series[metric] = pts
 
             val t = thresholds[metric.csv_code] ?: continue

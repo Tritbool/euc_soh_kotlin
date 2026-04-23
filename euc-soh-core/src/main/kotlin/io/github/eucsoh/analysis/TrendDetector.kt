@@ -23,6 +23,7 @@ import io.github.eucsoh.Constants.MetaColumns.WHEEL_KM
 import io.github.eucsoh.model.ThresholdInfo
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
+import java.util.Collections
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -44,6 +45,18 @@ object TrendDetector {
         val inflexionIndices: List<Int>,
         val localSlopes: Map<Int, Double>
     )
+
+    // Utilitaire à mettre en top-level ou companion object
+    private fun List<Double>.lowerBound(value: Double): Int {
+        val r = this.binarySearch(value)
+        return if (r >= 0) r else -(r + 1)
+    }
+
+    private fun List<Double>.upperBound(value: Double): Int {
+        val r = this.binarySearch(value)
+        return if (r >= 0) r + 1 else -(r + 1)
+    }
+
 
     /**
      * Detects linear drift (slope > 0, p < 0.05).
@@ -169,10 +182,13 @@ object TrendDetector {
 
         for (i in x.indices) {
             val kmI = x[i]
-            val mask = x.map { it >= kmI - halfW && it <= kmI + halfW }
-            val xWindow = x.filterIndexed { idx, _ -> mask[idx] }
-            val yWindow = y.filterIndexed { idx, _ -> mask[idx] }
-
+            //val mask = x.map { it >= kmI - halfW && it <= kmI + halfW }
+            //val xWindow = x.filterIndexed { idx, _ -> mask[idx] }
+            //val yWindow = y.filterIndexed { idx, _ -> mask[idx] }
+            val lo = x.lowerBound(kmI - halfW)
+            val hi = x.upperBound(kmI + halfW)
+            val xWindow = x.subList(lo, hi)
+            val yWindow = y.subList(lo, hi)
             if (xWindow.size < 5) continue
 
             val n = xWindow.size

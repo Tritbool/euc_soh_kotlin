@@ -48,6 +48,7 @@ import kotlin.math.round
  */
 object ReqStatsComputer {
     const val TAG = "ReqStatsComputer"
+    private val CSV_PARSER_OPTIONS = ParserOptions(locale = Locale.US)
 
     data class FileStats(
         val file: String,
@@ -101,16 +102,14 @@ object ReqStatsComputer {
             if (csvSource != null) {
                 stream = csvSource.openCsvStream(csvPath)
                 DataFrame.readCSV(
-                    stream, parserOptions = ParserOptions(
-                        locale = Locale.US
-                    )
+                    stream, parserOptions = CSV_PARSER_OPTIONS
                 )
+
             } else {
                 DataFrame.readCSV(
-                    csvPath, parserOptions = ParserOptions(
-                        locale = Locale.US
-                    )
+                    csvPath, parserOptions = CSV_PARSER_OPTIONS
                 )
+
             }
         } catch (e: Exception) {
             if (Constants.DEBUG) println("[ERROR] Failed to read $csvPath: ${e.message}")
