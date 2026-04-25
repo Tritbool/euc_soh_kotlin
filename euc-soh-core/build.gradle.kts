@@ -29,7 +29,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     
     // DataFrame for pandas-like operations
-    implementation("org.jetbrains.kotlinx:dataframe:0.14.1")
+    implementation("org.jetbrains.kotlinx:dataframe:1.0.0-Beta4")
     
     // Math/stats utilities
     implementation("org.apache.commons:commons-math3:3.6.1")
