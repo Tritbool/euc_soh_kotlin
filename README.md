@@ -9,7 +9,7 @@
 
 [![Run Tests](https://github.com/Tritbool/euc_soh_kotlin/actions/workflows/test.yml/badge.svg)](https://github.com/Tritbool/euc_soh_kotlin/actions/workflows/test.yml)
 [![Android Release](https://github.com/Tritbool/euc_soh_kotlin/actions/workflows/release-android.yml/badge.svg)](https://github.com/Tritbool/euc_soh_kotlin/actions/workflows/release-android.yml)
-[![License: AGPL v3+](https://img.shields.io/badge/License-AGPL_v3+-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![AGPL-3.0-only](https://img.shields.io/badge/License-AGPL--3.0--only-blue.svg)](https://spdx.org/licenses/AGPL-3.0-only.html)
 [![HAL](https://img.shields.io/badge/HAL-05553115-4b6c8b)](https://hal.science/hal-05553115)
 
 [<img src="https://f-droid.org/badge/get-it-on-fr.png"
@@ -27,7 +27,7 @@ It estimates battery health and internal resistance, and generates charts and re
 > The project is based on [EUC SOH: A Vehicle Health and Usage Monitoring System to Enhance the Safety of Electric Unicycles
 ](https://hal.science/hal-05553115)
 > 
-> The project free and open source, licensed under **AGPL‑3.0**.
+> The project free and open source, licensed under **AGPL‑3.0-only**.
 
 ---
 
@@ -143,7 +143,7 @@ This separation allows the same analysis algorithms to be reused across platform
 
 ## License
 
-EUC SoH is licensed under the **GNU Affero General Public License v3.0 or later (AGPL‑3.0‑or‑later)**.
+EUC SoH is licensed under the **GNU Affero General Public License v3.0-only (AGPL‑3.0‑only)**.
 
 You are free to run, study, share and modify the software under the terms of this license. See [`LICENSE`](LICENSE) for details.
 
