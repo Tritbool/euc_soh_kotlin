@@ -201,7 +201,6 @@ class WheelRepository(private val context: Context) {
             val allResults = roots.map { root ->
                 scanner.scanFromFile(root, darknessBotEnabled = darknessBotEnabled)
             }
-
             // Merge explicite : pour chaque MAC, fusionne les csvFiles de toutes les roots
             val merged = mutableMapOf<String, WheelIdentity>()
             for (result in allResults) {

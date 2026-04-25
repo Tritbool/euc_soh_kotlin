@@ -195,12 +195,17 @@ class WheelScanner(
     ): Map<String, WheelIdentity> = withContext(Dispatchers.IO) {
         val wheelLogDeferred = async {
             try {
-                val wheels = wheelLogFolders.flatMap { folder ->
+                val wheels = mutableMapOf<String, WheelIdentity>()
+                wheelLogFolders.forEach { folder ->
                     Log.d(TAG, "Scanning WheelLog folder: ${folder.absolutePath}")
                     val result = wheelLogScanner.scanFolder(folder)
                     Log.d(TAG, "Found ${result.size} wheels in ${folder.name}")
-                    result.values
-                }.associateBy { it.macAddress }
+                    result.forEach { (mac, identity) ->
+                        wheels.merge(mac, identity) { existing, new ->
+                            existing.copy(csvFiles = existing.csvFiles + new.csvFiles)
+                        }
+                    }
+                }
                 Log.d(TAG, "Total WheelLog wheels: ${wheels.size}")
                 wheels
             } catch (e: Exception) {
@@ -211,12 +216,17 @@ class WheelScanner(
 
         val eucWorldDeferred = async {
             try {
-                val wheels = eucWorldFolders.flatMap { folder ->
+                val wheels = mutableMapOf<String, WheelIdentity>()
+                eucWorldFolders.forEach { folder ->
                     Log.d(TAG, "Scanning EUC World folder: ${folder.absolutePath}")
                     val result = eucWorldScanner.scanFolder(folder)
                     Log.d(TAG, "Found ${result.size} wheels in ${folder.name}")
-                    result.values
-                }.associateBy { it.macAddress }
+                    result.forEach { (mac, identity) ->
+                        wheels.merge(mac, identity) { existing, new ->
+                            existing.copy(csvFiles = existing.csvFiles + new.csvFiles)
+                        }
+                    }
+                }
                 Log.d(TAG, "Total EUC World wheels: ${wheels.size}")
                 wheels
             } catch (e: Exception) {
