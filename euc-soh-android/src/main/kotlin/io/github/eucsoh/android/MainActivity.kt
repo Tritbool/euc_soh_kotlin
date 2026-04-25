@@ -105,7 +105,7 @@ class MainActivity : ComponentActivity() {
                             if (shouldShowUpdatePopup(this)) {
                                 AlertDialog.Builder(this)
                                     .setTitle("What's New in version ${BuildConfig.VERSION_NAME} rev. ${BuildConfig.VERSION_CODE}")
-                                    .setMessage("- Enhanced information section\n- Unified charts - information section legend colors\n - Updated PWM charts with standard limit lines: 60% green, 80% orange, 90% red")
+                                    .setMessage("- Enhanced files searching")
                                     .setPositiveButton("OK") { _, _ ->
                                         markUpdatePopupAsShown(this)
                                     }
