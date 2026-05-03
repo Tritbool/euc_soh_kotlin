@@ -1,22 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  ~ EUC SoH Kotlin - State of Health analysis for Electric Unicycles
-  ~ Copyright (C) 2026  Gauthier LE BARTZ LYAN
-  ~
-  ~ This program is free software: you can redistribute it and/or modify
-  ~ it under the terms of the GNU Affero General Public License as
-  ~ published by the Free Software Foundation, either version 3 of the
-  ~ License, or (at your option) any later version.
-  ~
-  ~ This program is distributed in the hope that it will be useful,
-  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ~ GNU Affero General Public License for more details.
-  ~
-  ~ You should have received a copy of the GNU Affero General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
-  -->
-
 <resources>
     <string name="app_name">EUC SoH Analyzer</string>
     <string name="back">Zurück</string>
@@ -30,6 +12,7 @@
     <string name="selected_euc_label">Ausgewähltes EUC:</string>
     <string name="detected_eucs">Erkannte EUC (%1$d)</string>
     <string name="analyze_button">%1$s analysieren</string>
+    <string name="analyze_button_mock">Analysieren</string>
     <string name="view_last_results">Letzte Ergebnisse anzeigen</string>
     <string name="csv_logs_count">%1$d CSV-Protokolle</string>
     <string name="mac_label">MAC: %1$s</string>
@@ -76,6 +59,7 @@
     <string name="files_rejected">❌ %1$d abgelehnt</string>
     <string name="files_none">Keine Dateien</string>
     <string name="files_tap_hint">Tippen für vollständigen Pfad</string>
+    <string name="files_open_with">Öffnen mit…</string>
     <string name="mosfet_dialog_title">MOSFET-Konfiguration</string>
     <string name="mosfet_dialog_section_title">MOSFET-Brückenparameter</string>
     <string name="mosfet_help_cd">Hilfe</string>
@@ -113,4 +97,144 @@
     <string name="mosfet_current_nparallel">Parallel: %1$dP</string>
     <string name="analyzing_phase">Analysiere</string>
     <string name="calibrating_phase">Kalibriere</string>
+    <string name="darknessbot_toggle_label">DarknessBot-Logs einschließen (.dbb)</string>
+    <string name="darknessbot_warning_title">DarknessBot-Daten — eingeschränkte Genauigkeit</string>
+    <string name="darknessbot_warning_body">DarknessBot unterscheidet nicht zwischen Phasenstrom und Batteriestrom. Wenn Ihr Rad Phasenstrom liefert (insbesondere Gotway/Begode), sind R_eq- und R_batt-Berechnungen physikalisch ungenau.\n\nNur zur Erkundung aktivieren — nicht zur Diagnose des echten Batteriezustands verwenden.</string>
+    <string name="darknessbot_warning_confirm">Trotzdem aktivieren</string>
+    <string name="darknessbot_warning_cancel">Abbrechen</string>
+    <string name="import_archive_button">Archiv importieren</string>
+    <string name="import_confirm_title">Archiv importieren</string>
+    <string name="import_confirm_file">Datei: %1$s</string>
+    <string name="import_confirm_wheel_mac">Rad-MAC: %1$s</string>
+    <string name="import_confirm_file_count">Dateien im Archiv: %1$d</string>
+    <string name="import_confirm_no_manifest">Dieses Archiv enthält kein gültiges Manifest. Es wurde nicht von EUC SoH erstellt.</string>
+    <string name="import_confirm_warning">Importieren Sie nur von EUC SoH erstellte Archive (Dateinamenformat: RadName_SoH_JJJJMMTT_HHMMSS.zip). Die Integrität des Archivs wird vor der Entnahme geprüft.</string>
+    <string name="import_confirm_extract">Entpacken</string>
+    <string name="import_reading_manifest">Archiv wird gelesen…</string>
+    <string name="import_success_title">Import erfolgreich</string>
+    <string name="import_success_body">Rad importiert: %1$s</string>
+    <string name="import_error_title">Import fehlgeschlagen</string>
+    <string name="import_error_manifest_missing">Dieses Archiv enthält kein Manifest. Es wurde nicht von EUC SoH erstellt oder das Archiv ist beschädigt.</string>
+    <string name="import_error_hmac_invalid">Die Signatur des Archivs ist ungültig. Das Archiv wurde möglicherweise außerhalb von EUC SoH verändert.</string>
+    <string name="import_error_file_corrupted">Eine oder mehrere Dateien im Archiv sind beschädigt. Die SHA-256-Prüfsumme stimmt nicht überein.</string>
+    <string name="import_warn_title">EUC SoH-Archiv importieren</string>
+    <string name="import_warn_body">Es können nur von EUC SoH exportierte Archive importiert werden. Das Archiv wird vor der Entnahme geprüft — jedes Archiv, das die Prüfung nicht besteht, wird abgelehnt.</string>
+    <string name="import_warn_filenameExample">RadName_SoH_JJJJMMTT_HHMMSS.zip</string>
+    <string name="import_warn_continue">Archiv auswählen</string>
+    <string name="import_extracting_title">Archiv wird entpackt…</string>
+    <string name="info_title">Über EUC SoH</string>
+    <string name="offline_claim">Datenschutz zuerst</string>
+    <string name="offline_claim_exlain">EUC SoH berechnet Statistiken ausschließlich aus lokalen EUC-Logs. Alles passiert und bleibt auf Ihrem Gerät.</string>
+    <string name="offline_claim_text">EUC SoH funktioniert 100% offline</string>
+    <string name="offline_claim_b1">Keine Datenerfassung</string>
+    <string name="offline_claim_b2">Kein Netzwerkaustausch</string>
+    <string name="offline_claim_b3">Keine proprietäre Software</string>
+    <string name="offline_claim_b4">Keine Drittanbieter</string>
+    <string name="info_s1_title">Was dieses Tool tut — und was nicht</string>
+    <string name="info_s1_does">EUC SoH liest CSV-Protokolle von WheelLog oder EUC World und verfolgt das Verhalten Ihres Akkupacks über Tausende von Kilometern. Hauptfrage: Wird es schwieriger, Strom durch den Pack zu drücken? EUC SoH misst diese Drift Fahrt für Fahrt und warnt, wenn sie sinnvolle Schwellenwerte überschreitet.</string>
+    <string name="info_s1_does_not_title">Was es NICHT tut:</string>
+    <string name="info_s1_limit1">Es sagt keine genaue verbleibende Lebensdauer voraus.</string>
+    <string name="info_s1_limit2">Es ersetzt keine praktischen Tests (Oszilloskop, kontrollierter Lade-/Entladezyklus oder ein BMS-Diagnosetool).</string>
+    <string name="info_s1_limit3">Es vergleicht Ihr Rad nicht mit anderen Fahrern — jedes Rad ist seine eigene Referenz.</string>
+    <string name="info_s1_limit4">Indikatoren sind relativ, nicht absolut: Ein hoher R_eq bedeutet nicht, dass die Batterie schlecht ist, nur dass sie von ihrer eigenen Vergangenheitsbasislinie abgewichen ist.</string>
+    <string name="info_s2_title">Wie man auf die Ergebnisse reagiert</string>
+    <string name="info_s2_intro">Alarme vergleichen jede neue Fahrt mit der Geschichte desselben Rades. Die App berechnet einen Durchschnitt und eine typische Streuung aus allen vergangenen Fahrten und meldet, wie weit die letzten Werte von dieser Basislinie entfernt sind:</string>
+    <string name="info_s2_alarm_danger_label">Gefahr — klar abnormal</string>
+    <string name="info_s2_alarm_danger_desc">Der Wert liegt weit außerhalb des Normalbereichs für dieses Rad. Aggressives Fahren reduzieren, Stecker prüfen und professionelle Inspektion erwägen.</string>
+    <string name="info_s2_alarm_orange_label">Warnung — frühe Drift</string>
+    <string name="info_s2_alarm_orange_desc">Der Wert driftet von seiner Basislinie weg. Nichts Dringendes, aber es lohnt sich, es im Auge zu behalten.</string>
+    <string name="info_s2_alarm_green_label">Normal — im erwarteten Bereich</string>
+    <string name="info_s2_alarm_green_desc">Metriken innerhalb des erwarteten Bereichs für die Geschichte dieses Rades.</string>
+    <string name="info_s2_action">Wenn ein Gefahrenalarm auf R_eq oder R_batt ausgelöst wird: Fahren mit fast leerem Akku und dauerhaftes Hartfahren vermeiden. CUSUM- und Trenddiagramme nutzen, um zu sehen, wann die Degradation begann.</string>
+    <string name="info_s3_title">Wie die App den normalen Widerstand bestimmt</string>
+    <string name="info_s3_intro">EUC SoH leitet den Nennwiderstand Ihres Akkupacks aus der in Ihren Protokollen gesehenen Maximalspannung ab — kein manuelles Eingeben des Zellmodells erforderlich.</string>
+    <string name="info_s3_formula">R_pack_nominal = S × r_cell / P\n\nS = Anzahl der Reihenzellen, P = Anzahl der Parallelzellen (konfigurierbar, Standard 1)</string>
+    <string name="info_s3_detail">Dieser Referenzwert dient als absolutes Sicherheitsnetz: Selbst wenn Ihr Rad immer hoch gemessen hat, wird ein Alarm ausgelöst, wenn R_eq ein konfigurierbares Vielfaches des erwarteten Neuwerts überschreitet (Standard 1,8×).</string>
+    <string name="info_s3_example_title">Beispiel</string>
+    <string name="info_s3_example">Ein 100V-Rad hat typischerweise 24S-Zellen. Mit r_cell = 80 mΩ (frische 21700) und P = 1: R_nominal = 24 × 0,080 / 1 = 1,92 Ω. Ein gemessenes R_eq_median von 3,5 Ω wäre ~1,8× nominal und löst den Absolutalarm aus.</string>
+    <string name="info_s3_note">Der P-Wert kann im MOSFET-Konfigurationsdialog gesetzt werden (Feld &quot;N Parallelzellen&quot;). Er beeinflusst nicht die Widerstandsberechnung — nur den R_nominal-Alarmschwellwert.</string>
+    <string name="info_s4_title">Wichtige Metriken und wie man sie liest</string>
+    <string name="info_m1_name">R_eq_median (mΩ)</string>
+    <string name="info_m1_desc">Die wichtigste Gesundheitszahl. Misst, wie stark der gesamte Leistungskreis dem Stromfluss während einer Fahrt widersteht. Höher = mehr Widerstand = mehr Spannungsverlust unter Last = weniger Sicherheitsmarge.</string>
+    <string name="info_m1_interp">R_eq_median ist der primäre Alarmauslöser. Er erfasst Degradation unabhängig von der Ursache — Zellen, MOSFETs oder Verdrahtung. Zur Zuordnung der Drift: Steigendes SAG und R_batt deuten auf Zellen hin; steigendes temp_board_max bei stabilem SAG deutet auf MOSFETs hin.</string>
+    <string name="info_m2_name">R_batt_median_25C (mΩ)</string>
+    <string name="info_m2_desc">Widerstand der Zellen allein — ohne Beitrag von MOSFETs und Verdrahtung. Temperaturkorrigiert auf 25°C. Nur verfügbar, wenn MOSFET-Parameter konfiguriert sind.</string>
+    <string name="info_m2_interp">Langsamer Anstieg über Hunderte von Fahrten = normales Zellenaltern. Plötzlicher Sprung = möglicher Zellenausfall oder schlechte Verbindung. Flach während R_eq steigt = Zellen sind in Ordnung, MOSFETs oder Verdrahtung prüfen.</string>
+    <string name="info_m3_name">R_mosfet_hot (mΩ)</string>
+    <string name="info_m3_desc">Geschätzter Widerstand der Leistungstransistoren (MOSFETs) bei ihrer Betriebstemperatur. Berechnet aus dem eingegebenen Datenblatt-Einschaltwiderstand, skaliert durch Wärmeanstieg.</string>
+    <string name="info_m3_interp">Da R_ds(on)_25°C eine feste Konstante im Modell ist, verfolgt R_mosfet_hot nicht direkt die MOSFET-Alterung. Echte MOSFET-Degradation erscheint in R_eq_median, das im Laufe der Zeit ansteigt.</string>
+    <string name="info_m4_name">sag_95p / sag_max (V)</string>
+    <string name="info_m4_desc">Wie stark die Spannung unter hoher Last einbricht. Ein alternder Pack verliert mehr Spannung unter Last. Gemessen als Differenz zwischen Ruhespannung und tatsächlicher Spannung bei hoher Nachfrage.</string>
+    <string name="info_m4_interp">Hoher Sag verkleinert die Lücke zwischen tatsächlicher Spannung und dem Cutoff-Schwellenwert der Firmware. Besonders gefährlich bei niedrigem Akku oder Kälte.</string>
+    <string name="info_m5_name">v_min_strong (V)</string>
+    <string name="info_m5_desc">Die niedrigste Spannung, die der Pack während eines Hochlastmoments erreichte. Je näher dieser Wert am Cutoff-Schwellenwert der Firmware liegt, desto weniger Puffer hat man.</string>
+    <string name="info_m5_interp">Sinkt mit der Zeit = Sicherheitsmarge schrumpft. Wert unterhalb des Firmware-Cutoffs = plötzlicher Stromausfall bei starker Beschleunigung möglich.</string>
+    <string name="info_m6_name">temp_board_max (°C)</string>
+    <string name="info_m6_desc">Die heißeste Temperatur, die das Steuergerät während einer Fahrt erreichte. Als Proxy für die Temperatur in den Leistungstransistoren verwendet.</string>
+    <string name="info_m6_interp">Aufwärtstrend bei ähnlicher Fahrleistung = Wärme baut sich schneller auf als zuvor — ein Zeichen für verschlechterte Wärmeleitfähigkeit.</string>
+    <string name="info_m7_name">i_95p / i_max (A)</string>
+    <string name="info_m7_desc">Wie stark der Pack elektrisch beansprucht wird. Hoher Strom = hohe Belastung für Zellen und Leistungstransistoren.</string>
+    <string name="info_m7_interp">Alarme auf diese Metriken deuten auf ungewöhnlich aggressives Fahren hin. Hohe Ströme beschleunigen die Alterung.</string>
+    <string name="info_footer">EUC SoH ist Open-Source-Forschungssoftware. Ergebnisse sind nur indikativ. Sicherheit hat immer Vorrang — qualifizierte Techniker für Wartungsentscheidungen konsultieren.</string>
+    <string name="info_m8_name">I_phase2_Int (A²·s/km)</string>
+    <string name="info_m8_desc">Ein Maß für die gesamte Wärmelast durch die Leistungsstufe pro Fahrt. Das Quadrieren des Stroms macht es proportional zur Jouleschen Wärme. Normiert pro Kilometer für fairen Vergleich.</string>
+    <string name="info_m8_interp">Jeder Punkt ist eine Fahrt. Ein Spike bedeutet, dass diese Sitzung elektrisch intensiv war. Die gestrichelte Linie kumuliert die Gesamtwärmedosis von Fahrt 1 bis heute.</string>
+    <string name="info_s5_title">Diagramme lesen: Beispiele</string>
+    <string name="info_graph_ok_title">Normales Profil — stabiles Rad</string>
+    <string name="info_graph_ok_desc">R_eq_median schwankt um eine flache Basislinie über Tausende von Kilometern. Punkte bleiben im grün-orangen Band ohne Aufwärtstrend. So sieht ein gesunder, stabiler Pack aus.</string>
+    <string name="info_graph_ko_title">Abnormales Profil — deutliche Drift</string>
+    <string name="info_graph_ko_desc">R_eq_median steigt stetig von ~0,12 Ω auf über 0,40 Ω über 27.000 km, überschreitet das Warnband und schließlich die Gefahrenschwelle. Die letzten Sitzungen steigen stark an.</string>
+    <string name="info_graph_legend_green">Grüne Linie: −1σ-Band (unter Durchschnitt)</string>
+    <string name="info_graph_legend_orange">Orange Linie: +1σ-Schwelle (Frühwarnung)</string>
+    <string name="info_graph_legend_red">Rote gestrichelte Linie: Gefahrenschwelle (µ + 2σ oder absolut)</string>
+    <string name="info_s6_title">Wie die Metriken berechnet werden</string>
+    <string name="info_s6_req_title">R_eq — Äquivalentwiderstand</string>
+    <string name="info_s6_req_body">R_eq = (V_idle − V_gemessen) / |I_Batterie|\n\nV_idle ist die lokale Ruhespannung (rekonstruiert aus kurzen Niedrigstrom-Momenten). R_eq_median ist der Median aller Werte pro Fahrt.</string>
+    <string name="info_s6_vidle_title">V_idle — lokale Leerlaufspannung</string>
+    <string name="info_s6_vidle_body">Die App findet kurze Momente, in denen der Strom nahe null ist (|I| &lt; 3 A für mindestens 5 s) und interpoliert eine glatte Kurve. Dies gibt eine lokale Ruhespannung für jeden Fahrmoment.</string>
+    <string name="info_s6_mosfet_title">R_mosfet und R_batt — Widerstandsaufteilung</string>
+    <string name="info_s6_mosfet_body">R_eq_median wird immer berechnet, dann auf 25°C normiert (reqMedian25C).\n\nR_batt nur wenn MOSFET-Parameter konfiguriert:\nR_mosfet(T) = R_ds(on)_25°C × (1 + α × (T − 25)) + R_Verdrahtung\nR_batt = max(0, R_eq_median − R_mosfet(T_Platine))</string>
+    <string name="info_s6_arrhenius_title">Temperaturkorrektur auf 25°C</string>
+    <string name="info_s6_arrhenius_body">R_25°C = R_gemessen / exp((Ea/R_gas) × (1/T_mess − 1/298,15))\n\nEa (Aktivierungsenergie) ist standardmäßig 20 kJ/mol, typisch für Li-Ion.</string>
+    <string name="info_s6_i2int_title">I_phase2_Int — Wärmedosis</string>
+    <string name="info_s6_i2int_body">I²_int = (∫ I_Phase² dt) / T_Fahrt\n\nDas Integral wird mit der Trapezregel berechnet. Das Quadrieren des Stroms macht es proportional zur Jouleschen Wärme.</string>
+    <string name="info_expand_label">Technische Details</string>
+    <string name="info_collapse_label">Details ausblenden</string>
+    <string name="info_s3_tech">R_pack_nominal = S × r_cell / P\n\nS = Anzahl Reihenzellen (abgeleitet aus Max-Packspannung)\nP = Anzahl paralleler Zell-Strings (konfigurierbar, Standard 1)\nr_cell = typischer DC-Innenwiderstand einer neuen Zelle der erkannten Chemie</string>
+    <string name="info_m3_tech">R_mosfet_hot = R_ds(on)_25°C × (1 + α × (T_Platine − 25)) + R_Verdrahtung</string>
+    <string name="info_s6_mosfet_tech">R_eq_median immer berechnet. Normiert auf 25°C via Arrhenius → R_eq_median_25C.\nOhne MOSFET-Config: R_batt und R_batt_median_25C werden nicht berechnet.</string>
+    <string name="info_s6_i2int_tech">I²_int = (∫ I_Phase² dt) / T_Fahrt\n\nNormierung durch Fahrtdauer: langer ruhiger Weg und kurze aggressive Fahrt vergleichbar.</string>
+    <string name="onboarding_next">Weiter</string>
+    <string name="onboarding_prev">Zurück</string>
+    <string name="onboarding_finish">Fertig</string>
+    <string name="onboarding_skip">Überspringen</string>
+    <string name="onboarding_welcome_title">Willkommen bei EUC SoH Analyzer</string>
+    <string name="onboarding_welcome_body">Diese App analysiert Ihre EUC-Fahrtprotokolle, um den Zustand von Akku und Leistungselektronik im Laufe der Zeit zu verfolgen.\nMachen wir eine kurze Tour durch die Hauptfunktionen.</string>
+    <string name="onboarding_scan_title">Protokolle scannen</string>
+    <string name="onboarding_scan_body">Tippen Sie auf Aktualisieren, um WheelLog-, EUC World- und DarknessBot-Protokolldateien auf Ihrem Gerät zu suchen.\nErkannte Räder erscheinen in der Liste unten.</string>
+    <string name="onboarding_info_title">Informationsbereich lesen</string>
+    <string name="onboarding_info_body">Lesen Sie den Informationsbereich, um zu verstehen, wie die Anwendung funktioniert und was sie berechnet.</string>
+    <string name="onboarding_darknessbot_title">DarknessBot-Schalter</string>
+    <string name="onboarding_darknessbot_body">Aktivieren Sie diesen Schalter, um DarknessBot-Dateien (.dbb) in die Analyse einzuschließen.\nHinweis: DarknessBot-Daten haben für einige Radmarken eingeschränkte Genauigkeit.</string>
+    <string name="onboarding_import_title">EUC SoH-Archiv importieren</string>
+    <string name="onboarding_import_body">Wählen Sie ein EUC SoH-Archiv aus, um Daten auf Ihr Telefon zu importieren.</string>
+    <string name="onboarding_analyze_title">Rad analysieren</string>
+    <string name="onboarding_analyze_body">Wählen Sie ein Rad aus der Liste und tippen Sie auf Analysieren, um die SoH-Analyse zu starten. Ergebnisse erscheinen nach der Verarbeitung.</string>
+    <string name="onboarding_export_title">Ergebnisse exportieren</string>
+    <string name="onboarding_export_body">Nach der Analyse können Sie Ergebnisse als PDF, CSV oder vollständiges ZIP-Archiv aus dem Ergebnisbildschirm exportieren.</string>
+    <string name="onboarding_results_welcome_title">Ergebnisübersicht</string>
+    <string name="onboarding_results_welcome_body">Dieser Bildschirm zeigt die SoH-Metriken für das ausgewählte Rad.\nSie können detaillierte Daten, Diagramme anzeigen und Berichte exportieren.</string>
+    <string name="onboarding_results_files_title">Dateidetails</string>
+    <string name="onboarding_results_files_body">Tippen Sie auf die Schaltfläche Dateien, um die verwendeten/abgelehnten Protokolldateien anzuzeigen.</string>
+    <string name="onboarding_results_charts_title">Diagramme</string>
+    <string name="onboarding_results_charts_body">Tippen Sie auf Diagramme, um Gauß-, Trend-, CUSUM- und Inflexionsdiagramme für die Metriken Ihres Rades anzuzeigen.</string>
+    <string name="onboarding_results_export_pdf_title">PDF exportieren</string>
+    <string name="onboarding_results_export_pdf_body">Tippen Sie auf das PDF-Symbol, um ein PDF mit detaillierten Analyseergebnissen inklusive Daten und Diagrammbilder zu exportieren.</string>
+    <string name="onboarding_results_export_csv_title">CSV exportieren</string>
+    <string name="onboarding_results_export_csv_body">Tippen Sie auf das CSV-Symbol, um eine CSV mit Analysezusammenfassung zu exportieren.</string>
+    <string name="onboarding_results_export_archive_title">Archiv exportieren</string>
+    <string name="onboarding_results_export_archive_body">Tippen Sie auf das Archiv-Symbol, um ein ZIP mit PDF-Bericht, CSV-Daten und allen Diagrammbildern zu exportieren.</string>
+    <string name="onboarding_results_export_share_title">Ergebnisse teilen</string>
+    <string name="onboarding_results_export_share_body">Sobald eine Datei (CSV, PDF oder ZIP) generiert wurde, können Sie sie über die Teilen-Schaltfläche teilen. Die Schaltfläche teilt nur die zuletzt generierte Datei.</string>
+    <string name="onboarding_help_cd">Einführungsführer anzeigen</string>
 </resources>
