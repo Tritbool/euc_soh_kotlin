@@ -122,103 +122,103 @@
     <string name="calibrating_phase">Calibrating</string>
 
 
-    <string name="info_title" translatable="false">About EUC SoH</string>
+    <string name="info_title">About EUC SoH</string>
 
-    <string name="offline_claim" translatable="false">Privacy first</string>
-    <string name="offline_claim_exlain" translatable="false">EUC SoH focuses on computing statistics from local euc logs parsing. Everything happens and stays on your device.</string>
-    <string name="offline_claim_text" translatable="false">EUC SoH works 100% offline</string>
-    <string name="offline_claim_b1" translatable="false">No data collection</string>
-    <string name="offline_claim_b2" translatable="false">No network exchange</string>
-    <string name="offline_claim_b3" translatable="false">No closed source software </string>
-    <string name="offline_claim_b4" translatable="false">No third party</string>
-
-
-
-    <string name="info_s1_title" translatable="false">What this tool does — and does not do</string>
-    <string name="info_s1_does" translatable="false">EUC SoH reads the CSV logs produced by WheelLog or EUC World and tracks how your battery pack behaves over thousands of kilometres. Its main question: is the pack getting harder to push current through? Like an old AA battery that still reads 1.5 V but cannot light a bright LED anymore, an ageing EUC pack loses its ability to deliver current cleanly — voltage drops more under load, heat rises. EUC SoH measures that drift ride after ride and warns you when it crosses meaningful thresholds.</string>
-    <string name="info_s1_does_not_title" translatable="false">What it does NOT do:</string>
-    <string name="info_s1_limit1" translatable="false">It does not predict an exact remaining lifespan.</string>
-    <string name="info_s1_limit2" translatable="false">It does not replace hands-on testing (oscilloscope, controlled charge/discharge cycle, or a BMS — Battery Management System — diagnostic tool).</string>
-    <string name="info_s1_limit3" translatable="false">It does not compare your wheel to other riders — each wheel is its own reference.</string>
-    <string name="info_s1_limit4" translatable="false">Indicators are relative, not absolute: a high R_eq (internal resistance of the circuit) does not mean the battery is bad in isolation — only that it has drifted from its own past baseline.</string>
+    <string name="offline_claim">Privacy first</string>
+    <string name="offline_claim_exlain">EUC SoH focuses on computing statistics from local euc logs parsing. Everything happens and stays on your device.</string>
+    <string name="offline_claim_text">EUC SoH works 100% offline</string>
+    <string name="offline_claim_b1">No data collection</string>
+    <string name="offline_claim_b2">No network exchange</string>
+    <string name="offline_claim_b3">No closed source software </string>
+    <string name="offline_claim_b4">No third party</string>
 
 
-    <string name="info_s2_title" translatable="false">How to act on the results</string>
-    <string name="info_s2_intro" translatable="false">Alarms compare each new ride to the history of that same wheel. The app computes an average and a typical spread from all past rides, and flags how far the latest values sit from that baseline:</string>
-    <string name="info_s2_alarm_danger_label" translatable="false">Danger — clearly abnormal</string>
-    <string name="info_s2_alarm_danger_desc" translatable="false">The value is far outside the normal range for this wheel. Reduce aggressive riding (hard acceleration, riding with a low battery), check your connectors, and consider a professional inspection before any long trip.</string>
-    <string name="info_s2_alarm_orange_label" translatable="false">Warning — early drift</string>
-    <string name="info_s2_alarm_orange_desc" translatable="false">The value is drifting away from its baseline. Nothing urgent, but worth keeping an eye on. Check more regularly.</string>
-    <string name="info_s2_alarm_green_label" translatable="false">Normal — within expected range</string>
-    <string name="info_s2_alarm_green_desc" translatable="false">Metrics within the expected range for this wheel\'s history.</string>
-    <string name="info_s2_action" translatable="false">When a danger alarm fires on R_eq or R_batt: avoid riding with a nearly empty battery, avoid sustained hard riding (steep hills, heavy load). Use the trend and CUSUM charts (a statistical algorithm that spots when a slow drift becomes significant) to find when the degradation started.</string>
+
+    <string name="info_s1_title">What this tool does — and does not do</string>
+    <string name="info_s1_does">EUC SoH reads the CSV logs produced by WheelLog or EUC World and tracks how your battery pack behaves over thousands of kilometres. Its main question: is the pack getting harder to push current through? Like an old AA battery that still reads 1.5 V but cannot light a bright LED anymore, an ageing EUC pack loses its ability to deliver current cleanly — voltage drops more under load, heat rises. EUC SoH measures that drift ride after ride and warns you when it crosses meaningful thresholds.</string>
+    <string name="info_s1_does_not_title">What it does NOT do:</string>
+    <string name="info_s1_limit1">It does not predict an exact remaining lifespan.</string>
+    <string name="info_s1_limit2">It does not replace hands-on testing (oscilloscope, controlled charge/discharge cycle, or a BMS — Battery Management System — diagnostic tool).</string>
+    <string name="info_s1_limit3">It does not compare your wheel to other riders — each wheel is its own reference.</string>
+    <string name="info_s1_limit4">Indicators are relative, not absolute: a high R_eq (internal resistance of the circuit) does not mean the battery is bad in isolation — only that it has drifted from its own past baseline.</string>
 
 
-    <string name="info_s3_title" translatable="false">How the app knows what \"normal\" resistance looks like</string>
-    <string name="info_s3_intro" translatable="false">To know whether your measured resistance is alarming, the app needs a reference: what would a healthy new pack of the same type measure? It estimates this automatically from the maximum voltage seen in your logs — no need to enter the cell model manually. A higher pack voltage means more cells in series, which means higher total resistance.\n\nFrom that maximum voltage, the app deduces the number of cells in series and looks up a typical internal resistance for new cells of that chemistry (18650 or 21700 format) from public datasheets.</string>
-    <string name="info_s3_formula" translatable="false">R_pack_nominal = S × r_cell / P\n\nwhere S = series cell count, P = parallel cell count (configurable, default 1)</string>
-    <string name="info_s3_detail" translatable="false">This reference value acts as an absolute safety net: even if your wheel has always measured high (so the statistical baseline is already shifted), an alarm fires if R_eq exceeds a configurable multiple of the expected new-pack value (default 1.8×). This catches wheels that were already degraded when you first started logging.</string>
-    <string name="info_s3_example_title" translatable="false">Example</string>
-    <string name="info_s3_example" translatable="false">A 100V wheel typically has 24S cells. With r_cell = 80 mΩ (fresh 21700) and P = 1: R_nominal = 24 × 0.080 / 1 = 1.92 Ω. A measured R_eq_median of 3.5 Ω would be ~1.8× nominal, triggering the absolute alarm.</string>
-    <string name="info_s3_note" translatable="false">The P value can be set in the MOSFET config dialog (field \"N parallel cells\"). It does not affect resistance computation — only the R_nominal alarm threshold.</string>
+    <string name="info_s2_title">How to act on the results</string>
+    <string name="info_s2_intro">Alarms compare each new ride to the history of that same wheel. The app computes an average and a typical spread from all past rides, and flags how far the latest values sit from that baseline:</string>
+    <string name="info_s2_alarm_danger_label">Danger — clearly abnormal</string>
+    <string name="info_s2_alarm_danger_desc">The value is far outside the normal range for this wheel. Reduce aggressive riding (hard acceleration, riding with a low battery), check your connectors, and consider a professional inspection before any long trip.</string>
+    <string name="info_s2_alarm_orange_label">Warning — early drift</string>
+    <string name="info_s2_alarm_orange_desc">The value is drifting away from its baseline. Nothing urgent, but worth keeping an eye on. Check more regularly.</string>
+    <string name="info_s2_alarm_green_label">Normal — within expected range</string>
+    <string name="info_s2_alarm_green_desc">Metrics within the expected range for this wheel\'s history.</string>
+    <string name="info_s2_action">When a danger alarm fires on R_eq or R_batt: avoid riding with a nearly empty battery, avoid sustained hard riding (steep hills, heavy load). Use the trend and CUSUM charts (a statistical algorithm that spots when a slow drift becomes significant) to find when the degradation started.</string>
 
 
-    <string name="info_s4_title" translatable="false">Key metrics and how to read them</string>
-
-    <string name="info_m1_name" translatable="false">R_eq_median (mΩ)</string>
-    <string name="info_m1_desc" translatable="false">The main health number. Measures how hard the whole power circuit resists current flow during a ride — like friction in a pipe. Higher = more resistance = more voltage lost under load = less safety margin.\n\nComputed as the median across all high-speed, high-load samples in a ride.</string>
-    <string name="info_m1_interp" translatable="false">R_eq_median is the primary alarm trigger. It captures degradation regardless of origin — cells, power transistors (MOSFETs), or wiring — but does not tell you what is failing.\n\nTo attribute the drift: rising SAG and R_batt point to the cells; rising temp_board_max with stable SAG points to the MOSFETs. The other metrics explain what R_eq_median summarises.</string>
-
-    <string name="info_m2_name" translatable="false">R_batt_median_25C (mΩ)</string>
-    <string name="info_m2_desc" translatable="false">The resistance of the cells only — with the contribution of the power transistors (MOSFETs) and wiring subtracted out. Temperature-corrected to 25°C so winter and summer rides are comparable.\n\nOnly available if you have entered MOSFET parameters in the settings. Without them, R_eq_median_25C is shown instead — it includes the full circuit.</string>
-    <string name="info_m2_interp" translatable="false">Slow increase over hundreds of rides = normal cell ageing. Sudden jump = possible cell failure, bad connector, or BMS (Battery Management System) fault. Flat while R_eq rises = cells are fine, look at the MOSFETs or wiring.</string>
-
-    <string name="info_m3_name" translatable="false">R_mosfet_hot (mΩ)</string>
-    <string name="info_m3_desc" translatable="false">Estimated resistance of the power transistors (MOSFETs) at their operating temperature. Computed from the datasheet on-resistance you entered, scaled by how much resistance increases with heat. This is a fixed model — it does not update as the transistors age.</string>
-    <string name="info_m3_interp" translatable="false">Because R_ds(on)_25°C is a fixed constant in the model, R_mosfet_hot does not directly track MOSFET ageing. What it captures is the thermal variation around that fixed baseline.\n\nReal MOSFET degradation (increased on-state resistance due to oxide wear, bond fatigue, etc.) will appear in R_eq_median rising over time — not in R_mosfet_hot alone.\n\nThe diagnostic signature of MOSFET failure is: R_eq_median trending up + temp_board_max increasing at comparable power conditions + SAG remaining relatively stable (cells still healthy). If SAG and R_batt also rise, the degradation is more widespread.</string>
-
-    <string name="info_m4_name" translatable="false">sag_95p / sag_max (V)</string>
-    <string name="info_m4_desc" translatable="false">How much the voltage drops under hard load. Like squeezing a stiff water bottle: an ageing pack has to work harder to push the same current, and voltage collapses more. Measured as the gap between resting voltage and actual voltage during high-demand moments.</string>
-    <string name="info_m4_interp" translatable="false">High sag shrinks the gap between actual voltage and the firmware\'s cut-off threshold. Especially dangerous at low battery or in cold weather — the firmware may cut power unexpectedly during hard acceleration.</string>
-
-    <string name="info_m5_name" translatable="false">v_min_strong (V)</string>
-    <string name="info_m5_desc" translatable="false">The lowest voltage the pack reached during a hard-load moment. The closer this gets to your firmware\'s cut-off voltage, the less margin you have before a sudden power cut.</string>
-    <string name="info_m5_interp" translatable="false">Decreasing over time = safety margin shrinking. Value dropping below your firmware\'s cut-off threshold means a sudden power cut is possible under hard acceleration.</string>
-
-    <string name="info_m6_name" translatable="false">temp_board_max (°C)</string>
-    <string name="info_m6_desc" translatable="false">The hottest the controller board got during a ride. Used as a proxy for the temperature inside the power transistors, which run hotter than the board surface but cannot be measured directly from logs.</string>
-    <string name="info_m6_interp" translatable="false">An upward trend at similar riding intensity means heat builds up faster than before — a sign of degraded thermal conductivity (dried-out thermal paste, ageing transistors). High sustained temperatures accelerate failure.</string>
-
-    <string name="info_m7_name" translatable="false">i_95p / i_max (A)</string>
-    <string name="info_m7_desc" translatable="false">How hard the pack is being pushed electrically. High current = high stress on both the cells and the power transistors.</string>
-    <string name="info_m7_interp" translatable="false">Alarms on these metrics indicate unusually aggressive riding sessions (high acceleration, steep terrain). High currents accelerate both battery and MOSFET degradation.</string>
+    <string name="info_s3_title">How the app knows what \"normal\" resistance looks like</string>
+    <string name="info_s3_intro">To know whether your measured resistance is alarming, the app needs a reference: what would a healthy new pack of the same type measure? It estimates this automatically from the maximum voltage seen in your logs — no need to enter the cell model manually. A higher pack voltage means more cells in series, which means higher total resistance.\n\nFrom that maximum voltage, the app deduces the number of cells in series and looks up a typical internal resistance for new cells of that chemistry (18650 or 21700 format) from public datasheets.</string>
+    <string name="info_s3_formula">R_pack_nominal = S × r_cell / P\n\nwhere S = series cell count, P = parallel cell count (configurable, default 1)</string>
+    <string name="info_s3_detail">This reference value acts as an absolute safety net: even if your wheel has always measured high (so the statistical baseline is already shifted), an alarm fires if R_eq exceeds a configurable multiple of the expected new-pack value (default 1.8×). This catches wheels that were already degraded when you first started logging.</string>
+    <string name="info_s3_example_title">Example</string>
+    <string name="info_s3_example">A 100V wheel typically has 24S cells. With r_cell = 80 mΩ (fresh 21700) and P = 1: R_nominal = 24 × 0.080 / 1 = 1.92 Ω. A measured R_eq_median of 3.5 Ω would be ~1.8× nominal, triggering the absolute alarm.</string>
+    <string name="info_s3_note">The P value can be set in the MOSFET config dialog (field \"N parallel cells\"). It does not affect resistance computation — only the R_nominal alarm threshold.</string>
 
 
-    <string name="info_footer" translatable="false">EUC SoH is open-source research software. Results are indicative only. Always prioritize safety and consult a qualified technician for maintenance decisions.</string>
+    <string name="info_s4_title">Key metrics and how to read them</string>
+
+    <string name="info_m1_name">R_eq_median (mΩ)</string>
+    <string name="info_m1_desc">The main health number. Measures how hard the whole power circuit resists current flow during a ride — like friction in a pipe. Higher = more resistance = more voltage lost under load = less safety margin.\n\nComputed as the median across all high-speed, high-load samples in a ride.</string>
+    <string name="info_m1_interp">R_eq_median is the primary alarm trigger. It captures degradation regardless of origin — cells, power transistors (MOSFETs), or wiring — but does not tell you what is failing.\n\nTo attribute the drift: rising SAG and R_batt point to the cells; rising temp_board_max with stable SAG points to the MOSFETs. The other metrics explain what R_eq_median summarises.</string>
+
+    <string name="info_m2_name">R_batt_median_25C (mΩ)</string>
+    <string name="info_m2_desc">The resistance of the cells only — with the contribution of the power transistors (MOSFETs) and wiring subtracted out. Temperature-corrected to 25°C so winter and summer rides are comparable.\n\nOnly available if you have entered MOSFET parameters in the settings. Without them, R_eq_median_25C is shown instead — it includes the full circuit.</string>
+    <string name="info_m2_interp">Slow increase over hundreds of rides = normal cell ageing. Sudden jump = possible cell failure, bad connector, or BMS (Battery Management System) fault. Flat while R_eq rises = cells are fine, look at the MOSFETs or wiring.</string>
+
+    <string name="info_m3_name">R_mosfet_hot (mΩ)</string>
+    <string name="info_m3_desc">Estimated resistance of the power transistors (MOSFETs) at their operating temperature. Computed from the datasheet on-resistance you entered, scaled by how much resistance increases with heat. This is a fixed model — it does not update as the transistors age.</string>
+    <string name="info_m3_interp">Because R_ds(on)_25°C is a fixed constant in the model, R_mosfet_hot does not directly track MOSFET ageing. What it captures is the thermal variation around that fixed baseline.\n\nReal MOSFET degradation (increased on-state resistance due to oxide wear, bond fatigue, etc.) will appear in R_eq_median rising over time — not in R_mosfet_hot alone.\n\nThe diagnostic signature of MOSFET failure is: R_eq_median trending up + temp_board_max increasing at comparable power conditions + SAG remaining relatively stable (cells still healthy). If SAG and R_batt also rise, the degradation is more widespread.</string>
+
+    <string name="info_m4_name">sag_95p / sag_max (V)</string>
+    <string name="info_m4_desc">How much the voltage drops under hard load. Like squeezing a stiff water bottle: an ageing pack has to work harder to push the same current, and voltage collapses more. Measured as the gap between resting voltage and actual voltage during high-demand moments.</string>
+    <string name="info_m4_interp">High sag shrinks the gap between actual voltage and the firmware\'s cut-off threshold. Especially dangerous at low battery or in cold weather — the firmware may cut power unexpectedly during hard acceleration.</string>
+
+    <string name="info_m5_name">v_min_strong (V)</string>
+    <string name="info_m5_desc">The lowest voltage the pack reached during a hard-load moment. The closer this gets to your firmware\'s cut-off voltage, the less margin you have before a sudden power cut.</string>
+    <string name="info_m5_interp">Decreasing over time = safety margin shrinking. Value dropping below your firmware\'s cut-off threshold means a sudden power cut is possible under hard acceleration.</string>
+
+    <string name="info_m6_name">temp_board_max (°C)</string>
+    <string name="info_m6_desc">The hottest the controller board got during a ride. Used as a proxy for the temperature inside the power transistors, which run hotter than the board surface but cannot be measured directly from logs.</string>
+    <string name="info_m6_interp">An upward trend at similar riding intensity means heat builds up faster than before — a sign of degraded thermal conductivity (dried-out thermal paste, ageing transistors). High sustained temperatures accelerate failure.</string>
+
+    <string name="info_m7_name">i_95p / i_max (A)</string>
+    <string name="info_m7_desc">How hard the pack is being pushed electrically. High current = high stress on both the cells and the power transistors.</string>
+    <string name="info_m7_interp">Alarms on these metrics indicate unusually aggressive riding sessions (high acceleration, steep terrain). High currents accelerate both battery and MOSFET degradation.</string>
 
 
-    <string name="info_m8_name" translatable="false">I_phase2_Int (A²·s/km)</string>
-    <string name="info_m8_desc" translatable="false">A measure of the total heat load put through the power stage per ride. Doubling the current quadruples the heat (current² effect) — so a short aggressive session can carry more thermal weight than a long calm one. Normalized per kilometre for fair comparison between rides.</string>
-    <string name="info_m8_interp" translatable="false">Each point is one ride. A spike means that session was electrically intense. The dashed line (right axis) accumulates the total thermal dose from ride 1 to today — use it to assess the overall stress history of your wheel.\n\nOnly available when your logging app records phase current (EUC World or WheelLog with that column enabled).</string>
+    <string name="info_footer">EUC SoH is open-source research software. Results are indicative only. Always prioritize safety and consult a qualified technician for maintenance decisions.</string>
 
-    <string name="info_s5_title" translatable="false">Reading the charts: examples</string>
-    <string name="info_graph_ok_title" translatable="false">Normal profile — stable wheel</string>
-    <string name="info_graph_ok_desc" translatable="false">R_eq_median fluctuates around a flat baseline across thousands of kilometres. Points stay inside the green–orange band with no upward trend. This is what a healthy, stable pack looks like.</string>
-    <string name="info_graph_ko_title" translatable="false">Abnormal profile — clear drift</string>
-    <string name="info_graph_ko_desc" translatable="false">R_eq_median climbs steadily from ~0.12 Ω to over 0.40 Ω across 27 000 km, crossing the warning band and eventually the Danger threshold. The last sessions spike sharply. This is accelerating degradation — the rate of climb matters as much as the absolute value.</string>
-    <string name="info_graph_legend_green" translatable="false">Green line: −1σ band (below average)</string>
-    <string name="info_graph_legend_orange" translatable="false">Orange line: +1σ threshold (early warning)</string>
-    <string name="info_graph_legend_red" translatable="false">Red dashed line: Danger threshold (µ + 2σ or absolute)</string>
 
-    <string name="files_open_with" translatable="false">Open with…</string>
+    <string name="info_m8_name">I_phase2_Int (A²·s/km)</string>
+    <string name="info_m8_desc">A measure of the total heat load put through the power stage per ride. Doubling the current quadruples the heat (current² effect) — so a short aggressive session can carry more thermal weight than a long calm one. Normalized per kilometre for fair comparison between rides.</string>
+    <string name="info_m8_interp">Each point is one ride. A spike means that session was electrically intense. The dashed line (right axis) accumulates the total thermal dose from ride 1 to today — use it to assess the overall stress history of your wheel.\n\nOnly available when your logging app records phase current (EUC World or WheelLog with that column enabled).</string>
+
+    <string name="info_s5_title">Reading the charts: examples</string>
+    <string name="info_graph_ok_title">Normal profile — stable wheel</string>
+    <string name="info_graph_ok_desc">R_eq_median fluctuates around a flat baseline across thousands of kilometres. Points stay inside the green–orange band with no upward trend. This is what a healthy, stable pack looks like.</string>
+    <string name="info_graph_ko_title">Abnormal profile — clear drift</string>
+    <string name="info_graph_ko_desc">R_eq_median climbs steadily from ~0.12 Ω to over 0.40 Ω across 27 000 km, crossing the warning band and eventually the Danger threshold. The last sessions spike sharply. This is accelerating degradation — the rate of climb matters as much as the absolute value.</string>
+    <string name="info_graph_legend_green">Green line: −1σ band (below average)</string>
+    <string name="info_graph_legend_orange">Orange line: +1σ threshold (early warning)</string>
+    <string name="info_graph_legend_red">Red dashed line: Danger threshold (µ + 2σ or absolute)</string>
+
+    <string name="files_open_with">Open with…</string>
 
 
     <!-- DarknessBot toggle -->
-    <string name="darknessbot_toggle_label" translatable="false">Include DarknessBot files (.dbb)</string>
-    <string name="darknessbot_warning_title" translatable="false">DarknessBot data — limited accuracy</string>
-    <string name="darknessbot_warning_body" translatable="false">DarknessBot does not distinguish phase current from battery current. If your wheel exposes phase current (Gotway/Begode in particular), R_eq and R_batt calculations will be physically incorrect.\n\nEnable for exploration only — do not use to diagnose real battery state of health.</string>
-    <string name="darknessbot_warning_confirm" translatable="false">Enable anyway</string>
-    <string name="darknessbot_warning_cancel" translatable="false">Cancel</string>
+    <string name="darknessbot_toggle_label">Include DarknessBot files (.dbb)</string>
+    <string name="darknessbot_warning_title">DarknessBot data — limited accuracy</string>
+    <string name="darknessbot_warning_body">DarknessBot does not distinguish phase current from battery current. If your wheel exposes phase current (Gotway/Begode in particular), R_eq and R_batt calculations will be physically incorrect.\n\nEnable for exploration only — do not use to diagnose real battery state of health.</string>
+    <string name="darknessbot_warning_confirm">Enable anyway</string>
+    <string name="darknessbot_warning_cancel">Cancel</string>
 
 
     <!-- Import archive -->
@@ -239,89 +239,89 @@
     <string name="import_error_file_corrupted">One or more files in the archive are corrupted. The SHA-256 checksum does not match.</string>
 
 
-    <string name="info_s6_title" translatable="false">How the metrics are computed</string>
+    <string name="info_s6_title">How the metrics are computed</string>
 
-    <string name="info_s6_req_title" translatable="false">R_eq — Equivalent resistance</string>
-    <string name="info_s6_req_body" translatable="false">Ohm\'s law: voltage drop = current × resistance. When the wheel draws current, the pack voltage dips below what it would be at rest. The bigger the dip for the same current, the higher the resistance.\n\nFor each ride, the app picks samples at speed &gt; 20 km/h with a meaningful current draw:\n\nR_eq = (V_idle − V_measured) / |I_battery|\n\nV_idle is the local resting voltage (reconstructed from brief low-current moments during the ride). R_eq_median is the median of all per-sample values across the ride.</string>
+    <string name="info_s6_req_title">R_eq — Equivalent resistance</string>
+    <string name="info_s6_req_body">Ohm\'s law: voltage drop = current × resistance. When the wheel draws current, the pack voltage dips below what it would be at rest. The bigger the dip for the same current, the higher the resistance.\n\nFor each ride, the app picks samples at speed &gt; 20 km/h with a meaningful current draw:\n\nR_eq = (V_idle − V_measured) / |I_battery|\n\nV_idle is the local resting voltage (reconstructed from brief low-current moments during the ride). R_eq_median is the median of all per-sample values across the ride.</string>
 
-    <string name="info_s6_vidle_title" translatable="false">V_idle — local no-load voltage</string>
-    <string name="info_s6_vidle_body" translatable="false">The resting voltage of a battery changes as it discharges (State of Charge effect). Using a single voltage from the start of a ride would introduce errors over long sessions.\n\nThe app finds brief moments where current is near zero (|I| &lt; 3 A for at least 5 s, no abrupt voltage swing) and interpolates a smooth curve through them. This gives a local resting voltage for every moment of the ride, tracking SoC naturally without an explicit SoC measurement.</string>
+    <string name="info_s6_vidle_title">V_idle — local no-load voltage</string>
+    <string name="info_s6_vidle_body">The resting voltage of a battery changes as it discharges (State of Charge effect). Using a single voltage from the start of a ride would introduce errors over long sessions.\n\nThe app finds brief moments where current is near zero (|I| &lt; 3 A for at least 5 s, no abrupt voltage swing) and interpolates a smooth curve through them. This gives a local resting voltage for every moment of the ride, tracking SoC naturally without an explicit SoC measurement.</string>
 
-    <string name="info_s6_mosfet_title" translatable="false">R_mosfet and R_batt — splitting the resistance</string>
-    <string name="info_s6_mosfet_body" translatable="false">R_eq_median is always computed. It is then normalized to 25°C via Arrhenius to give reqMedian25C — this is the temperature-corrected equivalent resistance of the full circuit (cells + MOSFETs + wiring).\n\nR_batt (the battery resistance isolated from the rest) is only computed when MOSFET parameters are configured:\nR_mosfet(T) = R_ds(on)_25°C × (1 + α × (T − 25)) + R_wiring\nR_batt = max(0, R_eq_median − R_mosfet(T_board))\nR_batt_median_25C = Arrhenius correction of R_batt\n\nWithout MOSFET config, R_batt and R_batt_median_25C are not shown. The code does not assume R_eq ≈ R_batt — it simply does not attempt the split.</string>
+    <string name="info_s6_mosfet_title">R_mosfet and R_batt — splitting the resistance</string>
+    <string name="info_s6_mosfet_body">R_eq_median is always computed. It is then normalized to 25°C via Arrhenius to give reqMedian25C — this is the temperature-corrected equivalent resistance of the full circuit (cells + MOSFETs + wiring).\n\nR_batt (the battery resistance isolated from the rest) is only computed when MOSFET parameters are configured:\nR_mosfet(T) = R_ds(on)_25°C × (1 + α × (T − 25)) + R_wiring\nR_batt = max(0, R_eq_median − R_mosfet(T_board))\nR_batt_median_25C = Arrhenius correction of R_batt\n\nWithout MOSFET config, R_batt and R_batt_median_25C are not shown. The code does not assume R_eq ≈ R_batt — it simply does not attempt the split.</string>
 
-    <string name="info_s6_arrhenius_title" translatable="false">Temperature correction to 25°C</string>
-    <string name="info_s6_arrhenius_body" translatable="false">A cold battery measures higher internal resistance than a warm one — even in perfect health. To make rides comparable across seasons, R_batt is corrected to a reference temperature of 25°C.\n\nThe correction uses the Arrhenius equation (a standard chemistry model for how rates — and resistance — change with temperature):\n\nR_25°C = R_measured / exp((Ea/R_gas) × (1/T_meas − 1/298.15))\n\nEa (activation energy) defaults to 20 kJ/mol, typical for Li-ion. If your logs span at least 5°C of temperature variation, the app can calibrate Ea automatically from your own riding history.</string>
+    <string name="info_s6_arrhenius_title">Temperature correction to 25°C</string>
+    <string name="info_s6_arrhenius_body">A cold battery measures higher internal resistance than a warm one — even in perfect health. To make rides comparable across seasons, R_batt is corrected to a reference temperature of 25°C.\n\nThe correction uses the Arrhenius equation (a standard chemistry model for how rates — and resistance — change with temperature):\n\nR_25°C = R_measured / exp((Ea/R_gas) × (1/T_meas − 1/298.15))\n\nEa (activation energy) defaults to 20 kJ/mol, typical for Li-ion. If your logs span at least 5°C of temperature variation, the app can calibrate Ea automatically from your own riding history.</string>
 
-    <string name="info_s6_i2int_title" translatable="false">I_phase2_Int — thermal dose</string>
-    <string name="info_s6_i2int_body" translatable="false">This metric integrates the square of the phase current over the ride duration:\n\nI²_int = (∫ I_phase² dt) / T_ride\n\nThe integral is computed with the trapezoid rule using actual timestamps when available, or a 0.1 s fallback. Squaring the current makes it proportional to Joule heating — doubling the current quadruples the heat. Normalizing by ride duration makes a long calm ride and a short aggressive ride comparable on a per-ride basis.\n\nThe chart displays both the per-ride dose (left axis) and a cumulative sum from ride 1 to N (right axis, dashed grey line).\n\nI_phase2_Int is only available when your logger records phase current (EUC World or WheelLog with that column enabled).</string>
+    <string name="info_s6_i2int_title">I_phase2_Int — thermal dose</string>
+    <string name="info_s6_i2int_body">This metric integrates the square of the phase current over the ride duration:\n\nI²_int = (∫ I_phase² dt) / T_ride\n\nThe integral is computed with the trapezoid rule using actual timestamps when available, or a 0.1 s fallback. Squaring the current makes it proportional to Joule heating — doubling the current quadruples the heat. Normalizing by ride duration makes a long calm ride and a short aggressive ride comparable on a per-ride basis.\n\nThe chart displays both the per-ride dose (left axis) and a cumulative sum from ride 1 to N (right axis, dashed grey line).\n\nI_phase2_Int is only available when your logger records phase current (EUC World or WheelLog with that column enabled).</string>
 
 
     <!-- Technical details strings (shown in expandable sections) -->
-    <string name="info_expand_label" translatable="false">Technical details</string>
-    <string name="info_collapse_label" translatable="false">Hide details</string>
+    <string name="info_expand_label">Technical details</string>
+    <string name="info_collapse_label">Hide details</string>
 
-    <string name="info_s3_tech" translatable="false">R_pack_nominal = S × r_cell / P\n\nS = number of cells in series (derived from max pack voltage)\nP = number of parallel cell strings (configurable, default 1)\nr_cell = typical DC internal resistance for a fresh cell of the detected chemistry\n\nThe P value can be set in the MOSFET config dialog. It does not affect resistance computation — only the R_nominal alarm threshold multiplier.</string>
+    <string name="info_s3_tech">R_pack_nominal = S × r_cell / P\n\nS = number of cells in series (derived from max pack voltage)\nP = number of parallel cell strings (configurable, default 1)\nr_cell = typical DC internal resistance for a fresh cell of the detected chemistry\n\nThe P value can be set in the MOSFET config dialog. It does not affect resistance computation — only the R_nominal alarm threshold multiplier.</string>
 
-    <string name="info_m3_tech" translatable="false">R_mosfet_hot = R_ds(on)_25°C × (1 + α × (T_board − 25)) + R_wiring\n\nR_ds(on)_25°C = on-state resistance from the MOSFET datasheet (entered in settings)\nα = linear thermal coefficient (default 0.007 /°C for Si MOSFETs)\nR_wiring = wiring resistance estimate (configurable)\n\nBecause R_ds(on)_25°C is a fixed constant, R_mosfet_hot does not track transistor ageing. Real degradation appears as R_eq_median rising while R_mosfet_hot stays flat.</string>
+    <string name="info_m3_tech">R_mosfet_hot = R_ds(on)_25°C × (1 + α × (T_board − 25)) + R_wiring\n\nR_ds(on)_25°C = on-state resistance from the MOSFET datasheet (entered in settings)\nα = linear thermal coefficient (default 0.007 /°C for Si MOSFETs)\nR_wiring = wiring resistance estimate (configurable)\n\nBecause R_ds(on)_25°C is a fixed constant, R_mosfet_hot does not track transistor ageing. Real degradation appears as R_eq_median rising while R_mosfet_hot stays flat.</string>
 
-    <string name="info_s6_mosfet_tech" translatable="false">R_eq_median is always computed. It is normalised to 25°C via Arrhenius to give R_eq_median_25C.\n\nWhen MOSFET parameters are configured:\n  R_mosfet(T) = R_ds(on)_25°C × (1 + α × (T − 25)) + R_wiring\n  R_batt = max(0, R_eq_median − R_mosfet(T_board))\n  R_batt_median_25C = Arrhenius correction of R_batt\n\nWithout MOSFET config, R_batt and R_batt_median_25C are not computed — the code does not assume R_eq ≈ R_batt.</string>
+    <string name="info_s6_mosfet_tech">R_eq_median is always computed. It is normalised to 25°C via Arrhenius to give R_eq_median_25C.\n\nWhen MOSFET parameters are configured:\n  R_mosfet(T) = R_ds(on)_25°C × (1 + α × (T − 25)) + R_wiring\n  R_batt = max(0, R_eq_median − R_mosfet(T_board))\n  R_batt_median_25C = Arrhenius correction of R_batt\n\nWithout MOSFET config, R_batt and R_batt_median_25C are not computed — the code does not assume R_eq ≈ R_batt.</string>
 
-    <string name="info_s6_i2int_tech" translatable="false">I²_int = (∫ I_phase² dt) / T_ride\n\nThe integral is computed with the trapezoid rule using actual timestamps when available, or a 0.1 s fallback. Squaring the current makes the metric proportional to Joule heating (P = R·I²). Normalising by ride duration makes long calm rides and short aggressive ones comparable on a per-ride basis.\n\nThe chart shows both the per-ride dose (left axis) and a cumulative sum from ride 1 to N (right axis, dashed grey line).</string>
+    <string name="info_s6_i2int_tech">I²_int = (∫ I_phase² dt) / T_ride\n\nThe integral is computed with the trapezoid rule using actual timestamps when available, or a 0.1 s fallback. Squaring the current makes the metric proportional to Joule heating (P = R·I²). Normalising by ride duration makes long calm rides and short aggressive ones comparable on a per-ride basis.\n\nThe chart shows both the per-ride dose (left axis) and a cumulative sum from ride 1 to N (right axis, dashed grey line).</string>
 
 
-    <string name="import_warn_title" translatable="false">Import an EUC SoH archive</string>
-    <string name="import_warn_body" translatable="false">Only archives exported by EUC SoH can be imported. The archive will be verified before extraction — any archive that fails verification will be rejected.</string>
-    <string name="import_warn_filename_example" translatable="false">WheelName_SoH_YYYYMMDD_HHMMSS.zip</string>
-    <string name="import_warn_continue" translatable="false">Select archive</string>
-    <string name="import_extracting_title" translatable="false">Extracting archive…</string>
+    <string name="import_warn_title">Import an EUC SoH archive</string>
+    <string name="import_warn_body">Only archives exported by EUC SoH can be imported. The archive will be verified before extraction — any archive that fails verification will be rejected.</string>
+    <string name="import_warn_filename_example">WheelName_SoH_YYYYMMDD_HHMMSS.zip</string>
+    <string name="import_warn_continue">Select archive</string>
+    <string name="import_extracting_title">Extracting archive…</string>
 
 
     <!-- Onboarding -->
-    <string name="onboarding_next" translatable="false">Next</string>
-    <string name="onboarding_prev" translatable="false">Previous</string>
-    <string name="onboarding_finish" translatable="false">Finish</string>
-    <string name="onboarding_skip" translatable="false">Skip</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_prev">Previous</string>
+    <string name="onboarding_finish">Finish</string>
+    <string name="onboarding_skip">Skip</string>
 
-    <string name="onboarding_welcome_title" translatable="false">Welcome to EUC SoH Analyzer</string>
-    <string name="onboarding_welcome_body" translatable="false">This app analyzes your EUC ride logs to track battery and power-electronics health over time.\nLet\'s take a quick tour of the main features.</string>
+    <string name="onboarding_welcome_title">Welcome to EUC SoH Analyzer</string>
+    <string name="onboarding_welcome_body">This app analyzes your EUC ride logs to track battery and power-electronics health over time.\nLet\'s take a quick tour of the main features.</string>
 
-    <string name="onboarding_scan_title" translatable="false">Scan your logs</string>
-    <string name="onboarding_scan_body" translatable="false">Tap Refresh to scan for WheelLog, EUC World and DarknessBot log files on your device.\nDetected wheels will appear in the list below.</string>
+    <string name="onboarding_scan_title">Scan your logs</string>
+    <string name="onboarding_scan_body">Tap Refresh to scan for WheelLog, EUC World and DarknessBot log files on your device.\nDetected wheels will appear in the list below.</string>
 
     <string name="onboarding_info_title">Read the information section</string>
     <string name="onboarding_info_body">Read the information section to understand how the application works, and what it computes in details.</string>
 
-    <string name="onboarding_darknessbot_title" translatable="false">DarknessBot toggle</string>
-    <string name="onboarding_darknessbot_body" translatable="false">Enable this switch to include DarknessBot (.dbb) files in the analysis.\nNote: DarknessBot data has limited accuracy for some wheel brands.</string>
+    <string name="onboarding_darknessbot_title">DarknessBot toggle</string>
+    <string name="onboarding_darknessbot_body">Enable this switch to include DarknessBot (.dbb) files in the analysis.\nNote: DarknessBot data has limited accuracy for some wheel brands.</string>
 
-    <string name="onboarding_import_title" translatable="false">Import an EUC SoH Archive</string>
-    <string name="onboarding_import_body" translatable="false">Select an EUC SoH Archive to import data to your phone and include wheel history to the analysis</string>
-    <string name="onboarding_analyze_title" translatable="false">Analyze a wheel</string>
-    <string name="onboarding_analyze_body" translatable="false">Select a wheel from the list, then tap the Analyze button to start the SoH analysis. Results will appear once processing is complete.</string>
-    <string name="onboarding_export_title" translatable="false">Export your results</string>
-    <string name="onboarding_export_body" translatable="false">After analysis, you can export results as PDF, CSV or a full ZIP archive from the results screen.</string>
+    <string name="onboarding_import_title">Import an EUC SoH Archive</string>
+    <string name="onboarding_import_body">Select an EUC SoH Archive to import data to your phone and include wheel history to the analysis</string>
+    <string name="onboarding_analyze_title">Analyze a wheel</string>
+    <string name="onboarding_analyze_body">Select a wheel from the list, then tap the Analyze button to start the SoH analysis. Results will appear once processing is complete.</string>
+    <string name="onboarding_export_title">Export your results</string>
+    <string name="onboarding_export_body">After analysis, you can export results as PDF, CSV or a full ZIP archive from the results screen.</string>
 
-    <string name="onboarding_results_welcome_title" translatable="false">Results overview</string>
-    <string name="onboarding_results_welcome_body" translatable="false">This screen shows the SoH metrics for the selected wheel.\nYou can view detailed data, charts and export reports.</string>
+    <string name="onboarding_results_welcome_title">Results overview</string>
+    <string name="onboarding_results_welcome_body">This screen shows the SoH metrics for the selected wheel.\nYou can view detailed data, charts and export reports.</string>
 
-    <string name="onboarding_results_files_title" translatable="false">Files details</string>
-    <string name="onboarding_results_files_body" translatable="false">Tap the files button to view the log files that are used / rejected for the analysis.</string>
+    <string name="onboarding_results_files_title">Files details</string>
+    <string name="onboarding_results_files_body">Tap the files button to view the log files that are used / rejected for the analysis.</string>
 
-    <string name="onboarding_results_charts_title" translatable="false">Charts</string>
-    <string name="onboarding_results_charts_body" translatable="false">Tap the Charts button to view Gaussian, Trend, CUSUM and Inflexion charts for your wheel\'s metrics.</string>
+    <string name="onboarding_results_charts_title">Charts</string>
+    <string name="onboarding_results_charts_body">Tap the Charts button to view Gaussian, Trend, CUSUM and Inflexion charts for your wheel\'s metrics.</string>
 
-    <string name="onboarding_results_export_pdf_title" translatable="false">Export PDF</string>
-    <string name="onboarding_results_export_pdf_body" translatable="false">Tap the PDF icon to export a PDF containing analysis results in detail, including data and all chart images.</string>
+    <string name="onboarding_results_export_pdf_title">Export PDF</string>
+    <string name="onboarding_results_export_pdf_body">Tap the PDF icon to export a PDF containing analysis results in detail, including data and all chart images.</string>
 
-    <string name="onboarding_results_export_csv_title" translatable="false">Export CSV</string>
-    <string name="onboarding_results_export_csv_body" translatable="false">Tap the CSV icon to export a CSV with analysis summary.</string>
+    <string name="onboarding_results_export_csv_title">Export CSV</string>
+    <string name="onboarding_results_export_csv_body">Tap the CSV icon to export a CSV with analysis summary.</string>
 
-    <string name="onboarding_results_export_archive_title" translatable="false">Export archive</string>
-    <string name="onboarding_results_export_archive_body" translatable="false">Tap the archive icon to export a ZIP containing the PDF report, CSV data and all chart images.</string>
+    <string name="onboarding_results_export_archive_title">Export archive</string>
+    <string name="onboarding_results_export_archive_body">Tap the archive icon to export a ZIP containing the PDF report, CSV data and all chart images.</string>
 
-    <string name="onboarding_results_export_share_title" translatable="false">Share results</string>
-    <string name="onboarding_results_export_share_body" translatable="false">Once you have generated a file (csv, pdf or zip), you can share it using the share button. The share button only shares the latest generated file</string>
+    <string name="onboarding_results_export_share_title">Share results</string>
+    <string name="onboarding_results_export_share_body">Once you have generated a file (csv, pdf or zip), you can share it using the share button. The share button only shares the latest generated file</string>
 
-    <string name="onboarding_help_cd" translatable="false">Show onboarding guide</string>
+    <string name="onboarding_help_cd">Show onboarding guide</string>
 </resources>
