@@ -119,7 +119,7 @@
     <string name="import_error_file_corrupted">Eine oder mehrere Dateien im Archiv sind beschädigt. Die SHA-256-Prüfsumme stimmt nicht überein.</string>
     <string name="import_warn_title">EUC SoH-Archiv importieren</string>
     <string name="import_warn_body">Es können nur von EUC SoH exportierte Archive importiert werden. Das Archiv wird vor der Entnahme geprüft — jedes Archiv, das die Prüfung nicht besteht, wird abgelehnt.</string>
-    <string name="import_warn_filenameExample">RadName_SoH_JJJJMMTT_HHMMSS.zip</string>
+    <string name="import_warn_filename_example">RadName_SoH_JJJJMMTT_HHMMSS.zip</string>
     <string name="import_warn_continue">Archiv auswählen</string>
     <string name="import_extracting_title">Archiv wird entpackt…</string>
     <string name="info_title">Über EUC SoH</string>
