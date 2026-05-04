@@ -12,13 +12,13 @@
 [![License: AGPL-3.0-or-later](https://img.shields.io/badge/License-AGPL--3.0--or--later-blue.svg)](https://spdx.org/licenses/AGPL-3.0-or-later.html)
 [![HAL](https://img.shields.io/badge/HAL-05553115-4b6c8b)](https://hal.science/hal-05553115)
 
-## F-Droid
+## F-Droid (recomnmended)
 
 [<img src="https://f-droid.org/badge/get-it-on-fr.png"
     alt="Disponible sur F-Droid"
     height="80">](https://f-droid.org/packages/io.github.eucsoh.android)
 
-## Play Store
+## Play Store (Not recommended - Bad UX due to SAF Restrictions)
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://playbadges.pavi2410.com/badge/full?id=io.github.eucsoh.android&theme=dark">
