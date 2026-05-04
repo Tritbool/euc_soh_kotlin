@@ -112,6 +112,7 @@ fun MainScreen(
         mutableStateOf(!OnboardingManager.hasSeenMain(context))
     }
     var mainOnboardingStep by remember { mutableStateOf(0) }
+    var showScanSourcesDialog by remember { mutableStateOf(false) }
 
     // Bounds collected via onGloballyPositioned for spotlight targets
     var infoBounds by remember { mutableStateOf(Rect.Zero) }
@@ -358,29 +359,11 @@ fun MainScreen(
                         Column(modifier = Modifier.padding(8.dp)) {
                             Text(
                                 stringResource(R.string.scan_sources_label, state.scanSources.size),
+                                modifier = Modifier.clickable { showScanSourcesDialog = true },
                                 style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer
                             )
-                            state.scanSources.take(3).forEach { source ->
-                                Text(
-                                    source,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                            if (state.scanSources.size > 3) {
-                                Text(
-                                    stringResource(
-                                        R.string.scan_sources_more,
-                                        state.scanSources.size - 3
-                                    ),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                            }
                         }
                     }
                 }
@@ -517,6 +500,13 @@ fun MainScreen(
                         onSave = viewModel::saveMosfetConfig,
                         onClear = viewModel::clearMosfetConfig,
                         onDismiss = viewModel::dismissMosfetDialog
+                    )
+                }
+
+                if (showScanSourcesDialog) {
+                    ScanSourcesDialog(
+                        sources = state.scanSources,
+                        onDismiss = { showScanSourcesDialog = false }
                     )
                 }
             }
