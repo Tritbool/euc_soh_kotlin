@@ -201,7 +201,11 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
                 Intent.FLAG_GRANT_READ_URI_PERMISSION
             )
         } catch (e: SecurityException) {
-            Log.w(TAG, "Unable to persist URI permission for $uri", e)
+            Log.w(
+                TAG,
+                "Unable to persist URI permission for $uri. This can happen if the picker did not grant persistable read access.",
+                e
+            )
         }
         repository.setRootUri(uri)
         updateScanPathDisplay()

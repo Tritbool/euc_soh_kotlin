@@ -84,7 +84,7 @@ class WheelRepository(private val context: Context) {
         Log.d(TAG, "getWheels called: forceRefresh=$forceRefresh darknessBotEnabled=$darknessBotEnabled")
         val rootUri = getRootUri()
         if (rootUri == null) {
-            Log.d(TAG, "No SAF root URI configured, returning empty list")
+            Log.d(TAG, "No SAF root URI configured, returning empty map")
             wheelDao.clearAll()
             return@withContext emptyMap()
         }
