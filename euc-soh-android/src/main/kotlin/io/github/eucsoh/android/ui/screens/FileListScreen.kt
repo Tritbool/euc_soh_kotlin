@@ -70,6 +70,7 @@ import io.github.eucsoh.SohAnalyzer
 import io.github.eucsoh.android.R
 import io.github.eucsoh.android.data.FileManager
 import kotlinx.coroutines.launch
+import java.io.File
 
 @Composable
 fun FileReportItem(
@@ -107,7 +108,7 @@ fun FileReportItem(
                     modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    Uri.decode(report.fileName),
+                    File(report.path).name,
                     style = MaterialTheme.typography.titleSmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -267,7 +268,7 @@ fun FileListScreen(
 
             AlertDialog(
                 onDismissRequest = { selectedReport = null },
-                title = { Text(Uri.decode(report.fileName)) },
+                title = { Text(File(report.path).name) },
                 text = {
                     Column {
                         SelectionContainer {
@@ -288,7 +289,7 @@ fun FileListScreen(
                             scope.launch {
                                 val shareUri = fileManager.copyToCache(
                                     sourceUri = report.path.toUri(),
-                                    fileName = report.fileName
+                                    fileName =File(report.path).name
                                 )
                                 val intent = Intent(Intent.ACTION_VIEW).apply {
                                     setDataAndType(shareUri, "text/csv")

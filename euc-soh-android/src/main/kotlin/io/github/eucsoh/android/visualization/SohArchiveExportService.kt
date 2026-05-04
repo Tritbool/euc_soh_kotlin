@@ -39,6 +39,7 @@ import java.util.zip.ZipOutputStream
 import io.github.eucsoh.SohAnalyzer
 import io.github.eucsoh.android.BuildConfig
 import io.github.eucsoh.android.data.model.WheelDataSource
+import androidx.core.net.toUri
 
 /**
  * Exports a ZIP archive with structure:
@@ -95,23 +96,24 @@ class SohArchiveExportService(private val context: Context) {
             fileReports
                 .filter { it.accepted && it.source != DARKNESS_BOT}
                 .forEach { report ->
+                    val ext = if(report.path.endsWith(".csv")) "" else ".csv"
                     val entryPath = when {
-                        report.source == EUC_WORLD -> "EUC World/${report.fileName}"
-                        report.source == WHEELLOG  -> "WheelLog/$macFolder/${report.fileName}"
-                        else                         -> "Other/${report.fileName}"
+                        report.source == EUC_WORLD -> "EUC World/${File(report.path).name}$ext"
+                        report.source == WHEELLOG  -> "WheelLog/$macFolder/${File(report.path).name}$ext"
+                        else                         -> "Other/${File(report.path).name}$ext"
                     }
                     try {
                         val inputStream = when {
                             report.path.startsWith("content://") -> {
                                 try {
-                                    context.contentResolver.openInputStream(Uri.parse(report.path))
+                                    context.contentResolver.openInputStream(report.path.toUri())
                                 } catch (e: SecurityException) {
                                     Log.w(TAG, "No permission for ${report.path}: ${e.message}")
                                     null
                                 }
                             }
                             report.path.startsWith("file://") ->
-                                java.io.File(Uri.parse(report.path).path!!).inputStream()
+                                java.io.File(report.path.toUri().path!!).inputStream()
                             else ->
                                 java.io.File(report.path).takeIf { it.canRead() }?.inputStream()
                         }
