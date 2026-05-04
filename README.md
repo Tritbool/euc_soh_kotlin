@@ -12,14 +12,24 @@
 [![License: AGPL-3.0-or-later](https://img.shields.io/badge/License-AGPL--3.0--or--later-blue.svg)](https://spdx.org/licenses/AGPL-3.0-or-later.html)
 [![HAL](https://img.shields.io/badge/HAL-05553115-4b6c8b)](https://hal.science/hal-05553115)
 
+## F-Droid
+
 [<img src="https://f-droid.org/badge/get-it-on-fr.png"
     alt="Disponible sur F-Droid"
     height="80">](https://f-droid.org/packages/io.github.eucsoh.android)
 
-<!-- Uncomment once published on F-Droid
-[![F-Droid](https://img.shields.io/f-droid/v/io.github.eucsoh.android)](https://f-droid.org/packages/io.github.eucsoh.android/)
--->
+## Play Store
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://playbadges.pavi2410.com/badge/full?id=io.github.eucsoh.android&theme=dark">
+  <img alt="PlayBadges Card Folo" src="https://playbadges.pavi2410.com/badge/full?id=io.github.eucsoh.android" height="100">
+</picture>
+
+<a href = "https://play.google.com/store/apps/details?id=io.github.eucsoh.android">
+  <img src="GetItOnGooglePlay_Badge_Web_color_English.png" height="80"></img>
+</a>
+
+----
 
 EUC SoH is an Android app that analyzes the **state of health (SoH)** of electric unicycles from ride logs produced by apps such as **WheelLog**, **EUC World** or **DarknessBot** (partially).
 It estimates battery health and internal resistance, and generates charts and reports suitable for resale, maintenance or long‑term monitoring.
