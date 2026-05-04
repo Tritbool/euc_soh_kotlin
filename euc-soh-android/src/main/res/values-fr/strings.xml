@@ -14,9 +14,11 @@
 
     <string name="topbar_title">EUC SoH Analyzer</string>
     <string name="topbar_refresh">Actualiser</string>
+    <string name="topbar_add_source_cd">Ajouter un dossier à scanner</string>
     <string name="selected_euc_label">EUC sélectionné :</string>
 
 
+    <string name="scan_sources_more">+ %1$d source(s)</string>
     <string name="detected_eucs">EUC détectés (%1$d)</string>
     <string name="analyze_button">Analyser %1$s</string>
     <string name="analyze_button_mock">Analyser</string>
@@ -29,6 +31,7 @@
 
     <string name="no_wheel_detected">Aucun EUC trouvé</string>
     <string name="no_wheel_hint">Le scanner cherche récursivement les dossiers :\n- WheelLog/\n- EUC World/\n\ndans : %1$s\n\nAssurez-vous que vos logs sont bien dans ce dossier.</string>
+    <string name="no_wheel_hint_restricted">Choisir un emplacement contenant les dossiers WheelLog ou EUC World, puis lancer un scan.  Emplacement actuel: %1$s</string>
     <string name="choose_folder">📁 Choisir un autre dossier</string>
     <string name="check_permissions">Vérifier les permissions</string>
 
@@ -306,4 +309,5 @@
     <string name="onboarding_results_export_archive_title">Exporter une archive ZIP</string>
     <string name="onboarding_results_export_archive_body">Appuyez sur l\'icône d\'archive pour exporter un fichier ZIP contenant le rapport PDF, les données CSV et toutes les images des graphiques.</string>
     <string name="onboarding_results_export_share_title">Partager les résultats</string>
+    <string name="scan_sources_label">Sources de scan (%1$d)</string>
 </resources>
