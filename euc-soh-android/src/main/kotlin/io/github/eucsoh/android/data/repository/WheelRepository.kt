@@ -185,7 +185,7 @@ class WheelRepository(private val context: Context) {
             target.merge(mac, newIdentity) { existing, new ->
                 val mergedCsv = existing.csvFiles + new.csvFiles
                 existing.copy(
-                    displayName = if (existing.displayName == existing.macAddress && new.displayName != new.macAddress) {
+                    displayName = if (shouldPreferDisplayName(existing, new)) {
                         new.displayName
                     } else {
                         existing.displayName
@@ -202,6 +202,11 @@ class WheelRepository(private val context: Context) {
                 )
             }
         }
+    }
+
+    private fun shouldPreferDisplayName(existing: WheelIdentity, incoming: WheelIdentity): Boolean {
+        return existing.displayName == existing.macAddress &&
+                incoming.displayName != incoming.macAddress
     }
 
 

@@ -134,6 +134,7 @@ class WheelScanner(
         val eucWorldDocs = mutableListOf<DocumentFile>()
         val dbbDocs = mutableListOf<DocumentFile>()
         if (darknessBotEnabled) {
+            // DarknessBot scanner traverses recursively from each scan root.
             dbbDocs.add(rootDoc)
         }
 
