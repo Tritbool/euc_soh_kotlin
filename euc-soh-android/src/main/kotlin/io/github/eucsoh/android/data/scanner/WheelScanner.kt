@@ -133,10 +133,14 @@ class WheelScanner(
         val wheelLogDocs = mutableListOf<DocumentFile>()
         val eucWorldDocs = mutableListOf<DocumentFile>()
         val dbbDocs = mutableListOf<DocumentFile>()
+        if (darknessBotEnabled) {
+            // DarknessBot scanner traverses recursively from each scan root.
+            dbbDocs.add(rootDoc)
+        }
 
         try {
             var foldersScanned = 0
-            walkDocumentTree(rootDoc, 0) { doc, depth ->
+            walkDocumentTree(rootDoc, 0) { doc, _ ->
                 foldersScanned++
                 if (foldersScanned % 100 == 0) {
                     Log.d(TAG, "Scanned $foldersScanned folders...")
@@ -158,6 +162,7 @@ class WheelScanner(
             Log.d(TAG, "Scan complete: $foldersScanned folders scanned")
             Log.d(TAG, "Found ${wheelLogDocs.size} WheelLog folders")
             Log.d(TAG, "Found ${eucWorldDocs.size} EUC World folders")
+            Log.d(TAG, "DarknessBot roots: ${dbbDocs.size}")
         } catch (e: Exception) {
             Log.e(TAG, "Error during document tree walk", e)
         }
@@ -271,12 +276,17 @@ class WheelScanner(
     ): Map<String, WheelIdentity> = withContext(Dispatchers.IO) {
         val wheelLogDeferred = async {
             try {
-                val wheels = wheelLogDocs.flatMap { doc ->
+                val wheels = mutableMapOf<String, WheelIdentity>()
+                wheelLogDocs.forEach { doc ->
                     Log.d(TAG, "Scanning WheelLog document: ${doc.uri}")
                     val result = wheelLogScanner.scanDocument(doc)
                     Log.d(TAG, "Found ${result.size} wheels in ${doc.name}")
-                    result.values
-                }.associateBy { it.macAddress }
+                    result.forEach { (mac, identity) ->
+                        wheels.merge(mac, identity) { existing, new ->
+                            existing.copy(csvFiles = existing.csvFiles + new.csvFiles)
+                        }
+                    }
+                }
                 Log.d(TAG, "Total WheelLog wheels: ${wheels.size}")
                 wheels
             } catch (e: Exception) {
@@ -287,12 +297,17 @@ class WheelScanner(
 
         val eucWorldDeferred = async {
             try {
-                val wheels = eucWorldDocs.flatMap { doc ->
+                val wheels = mutableMapOf<String, WheelIdentity>()
+                eucWorldDocs.forEach { doc ->
                     Log.d(TAG, "Scanning EUC World document: ${doc.uri}")
                     val result = eucWorldScanner.scanDocument(doc)
                     Log.d(TAG, "Found ${result.size} wheels in ${doc.name}")
-                    result.values
-                }.associateBy { it.macAddress }
+                    result.forEach { (mac, identity) ->
+                        wheels.merge(mac, identity) { existing, new ->
+                            existing.copy(csvFiles = existing.csvFiles + new.csvFiles)
+                        }
+                    }
+                }
                 Log.d(TAG, "Total EUC World wheels: ${wheels.size}")
                 wheels
             } catch (e: Exception) {
@@ -301,10 +316,32 @@ class WheelScanner(
             }
         }
 
+        val darknessBotDeferred = async {
+            try {
+                val wheels = mutableMapOf<String, WheelIdentity>()
+                dbbDocs.forEach { doc ->
+                    Log.d(TAG, "Scanning DarknessBot documents from: ${doc.uri}")
+                    val result = darknessBotScanner.scanFromUri(doc)
+                    Log.d(TAG, "Found ${result.size} DarknessBot wheels in ${doc.name}")
+                    result.forEach { (mac, identity) ->
+                        wheels.merge(mac, identity) { existing, new ->
+                            existing.copy(csvFiles = existing.csvFiles + new.csvFiles)
+                        }
+                    }
+                }
+                Log.d(TAG, "Total DarknessBot wheels: ${wheels.size}")
+                wheels
+            } catch (e: Exception) {
+                Log.e(TAG, "Error scanning DarknessBot documents", e)
+                emptyMap()
+            }
+        }
+
         val wheelLogWheels = wheelLogDeferred.await()
         val eucWorldWheels = eucWorldDeferred.await()
+        val darknessBotWheels = darknessBotDeferred.await()
 
-        return@withContext mergeWheels(wheelLogWheels, eucWorldWheels)
+        return@withContext mergeWheels(wheelLogWheels, eucWorldWheels, darknessBotWheels)
     }
 
     /**

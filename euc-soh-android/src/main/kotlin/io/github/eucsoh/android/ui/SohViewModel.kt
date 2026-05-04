@@ -61,6 +61,7 @@ data class SohUiState(
     val detectedWheels: Map<String, WheelIdentity> = emptyMap(),
     val selectedWheel: WheelIdentity? = null,
     val scanRootPath: String = "",
+    val scanSources: List<String> = emptyList(),
     val manualFolderUri: Uri? = null,
     val analysisMode: AnalysisMode = AnalysisMode.AUTO_DETECT,
     val isScanning: Boolean = false,
@@ -183,17 +184,41 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
      * Updates the scan path display in UI state.
      */
     private fun updateScanPathDisplay() {
-        val uri = repository.getRootUri()
-        val path = if (uri != null) {
-            "URI: $uri"
+        val rootUris = repository.getRootUris()
+        val sourceLabels = rootUris.map { "URI: $it" }
+        val path = if (sourceLabels.isNotEmpty()) {
+            if (sourceLabels.size == 1) {
+                sourceLabels.first()
+            } else {
+                "${sourceLabels.first()} (+${sourceLabels.size - 1} more)"
+            }
         } else {
             getApplication<Application>().getString(R.string.scan_folder_not_selected)
         }
         Log.d(TAG, "Current scan path: $path")
-        _state.update { it.copy(scanRootPath = path) }
+        _state.update {
+            it.copy(
+                scanRootPath = path,
+                scanSources = sourceLabels
+            )
+        }
     }
 
     fun selectScanRoot(uri: Uri) {
+        persistReadPermission(uri)
+        repository.setRootUri(uri)
+        updateScanPathDisplay()
+        scanWheels(forceRefresh = true)
+    }
+
+    fun addScanSource(uri: Uri) {
+        persistReadPermission(uri)
+        repository.addRootUri(uri)
+        updateScanPathDisplay()
+        scanWheels(forceRefresh = true)
+    }
+
+    private fun persistReadPermission(uri: Uri) {
         val context = getApplication<Application>()
         try {
             context.contentResolver.takePersistableUriPermission(
@@ -207,9 +232,6 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
                 e
             )
         }
-        repository.setRootUri(uri)
-        updateScanPathDisplay()
-        scanWheels(forceRefresh = true)
     }
 
 
