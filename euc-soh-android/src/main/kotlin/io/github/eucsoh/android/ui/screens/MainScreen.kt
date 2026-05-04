@@ -83,7 +83,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainScreen(
     viewModel: SohViewModel,
-    onRequestPermissions: () -> Unit,
     onOpenInfo: () -> Unit
 ) {
 
@@ -92,6 +91,13 @@ fun MainScreen(
     val bannerHeight = 64.dp
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
+    val scanFolderPickerLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocumentTree()
+    ) { uri ->
+        if (uri != null) {
+            viewModel.selectScanRoot(uri)
+        }
+    }
 
     // Onboarding state
     var showMainOnboarding by remember {
@@ -369,7 +375,7 @@ fun MainScreen(
 
                     state.detectedWheels.isEmpty() -> {
                         EmptyStateScreen(
-                            onRequestPermissions = onRequestPermissions,
+                            onSelectScanFolder = { scanFolderPickerLauncher.launch(null) },
                             onRetry = { viewModel.scanWheels(forceRefresh = true) },
                             scanPath = state.scanRootPath,
                             darknessBotEnabled = state.darknessBotEnabled,
@@ -569,7 +575,7 @@ fun AnalysisProgressScreen(
 
 @Composable
 fun EmptyStateScreen(
-    onRequestPermissions: () -> Unit,
+    onSelectScanFolder: () -> Unit,
     onRetry: () -> Unit,
     scanPath: String,
     darknessBotEnabled: Boolean = false,
@@ -592,12 +598,12 @@ fun EmptyStateScreen(
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                stringResource(R.string.no_wheel_hint, scanPath),
+                stringResource(R.string.no_wheel_hint_restricted, scanPath),
                 style = MaterialTheme.typography.bodyMedium
             )
             Spacer(Modifier.height(8.dp))
-            Button(onClick = onRequestPermissions) {
-                Text(stringResource(R.string.check_permissions))
+            Button(onClick = onSelectScanFolder) {
+                Text(stringResource(R.string.choose_folder))
             }
             Spacer(Modifier.height(8.dp))
             Button(
