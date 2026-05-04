@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -98,6 +99,13 @@ fun MainScreen(
             viewModel.selectScanRoot(uri)
         }
     }
+    val addScanSourceLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocumentTree()
+    ) { uri ->
+        if (uri != null) {
+            viewModel.addScanSource(uri)
+        }
+    }
 
     // Onboarding state
     var showMainOnboarding by remember {
@@ -107,6 +115,7 @@ fun MainScreen(
 
     // Bounds collected via onGloballyPositioned for spotlight targets
     var infoBounds by remember { mutableStateOf(Rect.Zero) }
+    var addSourceBounds by remember { mutableStateOf(Rect.Zero) }
     var refreshBounds by remember { mutableStateOf(Rect.Zero) }
     var darknessBotToggleBounds by remember { mutableStateOf(Rect.Zero) }
     var importArchiveBounds by remember { mutableStateOf(Rect.Zero) }
@@ -116,6 +125,7 @@ fun MainScreen(
     val mainOnboardingSteps =
         remember(
             infoBounds,
+            addSourceBounds,
             refreshBounds,
             darknessBotToggleBounds,
             importArchiveBounds,
@@ -140,6 +150,11 @@ fun MainScreen(
                             titleRes = R.string.onboarding_scan_title,
                             bodyRes = R.string.onboarding_scan_body,
                             targetBounds = refreshBounds
+                        ),
+                        OnboardingStep(
+                            titleRes = R.string.onboarding_add_source_title,
+                            bodyRes = R.string.onboarding_add_source_body,
+                            targetBounds = addSourceBounds
                         ),
                         OnboardingStep(
                             titleRes = R.string.onboarding_darknessbot_title,
@@ -171,6 +186,11 @@ fun MainScreen(
                                 titleRes = R.string.onboarding_scan_title,
                                 bodyRes = R.string.onboarding_scan_body,
                                 targetBounds = refreshBounds
+                            ),
+                            OnboardingStep(
+                                titleRes = R.string.onboarding_add_source_title,
+                                bodyRes = R.string.onboarding_add_source_body,
+                                targetBounds = addSourceBounds
                             ),
                             OnboardingStep(
                                 titleRes = R.string.onboarding_darknessbot_title,
@@ -275,6 +295,21 @@ fun MainScreen(
                             }
                         }
 
+                        if (!state.showResults) {
+                            IconButton(
+                                modifier = Modifier.onGloballyPositioned { coordinates ->
+                                    addSourceBounds = coordinates.boundsInRoot()
+                                },
+                                onClick = { addScanSourceLauncher.launch(null) }
+                            ) {
+                                Icon(
+                                    Icons.Default.CreateNewFolder,
+                                    contentDescription = stringResource(R.string.topbar_add_source_cd),
+                                    tint = Color(0xFF1A1C1E)
+                                )
+                            }
+                        }
+
                         // Refresh
                         IconButton(
                             modifier = Modifier.onGloballyPositioned { coordinates ->
@@ -315,24 +350,37 @@ fun MainScreen(
                     .fillMaxSize()
                     .padding(padding)
             ) {
-                // Show current scan path
-                if (state.scanRootPath.isNotEmpty()) {
+                if (state.scanSources.isNotEmpty()) {
                     Surface(
                         color = MaterialTheme.colorScheme.secondaryContainer,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(8.dp)) {
                             Text(
-                                stringResource(R.string.selected_euc_label),
+                                stringResource(R.string.scan_sources_label, state.scanSources.size),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer
                             )
-                            Text(
-                                state.selectedWheel?.effectiveName ?: "",
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
+                            state.scanSources.take(3).forEach { source ->
+                                Text(
+                                    source,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                            if (state.scanSources.size > 3) {
+                                Text(
+                                    stringResource(
+                                        R.string.scan_sources_more,
+                                        state.scanSources.size - 3
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                            }
                         }
                     }
                 }

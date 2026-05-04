@@ -32,6 +32,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.core.content.edit
 import androidx.core.net.toUri
+import io.github.eucsoh.android.data.model.WheelDataSource
+import org.json.JSONArray
+import org.json.JSONException
 
 /**
  * Repository for wheel detection with caching.
@@ -50,6 +53,7 @@ class WheelRepository(private val context: Context) {
     companion object {
         private const val TAG = "WheelRepository"
         private const val CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000L  // 24 hours
+        private const val PREF_ROOT_URIS = "scan_root_uris"
         private const val PREF_ROOT_URI = "scan_root_uri"
     }
 
@@ -58,17 +62,61 @@ class WheelRepository(private val context: Context) {
      */
     fun setRootUri(uri: Uri) {
         Log.d(TAG, "Setting root URI: $uri")
+        saveRootUris(listOf(uri))
+    }
+
+    /**
+     * Adds a SAF root URI to the list of scan sources.
+     */
+    fun addRootUri(uri: Uri) {
+        val current = getRootUris().map { it.toString() }.toMutableList()
+        if (uri.toString() !in current) {
+            current.add(uri.toString())
+        }
+        val updated = current.map { it.toUri() }
+        Log.d(TAG, "Adding root URI: $uri (total=${updated.size})")
+        saveRootUris(updated)
+    }
+
+    private fun saveRootUris(uris: List<Uri>) {
+        val json = JSONArray()
+        uris.forEach { json.put(it.toString()) }
         prefs.edit {
-            putString(PREF_ROOT_URI, uri.toString())
+            putString(PREF_ROOT_URIS, json.toString())
+            // Keep legacy key for backward compatibility.
+            putString(PREF_ROOT_URI, uris.firstOrNull()?.toString())
         }
     }
 
     /**
      * Gets the configured root URI (if in DocumentFile mode).
      */
-    fun getRootUri(): Uri? {
-        val storedUri = prefs.getString(PREF_ROOT_URI, null) ?: return null
-        return storedUri.toUri()
+    fun getRootUri(): Uri? = getRootUris().firstOrNull()
+
+    /**
+     * Gets all configured root URIs (multi-source SAF mode).
+     */
+    fun getRootUris(): List<Uri> {
+        val storedUris = prefs.getString(PREF_ROOT_URIS, null)
+        if (!storedUris.isNullOrBlank()) {
+            try {
+                val array = JSONArray(storedUris)
+                return buildList {
+                    for (i in 0 until array.length()) {
+                        val value = array.optString(i)
+                        if (value.isNotBlank()) {
+                            add(value.toUri())
+                        }
+                    }
+                }
+            } catch (e: JSONException) {
+                Log.w(TAG, "Failed to parse persisted root URIs, falling back to legacy key", e)
+            }
+        }
+
+        // Legacy single-root fallback.
+        val legacy = prefs.getString(PREF_ROOT_URI, null) ?: return emptyList()
+        return listOf(legacy.toUri())
     }
 
     /**
@@ -82,8 +130,8 @@ class WheelRepository(private val context: Context) {
         darknessBotEnabled: Boolean = false
     ): Map<String, WheelIdentity> = withContext(Dispatchers.IO) {
         Log.d(TAG, "getWheels called: forceRefresh=$forceRefresh darknessBotEnabled=$darknessBotEnabled")
-        val rootUri = getRootUri()
-        if (rootUri == null) {
+        val rootUris = getRootUris()
+        if (rootUris.isEmpty()) {
             Log.d(TAG, "No SAF root URI configured, returning empty map")
             wheelDao.clearAll()
             return@withContext emptyMap()
@@ -91,7 +139,7 @@ class WheelRepository(private val context: Context) {
 
         if (forceRefresh) {
             Log.d(TAG, "Force refresh requested, scanning...")
-            scanAndCache(rootUri, darknessBotEnabled)
+            scanAndCache(rootUris, darknessBotEnabled)
         } else {
             // Try cache first
             val cached = wheelDao.getAllWheels()
@@ -102,7 +150,7 @@ class WheelRepository(private val context: Context) {
                 cached.toWheelIdentities()
             } else {
                 Log.d(TAG, "Cache miss or expired, scanning...")
-                scanAndCache(rootUri, darknessBotEnabled)
+                scanAndCache(rootUris, darknessBotEnabled)
             }
         }
     }
@@ -112,17 +160,48 @@ class WheelRepository(private val context: Context) {
      * Scans using configured path/URI and updates cache.
      */
     private suspend fun scanAndCache(
-        rootUri: Uri,
+        rootUris: List<Uri>,
         darknessBotEnabled: Boolean = false
     ): Map<String, WheelIdentity> {
-        Log.d(TAG, "Scanning from URI: $rootUri")
-        val wheels: Map<String, WheelIdentity> = scanner.scanFromUri(rootUri, darknessBotEnabled)
+        val wheels = mutableMapOf<String, WheelIdentity>()
+        rootUris.forEach { rootUri ->
+            Log.d(TAG, "Scanning from URI: $rootUri")
+            val scanResult = scanner.scanFromUri(rootUri, darknessBotEnabled)
+            mergeWheelMaps(wheels, scanResult)
+        }
 
         Log.d(TAG, "Scan returned ${wheels.size} wheels")
         wheelDao.clearAll()
         wheelDao.insertWheels(wheels.toEntities())
         Log.d(TAG, "Cache updated")
         return wheels
+    }
+
+    private fun mergeWheelMaps(
+        target: MutableMap<String, WheelIdentity>,
+        source: Map<String, WheelIdentity>
+    ) {
+        source.forEach { (mac, newIdentity) ->
+            target.merge(mac, newIdentity) { existing, new ->
+                val mergedCsv = existing.csvFiles + new.csvFiles
+                existing.copy(
+                    displayName = if (existing.displayName == existing.macAddress && new.displayName != new.macAddress) {
+                        new.displayName
+                    } else {
+                        existing.displayName
+                    },
+                    csvFiles = mergedCsv,
+                    manufacturer = new.manufacturer ?: existing.manufacturer,
+                    model = new.model ?: existing.model,
+                    serialNumber = new.serialNumber ?: existing.serialNumber,
+                    source = if (existing.source == new.source) {
+                        existing.source
+                    } else {
+                        WheelDataSource.MIX
+                    }
+                )
+            }
+        }
     }
 
 
