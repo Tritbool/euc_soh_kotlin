@@ -39,8 +39,8 @@ android {
         applicationId = "io.github.eucsoh.android"
         minSdk = 26
         targetSdk = 36
-        versionCode = 17
-        versionName = "1.5"
+        versionCode = 1001
+        versionName = "2.00"
     }
 
     buildTypes {
