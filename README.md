@@ -12,7 +12,7 @@
 [![License: AGPL-3.0-or-later](https://img.shields.io/badge/License-AGPL--3.0--or--later-blue.svg)](https://spdx.org/licenses/AGPL-3.0-or-later.html)
 [![HAL](https://img.shields.io/badge/HAL-05553115-4b6c8b)](https://hal.science/hal-05553115)
 
-## F-Droid (recomnmended)
+## F-Droid (recommended)
 
 [<img src="https://f-droid.org/badge/get-it-on-fr.png"
     alt="Disponible sur F-Droid"
