@@ -309,20 +309,21 @@ fun MainScreen(
                                     tint = Color(0xFF1A1C1E)
                                 )
                             }
-                        }
 
-                        // Refresh
-                        IconButton(
-                            modifier = Modifier.onGloballyPositioned { coordinates ->
-                                refreshBounds = coordinates.boundsInRoot()
-                            },
-                            onClick = { viewModel.scanWheels(forceRefresh = true) }
-                        ) {
-                            Icon(
-                                Icons.Default.Refresh,
-                                contentDescription = stringResource(R.string.topbar_refresh),
-                                tint = Color(0xFF1A1C1E)
-                            )
+
+                            // Refresh
+                            IconButton(
+                                modifier = Modifier.onGloballyPositioned { coordinates ->
+                                    refreshBounds = coordinates.boundsInRoot()
+                                },
+                                onClick = { viewModel.scanWheels(forceRefresh = true) }
+                            ) {
+                                Icon(
+                                    Icons.Default.Refresh,
+                                    contentDescription = stringResource(R.string.topbar_refresh),
+                                    tint = Color(0xFF1A1C1E)
+                                )
+                            }
                         }
                     }
                     // Bouton Info (aide) à gauche
