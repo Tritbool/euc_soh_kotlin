@@ -1,0 +1,19 @@
+name: Block restricted -> main
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  block:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if source branch is restricted
+        run: |
+          echo "base=${{ github.base_ref }}"
+          echo "head=${{ github.head_ref }}"
+          if [ "${{ github.head_ref }}" = "restricted" ]; then
+            echo "Merging restricted into main is forbidden."
+            exit 1
+          fi
