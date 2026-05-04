@@ -20,12 +20,14 @@ package io.github.eucsoh.android.ui
 
 import android.app.Application
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.eucsoh.ProgressState
 import io.github.eucsoh.SohAnalyzer
+import io.github.eucsoh.android.R
 import io.github.eucsoh.android.AndroidCsvSource
 import io.github.eucsoh.android.AndroidLogger
 import io.github.eucsoh.android.data.model.WheelConfig
@@ -185,10 +187,25 @@ class SohViewModel(application: Application) : AndroidViewModel(application) {
         val path = if (uri != null) {
             "URI: $uri"
         } else {
-            repository.getRootPath().absolutePath
+            getApplication<Application>().getString(R.string.scan_folder_not_selected)
         }
         Log.d(TAG, "Current scan path: $path")
         _state.update { it.copy(scanRootPath = path) }
+    }
+
+    fun selectScanRoot(uri: Uri) {
+        val context = getApplication<Application>()
+        try {
+            context.contentResolver.takePersistableUriPermission(
+                uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+        } catch (e: SecurityException) {
+            Log.w(TAG, "Unable to persist URI permission for $uri", e)
+        }
+        repository.setRootUri(uri)
+        updateScanPathDisplay()
+        scanWheels(forceRefresh = true)
     }
 
 

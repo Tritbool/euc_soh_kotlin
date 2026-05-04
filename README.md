@@ -35,8 +35,8 @@ It estimates battery health and internal resistance, and generates charts and re
 
 ### Log discovery and ingestion
 
-- The app **automatically scans** known WheelLog and EUC World storage locations on your device.
-- No manual folder selection needed: EUC SoH finds your logs by itself.
+- The app scans WheelLog and EUC World logs from a folder explicitly selected by the user via Android SAF.
+- No full-storage permission is required (`MANAGE_EXTERNAL_STORAGE` is not used).
 - CSV files are discovered recursively and **grouped by wheel** based on their metadata.
 
 ### File validation and filtering
@@ -98,9 +98,8 @@ This is what a typical SoH analysis session looks like:
 
 2. **Launch the scan**
 
-  - Open EUC SoH and trigger a scan (or let the app scan on startup).
-  - The app automatically discovers all compatible CSV logs and groups them by wheel.
-    No folder selection required.
+  - Open EUC SoH, select a source folder via SAF, then trigger a scan.
+  - The app discovers compatible CSV logs inside that selected folder and groups them by wheel.
 
 
 3. **Run the SoH analysis**

@@ -29,8 +29,10 @@
 
     <string name="no_wheel_detected">No EUC found</string>
     <string name="no_wheel_hint">Recusrively scanning in:\n- WheelLog/\n- EUC World/\n\nfrom: %1$s\n\nEnsure your logs are in those folders.</string>
+    <string name="no_wheel_hint_restricted">Choose a folder that contains your WheelLog and/or EUC World logs, then run a scan.\n\nCurrent folder: %1$s</string>
     <string name="choose_folder">📁 Choose another folder</string>
     <string name="check_permissions">Check permissions</string>
+    <string name="scan_folder_not_selected">No scan folder selected (SAF mode)</string>
 
 
     <string name="scanning_eucs">Scanning for EUCs</string>

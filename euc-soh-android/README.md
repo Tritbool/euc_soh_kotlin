@@ -4,9 +4,9 @@ Application Android pour l'analyse de l'état de santé (SoH) des batteries d'EU
 
 ## Fonctionnalités
 
-### Détection automatique des roues
+### Détection SAF des roues
 
-L'application scanne automatiquement deux sources de logs :
+L'utilisateur choisit explicitement un dossier via le sélecteur SAF (Storage Access Framework), puis l'application scanne ce dossier à la recherche de deux sources de logs :
 
 1. **WheelLog** : `Download/WheelLog/MAC_ADDRESS/`
    - Structure : Chaque sous-dossier a pour nom l'adresse MAC de la roue (format `XX_YY_ZZ_AA_BB_CC`)
@@ -28,10 +28,6 @@ L'application scanne automatiquement deux sources de logs :
 - Les logs de WheelLog et EUC World sont automatiquement fusionnés
 - Les métadonnées (nom, fabricant, modèle) proviennent d'EUC World
 - Cache local pour éviter de rescanner à chaque ouverture (durée : 24h)
-
-### Mode manuel
-
-Si la détection automatique échoue, l'utilisateur peut sélectionner manuellement un dossier contenant les logs d'une seule roue.
 
 ## Architecture
 
@@ -58,18 +54,13 @@ data/
 ```
 ui/
 ├── SohViewModel.kt             # ViewModel avec StateFlow
-├── PermissionManager.kt        # Gestion des permissions
 └── screens/
     └── MainScreen.kt            # UI Jetpack Compose
 ```
 
 ## Permissions
 
-L'application gère automatiquement les permissions selon la version Android :
-
-- **Android 13+ (API 33)** : `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO`, `READ_MEDIA_AUDIO`
-- **Android 10-12 (API 29-32)** : `READ_EXTERNAL_STORAGE`
-- **Android 9- (API ≤28)** : `READ_EXTERNAL_STORAGE` + `WRITE_EXTERNAL_STORAGE`
+Cette variante utilise SAF et ne requiert pas d'autorisation globale de stockage (`MANAGE_EXTERNAL_STORAGE`).
 
 ## Technologies utilisées
 
@@ -95,8 +86,8 @@ Exclusions pour Android :
 ## Utilisation
 
 1. Installer l'application sur Android
-2. Accorder les permissions de stockage
-3. L'app scanne automatiquement les dossiers WheelLog et EUC World
+2. Choisir un dossier source via SAF
+3. L'app scanne ce dossier pour trouver WheelLog et EUC World
 4. Sélectionner une roue dans la liste
 5. Cliquer sur "Analyser" pour lancer l'analyse SoH
 6. Consulter les résultats (Req band, configuration pack, alarmes)
