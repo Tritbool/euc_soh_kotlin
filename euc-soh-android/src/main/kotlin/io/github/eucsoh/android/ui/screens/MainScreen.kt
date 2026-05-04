@@ -350,7 +350,7 @@ fun MainScreen(
                     .fillMaxSize()
                     .padding(padding)
             ) {
-                if (state.scanSources.isNotEmpty()) {
+                if (state.scanSources.isNotEmpty() && ! state.showResults) {
                     Surface(
                         color = MaterialTheme.colorScheme.secondaryContainer,
                         modifier = Modifier.fillMaxWidth()
