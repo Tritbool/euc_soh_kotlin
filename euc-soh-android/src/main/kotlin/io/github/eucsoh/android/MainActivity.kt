@@ -105,7 +105,7 @@ class MainActivity : ComponentActivity() {
                             if (shouldShowUpdatePopup(this)) {
                                 AlertDialog.Builder(this)
                                     .setTitle("What's New in version ${BuildConfig.VERSION_NAME} rev. ${BuildConfig.VERSION_CODE}")
-                                    .setMessage("- Enhanced files searching")
+                                    .setMessage("- UI improvements")
                                     .setPositiveButton("OK") { _, _ ->
                                         markUpdatePopupAsShown(this)
                                     }
