@@ -294,9 +294,7 @@ fun MainScreen(
                                     tint = Color(0xFF1A1C1E)
                                 )
                             }
-                        }
 
-                        if (!state.showResults) {
                             IconButton(
                                 modifier = Modifier.onGloballyPositioned { coordinates ->
                                     addSourceBounds = coordinates.boundsInRoot()
