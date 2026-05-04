@@ -267,7 +267,6 @@ fun MainScreen(
                                     tint = Color(0xFF1A1C1E)
                                 )
                             }
-                        }
 
                         // Refresh
                         IconButton(
@@ -282,6 +281,7 @@ fun MainScreen(
                                 tint = Color(0xFF1A1C1E)
                             )
                         }
+                    }
                     }
                     // Bouton Info (aide) à gauche
                     IconButton(
