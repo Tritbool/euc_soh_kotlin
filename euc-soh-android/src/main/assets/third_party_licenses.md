@@ -1,7 +1,7 @@
 
 # Android dependencies
 ## Dependency License Report
-_2026-04-25 14:41:24 CEST_
+_2026-05-12 16:50:25 CEST_
 ## Apache License, Version 2.0
 
 **1** **Group:** `androidx.activity` **Name:** `activity-compose` **Version:** `1.13.0` 
@@ -80,7 +80,7 @@ _2026-04-25 14:41:24 CEST_
 > - **POM Project URL**: [https://github.com/Kotlin/kotlinx.serialization](https://github.com/Kotlin/kotlinx.serialization)
 > - **POM License**: Apache License, Version 2.0 - [https://www.apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
-**20** **Group:** `org.jetbrains.kotlinx` **Name:** `kotlinx-coroutines-android` **Version:** `1.10.2` 
+**20** **Group:** `org.jetbrains.kotlinx` **Name:** `kotlinx-coroutines-android` **Version:** `1.11.0` 
 > - **POM Project URL**: [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
 > - **POM License**: Apache License, Version 2.0 - [https://www.apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
