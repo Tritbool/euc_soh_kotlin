@@ -26,7 +26,7 @@ repositories {
 
 dependencies {
     //implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
     
     // DataFrame for pandas-like operations
     implementation("org.jetbrains.kotlinx:dataframe:1.0.0-Beta5")
