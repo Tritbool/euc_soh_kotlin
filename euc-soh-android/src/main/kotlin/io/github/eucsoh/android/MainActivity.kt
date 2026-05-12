@@ -34,6 +34,7 @@ import io.github.eucsoh.android.ui.about.InfoScreen
 import io.github.eucsoh.android.ui.screens.MainScreen
 import io.github.eucsoh.android.ui.theme.EucSohTheme
 import androidx.core.content.edit
+import io.github.eucsoh.android.BuildConfig
 
 class MainActivity : ComponentActivity() {
 
