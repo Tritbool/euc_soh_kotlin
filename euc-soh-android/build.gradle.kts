@@ -41,6 +41,7 @@ android {
         targetSdk = 36
         versionCode = 10003
         versionName = "2.00"
+
     }
 
     buildTypes {

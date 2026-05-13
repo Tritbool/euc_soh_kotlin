@@ -324,6 +324,7 @@ fun MainScreen(
                             }
                         }
                     }
+                    }
                     // Bouton Info (aide) à gauche
                     IconButton(
                         modifier = Modifier

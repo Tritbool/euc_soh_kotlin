@@ -80,10 +80,15 @@ class MainActivity : ComponentActivity() {
                         else -> {
                             if (shouldShowUpdatePopup(this)) {
                                 AlertDialog.Builder(this)
+<<<<<<< HEAD
                                     .setTitle("What's New in version ${BuildConfig.VERSION_NAME} rev. ${BuildConfig.VERSION_CODE/10003}")
                                     .setMessage("Welcome! This is the Google Play edition of EUC SoH Analyzer.\n" +
                                             "Due to Google Play’s storage rules, file access works via the Android file picker.\n" +
                                             "A separate F‑Droid edition offers extended storage features for power users.")
+=======
+                                    .setTitle("What's New in version ${BuildConfig.VERSION_NAME} rev. ${BuildConfig.VERSION_CODE}")
+                                    .setMessage("- UI improvements\n- Dependencies updates")
+>>>>>>> main
                                     .setPositiveButton("OK") { _, _ ->
                                         markUpdatePopupAsShown(this)
                                     }
