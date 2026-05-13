@@ -241,7 +241,7 @@
 
     <string name="info_s6_i2int_title">I_phase2_Int — dose thermique</string>
     <string name="info_s6_i2int_body">Cette métrique intègre le carré du courant de phase sur la durée du trajet :\n\nI²_int = (∫ I_phase² dt) / T_trajet\n\nL\'intégrale est calculée par la méthode des trapèzes avec les horodatages réels si disponibles, sinon un pas de 0,1 s par défaut. Mettre le courant au carré le rend proportionnel à l\'échauffement par effet Joule — doubler le courant quadruple la chaleur. La normalisation par la durée rend comparables un long trajet calme et un trajet court agressif sur une base par trajet.\n\nLe graphique affiche à la fois la dose par trajet (axe gauche) et la somme cumulative du trajet 1 au trajet N (axe droit, ligne grise pointillée).\n\nI_phase2_Int n\'est disponible que si votre logger enregistre le courant de phase (EUC World ou WheelLog avec cette colonne activée).</string>
-    <string name="darknessbot_toggle_label">Inclure les logs DarnkessBot (.dbb)</string>
+    <string name="darknessbot_toggle_label">Inclure les logs DarknessBot (.dbb)</string>
     <string name="darknessbot_warning_title">Données DarknessBot - Précision limitée</string>
     <string name="darknessbot_warning_body">DarknessBot ne fait pas la distinction entre le courant de phase et le courant de batterie. Si votre roue fournit le courant de phase (notamment Gotway/Begode), les calculs de R_eq et R_batt seront physiquement erronés.  À activer uniquement à des fins d\'exploration — ne pas utiliser pour diagnostiquer l\'état de santé réel de la batterie.</string>
     <string name="darknessbot_warning_confirm">Oui, activer</string>
