@@ -141,7 +141,7 @@ fun InfoScreen(onClose: () -> Unit) {
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            Text("Google Play Store Version ${BuildConfig.VERSION_NAME} rev. ${BuildConfig.VERSION_CODE}")
+            Text("Google Play Store Version ${BuildConfig.VERSION_NAME} rev. ${BuildConfig.VERSION_CODE-10002}")
             // ── Section 1 : Ce que fait l'outil ──────────────────────────
             InfoSection(
                 icon = Icons.Default.Analytics,

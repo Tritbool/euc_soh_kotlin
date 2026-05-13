@@ -341,7 +341,7 @@ fun MainScreen(
                         )
                     }
                 }
-            }
+
         ) { padding ->
             val topOffsetPx = with(LocalDensity.current) {
                 padding.calculateTopPadding().toPx() //+ (bannerHeight.times(0.75f)).toPx()
