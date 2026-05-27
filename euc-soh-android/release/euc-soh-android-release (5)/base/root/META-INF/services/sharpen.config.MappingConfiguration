@@ -1,0 +1,12 @@
+com.itextpdf.barcodes.SharpenConfigMapping
+com.itextpdf.signatures.SharpenConfigMapping
+com.itextpdf.pdfa.SharpenConfigMapping
+com.itextpdf.pdfua.SharpenConfigMapping
+com.itextpdf.forms.SharpenConfigMapping
+com.itextpdf.svg.SharpenConfigMapping
+com.itextpdf.styledxmlparser.SharpenConfigMapping
+com.itextpdf.layout.SharpenConfigMapping
+com.itextpdf.kernel.SharpenConfigMapping
+com.itextpdf.io.SharpenConfigMapping
+com.itextpdf.bouncycastleconnector.SharpenConfigMapping
+com.itextpdf.commons.SharpenConfigMapping
