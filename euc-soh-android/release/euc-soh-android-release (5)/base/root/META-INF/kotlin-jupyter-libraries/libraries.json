@@ -1,9 +1,0 @@
-{
-  "descriptors": [
-    {
-      "init": [
-        "USE { dependencies(\"org.jetbrains.kotlinx:dataframe-jupyter:1.0.0-Beta5\") }"
-      ]
-    }
-  ]
-}
