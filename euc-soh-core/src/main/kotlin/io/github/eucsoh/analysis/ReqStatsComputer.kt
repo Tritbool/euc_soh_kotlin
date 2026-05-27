@@ -50,6 +50,98 @@ object ReqStatsComputer {
     const val TAG = "ReqStatsComputer"
     private val CSV_PARSER_OPTIONS = ParserOptions(locale = Locale.US)
 
+    /**
+     * Ordered list of formatters used to parse EUC World ISO-8601 timestamps.
+     * EUC World produces offsets either as "+0200" (no colon) or "+02:00" (with colon)
+     * depending on app version / device locale.  We try both so that parse never
+     * silently falls back to dt=0.1 on devices that emit the colon form.
+     */
+    private val EUC_WORLD_TS_FMTS: List<DateTimeFormatter> = listOf(
+        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ"),    // +0200 (no colon)
+        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"),  // +02:00 (with colon)
+        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ"),         // no millis, +0200
+        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")        // no millis, +02:00
+    )
+
+    private fun parseEucWorldTimestamp(rawValue: Any?): java.time.OffsetDateTime? {
+        if (rawValue == null) return null
+
+        when (rawValue) {
+            is java.time.OffsetDateTime -> return rawValue
+            is java.time.ZonedDateTime -> return rawValue.toOffsetDateTime()
+            is java.time.Instant -> return rawValue.atOffset(java.time.ZoneOffset.UTC)
+            is java.time.LocalDateTime -> return rawValue.atOffset(java.time.ZoneOffset.UTC)
+            is java.time.LocalDate -> return rawValue.atStartOfDay().atOffset(java.time.ZoneOffset.UTC)
+            is java.util.Date -> return rawValue.toInstant().atOffset(java.time.ZoneOffset.UTC)
+            is kotlinx.datetime.format.DateTimeComponents -> {
+                val instant = rawValue.toInstantUsingOffset()
+                return java.time.Instant.ofEpochMilli(instant.toEpochMilliseconds())
+                    .atOffset(java.time.ZoneOffset.UTC)
+            }
+        }
+
+        val s = rawValue.toString()
+        val raw = s.trim()
+
+        // Fast path: ISO parser handles most variants (+02:00, Z, optional seconds/fractions).
+        try {
+            return java.time.OffsetDateTime.parse(raw, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+        } catch (_: Exception) {
+        }
+
+        // EUC World sometimes exports offsets as +HHMM (e.g. +0200); normalize to +HH:MM.
+        val normalized = raw.replace(Regex("([+-]\\d{2})(\\d{2})$"), "$1:$2")
+        try {
+            return java.time.OffsetDateTime.parse(normalized, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+        } catch (_: Exception) {
+        }
+
+        // Some CSV readers may coerce +HHMM timestamps to LocalDateTime textual form.
+        try {
+            val local = java.time.LocalDateTime.parse(raw, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+            return local.atOffset(java.time.ZoneOffset.UTC)
+        } catch (_: Exception) {
+        }
+
+        for (pattern in listOf(
+            "yyyy-MM-dd HH:mm:ss.SSS",
+            "yyyy-MM-dd HH:mm:ss",
+            "yyyy-MM-dd HH:mm",
+            "yyyy-MM-dd'T'HH:mm:ss.SSS",
+            "yyyy-MM-dd'T'HH:mm:ss",
+            "yyyy-MM-dd'T'HH:mm"
+        )) {
+            try {
+                val local = java.time.LocalDateTime.parse(raw, DateTimeFormatter.ofPattern(pattern))
+                return local.atOffset(java.time.ZoneOffset.UTC)
+            } catch (_: Exception) {
+            }
+        }
+
+        try {
+            return java.time.Instant.parse(raw).atOffset(java.time.ZoneOffset.UTC)
+        } catch (_: Exception) {
+        }
+
+        raw.toLongOrNull()?.let { epoch ->
+            val instant = if (raw.length >= 13) {
+                java.time.Instant.ofEpochMilli(epoch)
+            } else {
+                java.time.Instant.ofEpochSecond(epoch)
+            }
+            return instant.atOffset(java.time.ZoneOffset.UTC)
+        }
+
+        // Keep explicit legacy formatters as a final fallback.
+        for (fmt in EUC_WORLD_TS_FMTS) {
+            try {
+                return java.time.OffsetDateTime.parse(raw, fmt)
+            } catch (_: Exception) {
+            }
+        }
+        return null
+    }
+
     data class FileStats(
         val file: String,
         val source: String,
@@ -80,7 +172,14 @@ object ReqStatsComputer {
         val rBattMedian25C: Double?,
         val pwm95p: Double?,
         val pwmMax: Double?,
-        val pwmMedian: Double?
+        val pwmMedian: Double?,
+        /**
+         * True when the I²dt integration used the dt=0.1 s fallback because
+         * real timestamps could not be parsed.  False when actual log timestamps
+         * were successfully parsed and used for the trapezoidal integration.
+         * Null when no phase-current column was present (metric not computed).
+         */
+        val fallbackDtUsed: Boolean? = null
     )
 
     /**
@@ -360,6 +459,7 @@ object ReqStatsComputer {
         var iPhase2Int: Double? = null
         var iPhaseMax: Double? = null
         var iPhase95p: Double? = null
+        var fallbackDtUsed: Boolean? = null
 
         if (iPhaseCol != null) {
             val iPhaseVals = filteredIndices.mapNotNull { idx ->
@@ -374,16 +474,11 @@ object ReqStatsComputer {
                     EUC_WORLD -> {
                         try {
                             if (EUCWorldColumns.TIMESTAMP.csv_code in df.columnNames()) {
-                                val fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
                                 // Parse tous les timestamps en OffsetDateTime
+                                // EUC_WORLD_TS_FMTS handles both "+0200" and "+02:00" offsets
                                 val times = df[EUCWorldColumns.TIMESTAMP.csv_code].values()
                                     .mapNotNull { raw ->
-                                        val s = raw?.toString() ?: return@mapNotNull null
-                                        try {
-                                            java.time.OffsetDateTime.parse(s, fmt)
-                                        } catch (_: Exception) {
-                                            null
-                                        }
+                                        parseEucWorldTimestamp(raw)
                                     }
 
                                 if (times.isEmpty()) {
@@ -392,18 +487,14 @@ object ReqStatsComputer {
                                     val t0 = times.minByOrNull { it.toEpochSecond() }!!
                                     // Temps relatif en secondes pour les points filtrés
                                     filteredIndices.map { idx ->
-                                        val raw =
-                                            df[EUCWorldColumns.TIMESTAMP.csv_code][idx]?.toString()
+                                        val raw = df[EUCWorldColumns.TIMESTAMP.csv_code][idx]
                                         if (raw == null) {
                                             Double.NaN
                                         } else {
-                                            try {
-                                                val t = java.time.OffsetDateTime.parse(raw, fmt)
-                                                java.time.Duration.between(t0, t)
-                                                    .toMillis() / 1000.0
-                                            } catch (_: Exception) {
-                                                Double.NaN
-                                            }
+                                            val t = parseEucWorldTimestamp(raw)
+                                            if (t == null) Double.NaN
+                                            else java.time.Duration.between(t0, t)
+                                                .toMillis() / 1000.0
                                         }
                                     }.toDoubleArray()
                                 }
@@ -439,10 +530,15 @@ object ReqStatsComputer {
                                         Double.NaN
                                     }
                                 }
-                                val t0 =
-                                    parsedTimes.filter { !it.isNaN() }.minOrNull() ?: return null
-                                parsedTimes.map { if (it.isNaN()) Double.NaN else it - t0 }
-                                    .toDoubleArray()
+                                // If all timestamps fail to parse, fall through to dt=0.1 fallback
+                                // rather than aborting the entire function.
+                                val t0 = parsedTimes.filter { !it.isNaN() }.minOrNull()
+                                if (t0 == null) {
+                                    null
+                                } else {
+                                    parsedTimes.map { if (it.isNaN()) Double.NaN else it - t0 }
+                                        .toDoubleArray()
+                                }
                             } else null
                         } catch (e: Exception) {
                             logger.d(TAG, "Failed to parse Wheelog timestamps: ${e.message}")
@@ -454,15 +550,18 @@ object ReqStatsComputer {
                 }
 
 // Intégration trapèzes si timestamps disponibles, sinon fallback dt=0.1s
+                val usingRealTimestamps = tSecFiltered != null && tSecFiltered.count { !it.isNaN() } >= 2
+                fallbackDtUsed = !usingRealTimestamps
                 val i2dtRaw: Double =
-                    if (tSecFiltered != null && tSecFiltered.count { !it.isNaN() } >= 2) {
+                    if (usingRealTimestamps) {
                         var sum = 0.0
                         for (k in 0 until iPhaseAbs.size - 1) {
-                            val dt = (tSecFiltered[k + 1] - tSecFiltered[k]).coerceIn(0.01, 1.0)
+                            val dt = (tSecFiltered!![k + 1] - tSecFiltered[k]).coerceIn(0.01, 1.0)
                             sum += 0.5 * (iPhaseAbs[k] * iPhaseAbs[k] + iPhaseAbs[k + 1] * iPhaseAbs[k + 1]) * dt
                         }
                         sum
                     } else {
+                        logger.d(TAG, "I²dt fallback: using dt=0.1s (timestamps unavailable or unparseable)")
                         iPhaseAbs.sumOf { it * it * 0.1 }
                     }
 
@@ -531,7 +630,8 @@ object ReqStatsComputer {
             rBattMedian25C = rBattMedian25C ?: rBattMedian,
             pwm95p = pwm95p,
             pwmMax = pwmMax,
-            pwmMedian = pwmMedian
+            pwmMedian = pwmMedian,
+            fallbackDtUsed = fallbackDtUsed
         )
     }
 }
