@@ -63,9 +63,81 @@ object ReqStatsComputer {
         DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")        // no millis, +02:00
     )
 
-    private fun parseEucWorldTimestamp(s: String): java.time.OffsetDateTime? {
+    private fun parseEucWorldTimestamp(rawValue: Any?): java.time.OffsetDateTime? {
+        if (rawValue == null) return null
+
+        when (rawValue) {
+            is java.time.OffsetDateTime -> return rawValue
+            is java.time.ZonedDateTime -> return rawValue.toOffsetDateTime()
+            is java.time.Instant -> return rawValue.atOffset(java.time.ZoneOffset.UTC)
+            is java.time.LocalDateTime -> return rawValue.atOffset(java.time.ZoneOffset.UTC)
+            is java.time.LocalDate -> return rawValue.atStartOfDay().atOffset(java.time.ZoneOffset.UTC)
+            is java.util.Date -> return rawValue.toInstant().atOffset(java.time.ZoneOffset.UTC)
+            is kotlinx.datetime.format.DateTimeComponents -> {
+                val instant = rawValue.toInstantUsingOffset()
+                return java.time.Instant.ofEpochMilli(instant.toEpochMilliseconds())
+                    .atOffset(java.time.ZoneOffset.UTC)
+            }
+        }
+
+        val s = rawValue.toString()
+        val raw = s.trim()
+
+        // Fast path: ISO parser handles most variants (+02:00, Z, optional seconds/fractions).
+        try {
+            return java.time.OffsetDateTime.parse(raw, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+        } catch (_: Exception) {
+        }
+
+        // EUC World sometimes exports offsets as +HHMM (e.g. +0200); normalize to +HH:MM.
+        val normalized = raw.replace(Regex("([+-]\\d{2})(\\d{2})$"), "$1:$2")
+        try {
+            return java.time.OffsetDateTime.parse(normalized, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+        } catch (_: Exception) {
+        }
+
+        // Some CSV readers may coerce +HHMM timestamps to LocalDateTime textual form.
+        try {
+            val local = java.time.LocalDateTime.parse(raw, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+            return local.atOffset(java.time.ZoneOffset.UTC)
+        } catch (_: Exception) {
+        }
+
+        for (pattern in listOf(
+            "yyyy-MM-dd HH:mm:ss.SSS",
+            "yyyy-MM-dd HH:mm:ss",
+            "yyyy-MM-dd HH:mm",
+            "yyyy-MM-dd'T'HH:mm:ss.SSS",
+            "yyyy-MM-dd'T'HH:mm:ss",
+            "yyyy-MM-dd'T'HH:mm"
+        )) {
+            try {
+                val local = java.time.LocalDateTime.parse(raw, DateTimeFormatter.ofPattern(pattern))
+                return local.atOffset(java.time.ZoneOffset.UTC)
+            } catch (_: Exception) {
+            }
+        }
+
+        try {
+            return java.time.Instant.parse(raw).atOffset(java.time.ZoneOffset.UTC)
+        } catch (_: Exception) {
+        }
+
+        raw.toLongOrNull()?.let { epoch ->
+            val instant = if (raw.length >= 13) {
+                java.time.Instant.ofEpochMilli(epoch)
+            } else {
+                java.time.Instant.ofEpochSecond(epoch)
+            }
+            return instant.atOffset(java.time.ZoneOffset.UTC)
+        }
+
+        // Keep explicit legacy formatters as a final fallback.
         for (fmt in EUC_WORLD_TS_FMTS) {
-            try { return java.time.OffsetDateTime.parse(s, fmt) } catch (_: Exception) {}
+            try {
+                return java.time.OffsetDateTime.parse(raw, fmt)
+            } catch (_: Exception) {
+            }
         }
         return null
     }
@@ -406,8 +478,7 @@ object ReqStatsComputer {
                                 // EUC_WORLD_TS_FMTS handles both "+0200" and "+02:00" offsets
                                 val times = df[EUCWorldColumns.TIMESTAMP.csv_code].values()
                                     .mapNotNull { raw ->
-                                        val s = raw?.toString() ?: return@mapNotNull null
-                                        parseEucWorldTimestamp(s)
+                                        parseEucWorldTimestamp(raw)
                                     }
 
                                 if (times.isEmpty()) {
@@ -416,8 +487,7 @@ object ReqStatsComputer {
                                     val t0 = times.minByOrNull { it.toEpochSecond() }!!
                                     // Temps relatif en secondes pour les points filtrés
                                     filteredIndices.map { idx ->
-                                        val raw =
-                                            df[EUCWorldColumns.TIMESTAMP.csv_code][idx]?.toString()
+                                        val raw = df[EUCWorldColumns.TIMESTAMP.csv_code][idx]
                                         if (raw == null) {
                                             Double.NaN
                                         } else {
