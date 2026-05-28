@@ -67,11 +67,11 @@ class RealLogsParsingTest {
         println("  Wheel km: ${result.wheelKm} km (${result.wheelKmSource})")
 
         assertEquals("wheellog", result.source, "Should detect WheelLog format")
-        assertTrue(result.nPoints > 50, "Should have sufficient data points")
-        assertTrue(result.reqMedian > 0.0, "Req median must be positive")
-        assertTrue(result.reqMean > 0.0, "Req mean must be positive")
-        assertTrue(result.req95p > 0.0, "Req 95p must be positive")
-        assertTrue(result.vIdle > 0.0, "V_idle must be positive")
+        assertTrue((result.nPoints ?: 0) > 50, "Should have sufficient data points")
+        assertTrue((result.reqMedian ?: 0.0) > 0.0, "Req median must be positive")
+        assertTrue((result.reqMean ?: 0.0) > 0.0, "Req mean must be positive")
+        assertTrue((result.req95p ?: 0.0) > 0.0, "Req 95p must be positive")
+        assertTrue((result.vIdle ?: 0.0) > 0.0, "V_idle must be positive")
         assertNotNull(result.ns, "Ns should be detected")
         assertTrue(result.ns!! > 10, "Ns should be reasonable for EUC (>10)")
         assertNotNull(result.wheelKmSource, "Distance source should be identified")
@@ -105,11 +105,11 @@ class RealLogsParsingTest {
 
         // 🐞 CRITICAL: These assertions will FAIL if the bug exists
         assertEquals("euc_world", result.source, "Should detect EUC World format")
-        assertTrue(result.nPoints > 50, "Should have sufficient data points")
-        assertTrue(result.reqMedian > 0.0, "Req median must be positive (currently FAILS for EUC World!)")
-        assertTrue(result.reqMean > 0.0, "Req mean must be positive (currently FAILS for EUC World!)")
-        assertTrue(result.req95p > 0.0, "Req 95p must be positive (currently FAILS for EUC World!)")
-        assertTrue(result.vIdle > 0.0, "V_idle must be positive")
+        assertTrue((result.nPoints ?: 0) > 50, "Should have sufficient data points")
+        assertTrue((result.reqMedian ?: 0.0) > 0.0, "Req median must be positive (currently FAILS for EUC World!)")
+        assertTrue((result.reqMean ?: 0.0) > 0.0, "Req mean must be positive (currently FAILS for EUC World!)")
+        assertTrue((result.req95p ?: 0.0) > 0.0, "Req 95p must be positive (currently FAILS for EUC World!)")
+        assertTrue((result.vIdle ?: 0.0) > 0.0, "V_idle must be positive")
         assertNotNull(result.ns, "Ns should be detected")
         assertTrue(result.ns!! > 10, "Ns should be reasonable for EUC (>10)")
         assertNotNull(result.wheelKmSource, "Distance source should be identified")
@@ -144,16 +144,16 @@ class RealLogsParsingTest {
         assertNotNull(result, "WheelLog should parse")
 
         assertTrue(
-            result.reqMedian > 0.0,
+            (result.reqMedian ?: 0.0) > 0.0,
             "WheelLog returned negative Req: ${result.reqMedian} Ω. " +
             "This indicates a parsing or calculation error."
         )
         assertTrue(
-            result.reqMean > 0.0,
+            (result.reqMean ?: 0.0) > 0.0,
             "WheelLog returned negative mean Req: ${result.reqMean} Ω"
         )
         assertTrue(
-            result.req95p > 0.0,
+            (result.req95p ?: 0.0) > 0.0,
             "WheelLog returned negative 95p Req: ${result.req95p} Ω"
         )
     }
@@ -170,16 +170,16 @@ class RealLogsParsingTest {
 
         // 🐞 BUG REPRODUCTION: This will FAIL if the Android bug exists
         assertTrue(
-            result.reqMedian > 0.0,
+            (result.reqMedian ?: 0.0) > 0.0,
             "🐞 BUG DETECTED: EUC World returned negative Req: ${result.reqMedian} Ω. " +
             "This indicates a parsing or calculation error for EUC World format."
         )
         assertTrue(
-            result.reqMean > 0.0,
+            (result.reqMean ?: 0.0) > 0.0,
             "🐞 BUG DETECTED: EUC World returned negative mean Req: ${result.reqMean} Ω"
         )
         assertTrue(
-            result.req95p > 0.0,
+            (result.req95p ?: 0.0) > 0.0,
             "🐞 BUG DETECTED: EUC World returned negative 95p Req: ${result.req95p} Ω"
         )
     }
@@ -253,13 +253,13 @@ class RealLogsParsingTest {
 
             // Typical EUC voltage ranges (16s ≈ 67V, 24s ≈ 100V)
             assertTrue(
-                result.vIdle in 50.0..KNOWN_SERIES.last()*MAXIIMAL_CELL_V,
+                (result.vIdle ?: 0.0) in 50.0..KNOWN_SERIES.last()*MAXIIMAL_CELL_V,
                 "${file.name}: V_idle ${result.vIdle}V is outside typical EUC range (50-120V)"
             )
 
             // Typical Req ranges for EUCs (1mΩ to 500mΩ)
             assertTrue(
-                result.reqMedian in 0.001..0.5,
+                (result.reqMedian ?: 0.0) in 0.001..0.5,
                 "${file.name}: Req ${result.reqMedian}Ω is outside typical EUC range (0.001-0.5Ω)"
             )
 
