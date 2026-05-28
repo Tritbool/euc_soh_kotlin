@@ -39,7 +39,6 @@ import androidx.core.content.edit
 import io.github.eucsoh.android.BuildConfig
 
 class MainActivity : ComponentActivity() {
-
     private val viewModel: SohViewModel by viewModels()
     private lateinit var permissionManager: PermissionManager
 
@@ -61,7 +60,7 @@ class MainActivity : ComponentActivity() {
     }
 
     companion object {
-        private const val TAG = "MainActivity"
+        private const val TAG = "EucSohAnalyzer"
     }
 
     override fun onResume() {
@@ -74,6 +73,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        Log.d(TAG,"MEMORY SETUP: ${Runtime.getRuntime().maxMemory()}")
         permissionManager = PermissionManager(this)
 
         // Request permissions if not granted
@@ -106,7 +106,7 @@ class MainActivity : ComponentActivity() {
                             if (shouldShowUpdatePopup(this)) {
                                 AlertDialog.Builder(this)
                                     .setTitle("What's New in version ${BuildConfig.VERSION_NAME} rev. ${BuildConfig.VERSION_CODE}")
-                                    .setMessage("- Corrected phase integration issues\n- Fixed crashes")
+                                    .setMessage("\n- Enhanced memory management\n- Fixed crashes\n- Better files rejection details")
                                     .setPositiveButton("OK") { _, _ ->
                                         markUpdatePopupAsShown(this)
                                     }

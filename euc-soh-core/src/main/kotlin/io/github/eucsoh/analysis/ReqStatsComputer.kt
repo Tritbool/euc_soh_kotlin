@@ -36,6 +36,7 @@ import org.jetbrains.kotlinx.dataframe.api.add
 import org.jetbrains.kotlinx.dataframe.api.filter
 import org.jetbrains.kotlinx.dataframe.api.rows
 import org.jetbrains.kotlinx.dataframe.io.readCSV
+import org.jetbrains.kotlinx.dataframe.io.readCsv
 import java.io.InputStream
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -71,7 +72,9 @@ object ReqStatsComputer {
             is java.time.ZonedDateTime -> return rawValue.toOffsetDateTime()
             is java.time.Instant -> return rawValue.atOffset(java.time.ZoneOffset.UTC)
             is java.time.LocalDateTime -> return rawValue.atOffset(java.time.ZoneOffset.UTC)
-            is java.time.LocalDate -> return rawValue.atStartOfDay().atOffset(java.time.ZoneOffset.UTC)
+            is java.time.LocalDate -> return rawValue.atStartOfDay()
+                .atOffset(java.time.ZoneOffset.UTC)
+
             is java.util.Date -> return rawValue.toInstant().atOffset(java.time.ZoneOffset.UTC)
             is kotlinx.datetime.format.DateTimeComponents -> {
                 val instant = rawValue.toInstantUsingOffset()
@@ -92,7 +95,10 @@ object ReqStatsComputer {
         // EUC World sometimes exports offsets as +HHMM (e.g. +0200); normalize to +HH:MM.
         val normalized = raw.replace(Regex("([+-]\\d{2})(\\d{2})$"), "$1:$2")
         try {
-            return java.time.OffsetDateTime.parse(normalized, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+            return java.time.OffsetDateTime.parse(
+                normalized,
+                DateTimeFormatter.ISO_OFFSET_DATE_TIME
+            )
         } catch (_: Exception) {
         }
 
@@ -144,35 +150,37 @@ object ReqStatsComputer {
 
     data class FileStats(
         val file: String,
-        val source: String,
-        val datetimeFirst: String?,
-        val wheelKm: Double?,
-        val wheelKmSource: String?,
-        val vIdle: Double,
-        val ns: Int?,
-        val socRefOk: Boolean,
-        val socRefVFull: Double?,
-        val nPoints: Int,
-        val reqMean: Double,
-        val reqMedian: Double,
-        val reqMedian25C: Double,
-        val req95p: Double,
-        val sag95p: Double,
-        val sagMax: Double,
-        val vMinStrong: Double,
-        val iMax: Double,
-        val i95p: Double,
-        val tempBoardMax: Double?,
-        val tempMotorMax: Double?,
-        val iPhase2Int: Double?,
-        val iPhaseMax: Double?,
-        val iPhase95p: Double?,
-        val rMosfetHot: Double?,
-        val rBattMedian: Double?,
-        val rBattMedian25C: Double?,
-        val pwm95p: Double?,
-        val pwmMax: Double?,
-        val pwmMedian: Double?,
+        val source: String? = null,
+        val readError: Boolean? = null,
+        val tooBig: Boolean? = null,
+        val datetimeFirst: String? = null,
+        val wheelKm: Double? = null,
+        val wheelKmSource: String? = null,
+        val vIdle: Double? = null,
+        val ns: Int? = null,
+        val socRefOk: Boolean? = null,
+        val socRefVFull: Double? = null,
+        val nPoints: Int? = null,
+        val reqMean: Double? = null,
+        val reqMedian: Double? = null,
+        val reqMedian25C: Double? = null,
+        val req95p: Double? = null,
+        val sag95p: Double? = null,
+        val sagMax: Double? = null,
+        val vMinStrong: Double? = null,
+        val iMax: Double? = null,
+        val i95p: Double? = null,
+        val tempBoardMax: Double? = null,
+        val tempMotorMax: Double? = null,
+        val iPhase2Int: Double? = null,
+        val iPhaseMax: Double? = null,
+        val iPhase95p: Double? = null,
+        val rMosfetHot: Double? = null,
+        val rBattMedian: Double? = null,
+        val rBattMedian25C: Double? = null,
+        val pwm95p: Double? = null,
+        val pwmMax: Double? = null,
+        val pwmMedian: Double? = null,
         /**
          * True when the I²dt integration used the dt=0.1 s fallback because
          * real timestamps could not be parsed.  False when actual log timestamps
@@ -200,27 +208,43 @@ object ReqStatsComputer {
         var df = try {
             if (csvSource != null) {
                 stream = csvSource.openCsvStream(csvPath)
-                DataFrame.readCSV(
+                DataFrame.readCsv(
                     stream, parserOptions = CSV_PARSER_OPTIONS
                 )
 
             } else {
-                DataFrame.readCSV(
+                DataFrame.readCsv(
                     csvPath, parserOptions = CSV_PARSER_OPTIONS
                 )
 
             }
         } catch (e: Exception) {
-            if (Constants.DEBUG) println("[ERROR] Failed to read $csvPath: ${e.message}")
-            return null
+            logger.e(TAG,"[ERROR] Failed to read $csvPath: ${e.message}")
+            if(e.message != null && e.message!!.contains("OOM",ignoreCase = true)){
+                return FileStats(
+                    file = csvPath.substringAfterLast('/'),
+                    tooBig = true
+                )
+            }
+            return FileStats(
+                file = csvPath.substringAfterLast('/'),
+                readError = true
+            )
         } finally {
             try {
                 stream?.close()
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                logger.e(TAG,"[ERROR] Fatal error for $csvPath: ${e.message}")
             }
         }
 
-        if (df.rowsCount() == 0) return null
+        if (df.rowsCount() == 0) {
+            logger.e(TAG,"[ERROR] empty file: $csvPath")
+            return FileStats(
+                file = csvPath.substringAfterLast('/'),
+                nPoints = 0
+            )
+        }
         val source =
             if (csvPath.contains(Constants.DARKNESS_BOT)) Constants.DARKNESS_BOT else SourceDetection.detectSource(
                 df
@@ -232,8 +256,11 @@ object ReqStatsComputer {
 
         // Check required columns
         if (vCol !in df.columnNames() || iCol !in df.columnNames() || sCol !in df.columnNames()) {
-            if (Constants.DEBUG) println("[ERROR] Missing required columns in $csvPath")
-            return null
+            logger.e(TAG, "[ERROR] Missing required columns in $csvPath")
+            return FileStats(
+                file = csvPath.substringAfterLast('/'),
+                nPoints = 0
+            )
         }
         df = df.filter { row ->
             row[vCol] != null && row[iCol] != null
@@ -397,7 +424,13 @@ object ReqStatsComputer {
             soc.isNaN() || (soc > 20.0 && soc < 90.0)
         }
 
-        if (filteredIndices.isEmpty()) return null
+        if (filteredIndices.isEmpty()) {
+            logger.d(TAG, "[ERROR] Missing required data in $csvPath")
+            return FileStats(
+                file = csvPath.substringAfterLast('/'),
+                nPoints = 0
+            )
+        }
 
         // Compute sag and Req
         val sags = filteredIndices.map { i ->
@@ -550,7 +583,8 @@ object ReqStatsComputer {
                 }
 
 // Intégration trapèzes si timestamps disponibles, sinon fallback dt=0.1s
-                val usingRealTimestamps = tSecFiltered != null && tSecFiltered.count { !it.isNaN() } >= 2
+                val usingRealTimestamps =
+                    tSecFiltered != null && tSecFiltered.count { !it.isNaN() } >= 2
                 fallbackDtUsed = !usingRealTimestamps
                 val i2dtRaw: Double =
                     if (usingRealTimestamps) {
@@ -561,7 +595,10 @@ object ReqStatsComputer {
                         }
                         sum
                     } else {
-                        logger.d(TAG, "I²dt fallback: using dt=0.1s (timestamps unavailable or unparseable)")
+                        logger.d(
+                            TAG,
+                            "I²dt fallback: using dt=0.1s (timestamps unavailable or unparseable)"
+                        )
                         iPhaseAbs.sumOf { it * it * 0.1 }
                     }
 
@@ -602,6 +639,7 @@ object ReqStatsComputer {
 
         return FileStats(
             file = csvPath.substringAfterLast('/'),
+            tooBig = false,
             source = source,
             datetimeFirst = firstDt,
             wheelKm = wheelKm,
