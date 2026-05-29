@@ -56,6 +56,11 @@ class MainActivity : ComponentActivity() {
             putInt(KEY_LAST_SEEN_VERSION, BuildConfig.VERSION_CODE)
         }
     }
+
+    companion object {
+        private const val TAG = "EucSohAnalyzer"
+    }
+
     override fun onResume() {
         super.onResume()
         viewModel.scanWheels(forceRefresh = false)

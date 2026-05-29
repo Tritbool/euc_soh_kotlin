@@ -30,7 +30,7 @@ dependencies {
     
     // DataFrame for pandas-like operations
     implementation("org.jetbrains.kotlinx:dataframe:1.0.0-Beta5")
-    
+    implementation("org.jetbrains.kotlinx:dataframe-csv:1.0.0-Beta5")
     // Math/stats utilities
     implementation("org.apache.commons:commons-math3:3.6.1")
     

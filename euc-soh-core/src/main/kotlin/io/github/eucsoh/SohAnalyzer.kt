@@ -200,10 +200,24 @@ class SohAnalyzer(
                             val fileName = path.substringAfterLast('/')
                             val source = result?.source       // voir ci-dessous
                             val fileReport = when {
+                                (result?.readError ?: false) ->
+                                    FileReport(
+                                        path, fileName, source, false,
+                                        rejectionReason = "File read error",
+                                        nPoints = result?.nPoints ?: 0
+                                    )
+
                                 (result?.nPoints ?: MIN_POINTS) < MIN_POINTS ->
                                     FileReport(
                                         path, fileName, source, false,
                                         rejectionReason = "Too few points (${result?.nPoints!!} < 50)",
+                                        nPoints = result?.nPoints ?: 0
+                                    )
+
+                                (result?.tooBig ?: false) ->
+                                    FileReport(
+                                        path, fileName, source, false,
+                                        rejectionReason = "File too big for processing",
                                         nPoints = result?.nPoints ?: 0
                                     )
 
@@ -246,7 +260,9 @@ class SohAnalyzer(
 
             // Filter stats with critical null values for calibration
             val validTempStats = tempStats.filter { stat ->
-                stat.reqMedian > LOWER_REQ && stat.tempBoardMax != null && stat.nPoints >= MIN_POINTS
+                (stat.reqMedian
+                    ?: 0.0) > LOWER_REQ && stat.tempBoardMax != null && (stat.nPoints
+                    ?: 0) >= MIN_POINTS
             }
 
             logger.d(
@@ -302,7 +318,7 @@ class SohAnalyzer(
         // Filter stats with minimum required data
         // Keep it as a safeguard even if prefiltering is applied at calibration
         val validStats = finalStats.filter { stat ->
-            stat.reqMedian > LOWER_REQ && stat.nPoints >= MIN_POINTS
+            stat.reqMedian!! > LOWER_REQ && stat.nPoints!! >= MIN_POINTS
         }
 
         logger.d(TAG, "Final: ${validStats.size}/${finalStats.size} stats valid")
