@@ -89,7 +89,7 @@ class MainActivity : ComponentActivity() {
                                     .setMessage("Welcome! This is the Google Play edition of EUC SoH Analyzer.\n" +
                                             "Due to Google Play’s storage rules, file access works via the Android file picker.\n" +
                                             "A separate F‑Droid edition offers extended storage features for power users.\n\n"+
-                                            "What's new in this version:\n- Fixed phase integration chart\n- Fixed crashes")
+                                            "What's new in this version:\n- Fixed phase integration chart\n- Fixed crashes\n- Enhanced memory management\n- Enhanced files rejection causes")
                                     .setPositiveButton("OK") { _, _ ->
                                         markUpdatePopupAsShown(this)
                                     }
