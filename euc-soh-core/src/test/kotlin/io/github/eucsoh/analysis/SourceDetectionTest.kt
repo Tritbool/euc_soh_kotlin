@@ -58,6 +58,32 @@ class SourceDetectionTest {
     }
 
     @Test
+    fun `detectSource identifies TuxWheel folder`() {
+        val df = dataFrameOf(
+            "date" to listOf("2024-01-01"),
+            "time" to listOf("10:00:00"),
+            "totaldistance" to listOf(100500)
+        )
+
+        val source = SourceDetection.detectSource(df, "/storage/emulated/0/Download/TuxWheel/wheel/log.csv")
+
+        assertEquals("tuxwheel", source, "Should identify TuxWheel as the log source")
+    }
+
+    @Test
+    fun `detectSource identifies TuxWheel in encoded SAF path`() {
+        val df = dataFrameOf(
+            "date" to listOf("2024-01-01"),
+            "time" to listOf("10:00:00"),
+            "totaldistance" to listOf(100500)
+        )
+
+        val source = SourceDetection.detectSource(df, "content://provider/tree/primary%3ADownload%2FTuxWheel%2Fwheel")
+
+        assertEquals("tuxwheel", source, "Should identify TuxWheel in encoded SAF path")
+    }
+
+    @Test
     fun `detectSource defaults to euc_world if datetime present`() {
         // Has datetime but not distance_total
         val df = dataFrameOf(
