@@ -36,7 +36,7 @@ import java.io.File
  * 2. DocumentFile-based (modern Android SAF, works everywhere)
  * 
  * Recursively searches for:
- * - WheelLog folders
+ * - WheelLog and TuxWheel folders (both use the legacy WheelLog format)
  * - EUC World folders
  * 
  * Merges data by MAC address from both sources.
@@ -95,8 +95,9 @@ class WheelScanner(
                 .filter { it.isDirectory }
                 .forEach { dir ->
                     when {
-                        dir.name.equals("WheelLog", ignoreCase = true) -> {
-                            Log.d(TAG, "Found WheelLog folder: ${dir.absolutePath}")
+                        dir.name.equals("WheelLog", ignoreCase = true) ||
+                            dir.name.equals("TuxWheel", ignoreCase = true) -> {
+                            Log.d(TAG, "Found WheelLog-compatible folder: ${dir.absolutePath}")
                             wheelLogFolders.add(dir)
                         }
                         dir.name.equals("EUC World", ignoreCase = true) -> {
@@ -144,8 +145,9 @@ class WheelScanner(
 
                 val name = doc.name ?: return@walkDocumentTree
                 when {
-                    name.equals("WheelLog", ignoreCase = true) -> {
-                        Log.d(TAG, "Found WheelLog folder: ${doc.uri}")
+                    name.equals("WheelLog", ignoreCase = true) ||
+                        name.equals("TuxWheel", ignoreCase = true) -> {
+                        Log.d(TAG, "Found WheelLog-compatible folder: ${doc.uri}")
                         wheelLogDocs.add(doc)
                     }
                     name.equals("EUC World", ignoreCase = true) -> {
