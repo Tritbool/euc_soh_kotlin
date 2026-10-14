@@ -4,7 +4,7 @@ Put your HTML text here<p><b>EUC SoH</b> is a state-of-health (SoH) analysis too
 
 <p><b>Main features:</b></p>
 <ul>
-<li>Scan storage recursively to discover WheelLog and EUC World subfolders and CSV log files automatically (optional support for DarknessBot dumps).</li>
+<li>Scan storage recursively to discover WheelLog, TuxWheel, and EUC World subfolders and CSV log files automatically (optional support for DarknessBot dumps). TuxWheel logs use the legacy WheelLog format and are found in Download/TuxWheel.</li>
 <li>Parse ride logs and separate accepted files from rejected ones, with explicit rejection reasons (e.g. too few data points, invalid Req computation).</li>
 <li>Compute state-of-health metrics such as equivalent resistance (Req) and CUSUM-based indicators.</li>
 <li>Display interactive charts (MPAndroidChart) to visualize resistance evolution and SoH trends over time.</li>
@@ -18,7 +18,7 @@ Put your HTML text here<p><b>EUC SoH</b> is a state-of-health (SoH) analysis too
 
 <p><b>A - Your own wheel</b></p>
 <ul>
-<li>Record rides using WheelLog, EUC World, or DarknessBot.</li>
+<li>Record rides using WheelLog, TuxWheel, EUC World, or DarknessBot.</li>
 <li>The app scans storage for folders containing compatible logs.</li>
 <li>If using DarknessBot: export a dump (.dbb) and enable .dbb search in the app.</li>
 </ul>

@@ -4,7 +4,7 @@
 
 <p><b>Fonctionnalités principales :</b></p>
 <ul>
-<li>Analyse récursive du stockage pour détecter automatiquement les sous-dossiers WheelLog et EUC World ainsi que les fichiers CSV (prise en charge optionnelle des dumps DarknessBot).</li>
+<li>Analyse récursive du stockage pour détecter automatiquement les sous-dossiers WheelLog, TuxWheel et EUC World ainsi que les fichiers CSV (prise en charge optionnelle des dumps DarknessBot). Les journaux TuxWheel utilisent le format WheelLog historique et se trouvent dans Download/TuxWheel.</li>
 <li>Analyse des journaux et séparation des fichiers acceptés et rejetés, avec des raisons explicites (ex. : trop peu de points, calcul de Req invalide).</li>
 <li>Calcul d’indicateurs de santé tels que la résistance équivalente (Req) et des métriques basées sur CUSUM.</li>
 <li>Affichage de graphiques interactifs (MPAndroidChart) pour visualiser l’évolution de la résistance et du SoH dans le temps.</li>
@@ -18,7 +18,7 @@
 
 <p><b>A - Votre propre roue</b></p>
 <ul>
-<li>Enregistrez vos trajets avec WheelLog, EUC World ou DarknessBot.</li>
+<li>Enregistrez vos trajets avec WheelLog, TuxWheel, EUC World ou DarknessBot.</li>
 <li>L’application analyse le stockage pour trouver les dossiers contenant des logs compatibles.</li>
 <li>Avec DarknessBot : exportez un dump (.dbb) puis activez la recherche de fichiers .dbb dans l’application.</li>
 </ul>

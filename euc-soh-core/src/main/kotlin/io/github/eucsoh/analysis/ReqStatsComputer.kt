@@ -24,6 +24,7 @@ import io.github.eucsoh.Constants.EUCWorldColumns
 import io.github.eucsoh.Constants.EUC_WORLD
 import io.github.eucsoh.Constants.KNOWN_SERIES
 import io.github.eucsoh.Constants.MAXIIMAL_CELL_V
+import io.github.eucsoh.Constants.TUXWHEEL
 import io.github.eucsoh.Constants.WHEELLOG
 import io.github.eucsoh.Constants.WheelLogColumns
 import io.github.eucsoh.CsvSource
@@ -247,7 +248,8 @@ object ReqStatsComputer {
         }
         val source =
             if (csvPath.contains(Constants.DARKNESS_BOT)) Constants.DARKNESS_BOT else SourceDetection.detectSource(
-                df
+                df,
+                csvPath
             )
 
         val vCol = CommonColumns.VOLTAGE.csv_code
@@ -541,7 +543,7 @@ object ReqStatsComputer {
                     }
 
 
-                    WHEELLOG -> {
+                    WHEELLOG, TUXWHEEL -> {
                         try {
                             if (WheelLogColumns.DATE.csv_code in df.columnNames() &&
                                 WheelLogColumns.TIME.csv_code in df.columnNames()

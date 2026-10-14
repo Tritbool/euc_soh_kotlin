@@ -28,6 +28,7 @@ object Constants {
 
     const val EUC_WORLD = "euc_world"
     const val WHEELLOG = "wheellog"
+    const val TUXWHEEL = "tuxwheel"
 
 
     const val DARKNESS_BOT = "darkness_bot"

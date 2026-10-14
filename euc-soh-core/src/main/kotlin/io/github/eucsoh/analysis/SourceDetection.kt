@@ -23,6 +23,7 @@ import io.github.eucsoh.Constants.DarknessBotColumns
 import io.github.eucsoh.Constants.DARKNESS_BOT
 import io.github.eucsoh.Constants.EUCWorldColumns
 import io.github.eucsoh.Constants.EUC_WORLD
+import io.github.eucsoh.Constants.TUXWHEEL
 import io.github.eucsoh.Constants.WHEELLOG
 import io.github.eucsoh.Constants.WheelLogColumns
 import io.github.eucsoh.Constants.CommonColumns
@@ -36,9 +37,13 @@ object SourceDetection {
 
     /**
      * Detects source format from DataFrame columns.
-     * @return "euc_world" or "wheellog"
+     * @return "euc_world", "wheellog", or "tuxwheel"
      */
-    fun detectSource(df: DataFrame<*>): String {
+    fun detectSource(df: DataFrame<*>, csvPath: String? = null): String {
+        if (csvPath != null && TUXWHEEL_PATH_REGEX.containsMatchIn(csvPath)) {
+            return TUXWHEEL
+        }
+
         val cols = df.columnNames().toSet()
 
         if (EUCWorldColumns.TIMESTAMP.csv_code in cols && EUCWorldColumns.DISTANCE_TOTAL.csv_code in cols) {
@@ -49,6 +54,11 @@ object SourceDetection {
         }
         return if (EUCWorldColumns.TIMESTAMP.csv_code in cols) EUC_WORLD else WHEELLOG
     }
+
+    private val TUXWHEEL_PATH_REGEX = Regex(
+        """(?:^|[/\\]|%2f)TuxWheel(?:[/\\]|%2f|$)""",
+        RegexOption.IGNORE_CASE
+    )
 
     /**
      * Extracts total wheel distance in km from DataFrame.

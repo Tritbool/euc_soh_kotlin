@@ -5,3 +5,4 @@ Latest features:
 - Unified charts - information section legend colors
 - Updated PWM charts with standard limit lines: 60% green, 80% orange, 90% red
 - Added DarknessBot dumps (.dbb) support, with limitations
+- Added support for legacy WheelLog-format logs saved by TuxWheel in Download/TuxWheel

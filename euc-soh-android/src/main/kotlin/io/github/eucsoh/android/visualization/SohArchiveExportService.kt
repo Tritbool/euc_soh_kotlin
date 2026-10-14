@@ -23,6 +23,7 @@ import android.net.Uri
 import android.util.Log
 import io.github.eucsoh.Constants.DARKNESS_BOT
 import io.github.eucsoh.Constants.EUC_WORLD
+import io.github.eucsoh.Constants.TUXWHEEL
 import io.github.eucsoh.Constants.WHEELLOG
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -97,6 +98,7 @@ class SohArchiveExportService(private val context: Context) {
                 .forEach { report ->
                     val entryPath = when {
                         report.source == EUC_WORLD -> "EUC World/${report.fileName}"
+                        report.source == TUXWHEEL -> "TuxWheel/$macFolder/${report.fileName}"
                         report.source == WHEELLOG  -> "WheelLog/$macFolder/${report.fileName}"
                         else                         -> "Other/${report.fileName}"
                     }
