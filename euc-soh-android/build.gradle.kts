@@ -59,6 +59,11 @@ android {
         compose = true
         buildConfig = true
     }
+
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/thirdparty-LICENSE"
