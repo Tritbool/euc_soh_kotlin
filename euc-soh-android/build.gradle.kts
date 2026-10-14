@@ -27,6 +27,11 @@ plugins {
     id("com.google.devtools.ksp") version "2.3.6"
     id("com.github.jk1.dependency-license-report") version "3.1.2"
 }
+
+dependencyLocking {
+    lockAllConfigurations()
+}
+
 kotlin {
     jvmToolchain(21)
 }

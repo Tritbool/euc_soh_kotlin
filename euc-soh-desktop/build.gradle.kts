@@ -21,6 +21,10 @@ plugins {
     application
 }
 
+dependencyLocking {
+    lockAllConfigurations()
+}
+
 application {
     mainClass.set("io.github.eucsoh.desktop.MainKt")
 }

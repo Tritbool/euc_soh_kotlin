@@ -26,6 +26,9 @@ plugins {
     id("org.jetbrains.compose") version "1.10.3" apply false
 }
 
+dependencyLocking {
+    lockAllConfigurations()
+}
 allprojects {
     group = "io.euc.soh"
     version = "1.0.0"
