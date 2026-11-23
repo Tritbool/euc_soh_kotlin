@@ -115,7 +115,7 @@ class LogFrame internal constructor(
             for ((colIdx, name) in header.withIndex()) {
                 val cleanName = name.trim()
                 if (cleanName.isEmpty()) continue
-                columns[cleanName] = data.mapNotNull { row ->
+                columns[cleanName] = data.map { row ->
                     if (colIdx < row.size) inferValue(row[colIdx]) else null
                 }
             }
