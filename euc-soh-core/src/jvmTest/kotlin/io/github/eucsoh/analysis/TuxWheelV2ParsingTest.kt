@@ -71,7 +71,7 @@ class TuxWheelV2ParsingTest {
     }
 
     private val cellsLabel = "\"[" + List(NS) { 4.190 + it * 0.001 }
-        .joinToString(",") { String.format(java.util.Locale.US, "%.3f", it) } + "\"]\"
+        .joinToString(",") { String.format(java.util.Locale.US, "%.3f", it) } + "]\""
 
     private fun writeV2Row(
         w: java.io.BufferedWriter,
