@@ -27,6 +27,7 @@ import io.github.eucsoh.Constants.EUC_WORLD
 import io.github.eucsoh.Constants.KNOWN_SERIES
 import io.github.eucsoh.Constants.MAXIIMAL_CELL_V
 import io.github.eucsoh.Constants.TUXWHEEL
+import io.github.eucsoh.Constants.TuxWheelV2Columns
 import io.github.eucsoh.Constants.WHEELLOG
 import io.github.eucsoh.Constants.WheelLogColumns
 import io.github.eucsoh.CsvSource
@@ -144,9 +145,10 @@ object ReqStatsComputer {
                 csvPath
             )
 
-        val vCol = CommonColumns.VOLTAGE.csv_code
-        val iCol = CommonColumns.CURRENT.csv_code
-        val sCol = CommonColumns.SPEED.csv_code
+        val tuxV2 = source == TUXWHEEL && SourceDetection.isTuxWheelV2(df)
+        val vCol = if (tuxV2) TuxWheelV2Columns.VOLTAGE.csv_code else CommonColumns.VOLTAGE.csv_code
+        val iCol = if (tuxV2) TuxWheelV2Columns.CURRENT.csv_code else CommonColumns.CURRENT.csv_code
+        val sCol = if (tuxV2) TuxWheelV2Columns.SPEED.csv_code else CommonColumns.SPEED.csv_code
 
         // Check required columns
         if (vCol !in df.columnNames() || iCol !in df.columnNames() || sCol !in df.columnNames()) {
@@ -161,30 +163,39 @@ object ReqStatsComputer {
         }
 
         val tempBoardCol = when {
+            tuxV2 && TuxWheelV2Columns.MAINBOARD_TEMPERATURE.csv_code in df.columnNames() -> TuxWheelV2Columns.MAINBOARD_TEMPERATURE.csv_code
+            tuxV2 && TuxWheelV2Columns.BOARD_TEMPERATURE.csv_code in df.columnNames() -> TuxWheelV2Columns.BOARD_TEMPERATURE.csv_code
             EUCWorldColumns.BOARD_TEMPERATURE.csv_code in df.columnNames() -> EUCWorldColumns.BOARD_TEMPERATURE.csv_code
             WheelLogColumns.BOARD_TEMPERATURE.csv_code in df.columnNames() -> WheelLogColumns.BOARD_TEMPERATURE.csv_code
             else -> null
         }
 
         val tempMotorCol = when {
+            tuxV2 && TuxWheelV2Columns.MOTOR_TEMPERATURE.csv_code in df.columnNames() -> TuxWheelV2Columns.MOTOR_TEMPERATURE.csv_code
             EUCWorldColumns.MOTOR_TEMPERATURE.csv_code in df.columnNames() -> EUCWorldColumns.MOTOR_TEMPERATURE.csv_code
             WheelLogColumns.MOTOR_TEMPERATURE.csv_code in df.columnNames() -> WheelLogColumns.MOTOR_TEMPERATURE.csv_code
             else -> null
         }
 
         val iPhaseCol = when {
+            tuxV2 -> TuxWheelV2Columns.CURRENT_PHASE.csv_code.takeIf { it in df.columnNames() }
             EUCWorldColumns.CURRENT_PHASE.csv_code in df.columnNames() -> EUCWorldColumns.CURRENT_PHASE.csv_code
             WheelLogColumns.CURRENT_PHASE.csv_code in df.columnNames() -> WheelLogColumns.CURRENT_PHASE.csv_code
             else -> null
         }
         val pwmCol = when {
+            tuxV2 -> TuxWheelV2Columns.PWM.csv_code.takeIf { it in df.columnNames() }
             EUCWorldColumns.PWM.csv_code in df.columnNames() -> EUCWorldColumns.PWM.csv_code
             WheelLogColumns.PWM.csv_code in df.columnNames() -> WheelLogColumns.PWM.csv_code
             else -> null
         }
 
-        val socCol = listOf(WheelLogColumns.SOC.csv_code, EUCWorldColumns.SOC.csv_code, "soc")
-            .firstOrNull { it in df.columnNames() }
+        val socCol = listOf(
+            TuxWheelV2Columns.SOC.csv_code,
+            WheelLogColumns.SOC.csv_code,
+            EUCWorldColumns.SOC.csv_code,
+            "soc"
+        ).firstOrNull { it in df.columnNames() }
 
         val (wheelKm, kmSource) = SourceDetection.normalizeDistanceTotal(df, source)
 
@@ -196,7 +207,23 @@ object ReqStatsComputer {
             val rounded = round(vIdleMax / MAXIIMAL_CELL_V).toInt()
             if (ceiled in KNOWN_SERIES) ceiled else rounded
         }
-        val ns = if (nsEst() in Constants.NS_MIN..Constants.NS_MAX) nsEst() else null
+        // TuxWheel v2 reports the pack's cell voltages on every row: use the
+        // exact cell count when available instead of the voltage heuristic.
+        val nsFromCells = if (tuxV2 && TuxWheelV2Columns.CELL_VOLTAGES.csv_code in df.columnNames()) {
+            df[TuxWheelV2Columns.CELL_VOLTAGES.csv_code]
+                .firstNotNullOfOrNull { raw ->
+                    raw as? String ?: return@firstNotNullOfOrNull null
+                }
+                ?.trim()
+                ?.removePrefix("[")
+                ?.removeSuffix("]")
+                ?.split(",")
+                ?.count { it.trim().toDoubleOrNull() != null }
+                ?.takeIf { it in Constants.NS_MIN..Constants.NS_MAX }
+        } else {
+            null
+        }
+        val ns = nsFromCells ?: if (nsEst() in Constants.NS_MIN..Constants.NS_MAX) nsEst() else null
 
         // SoC reference check
         var socRefOk = false
@@ -430,6 +457,34 @@ object ReqStatsComputer {
                         }
                     }
 
+
+                    // TuxWheel v2 carries an authoritative epoch-ms receive time.
+                    source == TUXWHEEL && tuxV2 -> {
+                        try {
+                            if (TuxWheelV2Columns.TIMESTAMP.csv_code in df.columnNames()) {
+                                val parsedTimes = filteredIndices.map { idx ->
+                                    val raw = df[TuxWheelV2Columns.TIMESTAMP.csv_code][idx]
+                                    if (raw == null) {
+                                        Double.NaN
+                                    } else {
+                                        parseTimestamp(raw) ?: Double.NaN
+                                    }
+                                }
+                                val t0 = parsedTimes.filter { !it.isNaN() }.minOrNull()
+                                if (t0 == null) {
+                                    null
+                                } else {
+                                    parsedTimes.map { if (it.isNaN()) Double.NaN else it - t0 }
+                                        .toDoubleArray()
+                                }
+                            } else {
+                                null
+                            }
+                        } catch (e: Exception) {
+                            logger.d(TAG, "Failed to parse TuxWheel v2 timestamps: ${e.message}")
+                            null
+                        }
+                    }
 
                     WHEELLOG, TUXWHEEL -> {
                         try {

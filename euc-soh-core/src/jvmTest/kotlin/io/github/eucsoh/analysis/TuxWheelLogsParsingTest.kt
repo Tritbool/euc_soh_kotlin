@@ -88,8 +88,9 @@ class TuxWheelLogsParsingTest {
 
         assertNotNull(result)
         assertEquals("tuxwheel", result.source)
-        assertEquals("totaldistance_m_wl", result.wheelKmSource)
-        assertTrue(assertNotNull(result.wheelKm) > 0.0)
+        // TuxWheel legacy schema stores the odometer in km (unlike WheelLog meters).
+        assertEquals("totaldistance_km_tw", result.wheelKmSource)
+        assertTrue(assertNotNull(result.wheelKm) > 1.0, "Odometer should stay in km, not m/1000")
         assertTrue(assertNotNull(result.datetimeFirst).contains(" "), "Should combine date and time")
     }
 

@@ -98,6 +98,46 @@ object Constants {
         ALTITUDE("Altitude")
     }
 
+    /**
+     * Native TuxWheel v2 (enriched) CSV column names — see TuxWheel docs/log_format.md.
+     * Rows are emitted per telemetry frame; `timestamp_ms` (epoch ms) is the
+     * authoritative time, `date`/`time` are local-time renderings.
+     * Distances are in km. Detected through the leading `schema` column
+     * (constant `tuxwheel-2`).
+     */
+    enum class TuxWheelV2Columns(val csv_code: String) {
+        SCHEMA("schema"),
+        TIMESTAMP("timestamp_ms"),
+        DATE("date"),
+        TIME("time"),
+        SPEED("speed_kmh"),
+        VOLTAGE("voltage_v"),
+        CURRENT("current_a"),
+        CURRENT_PHASE("phase_current_a"),
+        POWER("power_w"),
+        TORQUE("torque_nm"),
+        PWM("pwm_pct"),
+        SOC("battery_pct"),
+        DISTANCE("distance_km"),
+        DISTANCE_TOTAL("total_distance_km"),
+        RIDE_TIME_S("ride_time_s"),
+        TOTAL_RIDE_TIME_S("total_ride_time_s"),
+        TOTAL_POWER_ON_TIME_S("total_power_on_time_s"),
+        MAINBOARD_TEMPERATURE("mainboard_temp_c"),
+        MOTOR_TEMPERATURE("motor_temperature_c"),
+        MOSFET_TEMPERATURE("mosfet_temperature_c"),
+        BOARD_TEMPERATURE("board_temperature_c"),
+        PITCH("pitch_deg"),
+        ROLL("roll_deg"),
+        CHARGING("charging"),
+        ALERT("alert"),
+        MANUFACTURER("manufacturer"),
+        MODEL("model"),
+        SERIAL_NUMBER("serial_number"),
+        FIRMWARE_VERSION("firmware_version"),
+        CELL_VOLTAGES("cell_voltages_v")
+    }
+
     enum class EUCWorldColumns(val csv_code: String) {
         BOARD_TEMPERATURE("system_temp"),
         MOTOR_TEMPERATURE("temp_motor"),

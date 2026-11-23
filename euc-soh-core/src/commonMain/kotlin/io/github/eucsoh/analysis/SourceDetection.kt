@@ -26,20 +26,31 @@ import io.github.eucsoh.Constants.DARKNESS_BOT
 import io.github.eucsoh.Constants.EUCWorldColumns
 import io.github.eucsoh.Constants.EUC_WORLD
 import io.github.eucsoh.Constants.TUXWHEEL
+import io.github.eucsoh.Constants.TuxWheelV2Columns
 import io.github.eucsoh.Constants.WHEELLOG
 import io.github.eucsoh.Constants.WheelLogColumns
 import io.github.eucsoh.Constants.CommonColumns
 
 /**
- * CSV source type detection (EUC World vs WheelLog).
+ * CSV source type detection (EUC World vs WheelLog vs TuxWheel).
  */
 object SourceDetection {
+
+    /**
+     * True when the frame carries the self-describing TuxWheel v2 `schema` column.
+     */
+    fun isTuxWheelV2(df: LogFrame): Boolean =
+        TuxWheelV2Columns.SCHEMA.csv_code in df.columnNames()
 
     /**
      * Detects source format from LogFrame columns.
      * @return "euc_world", "wheellog", or "tuxwheel"
      */
     fun detectSource(df: LogFrame, csvPath: String? = null): String {
+        // TuxWheel v2 files self-describe through their `schema` column.
+        if (isTuxWheelV2(df)) {
+            return TUXWHEEL
+        }
         if (csvPath != null && TUXWHEEL_PATH_REGEX.containsMatchIn(csvPath)) {
             return TUXWHEEL
         }
@@ -79,6 +90,27 @@ object SourceDetection {
                     .filterIsInstance<Number>()
                     .maxOfOrNull { it.toDouble() }
                 return maxDist to "distance_log_km_euc"
+            }
+        } else if (source == TUXWHEEL && TuxWheelV2Columns.DISTANCE_TOTAL.csv_code in cols) {
+            // TuxWheel v2 already reports the odometer in km.
+            val maxDist = df[TuxWheelV2Columns.DISTANCE_TOTAL.csv_code]
+                .filterIsInstance<Number>()
+                .maxOfOrNull { it.toDouble() }
+            return maxDist to "total_distance_km_tw2"
+        } else if (source == TUXWHEEL) {
+            // TuxWheel legacy schema: `totaldistance` is an odometer in km,
+            // unlike real WheelLog files which store meters.
+            if (WheelLogColumns.DISTANCE_TOTAL.csv_code in cols) {
+                val maxDist = df[WheelLogColumns.DISTANCE_TOTAL.csv_code]
+                    .filterIsInstance<Number>()
+                    .maxOfOrNull { it.toDouble() }
+                return maxDist to "totaldistance_km_tw"
+            }
+            if (CommonColumns.DISTANCE.csv_code in cols) {
+                val maxDist = df[CommonColumns.DISTANCE.csv_code]
+                    .filterIsInstance<Number>()
+                    .maxOfOrNull { it.toDouble() }
+                return maxDist to "distance_log_km_tw"
             }
         } else {
             // WheelLog: totaldistance in meters
