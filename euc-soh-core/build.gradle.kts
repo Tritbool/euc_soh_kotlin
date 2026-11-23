@@ -18,7 +18,7 @@
 
 plugins {
     kotlin("multiplatform")
-    id("com.android.library")
+    id("com.android.kotlin.multiplatform.library")
 }
 
 dependencyLocking {
@@ -26,8 +26,10 @@ dependencyLocking {
 }
 
 kotlin {
-    androidTarget {
-        publishLibraryVariants("release")
+    androidLibrary {
+        namespace = "io.github.eucsoh.core"
+        compileSdk = 36
+        minSdk = 23
     }
     jvm()
     jvmToolchain(21)
@@ -63,10 +65,3 @@ tasks.register("test") {
     dependsOn("jvmTest")
 }
 
-android {
-    namespace = "io.github.eucsoh.core"
-    compileSdk = 36
-    defaultConfig {
-        minSdk = 23
-    }
-}
