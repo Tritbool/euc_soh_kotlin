@@ -459,7 +459,7 @@ object ReqStatsComputer {
 
 
                     // TuxWheel v2 carries an authoritative epoch-ms receive time.
-                    source == TUXWHEEL && tuxV2 -> {
+                    tuxV2 -> {
                         try {
                             if (TuxWheelV2Columns.TIMESTAMP.csv_code in df.columnNames()) {
                                 val parsedTimes = filteredIndices.map { idx ->
