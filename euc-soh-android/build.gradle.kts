@@ -78,20 +78,7 @@ android {
 
 dependencies {
     // Core module
-    implementation(project(":euc-soh-core")) {
-        // Exclude JVM-heavy DataFrame submodules
-        exclude(group = "org.jetbrains.kotlinx", module = "dataframe-arrow")
-        exclude(group = "org.jetbrains.kotlinx", module = "dataframe-excel")
-        exclude(group = "org.jetbrains.kotlinx", module = "dataframe-jdbc")
-        exclude(group = "org.jetbrains.kotlinx", module = "dataframe-openapi")
-
-        // Exclude JVM logging
-        exclude(group = "org.slf4j")
-        exclude(group = "ch.qos.logback")
-
-        // Exclude Apache POI (Excel processing)
-        exclude(group = "org.apache.poi")
-    }
+    implementation(project(":euc-soh-core"))
     
     // Android core
     implementation("androidx.documentfile:documentfile:1.1.0")

@@ -19,9 +19,11 @@
 plugins {
     kotlin("jvm") version "2.3.0" apply false
     kotlin("android") version "2.3.0" apply false
+    kotlin("multiplatform") version "2.3.0" apply false
     kotlin("plugin.serialization") version "2.3.0" apply false
     kotlin("plugin.compose") version "2.3.0" apply false
     id("com.android.application") version "9.1.1" apply false
+    id("com.android.library") version "9.1.1" apply false
     id("com.google.devtools.ksp") version "2.3.6" apply false
     id("org.jetbrains.compose") version "1.10.3" apply false
 }
