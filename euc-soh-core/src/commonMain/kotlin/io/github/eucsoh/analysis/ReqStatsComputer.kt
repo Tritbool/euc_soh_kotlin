@@ -421,6 +421,41 @@ object ReqStatsComputer {
                 val iPhaseAbs = iPhaseVals.map { abs(it) }
 
                 // Extraire les timestamps réels des filteredIndices
+                // WheelLog-style date+time columns, also used by legacy TuxWheel logs.
+                fun wheelLogDateTimes(): DoubleArray? {
+                    return try {
+                        if (WheelLogColumns.DATE.csv_code in df.columnNames() &&
+                            WheelLogColumns.TIME.csv_code in df.columnNames()
+                        ) {
+                            val parsedTimes = filteredIndices.map { idx ->
+                                val d = df[WheelLogColumns.DATE.csv_code][idx]?.toString()
+                                    ?: return@map Double.NaN
+                                val t = df[WheelLogColumns.TIME.csv_code][idx]?.toString()
+                                    ?: return@map Double.NaN
+                                val seconds = DateTimeUtils.parseToEpochSeconds("${d}T${t}")
+                                if (seconds == null) {
+                                    logger.d(TAG, "Failed to parse Wheelog timestamps: $d $t")
+                                    Double.NaN
+                                } else {
+                                    seconds
+                                }
+                            }
+                            // If all timestamps fail to parse, fall through to dt=0.1 fallback
+                            // rather than aborting the entire function.
+                            val t0 = parsedTimes.filter { !it.isNaN() }.minOrNull()
+                            if (t0 == null) {
+                                null
+                            } else {
+                                parsedTimes.map { if (it.isNaN()) Double.NaN else it - t0 }
+                                    .toDoubleArray()
+                            }
+                        } else null
+                    } catch (e: Exception) {
+                        logger.d(TAG, "Failed to parse Wheelog timestamps: ${e.message}")
+                        null
+                    }
+                }
+
                 val tSecFiltered: DoubleArray? = when (source) {
                     EUC_WORLD -> {
                         try {
@@ -459,9 +494,9 @@ object ReqStatsComputer {
 
 
                     // TuxWheel v2 carries an authoritative epoch-ms receive time.
-                    tuxV2 -> {
-                        try {
-                            if (TuxWheelV2Columns.TIMESTAMP.csv_code in df.columnNames()) {
+                    TUXWHEEL -> {
+                        if (tuxV2 && TuxWheelV2Columns.TIMESTAMP.csv_code in df.columnNames()) {
+                            try {
                                 val parsedTimes = filteredIndices.map { idx ->
                                     val raw = df[TuxWheelV2Columns.TIMESTAMP.csv_code][idx]
                                     if (raw == null) {
@@ -477,48 +512,17 @@ object ReqStatsComputer {
                                     parsedTimes.map { if (it.isNaN()) Double.NaN else it - t0 }
                                         .toDoubleArray()
                                 }
-                            } else {
+                            } catch (e: Exception) {
+                                logger.d(TAG, "Failed to parse TuxWheel v2 timestamps: ${e.message}")
                                 null
                             }
-                        } catch (e: Exception) {
-                            logger.d(TAG, "Failed to parse TuxWheel v2 timestamps: ${e.message}")
-                            null
+                        } else {
+                            // Legacy TuxWheel schema: WheelLog-style date + time columns.
+                            wheelLogDateTimes()
                         }
                     }
 
-                    WHEELLOG, TUXWHEEL -> {
-                        try {
-                            if (WheelLogColumns.DATE.csv_code in df.columnNames() &&
-                                WheelLogColumns.TIME.csv_code in df.columnNames()
-                            ) {
-                                val parsedTimes = filteredIndices.map { idx ->
-                                    val d = df[WheelLogColumns.DATE.csv_code][idx]?.toString()
-                                        ?: return@map Double.NaN
-                                    val t = df[WheelLogColumns.TIME.csv_code][idx]?.toString()
-                                        ?: return@map Double.NaN
-                                    val seconds = DateTimeUtils.parseToEpochSeconds("${d}T${t}")
-                                    if (seconds == null) {
-                                        logger.d(TAG, "Failed to parse Wheelog timestamps: $d $t")
-                                        Double.NaN
-                                    } else {
-                                        seconds
-                                    }
-                                }
-                                // If all timestamps fail to parse, fall through to dt=0.1 fallback
-                                // rather than aborting the entire function.
-                                val t0 = parsedTimes.filter { !it.isNaN() }.minOrNull()
-                                if (t0 == null) {
-                                    null
-                                } else {
-                                    parsedTimes.map { if (it.isNaN()) Double.NaN else it - t0 }
-                                        .toDoubleArray()
-                                }
-                            } else null
-                        } catch (e: Exception) {
-                            logger.d(TAG, "Failed to parse Wheelog timestamps: ${e.message}")
-                            null
-                        }
-                    }
+                    WHEELLOG -> wheelLogDateTimes()
 
                     else -> null
                 }
