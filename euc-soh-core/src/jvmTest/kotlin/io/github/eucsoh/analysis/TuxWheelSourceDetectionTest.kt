@@ -56,15 +56,28 @@ class TuxWheelSourceDetectionTest {
     }
 
     @Test
-    fun `TuxWheel totaldistance is converted from meters to kilometers`() {
+    fun `TuxWheel legacy totaldistance is an odometer in kilometers`() {
         val df = LogFrame.of(
-            "totaldistance" to listOf(1235200, 1234500)
+            "totaldistance" to listOf(1235.2, 1234.5)
         )
 
         val (wheelKm, source) = SourceDetection.normalizeDistanceTotal(df, "tuxwheel")
 
         assertEquals(1235.2, wheelKm)
-        assertEquals("totaldistance_m_wl", source)
+        assertEquals("totaldistance_km_tw", source)
+    }
+
+    @Test
+    fun `TuxWheel v2 total_distance_km is an odometer in kilometers`() {
+        val df = LogFrame.of(
+            "schema" to listOf("tuxwheel-2", "tuxwheel-2"),
+            "total_distance_km" to listOf(1235.2, 1234.5)
+        )
+
+        val (wheelKm, source) = SourceDetection.normalizeDistanceTotal(df, "tuxwheel")
+
+        assertEquals(1235.2, wheelKm)
+        assertEquals("total_distance_km_tw2", source)
     }
 
     @Test
@@ -76,7 +89,7 @@ class TuxWheelSourceDetectionTest {
         val (wheelKm, source) = SourceDetection.normalizeDistanceTotal(df, "tuxwheel")
 
         assertEquals(5.7, wheelKm)
-        assertEquals("distance_log_km_wl", source)
+        assertEquals("distance_log_km_tw", source)
     }
 
     @Test
