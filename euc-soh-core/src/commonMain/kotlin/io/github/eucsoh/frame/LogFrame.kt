@@ -62,7 +62,7 @@ class LogFrame internal constructor(
 
     fun add(column: String, values: List<Any?>): LogFrame {
         require(values.size == rowsCount() || rowsCount() == 0) {
-            "Column size mismatch: ${values.size} vs $rowsCount()"
+            "Column size mismatch: ${values.size} vs ${rowsCount()}"
         }
         val newColumns = LinkedHashMap(columns)
         newColumns[column] = values

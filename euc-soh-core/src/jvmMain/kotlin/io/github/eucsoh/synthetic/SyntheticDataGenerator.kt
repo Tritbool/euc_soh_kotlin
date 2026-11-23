@@ -534,13 +534,13 @@ object SyntheticDataGenerator {
                     timestamp.toLocalDate().toString(),
                     timestamp.toLocalTime().toString(),
                     totalDistance,
-                    (Locale.US, v).toFixed(2),
-                    (Locale.US, c).toFixed(2),
-                    (Locale.US, p).toFixed(2),
-                    (Locale.US, speed[i]).toFixed(2),
-                    (Locale.US, systemTemp[i]).toFixed(2),
-                    (Locale.US, tempMotor[i]).toFixed(2),
-                    (Locale.US, batteryLevelPct).toFixed(1)
+                    v.toFixed(2),
+                    c.toFixed(2),
+                    p.toFixed(2),
+                    speed[i].toFixed(2),
+                    systemTemp[i].toFixed(2),
+                    tempMotor[i].toFixed(2),
+                    batteryLevelPct.toFixed(1)
                 ).joinToString(",")
                 writer.write(line)
                 writer.newLine()
