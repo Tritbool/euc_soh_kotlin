@@ -134,22 +134,21 @@ fun ChartGalleryScreen(
 
     LaunchedEffect(selectedTab, plotData) {
         isLoading = true
-        // Les graphiques sont dessinés sur des bitmaps : faits dans la composition,
-        // ils gèlent l'interface le temps du tracé.
-        withContext(Dispatchers.Default) {
-            when (selectedTab) {
-                ChartTab.GAUSSIAN -> if (gaussCharts == null)
-                    gaussCharts = gaussGenerator.generateOverviewCharts(plotData)
+        // Tracé sur le thread principal : les générateurs manipulent des View Android
+        // (measure/layout/draw). Hors du thread principal ils lèvent une exception que
+        // leur try/catch avale, et la galerie reste vide sans erreur visible.
+        when (selectedTab) {
+            ChartTab.GAUSSIAN -> if (gaussCharts == null)
+                gaussCharts = gaussGenerator.generateOverviewCharts(plotData)
 
-                ChartTab.TREND -> if (trendCharts == null)
-                    trendCharts = trendGenerator.generateAllTrendCharts(plotData, wheelName)
+            ChartTab.TREND -> if (trendCharts == null)
+                trendCharts = trendGenerator.generateAllTrendCharts(plotData, wheelName)
 
-                ChartTab.CUSUM -> if (cusumCharts == null)
-                    cusumCharts = trendGenerator.generateAllCusumCharts(plotData, wheelName)
+            ChartTab.CUSUM -> if (cusumCharts == null)
+                cusumCharts = trendGenerator.generateAllCusumCharts(plotData, wheelName)
 
-                ChartTab.INFLEXION -> if (inflexCharts == null)
-                    inflexCharts = trendGenerator.generateAllInflexionCharts(plotData, wheelName)
-            }
+            ChartTab.INFLEXION -> if (inflexCharts == null)
+                inflexCharts = trendGenerator.generateAllInflexionCharts(plotData, wheelName)
         }
         isLoading = false
     }
@@ -221,37 +220,36 @@ fun ChartGalleryScreen(
                                 scope.launch {
                                     isExportingPdf = true
                                     try {
-                                        // Charts + PDF sont gros et lents : hors du thread
-                                        // principal, sinon l'interface ne répond plus.
-                                        withContext(Dispatchers.IO) {
-                                            // Génère les charts manquants
-                                            val gauss =
-                                                gaussCharts ?: gaussGenerator.generateOverviewCharts(
-                                                    plotData
-                                                )
-                                                    .also { gaussCharts = it }
-                                            val inflex = if (alarms > 0) inflexCharts
-                                                ?: trendGenerator.generateAllInflexionCharts(
-                                                    plotData,
-                                                    wheelName
-                                                )
-                                                    .also { inflexCharts = it }
-                                            else null
-                                            val cusum = if (alarms > 0) cusumCharts
-                                                ?: trendGenerator.generateAllCusumCharts(
-                                                    plotData,
-                                                    wheelName
-                                                )
-                                                    .also { cusumCharts = it }
-                                            else null
-                                            val trend = if (alarms > 0) trendCharts
-                                                ?: trendGenerator.generateAllTrendCharts(
-                                                    plotData,
-                                                    wheelName
-                                                )
-                                                    .also { trendCharts = it }
-                                            else null
+                                        // Charts manquants : tracé sur le thread principal,
+                                        // ce sont des View Android. Seul le fichier part sur IO.
+                                        val gauss =
+                                            gaussCharts ?: gaussGenerator.generateOverviewCharts(
+                                                plotData
+                                            )
+                                                .also { gaussCharts = it }
+                                        val inflex = if (alarms > 0) inflexCharts
+                                            ?: trendGenerator.generateAllInflexionCharts(
+                                                plotData,
+                                                wheelName
+                                            )
+                                                .also { inflexCharts = it }
+                                        else null
+                                        val cusum = if (alarms > 0) cusumCharts
+                                            ?: trendGenerator.generateAllCusumCharts(
+                                                plotData,
+                                                wheelName
+                                            )
+                                                .also { cusumCharts = it }
+                                        else null
+                                        val trend = if (alarms > 0) trendCharts
+                                            ?: trendGenerator.generateAllTrendCharts(
+                                                plotData,
+                                                wheelName
+                                            )
+                                                .also { trendCharts = it }
+                                        else null
 
+                                        withContext(Dispatchers.IO) {
                                             // Étape 1 : génère dans le dossier privé (toujours permis)
                                             pdfFile = pdfExporter.exportToPdf(
                                                 gauss,
@@ -294,14 +292,15 @@ fun ChartGalleryScreen(
                                 scope.launch {
                                     isExportingPdf = true
                                     try {
+                                        // Tracé sur le thread principal : des View Android.
+                                        val gaussForZip = gaussCharts
+                                            ?: gaussGenerator.generateOverviewCharts(plotData)
+                                                .also { gaussCharts = it }
                                         withContext(Dispatchers.IO) {
                                             // Génère le PDF temp si pas déjà fait
                                             if (pdfFile == null) {
-                                                val gauss = gaussCharts
-                                                    ?: gaussGenerator.generateOverviewCharts(plotData)
-                                                        .also { gaussCharts = it }
                                                 pdfFile = pdfExporter.exportToPdf(
-                                                    gauss,
+                                                    gaussForZip,
                                                     inflexCharts,
                                                     cusumCharts,
                                                     trendCharts,

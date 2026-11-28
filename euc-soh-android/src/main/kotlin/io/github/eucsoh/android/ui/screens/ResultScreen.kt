@@ -227,27 +227,27 @@ fun ResultsScreenEnhanced(
     }
 
     suspend fun generateCharts() {
-        // Dessin de bitmaps : fait sur le thread principal, cela gèle l'écran pendant
-        // toute la génération des graphiques.
-        withContext(Dispatchers.Default) {
-            gaussCharts =
-                gaussGenerator.generateOverviewCharts(result.plotData)
-            trendCharts = if (result.alarms.isNotEmpty())
-                trendGenerator.generateAllTrendCharts(
-                    result.plotData,
-                    wheelDisplayName
-                ) else null
-            cusumCharts = if (result.alarms.isNotEmpty())
-                trendGenerator.generateAllCusumCharts(
-                    result.plotData,
-                    wheelDisplayName
-                ) else null
-            inflexCharts = if (result.alarms.isNotEmpty())
-                trendGenerator.generateAllInflexionCharts(
-                    result.plotData,
-                    wheelDisplayName
-                ) else null
-        }
+        // Les générateurs construisent des LineChart MPAndroidChart puis appellent
+        // measure/layout/draw dessus : ce sont des View Android, elles ne vivent que sur
+        // le thread principal. Les dessiner sur Dispatchers.Default lève une exception,
+        // et chaque générateur avale les siennes — la galerie sortait vide, sans erreur
+        // visible. Le tracé gèle donc l'écran pendant sa durée : c'est le prix des View.
+        gaussCharts = gaussGenerator.generateOverviewCharts(result.plotData)
+        trendCharts = if (result.alarms.isNotEmpty())
+            trendGenerator.generateAllTrendCharts(
+                result.plotData,
+                wheelDisplayName
+            ) else null
+        cusumCharts = if (result.alarms.isNotEmpty())
+            trendGenerator.generateAllCusumCharts(
+                result.plotData,
+                wheelDisplayName
+            ) else null
+        inflexCharts = if (result.alarms.isNotEmpty())
+            trendGenerator.generateAllInflexionCharts(
+                result.plotData,
+                wheelDisplayName
+            ) else null
     }
 
     Log.d(TAG, "MAC : $macSafe")
@@ -459,8 +459,9 @@ fun ResultsScreenEnhanced(
                                     scope.launch {
                                         isExporting = true
                                         try {
+                                            // Tracé sur le thread principal : des View.
+                                            generateCharts()
                                             withContext(Dispatchers.IO) {
-                                                generateCharts()
                                                 pdfFile = pdfExporter.exportToPdf(
                                                     gaussCharts!!,
                                                     inflexCharts!!,
@@ -552,9 +553,10 @@ fun ResultsScreenEnhanced(
                                     scope.launch {
                                         isExporting = true
                                         try {
+                                            // Tracé sur le thread principal : des View.
+                                            if (pdfFile == null) generateCharts()
                                             withContext(Dispatchers.IO) {
                                                 if (pdfFile == null) {
-                                                    generateCharts()
                                                     pdfFile = pdfExporter.exportToPdf(
                                                         gaussCharts!!,
                                                         inflexCharts!!,
