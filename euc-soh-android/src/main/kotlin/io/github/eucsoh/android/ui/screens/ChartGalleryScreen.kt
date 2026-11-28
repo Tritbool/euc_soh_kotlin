@@ -45,7 +45,9 @@ import io.github.eucsoh.android.visualization.PdfExportService
 import io.github.eucsoh.android.visualization.SohArchiveExportService
 import io.github.eucsoh.android.visualization.SohChartGeneratorFixed
 import io.github.eucsoh.android.visualization.SohTrendCusumChartGenerator
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -132,18 +134,22 @@ fun ChartGalleryScreen(
 
     LaunchedEffect(selectedTab, plotData) {
         isLoading = true
-        when (selectedTab) {
-            ChartTab.GAUSSIAN -> if (gaussCharts == null)
-                gaussCharts = gaussGenerator.generateOverviewCharts(plotData)
+        // Les graphiques sont dessinés sur des bitmaps : faits dans la composition,
+        // ils gèlent l'interface le temps du tracé.
+        withContext(Dispatchers.Default) {
+            when (selectedTab) {
+                ChartTab.GAUSSIAN -> if (gaussCharts == null)
+                    gaussCharts = gaussGenerator.generateOverviewCharts(plotData)
 
-            ChartTab.TREND -> if (trendCharts == null)
-                trendCharts = trendGenerator.generateAllTrendCharts(plotData, wheelName)
+                ChartTab.TREND -> if (trendCharts == null)
+                    trendCharts = trendGenerator.generateAllTrendCharts(plotData, wheelName)
 
-            ChartTab.CUSUM -> if (cusumCharts == null)
-                cusumCharts = trendGenerator.generateAllCusumCharts(plotData, wheelName)
+                ChartTab.CUSUM -> if (cusumCharts == null)
+                    cusumCharts = trendGenerator.generateAllCusumCharts(plotData, wheelName)
 
-            ChartTab.INFLEXION -> if (inflexCharts == null)
-                inflexCharts = trendGenerator.generateAllInflexionCharts(plotData, wheelName)
+                ChartTab.INFLEXION -> if (inflexCharts == null)
+                    inflexCharts = trendGenerator.generateAllInflexionCharts(plotData, wheelName)
+            }
         }
         isLoading = false
     }
@@ -215,44 +221,48 @@ fun ChartGalleryScreen(
                                 scope.launch {
                                     isExportingPdf = true
                                     try {
-                                        // Génère les charts manquants
-                                        val gauss =
-                                            gaussCharts ?: gaussGenerator.generateOverviewCharts(
-                                                plotData
-                                            )
-                                                .also { gaussCharts = it }
-                                        val inflex = if (alarms > 0) inflexCharts
-                                            ?: trendGenerator.generateAllInflexionCharts(
-                                                plotData,
-                                                wheelName
-                                            )
-                                                .also { inflexCharts = it }
-                                        else null
-                                        val cusum = if (alarms > 0) cusumCharts
-                                            ?: trendGenerator.generateAllCusumCharts(
-                                                plotData,
-                                                wheelName
-                                            )
-                                                .also { cusumCharts = it }
-                                        else null
-                                        val trend = if (alarms > 0) trendCharts
-                                            ?: trendGenerator.generateAllTrendCharts(
-                                                plotData,
-                                                wheelName
-                                            )
-                                                .also { trendCharts = it }
-                                        else null
+                                        // Charts + PDF sont gros et lents : hors du thread
+                                        // principal, sinon l'interface ne répond plus.
+                                        withContext(Dispatchers.IO) {
+                                            // Génère les charts manquants
+                                            val gauss =
+                                                gaussCharts ?: gaussGenerator.generateOverviewCharts(
+                                                    plotData
+                                                )
+                                                    .also { gaussCharts = it }
+                                            val inflex = if (alarms > 0) inflexCharts
+                                                ?: trendGenerator.generateAllInflexionCharts(
+                                                    plotData,
+                                                    wheelName
+                                                )
+                                                    .also { inflexCharts = it }
+                                            else null
+                                            val cusum = if (alarms > 0) cusumCharts
+                                                ?: trendGenerator.generateAllCusumCharts(
+                                                    plotData,
+                                                    wheelName
+                                                )
+                                                    .also { cusumCharts = it }
+                                            else null
+                                            val trend = if (alarms > 0) trendCharts
+                                                ?: trendGenerator.generateAllTrendCharts(
+                                                    plotData,
+                                                    wheelName
+                                                )
+                                                    .also { trendCharts = it }
+                                            else null
 
-                                        // Étape 1 : génère dans le dossier privé (toujours permis)
-                                        pdfFile = pdfExporter.exportToPdf(
-                                            gauss,
-                                            inflex,
-                                            cusum,
-                                            trend,
-                                            result,
-                                            wheelName,
-                                            macAddress
-                                        )
+                                            // Étape 1 : génère dans le dossier privé (toujours permis)
+                                            pdfFile = pdfExporter.exportToPdf(
+                                                gauss,
+                                                inflex,
+                                                cusum,
+                                                trend,
+                                                result,
+                                                wheelName,
+                                                macAddress
+                                            )
+                                        }
 
                                         // Étape 2 : ouvre le picker — le lambda createPdfLauncher s'occupe de la copie
                                         createPdfLauncher.launch("${wheelName}_SoH_${timestamp}.pdf")
@@ -284,38 +294,40 @@ fun ChartGalleryScreen(
                                 scope.launch {
                                     isExportingPdf = true
                                     try {
-                                        // Génère le PDF temp si pas déjà fait
-                                        if (pdfFile == null) {
-                                            val gauss = gaussCharts
-                                                ?: gaussGenerator.generateOverviewCharts(plotData)
-                                                    .also { gaussCharts = it }
-                                            pdfFile = pdfExporter.exportToPdf(
-                                                gauss,
-                                                inflexCharts,
-                                                cusumCharts,
-                                                trendCharts,
-                                                result,
-                                                wheelName,
-                                                macAddress
+                                        withContext(Dispatchers.IO) {
+                                            // Génère le PDF temp si pas déjà fait
+                                            if (pdfFile == null) {
+                                                val gauss = gaussCharts
+                                                    ?: gaussGenerator.generateOverviewCharts(plotData)
+                                                        .also { gaussCharts = it }
+                                                pdfFile = pdfExporter.exportToPdf(
+                                                    gauss,
+                                                    inflexCharts,
+                                                    cusumCharts,
+                                                    trendCharts,
+                                                    result,
+                                                    wheelName,
+                                                    macAddress
+                                                )
+                                            }
+                                            if (csvFile == null) {
+                                                csvFile = csvExporter.exportToCsv(
+                                                    result,
+                                                    wheelName,
+                                                    macAddress
+                                                )
+                                            }
+                                            // Génère le ZIP dans le dossier privé
+                                            val archiveService = SohArchiveExportService(context)
+                                            zipFile = archiveService.exportArchive(
+                                                wheelName = wheelName,
+                                                macAddress = macAddress,
+                                                fileReports = fileReports,
+                                                pdfFile = pdfFile!!,
+                                                csvFile = csvFile!!,
+                                                darknessBotEnabled = darknessBotEnabled
                                             )
                                         }
-                                        if (csvFile == null) {
-                                            csvFile = csvExporter.exportToCsv(
-                                                result,
-                                                wheelName,
-                                                macAddress
-                                            )
-                                        }
-                                        // Génère le ZIP dans le dossier privé
-                                        val archiveService = SohArchiveExportService(context)
-                                        zipFile = archiveService.exportArchive(
-                                            wheelName = wheelName,
-                                            macAddress = macAddress,
-                                            fileReports = fileReports,
-                                            pdfFile = pdfFile!!,
-                                            csvFile = csvFile!!,
-                                            darknessBotEnabled = darknessBotEnabled
-                                        )
 
                                         // Ouvre le picker
                                         createZipLauncher.launch("${wheelName}_SoH_${timestamp}.zip")

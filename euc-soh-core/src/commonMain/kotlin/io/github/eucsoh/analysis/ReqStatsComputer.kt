@@ -44,6 +44,10 @@ import kotlin.math.round
  */
 object ReqStatsComputer {
     const val TAG = "ReqStatsComputer"
+
+    /** Ea used when no calibration is available (20 kJ/mol, mirrors ArrheniusNormalizer). */
+    const val DEFAULT_EA_J_PER_MOL = 20000.0
+
     /**
      * Parses timestamp strings (EUC World ISO-8601 or WheelLog date+time) to
      * epoch seconds.  EUC World produces offsets either as "+0200" (no colon)
@@ -296,10 +300,15 @@ object ReqStatsComputer {
         val currents = DoubleArray(rowCount)
         val speeds = DoubleArray(rowCount)
 
+        // Les colonnes sont résolues une fois pour toutes : `df[col]` est une lookup dans
+        // la map des colonnes, l'appeler dans la boucle coûterait un hash lookup par cellule.
+        val vSeries = df[vCol]
+        val iSeries = df[iCol]
+        val sSeries = df[sCol]
         for (i in 0 until rowCount) {
-            voltages[i] = (df[vCol][i] as? Number)?.toDouble() ?: Double.NaN
-            currents[i] = (df[iCol][i] as? Number)?.toDouble() ?: Double.NaN
-            speeds[i] = (df[sCol][i] as? Number)?.toDouble() ?: Double.NaN
+            voltages[i] = (vSeries[i] as? Number)?.toDouble() ?: Double.NaN
+            currents[i] = (iSeries[i] as? Number)?.toDouble() ?: Double.NaN
+            speeds[i] = (sSeries[i] as? Number)?.toDouble() ?: Double.NaN
         }
 
         val socValues = if (socVoltCol != null) {
@@ -310,8 +319,9 @@ object ReqStatsComputer {
                 else (v / (ns ?: 1) - 3.0) / 1.2 * 100.0
             }
         } else if (socCol != null) {
+            val socSeries = df[socCol]
             DoubleArray(rowCount) { i ->
-                (df[socCol][i] as? Number)?.toDouble() ?: Double.NaN
+                (socSeries[i] as? Number)?.toDouble() ?: Double.NaN
             }
         } else {
             DoubleArray(rowCount) { Double.NaN }
@@ -557,32 +567,11 @@ object ReqStatsComputer {
             }
         }
 
-        val ea = eaJPerMol ?: 20000.0
+        val ea = eaJPerMol ?: DEFAULT_EA_J_PER_MOL
 
-        val reqMedian25C = ArrheniusNormalizer.normalizeRBattTo25C(
-            rBattMeasured = reqMedian,
-            tempMeasuredC = tempBoardMax,
-            eaJPerMol = ea
-        )
-
-        // MOSFET split if params provided
-        var rMosfetHot: Double? = null
-        var rBattMedian: Double? = null
-        var rBattMedian25C: Double? = null
-
-        if (mosfetParams != null && tempBoardMax != null && (mosfetParams.rDsOn25cTotal != null)) {
-            rMosfetHot = mosfetParams.rMosfetAtTemp(tempBoardMax)
-            rBattMedian = maxOf(0.0, reqMedian - rMosfetHot)
-            rBattMedian25C = ArrheniusNormalizer.normalizeRBattTo25C(
-                rBattMeasured = rBattMedian,
-                tempMeasuredC = tempBoardMax,
-                eaJPerMol = ea
-            )
-        }
-        logger.d(TAG, "R Batt Median 25C:$rBattMedian25C")
         val firstDt = SourceDetection.getFirstDatetime(df, source)
 
-        return FileStats(
+        val stats = FileStats(
             file = csvPath.substringAfterLast('/'),
             tooBig = false,
             source = source,
@@ -596,7 +585,6 @@ object ReqStatsComputer {
             nPoints = filteredIndices.size,
             reqMean = reqMean,
             reqMedian = reqMedian,
-            reqMedian25C = reqMedian25C,
             req95p = req95p,
             sag95p = sag95p,
             sagMax = sagMax,
@@ -608,13 +596,50 @@ object ReqStatsComputer {
             iPhase2Int = iPhase2Int,
             iPhaseMax = iPhaseMax,
             iPhase95p = iPhase95p,
-            rMosfetHot = rMosfetHot,
-            rBattMedian = rBattMedian,
-            rBattMedian25C = rBattMedian25C ?: rBattMedian,
             pwm95p = pwm95p,
             pwmMax = pwmMax,
             pwmMedian = pwmMedian,
             fallbackDtUsed = fallbackDtUsed
+        )
+
+        return applyEa(stats, ea, mosfetParams)
+    }
+
+    /**
+     * Applique une énergie d'Arrhenius aux seuls champs qui en dépendent.
+     *
+     * Toute la mesure est indépendante de l'Ea : seuls [FileStats.reqMedian25C],
+     * [FileStats.rMosfetHot], [FileStats.rBattMedian] et [FileStats.rBattMedian25C]
+     * changent quand on change d'Ea. [SohAnalyzer] s'en sert pour recalibrer l'Ea sans
+     * relire ni reparser les journaux une deuxième fois.
+     */
+    fun applyEa(stats: FileStats, eaJPerMol: Double, mosfetParams: MOSFETParams?): FileStats {
+        val req = stats.reqMedian ?: return stats
+        val temp = stats.tempBoardMax
+
+        var rMosfetHot: Double? = null
+        var rBattMedian: Double? = null
+        var rBattMedian25C: Double? = null
+
+        if (mosfetParams != null && temp != null && mosfetParams.rDsOn25cTotal != null) {
+            rMosfetHot = mosfetParams.rMosfetAtTemp(temp)
+            rBattMedian = maxOf(0.0, req - rMosfetHot)
+            rBattMedian25C = ArrheniusNormalizer.normalizeRBattTo25C(
+                rBattMeasured = rBattMedian,
+                tempMeasuredC = temp,
+                eaJPerMol = eaJPerMol
+            )
+        }
+
+        return stats.copy(
+            reqMedian25C = ArrheniusNormalizer.normalizeRBattTo25C(
+                rBattMeasured = req,
+                tempMeasuredC = temp,
+                eaJPerMol = eaJPerMol
+            ),
+            rMosfetHot = rMosfetHot,
+            rBattMedian = rBattMedian,
+            rBattMedian25C = rBattMedian25C ?: rBattMedian
         )
     }
 }

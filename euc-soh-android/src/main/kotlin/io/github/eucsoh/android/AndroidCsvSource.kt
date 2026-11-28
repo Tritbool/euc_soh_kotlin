@@ -27,11 +27,22 @@ import io.github.eucsoh.CsvSource
  */
 class AndroidCsvSource(private val context: Context) : CsvSource {
 
+    companion object {
+        /**
+         * Taille de tampon de lecture d'un journal. Sans tampon, chaque petite lecture
+         * traverse le binder jusqu'au provider SAF, ce qui coûte plus cher que tout
+         * le reste de l'analyse.
+         */
+        private const val READ_BUFFER_BYTES = 64 * 1024
+    }
+
     override fun readCsv(path: String): String {
         val uri = path.toUri()
-        val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+        val input = context.contentResolver.openInputStream(uri)
             ?: throw IllegalArgumentException("Cannot open stream for $path")
-        return bytes.decodeToString()
+        return input.use {
+            it.buffered(READ_BUFFER_BYTES).reader(Charsets.UTF_8).readText()
+        }
     }
 
     override fun listCsvFiles(folderPath: String): List<String> {

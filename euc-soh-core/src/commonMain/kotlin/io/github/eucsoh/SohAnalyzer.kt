@@ -66,16 +66,33 @@ import io.github.eucsoh.analysis.TrendDetector
 import io.github.eucsoh.model.MOSFETParams
 import io.github.eucsoh.model.PlotData
 import io.github.eucsoh.model.ThresholdInfo
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.sync.withPermit
 
 /**
  * Main orchestrator for SoH analysis.
+ *
+ * [parallelism] borne le nombre de journaux analysés en parallèle. Chaque journal en
+ * cours d'analyse occupe son propre tas de colonnes, donc un dossier de plusieurs
+ * centaines de journaux épuiserait la mémoire de l'application sans cette borne.
  */
 class SohAnalyzer(
     private val csvSource: CsvSource? = null,
     private val mosfetParams: MOSFETParams? = null,
-    private val logger: Logger = NoOpLogger
+    private val logger: Logger = NoOpLogger,
+    private val parallelism: Int = DEFAULT_PARALLELISM
 ) {
+    companion object {
+        /** Trois journaux en parallèle : le gain s'essouffle au-delà, la mémoire non. */
+        const val DEFAULT_PARALLELISM = 3
+    }
+
     private val TAG: String = "SohAnalyzer"
 
     data class FileReport(
@@ -156,24 +173,38 @@ class SohAnalyzer(
         logger.d(TAG, "Starting analysis of ${csvPaths.size} files")
         val validCsvPath = mutableListOf<String>()
         val fileReports = mutableListOf<FileReport>()
+        // Stats de pass 1, réutilisables en pass 2 : seule l'Ea change entre les deux
+        // passes, et elle ne touche que quatre champs (voir ReqStatsComputer.applyEa).
+        val statsByPath = HashMap<String, ReqStatsComputer.FileStats>()
         // Pass 1: Calibrate Ea if needed
         var ea = eaJPerMol
         if (ea == null) {
             logger.d(TAG, "Pass 1: Ea calibration")
 
+            val computed = computeAll(csvPaths, null, CALIBRATING, onProgress)
+
             val tempStats =
                 csvPaths.mapIndexedNotNull { idx, path ->
                     val filename = path.substringAfterLast('/')
                     logger.d(TAG, "  Processing [$idx/${csvPaths.size}] $filename")
-                    onProgress?.invoke(idx, csvPaths.size, CALIBRATING)
-                    try {
-                        val result = ReqStatsComputer.computeReqStatsForFile(
-                            csvPath = path,
-                            csvSource = csvSource,
-                            mosfetParams = mosfetParams,
-                            eaJPerMol = null,
-                            logger = logger
+                    val outcome = computed[idx]
+                    if (outcome.isFailure) {
+                        val e = outcome.exceptionOrNull()
+                        logger.e(
+                            TAG,
+                            "  [$idx] FAILED: ${e?.let { it::class.simpleName }}: ${e?.message}",
+                            e
                         )
+                        fileReports.add(
+                            FileReport(
+                                path, filename, "Unknown", false,
+                                rejectionReason = "File unreadable or parse error"
+                            )
+                        )
+                        null
+                    } else {
+                        val result = outcome.getOrNull()
+                        result?.let { statsByPath[path] = it }
                         logger.d(
                             TAG,
                             "  [$idx] SUCCESS: ${result?.nPoints ?: MIN_POINTS} points, req=${result?.reqMedian ?: LOWER_REQ}"
@@ -233,19 +264,6 @@ class SohAnalyzer(
                         }
 
                         result
-                    } catch (e: Exception) {
-                        logger.e(
-                            TAG,
-                            "  [$idx] FAILED: ${e::class.simpleName}: ${e.message}",
-                            e
-                        )
-                        fileReports.add(
-                            FileReport(
-                                path, path.substringAfterLast('/'), "Unknown", false,
-                                rejectionReason = "File unreadable or parse error"
-                            )
-                        )
-                        null
                     }
                 }
 
@@ -290,20 +308,35 @@ class SohAnalyzer(
         }
 
 
+        val calibratedEa: Double = ea ?: ReqStatsComputer.DEFAULT_EA_J_PER_MOL
+
+        // Les journaux déjà mesurés en passe 1 ne sont pas relus : l'Ea calibré est
+        // réappliqué aux champs concernés. Seuls les journaux qui n'ont pas de passe 1
+        // (Ea fourni d'avance) sont réellement analysés ici.
+        val missing = finalPaths.mapIndexedNotNull { i, p ->
+            if (statsByPath.containsKey(p)) null else i
+        }
+        val missingResults = computeAll(missing.map { finalPaths[it] }, calibratedEa, ANALYZING, onProgress)
+        if (missing.isEmpty()) onProgress?.invoke(finalPaths.size, finalPaths.size, ANALYZING)
+        val computedFinal = HashMap<Int, Result<ReqStatsComputer.FileStats?>>()
+        missing.forEachIndexed { k, i -> computedFinal[i] = missingResults[k] }
+
         val finalStats =
             finalPaths.mapIndexedNotNull { idx, path ->
-                onProgress?.invoke(idx, finalPaths.size, ANALYZING)
-                try {
-                    ReqStatsComputer.computeReqStatsForFile(
-                        csvPath = path,
-                        csvSource = csvSource,
-                        mosfetParams = mosfetParams,
-                        eaJPerMol = ea,
-                        logger = logger
-                    )
-                } catch (e: Exception) {
-                    logger.e(TAG, "  Pass2 [$idx] FAILED: ${e.message}", e)
-                    null
+                val cached = statsByPath[path]
+                if (cached != null) {
+                    // La passe 1 a déjà tout mesuré : on ne relit pas le journal, on
+                    // réapplique seulement l'Ea calibré aux champs qui en dépendent.
+                    ReqStatsComputer.applyEa(cached, calibratedEa, mosfetParams)
+                } else {
+                    val outcome = computedFinal[idx] ?: Result.success(null)
+                    if (outcome.isFailure) {
+                        val e = outcome.exceptionOrNull()
+                        logger.e(TAG, "  Pass2 [$idx] FAILED: ${e?.message}", e)
+                        null
+                    } else {
+                        outcome.getOrNull()
+                    }
                 }
             }
 
@@ -476,6 +509,68 @@ class SohAnalyzer(
             macAddress = macAddress
         )
 
+    }
+
+    /**
+     * Analyse [paths] en parallèle, un journal par coroutine, et renvoie un résultat par
+     * chemin, dans l'ordre d'entrée.
+     *
+     * La mesure d'un journal ne dépend d'aucun autre : c'est le seul endroit de l'analyse
+     * où plusieurs cœurs peuvent travailler ensemble. [parallelism] borne le nombre de
+     * journaux en vol, parce que chacun garde ses colonnes en mémoire pendant qu'il est
+     * traité.
+     *
+     * La progression est émise à chaque journal terminé (donc dans l'ordre d'achèvement,
+     * pas dans l'ordre des fichiers).
+     */
+    private suspend fun computeAll(
+        paths: List<String>,
+        eaJPerMol: Double?,
+        phase: String,
+        onProgress: ((Int, Int, String) -> Unit)?
+    ): List<Result<ReqStatsComputer.FileStats?>> {
+        val total = paths.size
+        if (total == 0) return emptyList()
+
+        if (parallelism <= 1 || total == 1) {
+            return paths.mapIndexed { i, path ->
+                computeOne(path, eaJPerMol).also { onProgress?.invoke(i + 1, total, phase) }
+            }
+        }
+
+        val semaphore = Semaphore(parallelism)
+        val lock = Mutex()
+        var done = 0
+        return coroutineScope {
+            paths.map { path ->
+                async(Dispatchers.Default) {
+                    semaphore.withPermit {
+                        computeOne(path, eaJPerMol).also {
+                            val n = lock.withLock { ++done }
+                            onProgress?.invoke(n, total, phase)
+                        }
+                    }
+                }
+            }.awaitAll()
+        }
+    }
+
+    /** Mesure d'un journal, mise en forme de [Result] près à être rangé en ordre. */
+    private fun computeOne(
+        path: String,
+        eaJPerMol: Double?
+    ): Result<ReqStatsComputer.FileStats?> = try {
+        Result.success(
+            ReqStatsComputer.computeReqStatsForFile(
+                csvPath = path,
+                csvSource = csvSource,
+                mosfetParams = mosfetParams,
+                eaJPerMol = eaJPerMol,
+                logger = logger
+            )
+        )
+    } catch (e: Exception) {
+        Result.failure(e)
     }
 
     private fun buildPlotData(

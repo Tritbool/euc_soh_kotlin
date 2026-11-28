@@ -104,69 +104,114 @@ class LogFrame internal constructor(
          * Parses CSV text with a header row. Numeric-looking cells are stored
          * as [Double] (or [Long] for integer values), booleans as [Boolean],
          * empty cells as null, everything else as [String].
+         *
+         * Le fichier est parcouru une seule fois, ligne par ligne, et chaque cellule
+         * est rangée directement dans sa colonne : rien ne retient la grille de cellules
+         * intermédiaire. C'est ce qui garde l'empreinte mémoire proche de la taille des
+         * seules colonnes conservées — un journal de 2 Mo ne doit pas coûter 50 Mo de tas,
+         * surtout sur un téléphone.
          */
         fun readCsv(text: String): LogFrame {
-            val lines = splitCsvLines(text)
-            if (lines.isEmpty()) return of()
+            val cursor = CsvCursor(text)
 
-            val header = lines.first()
-            val data = lines.drop(1)
-            val columns = LinkedHashMap<String, List<Any?>>()
+            var header: List<String>? = null
+            while (header == null) {
+                val row = cursor.nextRow() ?: return of()
+                if (row.any { it.isNotBlank() }) header = row
+            }
+
+            val names = ArrayList<String>(header.size)
+            val slots = ArrayList<Int>(header.size)
             for ((colIdx, name) in header.withIndex()) {
                 val cleanName = name.trim()
                 if (cleanName.isEmpty()) continue
-                columns[cleanName] = data.map { row ->
-                    if (colIdx < row.size) inferValue(row[colIdx]) else null
+                names += cleanName
+                slots += colIdx
+            }
+            if (names.isEmpty()) return of()
+
+            // Prédimensionne : grandir une colonne par recopie coûte plus cher que
+            // l'espace légèrement sur-reservé sur un fichier à lignes vides.
+            val capacity = text.count { it == '\n' }.coerceAtLeast(16)
+            val columns = ArrayList<MutableList<Any?>>(names.size)
+            repeat(names.size) { columns += ArrayList<Any?>(capacity) }
+
+            val row = ArrayList<String>(names.size)
+            while (cursor.nextRowInto(row)) {
+                if (!row.any { it.isNotBlank() }) continue
+                for (k in names.indices) {
+                    val slot = slots[k]
+                    columns[k].add(if (slot < row.size) inferValue(row[slot]) else null)
                 }
             }
-            return LogFrame(columns)
+
+            val built = LinkedHashMap<String, List<Any?>>(names.size)
+            for (k in names.indices) built[names[k]] = columns[k]
+            return LogFrame(built)
         }
 
-        private fun splitCsvLines(text: String): List<List<String>> {
-            val rows = mutableListOf<List<String>>()
-            var current = mutableListOf<String>()
-            val sb = StringBuilder()
-            var inQuotes = false
-            var i = 0
+        /**
+         * Curseur CSV : découpe [text] ligne par ligne sans jamais retenir les lignes
+         * déjà lues. La liste de sortie est réutilisée entre les appels pour éviter
+         * une allocation par ligne.
+         */
+        private class CsvCursor(private val text: String) {
+            private var i = 0
+            private val cell = StringBuilder()
 
-            fun endCell() {
-                current.add(sb.toString())
-                sb.clear()
-            }
+            fun nextRowInto(out: MutableList<String>): Boolean {
+                out.clear()
+                if (i >= text.length) return false
 
-            fun endRow() {
-                endCell()
-                rows.add(current)
-                current = mutableListOf()
-            }
-
-            while (i < text.length) {
-                val ch = text[i]
-                when {
-                    inQuotes -> {
-                        if (ch == '"') {
-                            if (i + 1 < text.length && text[i + 1] == '"') {
-                                sb.append('"')
-                                i++
+                var inQuotes = false
+                while (i < text.length) {
+                    val ch = text[i]
+                    when {
+                        inQuotes -> {
+                            if (ch == '"') {
+                                if (i + 1 < text.length && text[i + 1] == '"') {
+                                    cell.append('"')
+                                    i++
+                                } else {
+                                    inQuotes = false
+                                }
                             } else {
-                                inQuotes = false
+                                cell.append(ch)
                             }
-                        } else {
-                            sb.append(ch)
                         }
-                    }
-                    ch == '"' -> inQuotes = true
-                    ch == ',' -> endCell()
-                    ch == '\n' -> endRow()
-                    ch == '\r' -> {}
-                    else -> sb.append(ch)
-                }
-                i++
-            }
-            if (sb.isNotEmpty() || current.isNotEmpty()) endRow()
 
-            return rows.filter { row -> row.any { it.isNotBlank() } }
+                        ch == '"' -> inQuotes = true
+                        ch == ',' -> {
+                            out.add(cell.toString())
+                            cell.clear()
+                        }
+
+                        ch == '\n' -> {
+                            i++
+                            out.add(cell.toString())
+                            cell.clear()
+                            return true
+                        }
+
+                        ch == '\r' -> {}
+                        else -> cell.append(ch)
+                    }
+                    i++
+                }
+
+                // Dernière ligne sans saut de ligne final ; sinon on est déjà sorti.
+                if (cell.isEmpty() && out.isEmpty()) return false
+                out.add(cell.toString())
+                cell.clear()
+                return true
+            }
+
+            fun nextRow(): List<String>? {
+                val row = ArrayList<String>(8)
+                return if (nextRowInto(row)) row else null
+            }
         }
+
 
         private fun inferValue(raw: String): Any? {
             val s = raw.trim()
