@@ -58,6 +58,19 @@ kotlin {
 
 tasks.named("jvmTest", Test::class) {
     useJUnitPlatform()
+
+    // Corpus tests (io.github.eucsoh.corpus) read these to locate the calibration
+    // data and to bound their runtime. Gradle does not forward -D flags to the
+    // test JVM on its own, so pass the ones that were actually set.
+    listOf(
+        "soh.samples.dir",
+        "soh.paper.dir",
+        "soh.corpus.limit",
+        "soh.corpus.ea",
+        "soh.corpus.budget.s"
+    ).forEach { key ->
+        System.getProperty(key)?.let { systemProperty(key, it) }
+    }
 }
 
 // Alias so that `gradlew test` keeps running the core tests after the KMP migration.

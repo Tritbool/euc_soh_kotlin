@@ -218,13 +218,25 @@ class LogFrame internal constructor(
             if (s.isEmpty()) return null
             if (s.equals("true", ignoreCase = true)) return true
             if (s.equals("false", ignoreCase = false)) return false
+
+            // Un nombre commence toujours par un chiffre ou un signe (et par un point pour
+            // les décimales écrites ".5"). Le vérifier avant d'appeler toDoubleOrNull /
+            // toLongOrNull évite de lancer une NumberFormatException par cellule : Kotlin
+            // les rattrape, mais les construire coûte plus cher que le parse lui-même, et
+            // c'est la colonne des horodatages qui la déclenchait sur chaque ligne. Le
+            // résultat est le même, on ne fait pas l'essai quand il ne peut pas réussir.
+            val first = s[0]
+            val numericStart = first in '0'..'9' || first == '+' || first == '-' || first == '.'
+
             if (s.contains("e") || s.contains("E")) {
-                return s.toDoubleOrNull()
+                return if (numericStart) s.toDoubleOrNull() else null
             }
             if (s.contains(".")) {
-                return s.toDoubleOrNull() ?: s
+                return if (numericStart) s.toDoubleOrNull() ?: s else s
             }
-            s.toLongOrNull()?.let { return it }
+            if (numericStart) {
+                s.toLongOrNull()?.let { return it }
+            }
             return s
         }
     }

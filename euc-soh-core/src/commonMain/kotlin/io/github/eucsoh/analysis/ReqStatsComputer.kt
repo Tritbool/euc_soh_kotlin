@@ -44,10 +44,6 @@ import kotlin.math.round
  */
 object ReqStatsComputer {
     const val TAG = "ReqStatsComputer"
-
-    /** Ea used when no calibration is available (20 kJ/mol, mirrors ArrheniusNormalizer). */
-    const val DEFAULT_EA_J_PER_MOL = 20000.0
-
     /**
      * Parses timestamp strings (EUC World ISO-8601 or WheelLog date+time) to
      * epoch seconds.  EUC World produces offsets either as "+0200" (no colon)
@@ -300,8 +296,9 @@ object ReqStatsComputer {
         val currents = DoubleArray(rowCount)
         val speeds = DoubleArray(rowCount)
 
-        // Les colonnes sont résolues une fois pour toutes : `df[col]` est une lookup dans
-        // la map des colonnes, l'appeler dans la boucle coûterait un hash lookup par cellule.
+        // Les colonnes sont résolues une fois ici : `df[col]` recherche la colonne dans la
+        // map du frame, et l'appeler par cellule coûtait un lookup pour chaque ligne. Le
+        // frame n'est pas modifié entre ici et la boucle, donc la série est la même.
         val vSeries = df[vCol]
         val iSeries = df[iCol]
         val sSeries = df[sCol]
@@ -365,13 +362,19 @@ object ReqStatsComputer {
             vIdleLocal[i] - voltages[i]
         }
 
-        val reqs = filteredIndices.map { i ->
-            sags[filteredIndices.indexOf(i)] / abs(currents[i])
+        // `sags[k]` est le sag de `filteredIndices[k]` : la position parcourue par `map`
+        // EST l'index que `indexOf(i)` allait rechercher. L'appeler à chaque Req relisait
+        // toute la liste filtrée pour chaque Req — quadratique sur les gros journaux, et
+        // c'était le premier poste de coût de la mesure. Résultat strictement identique.
+        val reqs = filteredIndices.mapIndexed { k, i ->
+            sags[k] / abs(currents[i])
         }
 
         val reqMean = reqs.average()
-        val reqMedian = reqs.sorted().let { it[it.size / 2] }
-        val req95p = reqs.sorted().let { it[(it.size * 0.95).toInt().coerceIn(0, it.size - 1)] }
+        // Un seul tri : reqMedian et req95p triaient chacun une copie complète de reqs.
+        val reqsSorted = reqs.sorted()
+        val reqMedian = reqsSorted[reqsSorted.size / 2]
+        val req95p = reqsSorted[(reqsSorted.size * 0.95).toInt().coerceIn(0, reqsSorted.size - 1)]
         val sag95p = sags.sorted().let { it[(it.size * 0.95).toInt().coerceIn(0, it.size - 1)] }
         val sagMax = sags.maxOrNull() ?: 0.0
 
@@ -567,11 +570,32 @@ object ReqStatsComputer {
             }
         }
 
-        val ea = eaJPerMol ?: DEFAULT_EA_J_PER_MOL
+        val ea = eaJPerMol ?: 20000.0
 
+        val reqMedian25C = ArrheniusNormalizer.normalizeRBattTo25C(
+            rBattMeasured = reqMedian,
+            tempMeasuredC = tempBoardMax,
+            eaJPerMol = ea
+        )
+
+        // MOSFET split if params provided
+        var rMosfetHot: Double? = null
+        var rBattMedian: Double? = null
+        var rBattMedian25C: Double? = null
+
+        if (mosfetParams != null && tempBoardMax != null && (mosfetParams.rDsOn25cTotal != null)) {
+            rMosfetHot = mosfetParams.rMosfetAtTemp(tempBoardMax)
+            rBattMedian = maxOf(0.0, reqMedian - rMosfetHot)
+            rBattMedian25C = ArrheniusNormalizer.normalizeRBattTo25C(
+                rBattMeasured = rBattMedian,
+                tempMeasuredC = tempBoardMax,
+                eaJPerMol = ea
+            )
+        }
+        logger.d(TAG, "R Batt Median 25C:$rBattMedian25C")
         val firstDt = SourceDetection.getFirstDatetime(df, source)
 
-        val stats = FileStats(
+        return FileStats(
             file = csvPath.substringAfterLast('/'),
             tooBig = false,
             source = source,
@@ -585,6 +609,7 @@ object ReqStatsComputer {
             nPoints = filteredIndices.size,
             reqMean = reqMean,
             reqMedian = reqMedian,
+            reqMedian25C = reqMedian25C,
             req95p = req95p,
             sag95p = sag95p,
             sagMax = sagMax,
@@ -596,50 +621,13 @@ object ReqStatsComputer {
             iPhase2Int = iPhase2Int,
             iPhaseMax = iPhaseMax,
             iPhase95p = iPhase95p,
+            rMosfetHot = rMosfetHot,
+            rBattMedian = rBattMedian,
+            rBattMedian25C = rBattMedian25C ?: rBattMedian,
             pwm95p = pwm95p,
             pwmMax = pwmMax,
             pwmMedian = pwmMedian,
             fallbackDtUsed = fallbackDtUsed
-        )
-
-        return applyEa(stats, ea, mosfetParams)
-    }
-
-    /**
-     * Applique une énergie d'Arrhenius aux seuls champs qui en dépendent.
-     *
-     * Toute la mesure est indépendante de l'Ea : seuls [FileStats.reqMedian25C],
-     * [FileStats.rMosfetHot], [FileStats.rBattMedian] et [FileStats.rBattMedian25C]
-     * changent quand on change d'Ea. [SohAnalyzer] s'en sert pour recalibrer l'Ea sans
-     * relire ni reparser les journaux une deuxième fois.
-     */
-    fun applyEa(stats: FileStats, eaJPerMol: Double, mosfetParams: MOSFETParams?): FileStats {
-        val req = stats.reqMedian ?: return stats
-        val temp = stats.tempBoardMax
-
-        var rMosfetHot: Double? = null
-        var rBattMedian: Double? = null
-        var rBattMedian25C: Double? = null
-
-        if (mosfetParams != null && temp != null && mosfetParams.rDsOn25cTotal != null) {
-            rMosfetHot = mosfetParams.rMosfetAtTemp(temp)
-            rBattMedian = maxOf(0.0, req - rMosfetHot)
-            rBattMedian25C = ArrheniusNormalizer.normalizeRBattTo25C(
-                rBattMeasured = rBattMedian,
-                tempMeasuredC = temp,
-                eaJPerMol = eaJPerMol
-            )
-        }
-
-        return stats.copy(
-            reqMedian25C = ArrheniusNormalizer.normalizeRBattTo25C(
-                rBattMeasured = req,
-                tempMeasuredC = temp,
-                eaJPerMol = eaJPerMol
-            ),
-            rMosfetHot = rMosfetHot,
-            rBattMedian = rBattMedian,
-            rBattMedian25C = rBattMedian25C ?: rBattMedian
         )
     }
 }
