@@ -203,7 +203,7 @@ fun FileInfoCard(
                         buildString {
                             append("${file.nPoints} points")
                             if (file.reqMedian != null) {
-                                append(" | Req: ${"%.3f".format(file.reqMedian)}Ω")
+                                append(" | Req proxy: ${"%.3f".format(file.reqMedian)}Ω")
                             }
                             if (file.wheelKm != null) {
                                 append(" | ${"%.0f".format(file.wheelKm)} km")

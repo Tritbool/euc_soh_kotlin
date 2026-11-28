@@ -345,7 +345,14 @@ fun InfoScreen(onClose: () -> Unit) {
                 onContainerColor = MaterialTheme.colorScheme.onPrimaryContainer
             ) {
                 InfoSubtitle(stringResource(R.string.info_s6_req_title))
-                InfoBody(stringResource(R.string.info_s6_req_body))
+                // La note canonique « proxy, pas une résistance mesurée » est ajoutée ici
+                // depuis la ressource unique info_req_proxy_note (même texte que dans le
+                // PDF), pour que le avertissement ne puisse pas diverger d'une surface à
+                // l'autre.
+                InfoBody(
+                    stringResource(R.string.info_s6_req_body) +
+                        "\n\n" + stringResource(R.string.info_req_proxy_note)
+                )
 
                 Spacer(Modifier.height(10.dp))
 

@@ -21,12 +21,19 @@ package io.github.eucsoh.android.visualization
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
+import com.itextpdf.io.font.constants.StandardFonts
 import com.itextpdf.io.image.ImageDataFactory
 import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.colors.DeviceRgb
+import com.itextpdf.kernel.font.PdfFont
+import com.itextpdf.kernel.font.PdfFontFactory
 import com.itextpdf.kernel.geom.PageSize
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
+import com.itextpdf.kernel.pdf.canvas.PdfCanvas
+import com.itextpdf.kernel.pdf.event.AbstractPdfDocumentEvent
+import com.itextpdf.kernel.pdf.event.AbstractPdfDocumentEventHandler
+import com.itextpdf.kernel.pdf.event.PdfDocumentEvent
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.AreaBreak
 import com.itextpdf.layout.element.Cell
@@ -37,10 +44,12 @@ import com.itextpdf.layout.properties.AreaBreakType
 import com.itextpdf.layout.properties.HorizontalAlignment
 import com.itextpdf.layout.properties.TextAlignment
 import io.github.eucsoh.SohAnalyzer
+import io.github.eucsoh.android.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -53,6 +62,14 @@ class PdfExportService(private val context: Context) {
         // Police embarquée dans Android, toujours disponible
         @Suppress("unused so far")
         private const val FONT = "fonts/NotoSans-Regular.ttf"
+
+        // Marges de page (pt) et bande réservée en bas de chaque page pour la note R_eq
+        private const val MARGIN = 30f
+        private const val FOOTER_BAND = 46f
+
+        // Note « R_eq = proxy de charge » imprimée en pied de toutes les pages
+        private const val FOOTER_FONT_SIZE = 6.5f
+        private const val FOOTER_LEADING = 8.2f
     }
 
     suspend fun exportToPdf(
@@ -80,7 +97,19 @@ class PdfExportService(private val context: Context) {
         // A4 landscape
         val pageSize = PageSize.A4.rotate()
         val document = Document(pdfDoc, pageSize)
-        document.setMargins(30f, 30f, 30f, 30f)
+        // Marge basse élargie d'une bande réservée : c'est dans cette bande qu'est dessiné
+        // le pied de page, il ne peut donc jamais chevaucher le contenu de la page.
+        document.setMargins(MARGIN, MARGIN, MARGIN, MARGIN + FOOTER_BAND)
+
+        // Note canonique « R_eq est un proxy de charge, pas une résistance mesurée » :
+        // même ressource que dans l'app (info_req_proxy_note), donc le texte ne peut pas
+        // diverger d'une surface à l'autre. Imprimée sur la page de titre ET en pied de
+        // chaque page, elle voyage avec le rapport là où il est envoyé.
+        val proxyNote = context.getString(R.string.info_req_proxy_note)
+        pdfDoc.addEventHandler(
+            PdfDocumentEvent.END_PAGE,
+            ReqProxyNoteHandler(document, proxyNote, MARGIN)
+        )
 
         // ── Page 1 : Titre ──────────────────────────────────────────────
         document.add(
@@ -124,6 +153,15 @@ class PdfExportService(private val context: Context) {
                     .setMarginTop(20f)
             )
         }
+
+        // Rappel de la note sur la page de titre, en clair cette fois
+        document.add(
+            Paragraph(proxyNote)
+                .setFontSize(9f)
+                .setFontColor(ColorConstants.GRAY)
+                .setTextAlignment(TextAlignment.JUSTIFIED)
+                .setMarginTop(28f)
+        )
 
         // ── Page 2 : Tableau des stats ───────────────────────────────────
         document.add(AreaBreak(AreaBreakType.NEXT_PAGE))
@@ -396,9 +434,10 @@ class PdfExportService(private val context: Context) {
             val imgData = ImageDataFactory.create(pngBytes)
             val img = Image(imgData)
 
-            // Calcule la taille max disponible sur la page (page - marges - titre)
-            val availW = pageSize.width - 60f   // 2 × marge 30pt
-            val availH = pageSize.height - 90f  // marges + titre
+            // Calcule la taille max disponible sur la page
+            // (page - marges - bande de la note en pied de page - titre)
+            val availW = pageSize.width - 2 * MARGIN
+            val availH = pageSize.height - 2 * MARGIN - FOOTER_BAND - 30f  // 30f : titre
             img.scaleToFit(availW, availH)
             img.setHorizontalAlignment(HorizontalAlignment.CENTER)
 
@@ -437,5 +476,83 @@ class PdfExportService(private val context: Context) {
             }
         )
         return analyzer.buildSummary(result, wheelName)
+    }
+
+    /**
+     * Imprime la note « R_eq = proxy de charge, pas une résistance mesurée » en pied de
+     * CHAQUE page du rapport.
+     *
+     * Le PDF est la surface où la confusion coûte le plus cher : imprimé, le rapport est lu
+     * comme une mesure d'atelier. La note est donc gravée dans le fichier lui-même — et pas
+     * ajoutée par l'app au moment de l'affichage — elle voyage avec le PDF, même quand il
+     * est envoyé à quelqu'un qui n'a jamais ouvert l'application.
+     *
+     * Le texte est dessiné directement sur le canvas à l'événement END_PAGE, dans la bande
+     * de marge basse réservée par [Document.setMargins] : quelle que soit la longueur de la
+     * note (les traductions sont plus ou moins longues), elle ne chevauche jamais le
+     * contenu, et elle est coupée en lignes à la largeur réelle des glyphes.
+     */
+    private class ReqProxyNoteHandler(
+        private val document: Document,
+        private val note: String,
+        private val bottomBase: Float
+    ) : AbstractPdfDocumentEventHandler() {
+
+        init {
+            addType(PdfDocumentEvent.END_PAGE)
+        }
+
+        override fun onAcceptedEvent(event: AbstractPdfDocumentEvent) {
+            val documentEvent = event as? PdfDocumentEvent ?: return
+            val page = documentEvent.page ?: return
+            // La page de titre porte déjà la note en clair et en plus gros : la répéter en
+            // pied de cette page-là ne ferait que doubler le texte au même endroit.
+            if (documentEvent.document.getPageNumber(page) == 1) return
+            try {
+                val font = PdfFontFactory.createFont(StandardFonts.HELVETICA)
+                val maxWidth = page.pageSizeWithRotation.width -
+                        document.leftMargin - document.rightMargin
+                val canvas = PdfCanvas(
+                    page.newContentStreamAfter(),
+                    page.resources,
+                    documentEvent.document
+                )
+                canvas.saveState()
+                val lines = lines(note, font, maxWidth)
+                // Dessin du bas vers le haut : la dernière ligne repose sur la marge
+                // extérieure, les précédentes remontent dans la bande réservée.
+                var y = bottomBase + (lines.size - 1) * FOOTER_LEADING
+                for (line in lines) {
+                    canvas.beginText()
+                        .setFontAndSize(font, FOOTER_FONT_SIZE)
+                        .setFillColorGray(0.42f)
+                        .moveText(document.leftMargin.toDouble(), y.toDouble())
+                        .showText(line)
+                        .endText()
+                    y -= FOOTER_LEADING
+                }
+                canvas.restoreState()
+            } catch (e: IOException) {
+                // Une note qui ne s'imprime pas ne doit pas faire échouer tout le rapport
+                Log.w(TAG, "Proxy note footer skipped", e)
+            }
+        }
+
+        /** Coupe [note] en lignes tenant dans [maxWidth], à la largeur réelle des glyphes. */
+        private fun lines(text: String, font: PdfFont, maxWidth: Float): List<String> {
+            val result = mutableListOf<String>()
+            var current = ""
+            for (word in text.split(" ")) {
+                val candidate = if (current.isEmpty()) word else "$current $word"
+                if (current.isNotEmpty() && font.getWidth(candidate, FOOTER_FONT_SIZE) > maxWidth) {
+                    result += current
+                    current = word
+                } else {
+                    current = candidate
+                }
+            }
+            if (current.isNotEmpty()) result += current
+            return result
+        }
     }
 }

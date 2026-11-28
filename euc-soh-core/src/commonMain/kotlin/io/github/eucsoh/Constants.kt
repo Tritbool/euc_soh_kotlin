@@ -170,13 +170,27 @@ object Constants {
 
     }
 
+    /**
+     * The metrics exported to CSV, plotted in the charts and printed in the PDF report.
+     *
+     * **The `Req_*` family is a load proxy, not a measured resistance.** It is inferred from
+     * how far the pack voltage dips while the wheel draws current, so one value bundles the
+     * cells, the power transistors, the wiring and the connectors — and it also moves with
+     * temperature, state of charge and how hard the rider pushed. The paper this app
+     * implements therefore renamed it the **Equivalent Load Proxy (ELP)**: read the labels
+     * below as an index to track against your own history, not as an absolute resistance
+     * in ohms.
+     *
+     * [csv_code] is the stable data contract shared with user exports and with the paper's
+     * reference files — never rename it.
+     */
     enum class Metrics(
         val csv_code: String,
         val higher_is_bad: Boolean = true,
         val label: String? = null
     ) {
-        REQ_MEDIAN_25C("Req_median_25C", true, "Equivalent resistance median @25°C (Ω)"),
-        REQ_MEDIAN("Req_median", true, "Equivalent resistance median (Ω)"),
+        REQ_MEDIAN_25C("Req_median_25C", true, "R_eq load proxy median @25°C (Ω)"),
+        REQ_MEDIAN("Req_median", true, "R_eq load proxy median (Ω)"),
         R_BATT_MEDIAN_25C("R_batt_median_25C", true, "R_batt median @25°C (Ω)"),
         R_BATT_MEDIAN("R_batt_median", true, "R_batt median (Ω)"),
         R_MOSFET_HOT("R_mosfet_hot", true, "R_MOSFET hot (Ω)"),
@@ -191,8 +205,8 @@ object Constants {
         I_PHASE_MAX("i_phase_max", true, "Max phase current (A)"),
         I_PHASE_95P("i_phase_95p", true, "Phase current 95th percentile (A)"),
         I_PHASE2_INT("I_phase2_int", true, "Phase I² dose – ∫ I_phase² dt (A²·s)"),
-        REQ_MEAN("Req_mean", true, "Equivalent resistance mean (Ω)"),
-        REQ_95P("Req_95p", true, "Equivalent resistance 95th percentile (Ω)"),
+        REQ_MEAN("Req_mean", true, "R_eq load proxy mean (Ω)"),
+        REQ_95P("Req_95p", true, "R_eq load proxy 95th percentile (Ω)"),
         V_MIN_STRONG("v_min_strong", false, "Maximum voltage collapse under load (V)"),
         PWM_MAX("pwm_max", true, "PWM max (%)"),
         PWM_95P("pwm_95p", true, "PWM 95th percentile (%)"),

@@ -136,7 +136,7 @@
     <string name="info_s1_limit1">Es sagt keine genaue verbleibende Lebensdauer voraus.</string>
     <string name="info_s1_limit2">Es ersetzt keine praktischen Tests (Oszilloskop, kontrollierter Lade-/Entladezyklus oder ein BMS-Diagnosetool).</string>
     <string name="info_s1_limit3">Es vergleicht Ihr Rad nicht mit anderen Fahrern — jedes Rad ist seine eigene Referenz.</string>
-    <string name="info_s1_limit4">Indikatoren sind relativ, nicht absolut: Ein hoher R_eq bedeutet nicht, dass die Batterie schlecht ist, nur dass sie von ihrer eigenen Vergangenheitsbasislinie abgewichen ist.</string>
+    <string name="info_s1_limit4">Indikatoren sind relativ, nicht absolut: Ein hoher R_eq bedeutet nicht, dass die Batterie schlecht ist, nur dass sie von ihrer eigenen Vergangenheitsbasislinie abgewichen ist. Und R_eq ist ein Proxy, kein gemessener Widerstand: Er wird aus dem Spannungseinbruch des Packs unter Last abgeleitet — also als Index zu lesen, nicht als Ohm-Wert für das Multimeter.</string>
     <string name="info_s2_title">Wie man auf die Ergebnisse reagiert</string>
     <string name="info_s2_intro">Alarme vergleichen jede neue Fahrt mit der Geschichte desselben Rades. Die App berechnet einen Durchschnitt und eine typische Streuung aus allen vergangenen Fahrten und meldet, wie weit die letzten Werte von dieser Basislinie entfernt sind:</string>
     <string name="info_s2_alarm_danger_label">Gefahr — klar abnormal</string>
@@ -155,7 +155,7 @@
     <string name="info_s3_note">Der P-Wert kann im MOSFET-Konfigurationsdialog gesetzt werden (Feld &quot;N Parallelzellen&quot;). Er beeinflusst nicht die Widerstandsberechnung — nur den R_nominal-Alarmschwellwert.</string>
     <string name="info_s4_title">Wichtige Metriken und wie man sie liest</string>
     <string name="info_m1_name">R_eq_median (mΩ)</string>
-    <string name="info_m1_desc">Die wichtigste Gesundheitszahl. Misst, wie stark der gesamte Leistungskreis dem Stromfluss während einer Fahrt widersteht. Höher = mehr Widerstand = mehr Spannungsverlust unter Last = weniger Sicherheitsmarge.</string>
+    <string name="info_m1_desc">Die wichtigste Gesundheitszahl — ein Proxy-Index, kein Widerstand, den Sie mit einem Multimeter messen könnten. Sie zeigt, wie stark der gesamte Leistungskreis dem Stromfluss während einer Fahrt widersteht. Höher = mehr Widerstand = mehr Spannungsverlust unter Last = weniger Sicherheitsmarge.</string>
     <string name="info_m1_interp">R_eq_median ist der primäre Alarmauslöser. Er erfasst Degradation unabhängig von der Ursache — Zellen, MOSFETs oder Verdrahtung. Zur Zuordnung der Drift: Steigendes SAG und R_batt deuten auf Zellen hin; steigendes temp_board_max bei stabilem SAG deutet auf MOSFETs hin.</string>
     <string name="info_m2_name">R_batt_median_25C (mΩ)</string>
     <string name="info_m2_desc">Widerstand der Zellen allein — ohne Beitrag von MOSFETs und Verdrahtung. Temperaturkorrigiert auf 25°C. Nur verfügbar, wenn MOSFET-Parameter konfiguriert sind.</string>
@@ -188,7 +188,10 @@
     <string name="info_graph_legend_orange">Orange Linie: +1σ-Schwelle (Frühwarnung)</string>
     <string name="info_graph_legend_red">Rote gestrichelte Linie: Gefahrenschwelle (µ + 2σ oder absolut)</string>
     <string name="info_s6_title">Wie die Metriken berechnet werden</string>
-    <string name="info_s6_req_title">R_eq — Äquivalentwiderstand</string>
+    <string name="info_s6_req_title">R_eq — äquivalenter Last-Proxy</string>
+
+    <!-- Kanonischer Hinweis „Proxy, kein gemessener Widerstand“: gleicher Text wie info_req_proxy_note in values/strings.xml. -->
+    <string name="info_req_proxy_note">R_eq ist kein Widerstand, den Sie mit einem Multimeter messen könnten. Er wird daraus abgeleitet, wie stark die Packspannung einbricht, während das Rad Strom zieht: Er bündelt damit Zellen, Leistungstransistoren, Verkabelung und Stecker in einer einzigen Zahl — und er ändert sich auch mit der Temperatur, dem Ladezustand und damit, wie hart Sie gefahren sind. Das Fachpapier, auf dem diese App basiert, nennt sie aus genau diesem Grund Equivalent Load Proxy (ELP). Behandeln Sie sie als einen Index, den Sie an Ihrer eigenen Historie verfolgen, nicht als absoluten Widerstand in Ohm.</string>
     <string name="info_s6_req_body">R_eq = (V_idle − V_gemessen) / |I_Batterie|\n\nV_idle ist die lokale Ruhespannung (rekonstruiert aus kurzen Niedrigstrom-Momenten). R_eq_median ist der Median aller Werte pro Fahrt.</string>
     <string name="info_s6_vidle_title">V_idle — lokale Leerlaufspannung</string>
     <string name="info_s6_vidle_body">Die App findet kurze Momente, in denen der Strom nahe null ist (|I| &lt; 3 A für mindestens 5 s) und interpoliert eine glatte Kurve. Dies gibt eine lokale Ruhespannung für jeden Fahrmoment.</string>
