@@ -86,7 +86,9 @@ import io.github.eucsoh.android.visualization.PdfExportService
 import io.github.eucsoh.android.visualization.SohArchiveExportService
 import io.github.eucsoh.android.visualization.SohChartGeneratorFixed
 import io.github.eucsoh.android.visualization.SohTrendCusumChartGenerator
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -224,9 +226,13 @@ fun ResultsScreenEnhanced(
         inflexCharts = null
     }
 
-    fun generateCharts() {
-        gaussCharts =
-            gaussGenerator.generateOverviewCharts(result.plotData)
+    suspend fun generateCharts() {
+        // Les générateurs construisent des LineChart MPAndroidChart puis appellent
+        // measure/layout/draw dessus : ce sont des View Android, elles ne vivent que sur
+        // le thread principal. Les dessiner sur Dispatchers.Default lève une exception,
+        // et chaque générateur avale les siennes — la galerie sortait vide, sans erreur
+        // visible. Le tracé gèle donc l'écran pendant sa durée : c'est le prix des View.
+        gaussCharts = gaussGenerator.generateOverviewCharts(result.plotData)
         trendCharts = if (result.alarms.isNotEmpty())
             trendGenerator.generateAllTrendCharts(
                 result.plotData,
@@ -453,16 +459,19 @@ fun ResultsScreenEnhanced(
                                     scope.launch {
                                         isExporting = true
                                         try {
+                                            // Tracé sur le thread principal : des View.
                                             generateCharts()
-                                            pdfFile = pdfExporter.exportToPdf(
-                                                gaussCharts!!,
-                                                inflexCharts!!,
-                                                cusumCharts!!,
-                                                trendCharts!!,
-                                                result,
-                                                wheelDisplayName,
-                                                macSafe
-                                            )
+                                            withContext(Dispatchers.IO) {
+                                                pdfFile = pdfExporter.exportToPdf(
+                                                    gaussCharts!!,
+                                                    inflexCharts!!,
+                                                    cusumCharts!!,
+                                                    trendCharts!!,
+                                                    result,
+                                                    wheelDisplayName,
+                                                    macSafe
+                                                )
+                                            }
                                             onMarkExport("application/pdf", pdfFile!!.absolutePath)
                                             createPdfLauncher.launch("${wheelDisplayName}-${macSafe}_SoH_${timestamp}.pdf")
 
@@ -544,34 +553,37 @@ fun ResultsScreenEnhanced(
                                     scope.launch {
                                         isExporting = true
                                         try {
-                                            if (pdfFile == null) {
-                                                generateCharts()
-                                                pdfFile = pdfExporter.exportToPdf(
-                                                    gaussCharts!!,
-                                                    inflexCharts!!,
-                                                    cusumCharts!!,
-                                                    trendCharts!!,
-                                                    result,
-                                                    wheelDisplayName,
-                                                    macSafe
-                                                )
-                                            }
-                                            if (csvFile == null) {
-                                                csvFile =
-                                                    csvExporter.exportToCsv(
+                                            // Tracé sur le thread principal : des View.
+                                            if (pdfFile == null) generateCharts()
+                                            withContext(Dispatchers.IO) {
+                                                if (pdfFile == null) {
+                                                    pdfFile = pdfExporter.exportToPdf(
+                                                        gaussCharts!!,
+                                                        inflexCharts!!,
+                                                        cusumCharts!!,
+                                                        trendCharts!!,
                                                         result,
                                                         wheelDisplayName,
                                                         macSafe
                                                     )
+                                                }
+                                                if (csvFile == null) {
+                                                    csvFile =
+                                                        csvExporter.exportToCsv(
+                                                            result,
+                                                            wheelDisplayName,
+                                                            macSafe
+                                                        )
+                                                }
+                                                zipFile = archiveService.exportArchive(
+                                                    wheelName = wheelDisplayName,
+                                                    macAddress = macSafe,
+                                                    fileReports = result.fileReports,
+                                                    pdfFile = pdfFile!!,
+                                                    csvFile = csvFile!!,  // null si pas encore exporté = pas inclus
+                                                    darknessBotEnabled = darknessBotEnabled
+                                                )
                                             }
-                                            zipFile = archiveService.exportArchive(
-                                                wheelName = wheelDisplayName,
-                                                macAddress = macSafe,
-                                                fileReports = result.fileReports,
-                                                pdfFile = pdfFile!!,
-                                                csvFile = csvFile!!,  // null si pas encore exporté = pas inclus
-                                                darknessBotEnabled = darknessBotEnabled
-                                            )
 
                                             onMarkExport("application/zip", zipFile!!.absolutePath)
                                             createZipLauncher.launch("${wheelDisplayName}-${macSafe}_SoH_${timestamp}.zip")

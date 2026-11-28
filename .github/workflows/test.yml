@@ -43,14 +43,14 @@ jobs:
       with:
         name: test-results
         path: |
-          **/build/test-results/test/*.xml
-          **/build/reports/tests/test/
+          **/build/test-results/**/
+          **/build/reports/tests/
         retention-days: 30
         
     - name: Publish test summary
       if: always()
       uses: EnricoMi/publish-unit-test-result-action@v2
       with:
-        files: '**/build/test-results/test/*.xml'
+        files: '**/build/test-results/**/TEST-*.xml'
         check_name: 'Test Results'
         comment_mode: 'off'

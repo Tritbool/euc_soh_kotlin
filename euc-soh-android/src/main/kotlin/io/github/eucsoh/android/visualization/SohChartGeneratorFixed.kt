@@ -201,7 +201,10 @@ class SohChartGeneratorFixed(private val context: Context) {
             if (plotData.series[metric].isNullOrEmpty()) return@mapNotNull null
             try {
                 metric.csv_code to generateMetricChart(plotData, metric)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                // Ne pas remonter un metric qui rate, mais ne pas le taire non plus :
+                // c'est ce qui a rendu invisible le tracé hors thread principal.
+                Log.w(TAG, "gaussian chart failed for $metric", e)
                 null
             }
         }

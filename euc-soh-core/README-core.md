@@ -2,6 +2,13 @@
 
 # EUC State of Health - Core Kotlin
 
+> **Multiplateforme** : ce module est un module Kotlin Multiplatform (KMP) avec deux cibles,
+> `android` (via `com.android.kotlin.multiplatform.library`) et `jvm` (desktop).
+> Le code du moteur d'analyse vit dans `src/commonMain` et ne dépend d'aucune API JVM :
+> `LogFrame` (frame maison) remplace kotlinx DataFrame, la lecture CSV passe par l'abstraction
+> `CsvSource` (texte), et le parsing des timestamps est assuré par `DateTimeUtils`.
+> `SyntheticDataGenerator` (réservé aux tests) reste en `src/jvmMain`, les tests en `src/jvmTest`.
+
 ## Installation
 
 ### Gradle Multi-module Setup

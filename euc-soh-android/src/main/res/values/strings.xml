@@ -140,7 +140,7 @@
     <string name="info_s1_limit1">It does not predict an exact remaining lifespan.</string>
     <string name="info_s1_limit2">It does not replace hands-on testing (oscilloscope, controlled charge/discharge cycle, or a BMS — Battery Management System — diagnostic tool).</string>
     <string name="info_s1_limit3">It does not compare your wheel to other riders — each wheel is its own reference.</string>
-    <string name="info_s1_limit4">Indicators are relative, not absolute: a high R_eq (internal resistance of the circuit) does not mean the battery is bad in isolation — only that it has drifted from its own past baseline.</string>
+    <string name="info_s1_limit4">Indicators are relative, not absolute: a high R_eq does not mean the battery is bad in isolation — only that it has drifted from its own past baseline. And R_eq is a proxy, not a measured resistance: it is inferred from how far the pack voltage dips under load, so read it as an index of how hard the whole power circuit is to push current through, not as ohms you could check with a multimeter.</string>
 
 
     <string name="info_s2_title">How to act on the results</string>
@@ -166,7 +166,7 @@
     <string name="info_s4_title">Key metrics and how to read them</string>
 
     <string name="info_m1_name">R_eq_median (mΩ)</string>
-    <string name="info_m1_desc">The main health number. Measures how hard the whole power circuit resists current flow during a ride — like friction in a pipe. Higher = more resistance = more voltage lost under load = less safety margin.\n\nComputed as the median across all high-speed, high-load samples in a ride.</string>
+    <string name="info_m1_desc">The main health number — a proxy index, not a resistance you could measure with a multimeter. It tracks how hard the whole power circuit resists current flow during a ride — like friction in a pipe. Higher = more resistance = more voltage lost under load = less safety margin.\n\nComputed as the median across all high-speed, high-load samples in a ride.</string>
     <string name="info_m1_interp">R_eq_median is the primary alarm trigger. It captures degradation regardless of origin — cells, power transistors (MOSFETs), or wiring — but does not tell you what is failing.\n\nTo attribute the drift: rising SAG and R_batt point to the cells; rising temp_board_max with stable SAG points to the MOSFETs. The other metrics explain what R_eq_median summarises.</string>
 
     <string name="info_m2_name">R_batt_median_25C (mΩ)</string>
@@ -241,14 +241,22 @@
 
     <string name="info_s6_title">How the metrics are computed</string>
 
-    <string name="info_s6_req_title">R_eq — Equivalent resistance</string>
+    <string name="info_s6_req_title">R_eq — Equivalent load proxy</string>
+
+    <!--
+        Canonical "R_eq is a proxy, not a measured resistance" caveat. Single source of
+        truth: reused verbatim by InfoScreen (appended to info_s6_req_body) and by
+        PdfExportService (title page + footer of every page). Do not paraphrase it in
+        another surface — copy the wording here instead, or the caveat will drift.
+    -->
+    <string name="info_req_proxy_note">R_eq is not a resistance you could measure with a multimeter. It is inferred from how far the pack voltage dips while the wheel is drawing current, so it bundles the cells, the power transistors, the wiring and the connectors into a single number — and it also moves with temperature, state of charge and how hard you rode. The paper this app is based on calls it the Equivalent Load Proxy (ELP) for exactly this reason. Treat it as an index you track against your own history, not as an absolute resistance in ohms.</string>
     <string name="info_s6_req_body">Ohm\'s law: voltage drop = current × resistance. When the wheel draws current, the pack voltage dips below what it would be at rest. The bigger the dip for the same current, the higher the resistance.\n\nFor each ride, the app picks samples at speed &gt; 20 km/h with a meaningful current draw:\n\nR_eq = (V_idle − V_measured) / |I_battery|\n\nV_idle is the local resting voltage (reconstructed from brief low-current moments during the ride). R_eq_median is the median of all per-sample values across the ride.</string>
 
     <string name="info_s6_vidle_title">V_idle — local no-load voltage</string>
     <string name="info_s6_vidle_body">The resting voltage of a battery changes as it discharges (State of Charge effect). Using a single voltage from the start of a ride would introduce errors over long sessions.\n\nThe app finds brief moments where current is near zero (|I| &lt; 3 A for at least 5 s, no abrupt voltage swing) and interpolates a smooth curve through them. This gives a local resting voltage for every moment of the ride, tracking SoC naturally without an explicit SoC measurement.</string>
 
     <string name="info_s6_mosfet_title">R_mosfet and R_batt — splitting the resistance</string>
-    <string name="info_s6_mosfet_body">R_eq_median is always computed. It is then normalized to 25°C via Arrhenius to give reqMedian25C — this is the temperature-corrected equivalent resistance of the full circuit (cells + MOSFETs + wiring).\n\nR_batt (the battery resistance isolated from the rest) is only computed when MOSFET parameters are configured:\nR_mosfet(T) = R_ds(on)_25°C × (1 + α × (T − 25)) + R_wiring\nR_batt = max(0, R_eq_median − R_mosfet(T_board))\nR_batt_median_25C = Arrhenius correction of R_batt\n\nWithout MOSFET config, R_batt and R_batt_median_25C are not shown. The code does not assume R_eq ≈ R_batt — it simply does not attempt the split.</string>
+    <string name="info_s6_mosfet_body">R_eq_median is always computed. It is then normalized to 25°C via Arrhenius to give reqMedian25C — this is the temperature-corrected equivalent load proxy of the full circuit (cells + MOSFETs + wiring).\n\nR_batt (the battery resistance isolated from the rest) is only computed when MOSFET parameters are configured:\nR_mosfet(T) = R_ds(on)_25°C × (1 + α × (T − 25)) + R_wiring\nR_batt = max(0, R_eq_median − R_mosfet(T_board))\nR_batt_median_25C = Arrhenius correction of R_batt\n\nWithout MOSFET config, R_batt and R_batt_median_25C are not shown. The code does not assume R_eq ≈ R_batt — it simply does not attempt the split.</string>
 
     <string name="info_s6_arrhenius_title">Temperature correction to 25°C</string>
     <string name="info_s6_arrhenius_body">A cold battery measures higher internal resistance than a warm one — even in perfect health. To make rides comparable across seasons, R_batt is corrected to a reference temperature of 25°C.\n\nThe correction uses the Arrhenius equation (a standard chemistry model for how rates — and resistance — change with temperature):\n\nR_25°C = R_measured / exp((Ea/R_gas) × (1/T_meas − 1/298.15))\n\nEa (activation energy) defaults to 20 kJ/mol, typical for Li-ion. If your logs span at least 5°C of temperature variation, the app can calibrate Ea automatically from your own riding history.</string>

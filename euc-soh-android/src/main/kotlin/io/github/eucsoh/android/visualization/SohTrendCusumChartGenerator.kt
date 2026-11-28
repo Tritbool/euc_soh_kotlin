@@ -22,6 +22,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.util.Log
 import android.view.View
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.LimitLine
@@ -48,6 +49,8 @@ import com.github.mikephil.charting.components.LegendEntry
 class SohTrendCusumChartGenerator(private val context: Context) {
 
     companion object {
+        const val TAG = "SohTrendCusumChart"
+
         const val CHART_WIDTH = 1200
         const val CHART_HEIGHT = 800
 
@@ -179,7 +182,9 @@ class SohTrendCusumChartGenerator(private val context: Context) {
             if (plotData.trendResults[metric] == null || !plotData.trendResults[metric]?.isSignificant!!) return@mapNotNull null
             try {
                 metric.csv_code to generateTrendChart(plotData, metric, wheelName)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                // Avalé mais tracé : un chart qui rate doit rester visible dans logcat.
+                Log.w(TAG, "chart generation failed for $metric", e)
                 null
             }
         }
@@ -315,7 +320,9 @@ class SohTrendCusumChartGenerator(private val context: Context) {
             if (plotData.cusumResults[metric] == null || plotData.cusumResults[metric]?.alarmKm!!.isEmpty()) return@mapNotNull null
             try {
                 metric.csv_code to generateCusumChart(plotData, metric, wheelName)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                // Avalé mais tracé : un chart qui rate doit rester visible dans logcat.
+                Log.w(TAG, "chart generation failed for $metric", e)
                 null
             }
         }
@@ -428,7 +435,9 @@ class SohTrendCusumChartGenerator(private val context: Context) {
             if (plotData.inflexionResults[metric] == null || plotData.inflexionResults[metric]?.inflexionIndices!!.isEmpty()) return@mapNotNull null
             try {
                 metric.csv_code to generateInflexionChart(plotData, metric, wheelName)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                // Avalé mais tracé : un chart qui rate doit rester visible dans logcat.
+                Log.w(TAG, "chart generation failed for $metric", e)
                 null
             }
         }

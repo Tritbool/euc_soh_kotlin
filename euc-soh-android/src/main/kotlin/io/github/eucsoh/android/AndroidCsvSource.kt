@@ -21,20 +21,28 @@ package io.github.eucsoh.android
 import android.content.Context
 import androidx.core.net.toUri
 import io.github.eucsoh.CsvSource
-import java.io.InputStream
 
 /**
  * Android implementation of CsvSource using ContentResolver.
- * 
- * IMPORTANT: The InputStream returned by openCsvStream() must be closed
- * by the caller using .use {} to prevent resource leaks.
  */
 class AndroidCsvSource(private val context: Context) : CsvSource {
 
-    override fun openCsvStream(path: String): InputStream {
+    companion object {
+        /**
+         * Taille de tampon de lecture d'un journal. Sans tampon, chaque petite lecture
+         * traverse le binder jusqu'au provider SAF, ce qui coûte plus cher que tout
+         * le reste de l'analyse.
+         */
+        private const val READ_BUFFER_BYTES = 64 * 1024
+    }
+
+    override fun readCsv(path: String): String {
         val uri = path.toUri()
-        return context.contentResolver.openInputStream(uri)
+        val input = context.contentResolver.openInputStream(uri)
             ?: throw IllegalArgumentException("Cannot open stream for $path")
+        return input.use {
+            it.buffered(READ_BUFFER_BYTES).reader(Charsets.UTF_8).readText()
+        }
     }
 
     override fun listCsvFiles(folderPath: String): List<String> {

@@ -42,7 +42,7 @@ import java.util.zip.ZipInputStream
  * Responsibilities (Android layer only — no parsing logic here):
  * 1. Find .dbb files in the given directory tree.
  * 2. For each .dbb, check the cache: skip if already extracted and archive is unchanged.
- * 3. Open each CSV entry as a ZipInputStream, hand the stream to [DarknessBotParser].
+ * 3. Open each CSV entry as a ZipInputStream, hand the entry text to [DarknessBotParser].
  * 4. Write the resulting trip-CSVs to cacheDir/dbb/{archive_stem}/{mac}/
  * 5. Return a Map<MAC, WheelIdentity> pointing to the cached trip-CSV URIs.
  *
@@ -170,7 +170,7 @@ class DarknessBotScanner(private val context: Context) {
 
                     val result = DarknessBotParser.parse(
                         fileName = entryName,
-                        inputStream = entryBytes.inputStream()
+                        csvText = entryBytes.decodeToString()
                     )
 
                     if (result != null) {

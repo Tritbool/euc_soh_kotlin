@@ -17,41 +17,64 @@
  */
 
 plugins {
-    kotlin("jvm") version "2.3.0"
+    kotlin("multiplatform")
+    id("com.android.kotlin.multiplatform.library")
 }
 
 dependencyLocking {
     lockAllConfigurations()
 }
 
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    //implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
-    
-    // DataFrame for pandas-like operations
-    implementation("org.jetbrains.kotlinx:dataframe:1.0.0-Beta5")
-    implementation("org.jetbrains.kotlinx:dataframe-csv:1.0.0-Beta5")
-    // Math/stats utilities
-    implementation("org.apache.commons:commons-math3:3.6.1")
-    
-    // Logging
-    implementation("org.slf4j:slf4j-api:2.0.17")
-    implementation("ch.qos.logback:logback-classic:1.5.32")
-
-    // Testing
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
-    testImplementation("io.kotest:kotest-runner-junit5:6.1.11")
-    testImplementation("io.kotest:kotest-assertions-core:6.1.11")
-}
-
 kotlin {
+    androidLibrary {
+        namespace = "io.github.eucsoh.core"
+        compileSdk = 36
+        minSdk = 23
+    }
+    jvm()
     jvmToolchain(21)
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
+            }
+        }
+        commonTest {
+            dependencies {
+                implementation("org.jetbrains.kotlin:kotlin-test")
+            }
+        }
+        jvmMain {
+        }
+        jvmTest {
+            dependencies {
+                implementation("io.kotest:kotest-runner-junit5:6.1.11")
+                implementation("io.kotest:kotest-assertions-core:6.1.11")
+            }
+        }
+    }
 }
 
-tasks.test {
+tasks.named("jvmTest", Test::class) {
     useJUnitPlatform()
+
+    // Corpus tests (io.github.eucsoh.corpus) read these to locate the calibration
+    // data and to bound their runtime. Gradle does not forward -D flags to the
+    // test JVM on its own, so pass the ones that were actually set.
+    listOf(
+        "soh.samples.dir",
+        "soh.paper.dir",
+        "soh.corpus.limit",
+        "soh.corpus.ea",
+        "soh.corpus.budget.s"
+    ).forEach { key ->
+        System.getProperty(key)?.let { systemProperty(key, it) }
+    }
 }
+
+// Alias so that `gradlew test` keeps running the core tests after the KMP migration.
+tasks.register("test") {
+    dependsOn("jvmTest")
+}
+

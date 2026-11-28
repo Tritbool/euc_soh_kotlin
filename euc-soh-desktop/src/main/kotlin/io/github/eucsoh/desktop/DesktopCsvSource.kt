@@ -20,15 +20,14 @@ package io.github.eucsoh.desktop
 
 import io.github.eucsoh.CsvSource
 import java.io.File
-import java.io.InputStream
 
 /**
  * Desktop implementation of CsvSource using File API.
  */
 class DesktopCsvSource : CsvSource {
 
-    override fun openCsvStream(path: String): InputStream {
-        return File(path).inputStream()
+    override fun readCsv(path: String): String {
+        return File(path).readText(Charsets.UTF_8)
     }
 
     override fun listCsvFiles(folderPath: String): List<String> {

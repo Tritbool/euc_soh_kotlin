@@ -127,12 +127,12 @@
     <string name="offline_claim_b3">Aucun logiciel privé</string>
     <string name="offline_claim_b4">Aucun tiers externe</string>
     <string name="info_s1_title">Ce que fait l\'outil — et ce qu\'il ne fait pas</string>
-    <string name="info_s1_does">EUC SoH analyse vos logs de trajet (CSV WheelLog / EUC World) sur des milliers de kilomètres pour suivre la santé à long terme de votre pack batterie et de l\'étage de puissance (MOSFETs). Il en dérive des indicateurs empiriques — résistance équivalente, voltage sag, stress thermique — et détecte les tendances de dégradation ou les événements anormaux via des seuils statistiques et une détection de rupture CUSUM.</string>
+    <string name="info_s1_does">EUC SoH analyse vos logs de trajet (CSV WheelLog / EUC World) sur des milliers de kilomètres pour suivre la santé à long terme de votre pack batterie et de l\'étage de puissance (MOSFETs). Il en dérive des indicateurs empiriques — proxy de charge équivalent, voltage sag, stress thermique — et détecte les tendances de dégradation ou les événements anormaux via des seuils statistiques et une détection de rupture CUSUM.</string>
     <string name="info_s1_does_not_title">Ce qu\'il ne fait PAS :</string>
     <string name="info_s1_limit1">Il ne prédit pas une durée de vie résiduelle précise.</string>
     <string name="info_s1_limit2">Il ne remplace pas un oscilloscope, un cycle charge/décharge en laboratoire, ni un diagnostic BMS contrôlé.</string>
     <string name="info_s1_limit3">Il ne compare pas votre roue aux autres riders — chaque roue est sa propre référence.</string>
-    <string name="info_s1_limit4">Les indicateurs sont relatifs, pas absolus : un R_eq élevé ne signifie pas que la batterie est mauvaise en soi, seulement qu\'elle a dérivé par rapport à son propre historique.</string>
+    <string name="info_s1_limit4">Les indicateurs sont relatifs, pas absolus : un R_eq élevé ne signifie pas que la batterie est mauvaise en soi, seulement qu\'elle a dérivé par rapport à son propre historique. Et R_eq est un proxy, pas une résistance mesurée : elle est déduite de la chute de tension du pack sous charge — à lire comme un indice, pas comme des ohms vérifiables au multimètre.</string>
 
 
     <string name="info_s2_title">Comment agir sur les résultats</string>
@@ -158,7 +158,7 @@
     <string name="info_s4_title">Métriques importantes et comment les interpréter</string>
 
     <string name="info_m1_name">R_eq_median (mΩ)</string>
-    <string name="info_m1_desc">Résistance équivalente médiane du pack complet (batterie + MOSFETs + câblage) sur tous les échantillons à forte charge d\'un trajet. Indicateur de santé global principal.</string>
+    <string name="info_m1_desc">Indicateur de santé global principal — un proxy, pas une résistance mesurable au multimètre. Médiane du proxy de charge équivalent du pack complet (batterie + MOSFETs + câblage) sur tous les échantillons à forte charge d\'un trajet.</string>
     <string name="info_m1_interp">R_eq_median capture toute dérive quelle qu\'en soit l\'origine — batterie, MOSFETs ou câblage. Une tendance à la hausse soutenue signifie que le circuit se dégrade, mais n\'indique pas ce qui est en cause. Pour attribuer la dérive, croisez avec les autres métriques : SAG et R_batt en hausse pointent vers les cellules ; temp_board_max qui explose avec un SAG stable pointe vers les MOSFETs. R_eq_median est le déclencheur d\'alarme principal — les autres métriques servent à l\'expliquer.</string>
 
     <string name="info_m2_name">R_batt_median_25C (mΩ)</string>
@@ -227,14 +227,17 @@
 
     <string name="info_s6_title">Comment les métriques sont calculées</string>
 
-    <string name="info_s6_req_title">R_eq — résistance équivalente</string>
+    <string name="info_s6_req_title">R_eq — proxy de charge équivalent</string>
+
+    <!-- Note canonique « proxy, pas une résistance mesurée » : même texte que info_req_proxy_note en values/strings.xml. -->
+    <string name="info_req_proxy_note">R_eq n\'est pas une résistance que vous pourriez mesurer au multimètre. Elle est déduite de la façon dont la tension du pack chute pendant que la roue tire du courant : elle regroupe donc les cellules, les transistors de puissance, le câblage et les connecteurs en un seul nombre — et elle varie aussi avec la température, l\'état de charge et l\'effort que vous avez fourni. L\'article sur lequel cette application est basée l\'appelle Equivalent Load Proxy (ELP) pour exactement cette raison. Traitez-la comme un indice à comparer à votre propre historique, et non comme une résistance absolue en ohms.</string>
     <string name="info_s6_req_body">Pour chaque trajet, l\'app sélectionne les échantillons où vitesse &gt; 20 km/h et courant batterie est dans une plage significative. Pour chacun :\n\nR_eq = (V_idle − V_mesurée) / |I_batterie|\n\noù V_idle est une estimation locale de la tension à vide, reconstruite à partir de segments de repos répartis dans le trajet (pas une valeur unique pour tout le trajet). R_eq_median est la médiane de toutes ces valeurs. Elle reflète la résistance combinée des cellules + MOSFETs + câblage.</string>
 
     <string name="info_s6_vidle_title">V_idle — tension à vide locale</string>
     <string name="info_s6_vidle_body">V_idle n\'est pas un nombre fixe. L\'app identifie les segments où |I| &lt; 3 A pendant au moins 5 s sans variation brusque (dV/dt &lt; 0,5 V/s). Elle interpole un profil lisse entre ces points de repos. Cela donne une référence locale qui suit naturellement le SoC, sans nécessiter une mesure précise de charge résiduelle.</string>
 
     <string name="info_s6_mosfet_title">R_mosfet et R_batt — décomposition de la résistance</string>
-    <string name="info_s6_mosfet_body">R_eq_median est toujours calculée. Elle est ensuite normalisée à 25°C via Arrhenius pour donner reqMedian25C — c\'est la résistance équivalente corrigée en température du circuit complet (cellules + MOSFETs + câblage).\n\nR_batt (résistance batterie isolée du reste) n\'est calculée que si les paramètres MOSFET sont configurés :\nR_mosfet(T) = R_ds(on)_25°C × (1 + α × (T − 25)) + R_câblage\nR_batt = max(0, R_eq_median − R_mosfet(T_carte))\nR_batt_median_25C = correction Arrhenius de R_batt\n\nSans config MOSFET, R_batt et R_batt_median_25C ne sont pas affichées. Le code ne suppose pas R_eq ≈ R_batt — il ne tente simplement pas la décomposition.</string>
+    <string name="info_s6_mosfet_body">R_eq_median est toujours calculée. Elle est ensuite normalisée à 25°C via Arrhenius pour donner reqMedian25C — c\'est le proxy de charge équivalent corrigé en température du circuit complet (cellules + MOSFETs + câblage).\n\nR_batt (résistance batterie isolée du reste) n\'est calculée que si les paramètres MOSFET sont configurés :\nR_mosfet(T) = R_ds(on)_25°C × (1 + α × (T − 25)) + R_câblage\nR_batt = max(0, R_eq_median − R_mosfet(T_carte))\nR_batt_median_25C = correction Arrhenius de R_batt\n\nSans config MOSFET, R_batt et R_batt_median_25C ne sont pas affichées. Le code ne suppose pas R_eq ≈ R_batt — il ne tente simplement pas la décomposition.</string>
 
     <string name="info_s6_arrhenius_title">Correction en température à 25°C</string>
     <string name="info_s6_arrhenius_body">La résistance interne d\'une batterie dépend de la température. Pour rendre les valeurs comparables entre saisons et conditions, R_batt est normalisée à 25°C via la loi d\'Arrhenius :\n\nR_25°C = R_mesurée / exp((Ea/R_gaz) × (1/T_mes − 1/298,15))\n\nEa vaut par défaut 20 kJ/mol (Li-ion typique). L\'app peut auto-calibrer Ea depuis votre historique si l\'amplitude thermique dans vos logs est suffisante (≥ 5°C).</string>
